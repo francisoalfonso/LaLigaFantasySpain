@@ -146,7 +146,7 @@ class FantasyDataProcessor {
       penalties_saved: 0
     };
 
-    // Mapear estadísticas según la estructura de SportMonks
+    // Mapear estadísticas según la estructura de API-Sports
     if (playerStatData.value !== undefined) {
       switch (playerStatData.type?.name?.toLowerCase()) {
         case 'goals':

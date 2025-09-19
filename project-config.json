@@ -1,0 +1,119 @@
+{
+  "project": {
+    "name": "Fantasy La Liga Pro",
+    "description": "Equipo profesional de reporteros AI para Fantasy La Liga",
+    "version": "1.0.0",
+    "phase": "team_evolution"
+  },
+  "contact": {
+    "business_email": "laligafantasyspainpro@gmail.com",
+    "support_email": "laligafantasyspainpro@gmail.com"
+  },
+  "github": {
+    "username": "laligafantasyspainpro-ux",
+    "repository": "LaLigaFantasySpain",
+    "url": "https://github.com/laligafantasyspainpro-ux/LaLigaFantasySpain.git",
+    "description": "AI-powered Fantasy La Liga content creation system with team-based avatars"
+  },
+  "branding": {
+    "primary_name": "Fantasy La Liga Pro",
+    "tagline": "El equipo profesional de Fantasy La Liga",
+    "colors": {
+      "primary": "#0066cc",
+      "secondary": "#ffffff",
+      "accent": "#ff3333"
+    },
+    "style": "dazn_professional_sports"
+  },
+  "channels": {
+    "youtube": {
+      "primary": "Fantasy La Liga Pro",
+      "alternatives": ["Fantasy LaLiga Studio", "La Liga Fantasy Pro", "Fantasy La Liga España"],
+      "url_slug": "FantasyLaLigaPro"
+    },
+    "tiktok": {
+      "primary": "@FantasyLaLigaPro",
+      "alternatives": ["@LaLigaFantasyPro", "@FantasyLaLigaES", "@FantasyLaLigaStudio"]
+    },
+    "instagram": {
+      "primary": "@fantasy.laliga.pro",
+      "alternatives": ["@fantasy.laliga.studio", "@laligafantasy.pro", "@fantasy.laliga.esp"]
+    },
+    "twitter": {
+      "primary": "@FantasyLaLiga",
+      "alternatives": ["@LaLigaFantasy", "@FantasyLaLigaES", "@LaLigaFantasyPro"]
+    }
+  },
+  "team": {
+    "reporters": [
+      {
+        "id": "ana_martinez",
+        "name": "Ana Martínez",
+        "nickname": "Ana Fantasy",
+        "specialties": ["análisis_táctico", "preview_partidos", "post_match_analysis"],
+        "platforms": ["youtube", "instagram"]
+      },
+      {
+        "id": "carlos_gonzalez",
+        "name": "Carlos González",
+        "nickname": "Carlos Stats",
+        "specialties": ["estadísticas_jugadores", "consejos_fantasy", "alineaciones_optimales"],
+        "platforms": ["youtube", "instagram", "twitter"]
+      },
+      {
+        "id": "lucia_rodriguez",
+        "name": "Lucía Rodríguez",
+        "nickname": "Lucía Femenina",
+        "specialties": ["liga_femenina", "jugadores_emergentes", "cantera_la_liga"],
+        "platforms": ["instagram", "youtube"]
+      },
+      {
+        "id": "pablo_teen",
+        "name": "Pablo Martín",
+        "nickname": "Pablo GenZ",
+        "specialties": ["fantasy_hacks", "memes_fútbol", "trends_tiktok", "gaming_fantasy"],
+        "platforms": ["tiktok", "instagram", "twitch"]
+      }
+    ]
+  },
+  "services": {
+    "heygen": {
+      "account_email": "laligafantasyspainpro@gmail.com",
+      "plan": "professional",
+      "avatars_needed": 4
+    },
+    "api_sports": {
+      "plan": "ultra",
+      "requests_daily": 75000,
+      "leagues": ["la_liga", "la_liga_femenina"]
+    }
+  },
+  "domains": {
+    "primary": "laligafantasyspain.com",
+    "status": "registered",
+    "registered_with": "laligafantasyspainpro@gmail.com",
+    "additional_to_consider": [
+      "laligafantasyspain.es",
+      "fantasylaligapro.com",
+      "fantasylaligapro.es"
+    ]
+  },
+  "development": {
+    "repository_url": "https://github.com/laligafantasyspainpro-ux/LaLigaFantasySpain.git",
+    "main_branch": "main",
+    "tech_stack": ["Node.js", "Express", "Alpine.js", "API-Sports", "HeyGen"],
+    "deployment": "production_ready"
+  },
+  "next_steps": [
+    "Setup GitHub repository laligafantasyspainpro-ux/LaLigaFantasySpain",
+    "Migrar código actual al nuevo repositorio LaLigaFantasySpain",
+    "Configurar dominio laligafantasyspain.com con hosting",
+    "Verificar disponibilidad de nombres en todas las plataformas",
+    "Crear cuenta HeyGen con email del proyecto",
+    "Setup cuentas de redes sociales",
+    "Configurar branding visual consistente"
+  ],
+  "notes": {
+    "api_sports_account": "Mantener cuenta personal por ahora - migrar a cuenta proyecto en el futuro"
+  }
+}

@@ -1,4 +1,4 @@
-// Rutas para API-Football - Comparación con SportMonks
+// Rutas para API-Sports - La Liga Fantasy Dashboard
 const express = require('express');
 const ApiFootballClient = require('../services/apiFootball');
 const DataProcessor = require('../services/dataProcessor');
@@ -208,6 +208,128 @@ router.get('/laliga/player/:id', async (req, res) => {
   }
 });
 
+// Obtener todas las ligas españolas (incluye Liga Femenina)
+router.get('/spain/leagues', async (req, res) => {
+  try {
+    const result = await apiFootball.getSpanishLeagues();
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        count: result.count,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// === LIGA FEMENINA ENDPOINTS ===
+
+// Equipos de La Liga Femenina
+router.get('/femenina/teams', async (req, res) => {
+  try {
+    const result = await apiFootball.getLigaFemeninaTeams();
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        count: result.count,
+        league: 'Liga Femenina',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// Jugadoras de La Liga Femenina
+router.get('/femenina/players', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const team_id = req.query.team_id || null;
+    const season = req.query.season || null;
+
+    const result = await apiFootball.getLigaFemeninaPlayers(page, team_id, season);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        count: result.count,
+        page: page,
+        league: 'Liga Femenina',
+        has_more: result.pagination?.current < result.pagination?.total,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// Clasificación Liga Femenina
+router.get('/femenina/standings', async (req, res) => {
+  try {
+    const result = await apiFootball.getLigaFemeninaStandings();
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        league: 'Liga Femenina',
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
 // Calcular puntos Fantasy con datos API-Football
 router.post('/laliga/fantasy-points', async (req, res) => {
   try {
@@ -253,41 +375,5 @@ router.post('/laliga/fantasy-points', async (req, res) => {
   }
 });
 
-// Comparación directa: API-Football vs SportMonks
-router.get('/comparison/players', async (req, res) => {
-  try {
-    // Obtener datos de ambas APIs para comparar
-    const apiFootballResult = await apiFootball.getLaLigaPlayers(1);
-
-    res.json({
-      success: true,
-      comparison: {
-        api_football: {
-          available: apiFootballResult.success,
-          count: apiFootballResult.count || 0,
-          sample: apiFootballResult.data?.slice(0, 3) || [],
-          error: !apiFootballResult.success ? apiFootballResult.error : null
-        },
-        sportmonks: {
-          available: false,
-          note: 'Plan gratuito no incluye La Liga - solo Dinamarca/Escocia'
-        }
-      },
-      recommendation: {
-        provider: 'API-Football',
-        reason: 'Acceso completo a La Liga con datos detallados',
-        cost_comparison: {
-          api_football: '$19/mes - 7,500 requests/día',
-          sportmonks: '€39/mes - 3,000 requests/hora'
-        }
-      }
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
 
 module.exports = router;

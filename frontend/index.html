@@ -20,7 +20,7 @@
                         <div class="text-4xl">⚽</div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">Fantasy La Liga</h1>
-                            <p class="text-green-600 font-medium">Dashboard de Validación SportMonks</p>
+                            <p class="text-green-600 font-medium">Dashboard API-Sports - Plan Ultra</p>
                         </div>
                     </div>
 
@@ -61,41 +61,42 @@
                     </div>
                 </div>
 
-                <!-- Leagues Available Card -->
+                <!-- La Liga Players Card -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-600 text-sm">Ligas Disponibles</p>
-                            <p class="text-2xl font-bold" x-text="leaguesCount"></p>
+                            <p class="text-gray-600 text-sm">Jugadores La Liga</p>
+                            <p class="text-2xl font-bold">600+</p>
                         </div>
                         <div class="text-green-500 text-3xl">
-                            <i class="fas fa-trophy"></i>
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Test Results Card -->
+                <!-- Teams Card -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-600 text-sm">Tests Pasados</p>
-                            <p class="text-2xl font-bold" x-text="testsPassedCount + '/' + testsTotalCount"></p>
+                            <p class="text-gray-600 text-sm">Equipos La Liga</p>
+                            <p class="text-2xl font-bold">20</p>
                         </div>
                         <div class="text-purple-500 text-3xl">
-                            <i class="fas fa-check-circle"></i>
+                            <i class="fas fa-shield-alt"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Fantasy Points Card -->
+                <!-- API Plan Card -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-600 text-sm">Calculadora</p>
-                            <p class="text-2xl font-bold" x-text="calculatorStatus"></p>
+                            <p class="text-gray-600 text-sm">Plan API-Sports</p>
+                            <p class="text-2xl font-bold">Ultra</p>
+                            <p class="text-xs text-gray-500">75k requests/día</p>
                         </div>
                         <div class="text-orange-500 text-3xl">
-                            <i class="fas fa-calculator"></i>
+                            <i class="fas fa-rocket"></i>
                         </div>
                     </div>
                 </div>
@@ -117,6 +118,12 @@
                             <i class="fas fa-star mr-2"></i>
                             Propuesta de Valor
                         </button>
+                        <button @click="activeTab = 'roadmap'"
+                                :class="activeTab === 'roadmap' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            <i class="fas fa-road mr-2"></i>
+                            Plan de Acción
+                        </button>
                     </nav>
                 </div>
             </div>
@@ -127,12 +134,12 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Left Column: API Testing -->
                 <div class="space-y-6">
-                    <!-- SportMonks API Tests -->
+                    <!-- API-Sports Tests -->
                     <div class="bg-white rounded-xl shadow-lg">
                         <div class="p-6 border-b border-gray-200">
                             <h2 class="text-xl font-bold text-gray-800 flex items-center">
                                 <i class="fas fa-vial mr-3 text-blue-500"></i>
-                                Pruebas de API SportMonks
+                                Pruebas API-Sports La Liga
                             </h2>
                         </div>
                         <div class="p-6">
@@ -145,7 +152,7 @@
                                             <i :class="tests.connection.status === 'success' ? 'fas fa-check-circle' : tests.connection.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
                                         </div>
                                         <div>
-                                            <p class="font-medium">Test de Conexión</p>
+                                            <p class="font-medium">Conexión API-Sports</p>
                                             <p class="text-sm text-gray-600" x-text="tests.connection.message"></p>
                                         </div>
                                     </div>
@@ -156,21 +163,40 @@
                                     </button>
                                 </div>
 
-                                <!-- Leagues Test -->
+                                <!-- Players Test -->
                                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                                     <div class="flex items-center space-x-3">
-                                        <div :class="tests.leagues.status === 'success' ? 'text-green-500' : tests.leagues.status === 'error' ? 'text-red-500' : 'text-gray-400'"
+                                        <div :class="tests.players.status === 'success' ? 'text-green-500' : tests.players.status === 'error' ? 'text-red-500' : 'text-gray-400'"
                                              class="text-lg">
-                                            <i :class="tests.leagues.status === 'success' ? 'fas fa-check-circle' : tests.leagues.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
+                                            <i :class="tests.players.status === 'success' ? 'fas fa-check-circle' : tests.players.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
                                         </div>
                                         <div>
-                                            <p class="font-medium">Obtener Ligas</p>
-                                            <p class="text-sm text-gray-600" x-text="tests.leagues.message"></p>
+                                            <p class="font-medium">Jugadores La Liga</p>
+                                            <p class="text-sm text-gray-600" x-text="tests.players.message"></p>
                                         </div>
                                     </div>
-                                    <button @click="testLeagues()"
+                                    <button @click="testPlayers()"
                                             :disabled="isLoading"
                                             class="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm">
+                                        Probar
+                                    </button>
+                                </div>
+
+                                <!-- Teams Test -->
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="tests.teams.status === 'success' ? 'text-green-500' : tests.teams.status === 'error' ? 'text-red-500' : 'text-gray-400'"
+                                             class="text-lg">
+                                            <i :class="tests.teams.status === 'success' ? 'fas fa-check-circle' : tests.teams.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Equipos La Liga</p>
+                                            <p class="text-sm text-gray-600" x-text="tests.teams.message"></p>
+                                        </div>
+                                    </div>
+                                    <button @click="testTeams()"
+                                            :disabled="isLoading"
+                                            class="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm">
                                         Probar
                                     </button>
                                 </div>
@@ -395,12 +421,12 @@
                                             <span class="text-sm">"Scout de Ligas Secretas"</span>
                                         </div>
                                         <div class="flex items-center">
-                                            <i class="fas fa-database mr-2"></i>
-                                            <span class="text-sm">Plan gratuito SportMonks</span>
+                                            <i class="fas fa-rocket mr-2"></i>
+                                            <span class="text-sm">Plan Ultra API-Sports</span>
                                         </div>
                                         <div class="flex items-center">
                                             <i class="fas fa-trophy mr-2"></i>
-                                            <span class="text-sm">Dinamarca + Escocia</span>
+                                            <span class="text-sm">La Liga Completa</span>
                                         </div>
                                     </div>
                                 </div>
@@ -526,24 +552,24 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <div class="text-center">
                                 <div class="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-2xl font-bold">2</span>
+                                    <span class="text-2xl font-bold">1</span>
                                 </div>
-                                <h4 class="font-semibold text-gray-800">Ligas Activas</h4>
-                                <p class="text-sm text-gray-600">Dinamarca & Escocia</p>
+                                <h4 class="font-semibold text-gray-800">Liga Principal</h4>
+                                <p class="text-sm text-gray-600">La Liga Española</p>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-xl font-bold">25K+</span>
+                                    <span class="text-xl font-bold">600+</span>
                                 </div>
                                 <h4 class="font-semibold text-gray-800">Jugadores</h4>
-                                <p class="text-sm text-gray-600">Base de datos global</p>
+                                <p class="text-sm text-gray-600">Temporada 2024-2025</p>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-r from-purple-400 to-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                                    <span class="text-xl font-bold">24/7</span>
+                                    <span class="text-xl font-bold">20</span>
                                 </div>
-                                <h4 class="font-semibold text-gray-800">Monitoreo</h4>
-                                <p class="text-sm text-gray-600">Partidos en vivo</p>
+                                <h4 class="font-semibold text-gray-800">Equipos</h4>
+                                <p class="text-sm text-gray-600">Datos completos</p>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
@@ -775,6 +801,692 @@
                             <p class="text-2xl font-bold mb-2">SIGUIENTE PASO:</p>
                             <p class="text-xl">Crear Avatares Gemelos con HeyGen</p>
                             <p class="text-sm opacity-80 mt-2">Un avatar, dos mercados, doble oportunidad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roadmap/Plan de Acción Tab -->
+            <div x-show="activeTab === 'roadmap'" x-transition>
+                <div class="max-w-7xl mx-auto">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-4">🗺️ Plan de Acción - La Liga AI</h2>
+                        <p class="text-lg opacity-90">Roadmap completo para llevar el proyecto a producción</p>
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+                            <div class="text-center">
+                                <div class="text-2xl font-bold" x-text="getRoadmapProgress('setup') + '%'">0%</div>
+                                <div class="text-sm opacity-80">Setup Inicial</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold" x-text="getRoadmapProgress('mvp') + '%'">0%</div>
+                                <div class="text-sm opacity-80">MVP</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold" x-text="getRoadmapProgress('production') + '%'">0%</div>
+                                <div class="text-sm opacity-80">Producción</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold" x-text="getRoadmapProgress('team_evolution') + '%'">0%</div>
+                                <div class="text-sm opacity-80">Team DAZN</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold" x-text="getRoadmapProgress('scale') + '%'">0%</div>
+                                <div class="text-sm opacity-80">Escalabilidad</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap Sections -->
+                    <div class="space-y-8">
+
+                        <!-- FASE 1: SETUP INICIAL -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6">
+                                <h3 class="text-2xl font-bold flex items-center">
+                                    <i class="fas fa-cogs mr-3"></i>
+                                    FASE 1: Setup Inicial
+                                </h3>
+                                <p class="mt-2 opacity-90">Configuración básica y cuentas necesarias</p>
+                                <div class="mt-4">
+                                    <div class="bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all duration-300"
+                                             :style="'width: ' + getRoadmapProgress('setup') + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Account Setup -->
+                                    <div class="border-l-4 border-blue-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">📧 Configuración de Cuentas</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.gmail" @change="updateRoadmapTask('setup', 'gmail', $event.target.checked)"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear nueva cuenta Gmail para el proyecto (laligaai@gmail.com)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.github" @change="updateRoadmapTask('setup', 'github', $event.target.checked)"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Configurar GitHub con nueva cuenta</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.api_sports" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Migrar API-Sports a cuenta del proyecto</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Development Environment -->
+                                    <div class="border-l-4 border-green-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">⚙️ Entorno de Desarrollo</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.env_variables" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Configurar variables de entorno producción</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.ssl_cert" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Configurar certificados SSL</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.setup.domain" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Registrar dominio (laligaai.com)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 2: MVP -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white p-6">
+                                <h3 class="text-2xl font-bold flex items-center">
+                                    <i class="fas fa-rocket mr-3"></i>
+                                    FASE 2: MVP (Minimum Viable Product)
+                                </h3>
+                                <p class="mt-2 opacity-90">Desarrollo del producto mínimo funcional</p>
+                                <div class="mt-4">
+                                    <div class="bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all duration-300"
+                                             :style="'width: ' + getRoadmapProgress('mvp') + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- AI Avatar -->
+                                    <div class="border-l-4 border-purple-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🤖 Avatar AI (HeyGen)</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.heygen_account" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear cuenta HeyGen Professional</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.avatar_design" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Diseñar avatar masculino joven (25-35 años)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.avatar_training" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Entrenar voz y gestos del avatar</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.test_videos" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear 5 videos de prueba con datos reales</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content System -->
+                                    <div class="border-l-4 border-yellow-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">📝 Sistema de Contenido</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.content_templates" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear 20 templates de scripts (análisis, predicciones, tips)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.data_integration" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Integrar datos API-Sports con templates</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.content_scheduler" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Desarrollar sistema de programación de contenido</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Social Media Setup -->
+                                    <div class="border-l-4 border-pink-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">📱 Configuración Redes Sociales</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.instagram_account" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear cuenta Instagram @laligaai_es</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.tiktok_account" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear cuenta TikTok @laligaai</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.youtube_account" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear canal YouTube "La Liga AI"</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.mvp.brand_design" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Diseñar identidad visual (logo, colores, tipografía)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 3: PRODUCCIÓN -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-6">
+                                <h3 class="text-2xl font-bold flex items-center">
+                                    <i class="fas fa-play mr-3"></i>
+                                    FASE 3: Lanzamiento a Producción
+                                </h3>
+                                <p class="mt-2 opacity-90">Despliegue y primeros contenidos</p>
+                                <div class="mt-4">
+                                    <div class="bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all duration-300"
+                                             :style="'width: ' + getRoadmapProgress('production') + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Launch Campaign -->
+                                    <div class="border-l-4 border-red-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🚀 Campaña de Lanzamiento</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.content_batch" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear lote inicial de 50 videos (2 semanas contenido)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.launch_strategy" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Planificar estrategia de lanzamiento por fases</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.analytics_setup" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Configurar analytics y tracking de métricas</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Automation -->
+                                    <div class="border-l-4 border-blue-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🔄 Automatización</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.posting_automation" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Implementar posting automático (Buffer/Hootsuite)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.data_sync" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Automatizar sync de datos API-Sports diario</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.monitoring" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Sistema de monitoreo y alertas</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Community Management -->
+                                    <div class="border-l-4 border-green-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">👥 Community Management</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.response_templates" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear templates de respuestas automáticas</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.engagement_strategy" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Definir estrategia de engagement</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Agente Investigador Competencia -->
+                                    <div class="border-l-4 border-purple-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🔍 Agente Investigador Competencia</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.competitive_intelligence_agent" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Desarrollar agente AI para análisis automático competencia</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.competitor_content_monitoring" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Sistema monitoreo contenido competidores (YouTube, TikTok, Instagram)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.viral_content_detection" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Detector automático contenido viral y trending topics</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.trending_topics_tracker" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Tracker trends fútbol en tiempo real (Twitter, Reddit, foros)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.competitor_analysis_dashboard" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Dashboard análisis competencia con métricas automáticas</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.automated_content_triggers" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Triggers automáticos para generar contenido reactivo</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.response_content_generator" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Generador automático contenido respuesta a trends</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.real_time_trend_alerts" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Sistema alertas tiempo real para trends emergentes</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.production.competitive_gap_analysis" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Análisis gaps competitivos y oportunidades de contenido</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 4: TEAM EVOLUTION (DAZN MODEL) -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+                                <h3 class="text-2xl font-bold flex items-center">
+                                    <i class="fas fa-users mr-3"></i>
+                                    FASE 4: Team DAZN Model - Multi Reporteros
+                                </h3>
+                                <p class="mt-2 opacity-90">Evolución a equipo profesional de reporteros especializados</p>
+                                <div class="mt-4">
+                                    <div class="bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all duration-300"
+                                             :style="'width: ' + getRoadmapProgress('team_evolution') + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- Diseño y Concepto -->
+                                    <div class="border-l-4 border-indigo-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🎨 Diseño y Concepto Team</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.team_concept_design" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-indigo-600">
+                                                <span class="text-sm">Diseñar concepto equipo multi-reporteros estilo DAZN</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.dazn_branding_research" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-indigo-600">
+                                                <span class="text-sm">Investigar y adaptar branding profesional DAZN</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.avatar_personas_definition" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-indigo-600">
+                                                <span class="text-sm">Definir personalidades y especialidades de cada reportero</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reporteros Individuales -->
+                                    <div class="border-l-4 border-blue-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">👥 Reporteros Especializados</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.ana_martinez_avatar" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">👩‍💼 Ana Martínez (28) - Analista Senior Táctica</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.carlos_gonzalez_avatar" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">👨‍💼 Carlos González (32) - Experto en Estadísticas</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.lucia_rodriguez_avatar" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">👩‍💼 Lucía Rodríguez (26) - Especialista Liga Femenina</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.pablo_genz_avatar" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">👨‍💻 Pablo GenZ (19) - Conecta con Jóvenes (TikTok/Twitch)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sistema Técnico -->
+                                    <div class="border-l-4 border-green-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">⚙️ Sistema Técnico</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.content_rotation_system" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-green-600">
+                                                <span class="text-sm">Sistema rotación automática de contenido por reportero</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.personality_script_engine" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-green-600">
+                                                <span class="text-sm">Motor personalización scripts según personalidad</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.uniform_visual_system" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-green-600">
+                                                <span class="text-sm">Sistema uniformes y branding visual consistente</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- HeyGen Enterprise -->
+                                    <div class="border-l-4 border-red-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🎬 HeyGen Enterprise</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.heygen_enterprise_plan" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-red-600">
+                                                <span class="text-sm">Contratar plan Enterprise (4+ avatares custom)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.multi_avatar_setup" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-red-600">
+                                                <span class="text-sm">Configurar 4 avatares con voces personalizadas</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.brand_overlay_system" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-red-600">
+                                                <span class="text-sm">Sistema overlay logos y uniformes automáticos</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Liga Femenina Integration -->
+                                    <div class="border-l-4 border-pink-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">⚽ Liga Femenina (Lucía)</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.women_league_data_integration" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-pink-600">
+                                                <span class="text-sm">Integrar datos Liga Femenina en sistema</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.lucia_content_templates" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-pink-600">
+                                                <span class="text-sm">Templates contenido específico fútbol femenino</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.female_audience_strategy" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-pink-600">
+                                                <span class="text-sm">Estrategia captar audiencia femenina</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- GenZ Strategy -->
+                                    <div class="border-l-4 border-purple-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">📱 Estrategia GenZ (Pablo)</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.tiktok_viral_strategy" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Estrategia contenido viral TikTok</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.twitch_streaming_setup" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Setup streaming Twitch en vivo</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.meme_content_templates" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Templates memes y contenido shareable</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.genz_language_adaptation" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Adaptación lenguaje y slang generacional</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content Distribution -->
+                                    <div class="border-l-4 border-orange-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">📺 Distribución Contenido</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.platform_specialization" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-orange-600">
+                                                <span class="text-sm">Especialización plataformas (YouTube→Ana, TikTok→Pablo)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.daily_rotation_scheduler" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-orange-600">
+                                                <span class="text-sm">Scheduler rotación diaria automatizada</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.special_events_assignment" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-orange-600">
+                                                <span class="text-sm">Asignación automática eventos especiales</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.cross_platform_publishing" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-orange-600">
+                                                <span class="text-sm">Sistema publicación cross-platform</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Channel Naming Strategy -->
+                                    <div class="border-l-4 border-purple-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🏷️ Estrategia Nombres Canales</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.primary_channel_names_defined" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Nombres primarios definidos: "Fantasy La Liga Pro"</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.backup_channel_names_defined" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Nombres alternativos definidos por plataforma</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.channel_availability_verified" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Disponibilidad verificada en todas las plataformas</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.team_evolution.brand_consistency_guidelines" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-purple-600">
+                                                <span class="text-sm">Guías consistencia visual y branding</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FASE 5: ESCALABILIDAD -->
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6">
+                                <h3 class="text-2xl font-bold flex items-center">
+                                    <i class="fas fa-chart-line mr-3"></i>
+                                    FASE 5: Escalabilidad y Evolución
+                                </h3>
+                                <p class="mt-2 opacity-90">Crecimiento y nuevas funcionalidades</p>
+                                <div class="mt-4">
+                                    <div class="bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all duration-300"
+                                             :style="'width: ' + getRoadmapProgress('scale') + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-4">
+                                    <!-- International Expansion -->
+                                    <div class="border-l-4 border-blue-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">🌍 Expansión Internacional</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.english_avatar" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear avatar en inglés para mercado UK</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.usa_market" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Analizar potencial mercado USA (MLS)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.other_leagues" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Expandir a Premier League y Serie A</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Advanced Features -->
+                                    <div class="border-l-4 border-yellow-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">⚡ Funcionalidades Avanzadas</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.ai_predictions" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">IA predictiva para resultados partidos</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.mobile_app" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Desarrollar app móvil nativa</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.premium_tier" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Crear tier premium con predicciones exclusivas</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Monetization -->
+                                    <div class="border-l-4 border-green-500 pl-4">
+                                        <h4 class="font-bold text-lg mb-3">💰 Monetización</h4>
+                                        <div class="space-y-2">
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.sponsorships" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Buscar patrocinadores (casas de apuestas, apps fantasy)</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.affiliate_program" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Programa de afiliados con plataformas fantasy</span>
+                                            </label>
+                                            <label class="flex items-center space-x-3 cursor-pointer">
+                                                <input type="checkbox" x-model="roadmapTasks.scale.merchandise" @change="saveRoadmapTasks()"
+                                                       class="w-5 h-5 text-blue-600">
+                                                <span class="text-sm">Merchandising y productos digitales</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Summary -->
+                        <div class="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl p-8">
+                            <h3 class="text-2xl font-bold mb-6">📊 Resumen de Progreso</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="font-bold mb-4">Estado Actual</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between">
+                                            <span>Setup Inicial:</span>
+                                            <span x-text="getRoadmapProgress('setup') + '%'"></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>MVP:</span>
+                                            <span x-text="getRoadmapProgress('mvp') + '%'"></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Producción:</span>
+                                            <span x-text="getRoadmapProgress('production') + '%'"></span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Escalabilidad:</span>
+                                            <span x-text="getRoadmapProgress('scale') + '%'"></span>
+                                        </div>
+                                        <div class="border-t border-gray-600 pt-2 mt-2">
+                                            <div class="flex justify-between font-bold">
+                                                <span>Total:</span>
+                                                <span x-text="getTotalProgress() + '%'"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold mb-4">Próximos Pasos Críticos</h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                            <span>Crear cuenta Gmail del proyecto</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-user-cog text-blue-400"></i>
+                                            <span>Setup cuenta HeyGen Professional</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-video text-green-400"></i>
+                                            <span>Crear primer avatar y video prueba</span>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-instagram text-pink-400"></i>
+                                            <span>Configurar redes sociales</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

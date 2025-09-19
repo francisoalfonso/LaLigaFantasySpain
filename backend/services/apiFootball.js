@@ -16,6 +16,7 @@ class ApiFootballClient {
     // IDs de La Liga para diferentes temporadas
     this.LEAGUES = {
       LA_LIGA: 140,
+      LA_LIGA_FEMENINA: 142,
       SEASON_2024: 2024,
       SEASON_2025: 2025,
       CURRENT_SEASON: 2025  // Temporada actual La Liga 2024-2025
@@ -37,18 +38,23 @@ class ApiFootballClient {
   }
 
   // Realizar petición a la API
-  async makeRequest(endpoint, params = {}) {
+  async makeRequest(endpoint, params = {}, includeTimezone = false) {
     await this.waitForRateLimit();
 
     try {
-      console.log(`🔄 API-Football: ${endpoint}`, params);
+      const requestUrl = `${this.baseURL}${endpoint}`;
+      const requestParams = { ...params };
 
-      const response = await axios.get(`${this.baseURL}${endpoint}`, {
+      // Solo añadir timezone para endpoints que lo soporten (como fixtures)
+      if (includeTimezone) {
+        requestParams.timezone = 'Europe/Madrid';
+      }
+
+      console.log(`🔄 API-Football: ${endpoint}`, requestParams);
+
+      const response = await axios.get(requestUrl, {
         headers: this.headers,
-        params: {
-          ...params,
-          timezone: 'Europe/Madrid'
-        },
+        params: requestParams,
         timeout: 10000
       });
 
@@ -117,6 +123,30 @@ class ApiFootballClient {
         data: result.data[0] || null,
         league_name: result.data[0]?.league?.name || 'La Liga',
         season: result.data[0]?.seasons?.[0] || null
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener todas las ligas españolas (incluye Liga Femenina)
+  async getSpanishLeagues() {
+    const result = await this.makeRequest('/leagues', {
+      country: 'Spain'
+    });
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(item => ({
+          id: item.league.id,
+          name: item.league.name,
+          type: item.league.type,
+          logo: item.league.logo,
+          country: item.country.name,
+          seasons: item.seasons?.map(s => s.year) || []
+        })),
+        count: result.count
       };
     }
 
@@ -277,6 +307,106 @@ class ApiFootballClient {
     const result = await this.makeRequest('/standings', {
       league: this.LEAGUES.LA_LIGA,
       season: this.LEAGUES.SEASON_2024
+    });
+
+    if (result.success && result.data.length > 0) {
+      return {
+        success: true,
+        data: result.data[0].league.standings[0].map(team => ({
+          position: team.rank,
+          team: {
+            id: team.team.id,
+            name: team.team.name,
+            logo: team.team.logo
+          },
+          points: team.points,
+          played: team.all.played,
+          won: team.all.win,
+          drawn: team.all.draw,
+          lost: team.all.lose,
+          goals_for: team.all.goals.for,
+          goals_against: team.all.goals.against,
+          goal_difference: team.goalsDiff
+        }))
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener equipos de La Liga Femenina
+  async getLigaFemeninaTeams() {
+    const result = await this.makeRequest('/teams', {
+      league: this.LEAGUES.LA_LIGA_FEMENINA,
+      season: this.LEAGUES.CURRENT_SEASON
+    });
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(team => ({
+          id: team.team.id,
+          name: team.team.name,
+          code: team.team.code,
+          logo: team.team.logo,
+          venue: team.venue?.name,
+          founded: team.team.founded
+        })),
+        count: result.count
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener jugadoras de La Liga Femenina
+  async getLigaFemeninaPlayers(page = 1, team_id = null, season = null) {
+    const params = {
+      league: this.LEAGUES.LA_LIGA_FEMENINA,
+      season: season || this.LEAGUES.SEASON_2024, // Try 2024 season for better data
+      page: page
+    };
+
+    if (team_id) {
+      params.team = team_id;
+    }
+
+    const result = await this.makeRequest('/players', params);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(item => ({
+          id: item.player.id,
+          name: item.player.name,
+          firstname: item.player.firstname,
+          lastname: item.player.lastname,
+          age: item.player.age,
+          nationality: item.player.nationality,
+          height: item.player.height,
+          weight: item.player.weight,
+          photo: item.player.photo,
+          position: item.statistics?.[0]?.games?.position,
+          team: {
+            id: item.statistics?.[0]?.team?.id,
+            name: item.statistics?.[0]?.team?.name,
+            logo: item.statistics?.[0]?.team?.logo
+          },
+          stats: item.statistics?.[0] || null
+        })),
+        count: result.count,
+        pagination: result.pagination
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener clasificación Liga Femenina
+  async getLigaFemeninaStandings() {
+    const result = await this.makeRequest('/standings', {
+      league: this.LEAGUES.LA_LIGA_FEMENINA,
+      season: this.LEAGUES.CURRENT_SEASON
     });
 
     if (result.success && result.data.length > 0) {

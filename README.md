@@ -1,6 +1,8 @@
-# 🏆 La Liga AI - Fantasy Football Influencer Platform
+# ⚽ Fantasy La Liga Pro
 
-Sistema completo para crear un influencer virtual de La Liga Fantasy usando datos reales de API-Sports y tecnología AI.
+## 🏆 El equipo profesional de Fantasy La Liga
+
+Sistema automatizado de creación de contenido para Fantasy La Liga utilizando avatares AI y análisis de datos en tiempo real.
 
 ## 🎯 Descripción
 
@@ -38,8 +40,8 @@ Plataforma que combina datos reales de La Liga con inteligencia artificial para 
 
 ```bash
 # Clonar repositorio
-git clone https://github.com/francisoalfonso/La-Liga-AI.git
-cd La-Liga-AI
+git clone https://github.com/laligafantasyspainpro-ux/LaLigaFantasySpain.git
+cd LaLigaFantasySpain
 
 # Instalar dependencias
 npm install
@@ -78,6 +80,9 @@ npm run dev
 
 # Acceder al dashboard
 http://localhost:3000
+
+# Producción
+https://laligafantasyspain.com
 ```
 
 ## 📡 API Endpoints
@@ -233,11 +238,12 @@ Alavés juega en casa y él ha convertido 1 penalty esta temporada."
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
 
-## 👨‍💻 Autor
+## 👨‍💻 Proyecto
 
-**Francisco Alfonso Domínguez**
-- GitHub: [@francisoalfonso](https://github.com/francisoalfonso)
-- Email: francisco.alfonso.dominguez@gmail.com
+**Fantasy La Liga Pro Team**
+- GitHub: [@laligafantasyspainpro-ux](https://github.com/laligafantasyspainpro-ux)
+- Email: laligafantasyspainpro@gmail.com
+- Repository: [LaLigaFantasySpain](https://github.com/laligafantasyspainpro-ux/LaLigaFantasySpain)
 
 ## 🙏 Agradecimientos
 

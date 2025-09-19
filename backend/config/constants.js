@@ -1,15 +1,10 @@
 // Configuraciones y constantes para el proyecto Fantasy La Liga
 module.exports = {
-  // IDs de SportMonks
-  LEAGUE_IDS: {
-    LA_LIGA: 564,
-    // Para testing con plan gratuito
-    SCOTTISH_PREMIERSHIP: 501,
-    DANISH_SUPERLIGA: 271
-  },
-
-  SEASON_IDS: {
-    LA_LIGA_2024_25: 23476
+  // API-Sports La Liga
+  API_SPORTS: {
+    LA_LIGA_ID: 140,
+    SEASON_2024_25: 2025,
+    BASE_URL: 'https://v3.football.api-sports.io'
   },
 
   // Sistema de puntos Fantasy La Liga
@@ -63,18 +58,6 @@ module.exports = {
     HOST: process.env.HOST || 'localhost'
   },
 
-  // URLs base de SportMonks
-  SPORTMONKS: {
-    BASE_URL: 'https://api.sportmonks.com/v3/football',
-    RATE_LIMIT: 3000, // 3 segundos entre llamadas para plan gratuito
-    INCLUDES: [
-      'participants',
-      'scores',
-      'statistics.details',
-      'lineups.details.player',
-      'events.player'
-    ]
-  },
 
   // Thresholds para destacar jugadores
   THRESHOLDS: {

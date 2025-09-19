@@ -11,7 +11,7 @@ function dashboardApp() {
     connectionStatus: 'Verificando...',
     leaguesCount: 0,
     testsPassedCount: 0,
-    testsTotalCount: 3,
+    testsTotalCount: 4,
     calculatorStatus: 'Pendiente',
 
     // Información del sistema
@@ -28,7 +28,11 @@ function dashboardApp() {
         status: 'pending', // pending, success, error
         message: 'Pendiente'
       },
-      leagues: {
+      players: {
+        status: 'pending',
+        message: 'Pendiente'
+      },
+      teams: {
         status: 'pending',
         message: 'Pendiente'
       },
@@ -61,6 +65,9 @@ function dashboardApp() {
       console.log('🚀 Alpine.js inicializando dashboard...');
       this.addLog('info', '🚀 Dashboard inicializado');
       console.log('📊 Estado inicial:', this.tests);
+
+      // Cargar progreso del roadmap desde localStorage
+      this.loadRoadmapTasks();
 
       try {
         await this.checkSystemInfo();
@@ -149,7 +156,7 @@ function dashboardApp() {
         const config = await this.apiCall('test/config');
 
         this.systemInfo = {
-          api_configured: config.config.sportmonks_api_configured,
+          api_configured: config.config.api_sports_configured,
           environment: config.config.node_env || 'development',
           port: config.config.port || 3000,
           uptime: Math.round(health.uptime)
@@ -166,10 +173,10 @@ function dashboardApp() {
       console.log('🔄 Iniciando test de conexión...');
       this.tests.connection.status = 'pending';
       this.tests.connection.message = 'Probando conexión...';
-      this.addLog('info', '🔄 Iniciando test de conexión SportMonks...');
+      this.addLog('info', '🔄 Iniciando test de conexión API-Sports...');
 
       try {
-        const result = await this.apiCall('sportmonks/test');
+        const result = await this.apiCall('laliga/test');
 
         if (result.success) {
           this.tests.connection.status = 'success';
@@ -179,12 +186,8 @@ function dashboardApp() {
           this.apiStatusText = 'Conectado';
           this.testsPassedCount = Math.max(this.testsPassedCount, 1);
 
-          this.addLog('success', '✅ Conexión con SportMonks exitosa');
-
-          if (result.data.leagues !== undefined) {
-            this.leaguesCount = result.data.leagues;
-            this.addLog('info', `📊 ${result.data.leagues} ligas disponibles`);
-          }
+          this.addLog('success', '✅ Conexión con API-Sports exitosa');
+          this.addLog('info', '🏆 Plan Ultra - La Liga datos completos');
         } else {
           throw new Error('Test de conexión falló');
         }
@@ -199,43 +202,70 @@ function dashboardApp() {
       }
     },
 
-    // Test de ligas
-    async testLeagues() {
-      this.tests.leagues.status = 'pending';
-      this.tests.leagues.message = 'Obteniendo ligas...';
-      this.addLog('info', '🏆 Probando obtención de ligas...');
+    // Test de jugadores La Liga
+    async testPlayers() {
+      this.tests.players.status = 'pending';
+      this.tests.players.message = 'Obteniendo jugadores...';
+      this.addLog('info', '👥 Probando obtención de jugadores La Liga...');
 
       try {
-        const result = await this.apiCall('sportmonks/leagues');
+        const result = await this.apiCall('laliga/laliga/players');
 
         if (result.success) {
-          this.tests.leagues.status = 'success';
-          this.tests.leagues.message = `${result.count} ligas obtenidas`;
+          this.tests.players.status = 'success';
+          this.tests.players.message = `${result.count} jugadores obtenidos`;
           this.leaguesCount = result.count;
           this.testsPassedCount = Math.max(this.testsPassedCount, 2);
 
-          this.addLog('success', `✅ ${result.count} ligas obtenidas exitosamente`);
+          this.addLog('success', `✅ ${result.count} jugadores La Liga obtenidos`);
 
-          // Mostrar algunas ligas de ejemplo
+          // Mostrar algunos jugadores de ejemplo
           if (result.data && result.data.length > 0) {
-            const firstLeagues = result.data.slice(0, 3);
-            firstLeagues.forEach(league => {
-              this.addLog('info', `🏆 Liga: ${league.name || 'N/A'} (ID: ${league.id || 'N/A'})`);
+            const firstPlayers = result.data.slice(0, 3);
+            firstPlayers.forEach(player => {
+              this.addLog('info', `⚽ Jugador: ${player.name || 'N/A'} - ${player.team || 'N/A'}`);
             });
           }
         } else {
-          throw new Error('No se pudieron obtener las ligas');
+          throw new Error('No se pudieron obtener los jugadores');
         }
       } catch (error) {
-        this.tests.leagues.status = 'error';
-        this.tests.leagues.message = error.message;
-        this.addLog('error', `❌ Error obteniendo ligas: ${error.message}`);
+        this.tests.players.status = 'error';
+        this.tests.players.message = error.message;
+        this.addLog('error', `❌ Error obteniendo jugadores: ${error.message}`);
+      }
+    },
 
-        // Si es un error 400, explicar que es normal con plan gratuito
-        if (error.message.includes('400') || error.message.includes('Bad Request')) {
-          this.addLog('warning', '⚠️ Error 400: Normal con plan gratuito de SportMonks');
-          this.addLog('info', '💡 Plan gratuito limitado a Scottish Premiership y Danish Superliga');
+    // Test de equipos La Liga
+    async testTeams() {
+      this.tests.teams.status = 'pending';
+      this.tests.teams.message = 'Obteniendo equipos...';
+      this.addLog('info', '🏛️ Probando obtención de equipos La Liga...');
+
+      try {
+        const result = await this.apiCall('laliga/laliga/teams');
+
+        if (result.success) {
+          this.tests.teams.status = 'success';
+          this.tests.teams.message = `${result.count} equipos obtenidos`;
+          this.testsPassedCount = Math.max(this.testsPassedCount, 3);
+
+          this.addLog('success', `✅ ${result.count} equipos La Liga obtenidos`);
+
+          // Mostrar algunos equipos de ejemplo
+          if (result.data && result.data.length > 0) {
+            const firstTeams = result.data.slice(0, 3);
+            firstTeams.forEach(team => {
+              this.addLog('info', `🏛️ Equipo: ${team.name || 'N/A'}`);
+            });
+          }
+        } else {
+          throw new Error('No se pudieron obtener los equipos');
         }
+      } catch (error) {
+        this.tests.teams.status = 'error';
+        this.tests.teams.message = error.message;
+        this.addLog('error', `❌ Error obteniendo equipos: ${error.message}`);
       }
     },
 
@@ -269,7 +299,7 @@ function dashboardApp() {
           this.tests.calculator.status = 'success';
           this.tests.calculator.message = `${result.fantasy_points} puntos calculados`;
           this.calculatorStatus = 'Funcionando';
-          this.testsPassedCount = Math.max(this.testsPassedCount, 3);
+          this.testsPassedCount = Math.max(this.testsPassedCount, 4);
 
           this.addLog('success', `✅ Calculadora funcionando: ${result.fantasy_points} puntos`);
           this.addLog('info', `📊 Test: Delantero con 1 gol + 1 asistencia = ${result.fantasy_points} pts`);
@@ -292,7 +322,8 @@ function dashboardApp() {
       try {
         await this.checkSystemInfo();
         await this.testConnection();
-        await this.testLeagues();
+        await this.testPlayers();
+        await this.testTeams();
         await this.testCalculator();
 
         this.addLog('success', `✅ Test completo finalizado: ${this.testsPassedCount}/${this.testsTotalCount} pruebas pasadas`);
@@ -396,6 +427,174 @@ function dashboardApp() {
         }
       } catch (error) {
         this.addLog('error', `❌ Error abriendo muestra: ${error.message}`);
+      }
+    },
+
+    // Roadmap tasks data structure
+    roadmapTasks: {
+      setup: {
+        gmail: false,
+        github: false,
+        api_sports: false,
+        env_variables: false,
+        ssl_cert: false,
+        domain: false
+      },
+      mvp: {
+        heygen_account: false,
+        avatar_design: false,
+        avatar_training: false,
+        test_videos: false,
+        content_templates: false,
+        data_integration: false,
+        content_scheduler: false,
+        instagram_account: false,
+        tiktok_account: false,
+        youtube_account: false,
+        brand_design: false
+      },
+      production: {
+        content_batch: false,
+        launch_strategy: false,
+        analytics_setup: false,
+        posting_automation: false,
+        data_sync: false,
+        monitoring: false,
+        response_templates: false,
+        engagement_strategy: false,
+
+        // Agente Investigador Competencia
+        competitive_intelligence_agent: false,
+        competitor_content_monitoring: false,
+        viral_content_detection: false,
+        trending_topics_tracker: false,
+        competitor_analysis_dashboard: false,
+        automated_content_triggers: false,
+        response_content_generator: false,
+        real_time_trend_alerts: false,
+        competitive_gap_analysis: false
+      },
+      team_evolution: {
+        // Fase Team DAZN Model - Multi Reporteros
+        team_concept_design: false,
+        dazn_branding_research: false,
+        avatar_personas_definition: false,
+
+        // Reporteros individuales
+        ana_martinez_avatar: false,       // Analista Senior (28)
+        carlos_gonzalez_avatar: false,    // Experto Stats (32)
+        lucia_rodriguez_avatar: false,    // Especialista Femenina (26)
+        pablo_genz_avatar: false,         // Teenager GenZ (19)
+
+        // Sistema técnico
+        content_rotation_system: false,
+        personality_script_engine: false,
+        voice_cloning_setup: false,
+        uniform_visual_system: false,
+
+        // HeyGen Enterprise
+        heygen_enterprise_plan: false,
+        multi_avatar_setup: false,
+        voice_customization: false,
+        brand_overlay_system: false,
+
+        // Liga Femenina Integration
+        women_league_data_integration: false,
+        lucia_content_templates: false,
+        female_audience_strategy: false,
+
+        // GenZ Strategy (Pablo)
+        tiktok_viral_strategy: false,
+        twitch_streaming_setup: false,
+        meme_content_templates: false,
+        genz_language_adaptation: false,
+
+        // Content Distribution
+        platform_specialization: false,
+        daily_rotation_scheduler: false,
+        special_events_assignment: false,
+        cross_platform_publishing: false,
+
+        // Channel Naming Strategy
+        primary_channel_names_defined: false,
+        backup_channel_names_defined: false,
+        channel_availability_verified: false,
+        brand_consistency_guidelines: false
+      },
+
+      scale: {
+        english_avatar: false,
+        usa_market: false,
+        other_leagues: false,
+        ai_predictions: false,
+        mobile_app: false,
+        premium_tier: false,
+        sponsorships: false,
+        affiliate_program: false,
+        merchandise: false
+      }
+    },
+
+    // Calcular progreso de cada fase
+    getRoadmapProgress(phase) {
+      const tasks = this.roadmapTasks[phase];
+      if (!tasks) return 0;
+
+      const taskValues = Object.values(tasks);
+      const completedTasks = taskValues.filter(task => task === true).length;
+      const totalTasks = taskValues.length;
+
+      return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    },
+
+    // Calcular progreso total
+    getTotalProgress() {
+      const phases = ['setup', 'mvp', 'production', 'team_evolution', 'scale'];
+      const totalProgress = phases.reduce((sum, phase) => {
+        return sum + this.getRoadmapProgress(phase);
+      }, 0);
+
+      return Math.round(totalProgress / phases.length);
+    },
+
+    // Guardar estado en localStorage
+    saveRoadmapTasks() {
+      try {
+        localStorage.setItem('laligaai_roadmap_tasks', JSON.stringify(this.roadmapTasks));
+        console.log('💾 Roadmap tasks saved to localStorage');
+
+        // Log de progreso actualizado
+        const totalProgress = this.getTotalProgress();
+        this.addLog('info', `📊 Progreso del proyecto actualizado: ${totalProgress}%`);
+      } catch (error) {
+        console.error('❌ Error saving roadmap tasks:', error);
+      }
+    },
+
+    // Actualizar estado de tarea y guardar automáticamente
+    updateRoadmapTask(phase, task, value) {
+      if (this.roadmapTasks[phase] && this.roadmapTasks[phase].hasOwnProperty(task)) {
+        this.roadmapTasks[phase][task] = value;
+        this.saveRoadmapTasks();
+
+        // Log del cambio
+        const action = value ? 'completada' : 'pendiente';
+        const taskName = task.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        this.addLog('info', `📋 Tarea ${action}: ${taskName}`);
+      }
+    },
+
+    // Cargar estado desde localStorage
+    loadRoadmapTasks() {
+      try {
+        const saved = localStorage.getItem('laligaai_roadmap_tasks');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          this.roadmapTasks = { ...this.roadmapTasks, ...parsed };
+          console.log('📂 Roadmap tasks loaded from localStorage');
+        }
+      } catch (error) {
+        console.error('❌ Error loading roadmap tasks:', error);
       }
     },
 

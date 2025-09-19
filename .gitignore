@@ -65,3 +65,26 @@ build/
 
 # Demo files (opcional)
 demo_*.html
+
+# API Keys and sensitive data
+config/keys.js
+config/secrets.json
+
+# HeyGen API credentials
+heygen-config.json
+
+# Fantasy La Liga Pro specific
+uploads/
+generated-videos/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Avatar and media files (large files)
+avatars/
+media/exports/
+
+# Social media content exports
+exports/
+content-exports/

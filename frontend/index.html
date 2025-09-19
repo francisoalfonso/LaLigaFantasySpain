@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy La Liga - Dashboard de Validación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <div id="app" x-data="dashboardApp()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-white shadow-lg border-b-4 border-green-500">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-4xl">⚽</div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-800">Fantasy La Liga</h1>
+                            <p class="text-green-600 font-medium">Dashboard de Validación SportMonks</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500">Estado de la API</div>
+                            <div class="flex items-center space-x-2">
+                                <div :class="apiStatus === 'connected' ? 'bg-green-500' : apiStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'"
+                                     class="w-3 h-3 rounded-full"></div>
+                                <span class="text-sm font-medium" x-text="apiStatusText"></span>
+                            </div>
+                        </div>
+
+                        <button @click="runFullTest()"
+                                :disabled="isLoading"
+                                class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            <i class="fas fa-play mr-2"></i>
+                            <span x-text="isLoading ? 'Probando...' : 'Probar Todo'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- API Status Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Conexión API</p>
+                            <p class="text-2xl font-bold" x-text="connectionStatus"></p>
+                        </div>
+                        <div class="text-blue-500 text-3xl">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leagues Available Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Ligas Disponibles</p>
+                            <p class="text-2xl font-bold" x-text="leaguesCount"></p>
+                        </div>
+                        <div class="text-green-500 text-3xl">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Results Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Tests Pasados</p>
+                            <p class="text-2xl font-bold" x-text="testsPassedCount + '/' + testsTotalCount"></p>
+                        </div>
+                        <div class="text-purple-500 text-3xl">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fantasy Points Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-600 text-sm">Calculadora</p>
+                            <p class="text-2xl font-bold" x-text="calculatorStatus"></p>
+                        </div>
+                        <div class="text-orange-500 text-3xl">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="bg-white rounded-xl shadow-lg mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8" aria-label="Tabs">
+                        <button @click="activeTab = 'testing'"
+                                :class="activeTab === 'testing' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            <i class="fas fa-vial mr-2"></i>
+                            Testing & Validación
+                        </button>
+                        <button @click="activeTab = 'content'"
+                                :class="activeTab === 'content' ? 'border-green-500 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                            <i class="fas fa-star mr-2"></i>
+                            Propuesta de Valor
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div x-show="activeTab === 'testing'" x-transition>
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Left Column: API Testing -->
+                <div class="space-y-6">
+                    <!-- SportMonks API Tests -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-vial mr-3 text-blue-500"></i>
+                                Pruebas de API SportMonks
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <!-- Connection Test -->
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="tests.connection.status === 'success' ? 'text-green-500' : tests.connection.status === 'error' ? 'text-red-500' : 'text-gray-400'"
+                                             class="text-lg">
+                                            <i :class="tests.connection.status === 'success' ? 'fas fa-check-circle' : tests.connection.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Test de Conexión</p>
+                                            <p class="text-sm text-gray-600" x-text="tests.connection.message"></p>
+                                        </div>
+                                    </div>
+                                    <button @click="testConnection()"
+                                            :disabled="isLoading"
+                                            class="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm">
+                                        Probar
+                                    </button>
+                                </div>
+
+                                <!-- Leagues Test -->
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="tests.leagues.status === 'success' ? 'text-green-500' : tests.leagues.status === 'error' ? 'text-red-500' : 'text-gray-400'"
+                                             class="text-lg">
+                                            <i :class="tests.leagues.status === 'success' ? 'fas fa-check-circle' : tests.leagues.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Obtener Ligas</p>
+                                            <p class="text-sm text-gray-600" x-text="tests.leagues.message"></p>
+                                        </div>
+                                    </div>
+                                    <button @click="testLeagues()"
+                                            :disabled="isLoading"
+                                            class="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm">
+                                        Probar
+                                    </button>
+                                </div>
+
+                                <!-- Fantasy Calculator Test -->
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div class="flex items-center space-x-3">
+                                        <div :class="tests.calculator.status === 'success' ? 'text-green-500' : tests.calculator.status === 'error' ? 'text-red-500' : 'text-gray-400'"
+                                             class="text-lg">
+                                            <i :class="tests.calculator.status === 'success' ? 'fas fa-check-circle' : tests.calculator.status === 'error' ? 'fas fa-times-circle' : 'fas fa-clock'"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Calculadora Fantasy</p>
+                                            <p class="text-sm text-gray-600" x-text="tests.calculator.message"></p>
+                                        </div>
+                                    </div>
+                                    <button @click="testCalculator()"
+                                            :disabled="isLoading"
+                                            class="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white px-3 py-1 rounded text-sm">
+                                        Probar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Info -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-info-circle mr-3 text-blue-500"></i>
+                                Información del Sistema
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <dl class="space-y-3">
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">API Key Configurada:</dt>
+                                    <dd class="font-medium" x-text="systemInfo.api_configured ? '✅ Sí' : '❌ No'"></dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Entorno:</dt>
+                                    <dd class="font-medium" x-text="systemInfo.environment"></dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Puerto:</dt>
+                                    <dd class="font-medium" x-text="systemInfo.port"></dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Tiempo Activo:</dt>
+                                    <dd class="font-medium" x-text="systemInfo.uptime + 's'"></dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Results & Data -->
+                <div class="space-y-6">
+                    <!-- Test Results Log -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-terminal mr-3 text-green-500"></i>
+                                Log de Resultados
+                            </h2>
+                            <div class="flex space-x-2 mt-2">
+                                <button @click="clearLog()"
+                                        class="text-sm bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded">
+                                    Limpiar
+                                </button>
+                                <button @click="downloadLog()"
+                                        class="text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                                    Descargar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-64 overflow-y-auto"
+                                 id="logContainer">
+                                <div x-show="logs.length === 0" class="text-gray-500">
+                                    Esperando resultados de pruebas...
+                                </div>
+                                <template x-for="log in logs" :key="log.id">
+                                    <div class="mb-2">
+                                        <span class="text-gray-400" x-text="log.timestamp"></span>
+                                        <span :class="log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : 'text-blue-400'"
+                                              x-text="log.message"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Samples -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-database mr-3 text-purple-500"></i>
+                                Muestras de Datos
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div x-show="dataSamples.length === 0" class="text-gray-500 text-center py-8">
+                                No hay muestras disponibles aún.
+                                <br>
+                                <span class="text-sm">Ejecuta algunas pruebas para ver los datos.</span>
+                            </div>
+                            <div x-show="dataSamples.length > 0" class="space-y-3">
+                                <template x-for="sample in dataSamples" :key="sample.name">
+                                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p class="font-medium" x-text="sample.name"></p>
+                                            <p class="text-sm text-gray-600" x-text="sample.timestamp"></p>
+                                        </div>
+                                        <button @click="viewSample(sample)"
+                                                class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm">
+                                            Ver
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fantasy Points Calculator -->
+                    <div class="bg-white rounded-xl shadow-lg">
+                        <div class="p-6 border-b border-gray-200">
+                            <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                                <i class="fas fa-calculator mr-3 text-orange-500"></i>
+                                Calculadora Fantasy
+                            </h2>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Posición</label>
+                                    <select x-model="fantasyCalc.position"
+                                            class="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option value="GK">Portero (GK)</option>
+                                        <option value="DEF">Defensa (DEF)</option>
+                                        <option value="MID">Centrocampista (MID)</option>
+                                        <option value="FWD">Delantero (FWD)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Minutos</label>
+                                    <input type="number" x-model="fantasyCalc.minutes"
+                                           class="w-full p-2 border border-gray-300 rounded-lg"
+                                           placeholder="90">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Goles</label>
+                                    <input type="number" x-model="fantasyCalc.goals"
+                                           class="w-full p-2 border border-gray-300 rounded-lg"
+                                           placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Asistencias</label>
+                                    <input type="number" x-model="fantasyCalc.assists"
+                                           class="w-full p-2 border border-gray-300 rounded-lg"
+                                           placeholder="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tarjetas</label>
+                                    <div class="flex space-x-2">
+                                        <input type="number" x-model="fantasyCalc.yellow_cards"
+                                               class="w-1/2 p-2 border border-gray-300 rounded-lg"
+                                               placeholder="🟨">
+                                        <input type="number" x-model="fantasyCalc.red_cards"
+                                               class="w-1/2 p-2 border border-gray-300 rounded-lg"
+                                               placeholder="🟥">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button @click="calculateFantasyPoints()"
+                                    class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium">
+                                Calcular Puntos Fantasy
+                            </button>
+
+                            <div x-show="fantasyCalc.result !== null"
+                                 class="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                                <div class="text-center">
+                                    <div class="text-3xl font-bold text-orange-600" x-text="fantasyCalc.result + ' puntos'"></div>
+                                    <div class="text-sm text-gray-600 mt-1">Puntos Fantasy calculados</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Propuesta de Valor Tab -->
+            <div x-show="activeTab === 'content'" x-transition>
+                <div class="space-y-8">
+                    <!-- Hero Section -->
+                    <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl shadow-xl p-8 text-white">
+                        <div class="text-center">
+                            <h2 class="text-4xl font-bold mb-4">🚀 ESTRATEGIA DUAL: OPORTUNIDAD 2X</h2>
+                            <p class="text-xl mb-6 opacity-90">Conquistar dos mercados desatendidos simultáneamente</p>
+
+                            <!-- Dual Market Strategy -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+                                <!-- Spanish Market -->
+                                <div class="bg-red-500 bg-opacity-30 rounded-xl p-6 border border-red-300">
+                                    <div class="flex items-center justify-center mb-4">
+                                        <span class="text-3xl mr-3">🇪🇸</span>
+                                        <h3 class="text-2xl font-bold">MERCADO ESPAÑOL</h3>
+                                    </div>
+                                    <div class="space-y-3 text-left">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-user-friends mr-2"></i>
+                                            <span class="text-sm">1 competidor principal (Carrasco)</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-search mr-2"></i>
+                                            <span class="text-sm">"Scout de Ligas Secretas"</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-database mr-2"></i>
+                                            <span class="text-sm">Plan gratuito SportMonks</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-trophy mr-2"></i>
+                                            <span class="text-sm">Dinamarca + Escocia</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- English Market -->
+                                <div class="bg-blue-500 bg-opacity-30 rounded-xl p-6 border border-blue-300">
+                                    <div class="flex items-center justify-center mb-4">
+                                        <span class="text-3xl mr-3">🇬🇧</span>
+                                        <h3 class="text-2xl font-bold">MERCADO INGLÉS</h3>
+                                    </div>
+                                    <div class="space-y-3 text-left">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-star mr-2"></i>
+                                            <span class="text-sm">CERO competidores especializados</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-bridge mr-2"></i>
+                                            <span class="text-sm">"The La Liga FPL Bridge"</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-users mr-2"></i>
+                                            <span class="text-sm">15M+ jugadores FPL</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-chart-line mr-2"></i>
+                                            <span class="text-sm">Mercado $1.05B creciendo 12.56%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Key Stats -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="text-3xl mb-2">🌍</div>
+                                    <h3 class="font-bold">2 Mercados</h3>
+                                    <p class="text-sm opacity-80">España + Inglaterra</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="text-3xl mb-2">⚡</div>
+                                    <h3 class="font-bold">Datos Reales</h3>
+                                    <p class="text-sm opacity-80">25K+ jugadores</p>
+                                </div>
+                                <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                    <div class="text-3xl mb-2">🎯</div>
+                                    <h3 class="font-bold">Competencia Baja</h3>
+                                    <p class="text-sm opacity-80">Oportunidad única</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unique Selling Points -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Diferenciación -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-crown mr-3 text-yellow-500"></i>
+                                Ventaja Competitiva
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <h4 class="font-semibold text-green-600">Único en el Mercado</h4>
+                                        <p class="text-sm text-gray-600">Solo 1 competidor principal vs 50+ en Premier League</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <h4 class="font-semibold text-blue-600">Tecnología Avanzada</h4>
+                                        <p class="text-sm text-gray-600">Avatar IA + API real vs creación manual</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                                    <div>
+                                        <h4 class="font-semibold text-purple-600">Escalabilidad Total</h4>
+                                        <p class="text-sm text-gray-600">Contenido automatizado 24/7</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Content Types -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-video mr-3 text-red-500"></i>
+                                Tipos de Contenido
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-red-50 p-3 rounded-lg text-center">
+                                    <i class="fas fa-film text-red-500 text-2xl mb-2"></i>
+                                    <p class="font-semibold text-red-600">Reels</p>
+                                    <p class="text-xs text-gray-600">Tips rápidos</p>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded-lg text-center">
+                                    <i class="fas fa-chart-line text-blue-500 text-2xl mb-2"></i>
+                                    <p class="font-semibold text-blue-600">Análisis</p>
+                                    <p class="text-xs text-gray-600">Datos técnicos</p>
+                                </div>
+                                <div class="bg-green-50 p-3 rounded-lg text-center">
+                                    <i class="fas fa-user text-green-500 text-2xl mb-2"></i>
+                                    <p class="font-semibold text-green-600">Perfiles</p>
+                                    <p class="text-xs text-gray-600">Scouting jugadores</p>
+                                </div>
+                                <div class="bg-purple-50 p-3 rounded-lg text-center">
+                                    <i class="fas fa-broadcast-tower text-purple-500 text-2xl mb-2"></i>
+                                    <p class="font-semibold text-purple-600">Live</p>
+                                    <p class="text-xs text-gray-600">Seguimiento real</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Showcase -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-database mr-3 text-indigo-500"></i>
+                            Datos Disponibles en Tiempo Real
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="text-center">
+                                <div class="bg-gradient-to-r from-green-400 to-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                    <span class="text-2xl font-bold">2</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Ligas Activas</h4>
+                                <p class="text-sm text-gray-600">Dinamarca & Escocia</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                    <span class="text-xl font-bold">25K+</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Jugadores</h4>
+                                <p class="text-sm text-gray-600">Base de datos global</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-gradient-to-r from-purple-400 to-purple-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                    <span class="text-xl font-bold">24/7</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Monitoreo</h4>
+                                <p class="text-sm text-gray-600">Partidos en vivo</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+                                    <span class="text-xl font-bold">∞</span>
+                                </div>
+                                <h4 class="font-semibold text-gray-800">Contenido</h4>
+                                <p class="text-sm text-gray-600">Generación automática</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dual Market Content Strategy -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                            <i class="fas fa-globe mr-3 text-indigo-500"></i>
+                            Estrategia de Contenido Dual
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Spanish Content -->
+                            <div class="border border-red-200 rounded-lg p-4">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-2xl mr-2">🇪🇸</span>
+                                    <h4 class="text-lg font-bold text-red-600">Contenido Español</h4>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="bg-red-50 p-3 rounded border-l-4 border-red-500">
+                                        <h5 class="font-semibold text-red-600">🔍 Scout de Ligas Secretas</h5>
+                                        <p class="text-sm text-gray-600">"Mientras todos miran La Liga, yo encuentro oro en Dinamarca y Escocia"</p>
+                                    </div>
+                                    <div class="bg-red-50 p-3 rounded border-l-4 border-red-500">
+                                        <h5 class="font-semibold text-red-600">💎 Ganga del Día</h5>
+                                        <p class="text-sm text-gray-600">"Kasper Schmeichel - El portero que nadie ve pero que te dará 15+ puntos"</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- English Content -->
+                            <div class="border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-center mb-4">
+                                    <span class="text-2xl mr-2">🇬🇧</span>
+                                    <h4 class="text-lg font-bold text-blue-600">English Content</h4>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
+                                        <h5 class="font-semibold text-blue-600">🔗 FPL Bridge</h5>
+                                        <p class="text-sm text-gray-600">"FPL players: Here's why Yamal is better value than Saka this season"</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded border-l-4 border-blue-500">
+                                        <h5 class="font-semibold text-blue-600">📊 League Comparison</h5>
+                                        <p class="text-sm text-gray-600">"La Liga vs Premier League: Fantasy point systems decoded"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Opportunity Analysis -->
+                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg p-6 text-white mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-center">🎯 OPORTUNIDAD DE MERCADO ÚNICA</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-lg font-bold mb-4 flex items-center">
+                                    <i class="fas fa-trophy mr-2"></i>
+                                    Competencia Identificada
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>🇪🇸 Creadores La Liga Fantasy:</span>
+                                        <span class="font-bold">1 principal</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🇬🇧 FPL → La Liga creators:</span>
+                                        <span class="font-bold">0 especializados</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🤖 Avatares IA Fantasy:</span>
+                                        <span class="font-bold">Solo Alex oficial</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>📊 Con datos técnicos:</span>
+                                        <span class="font-bold">Prácticamente 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold mb-4 flex items-center">
+                                    <i class="fas fa-users mr-2"></i>
+                                    Audiencia Potencial
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>🇪🇸 Usuarios La Liga Fantasy:</span>
+                                        <span class="font-bold">2M+ activos</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🇬🇧 Jugadores FPL:</span>
+                                        <span class="font-bold">15M+ registrados</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🌍 Mercado Fantasy EU:</span>
+                                        <span class="font-bold">$1.05B creciendo</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🎯 Total addressable:</span>
+                                        <span class="font-bold">17M+ usuarios</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Example Content Preview -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Content Examples -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-play-circle mr-3 text-green-500"></i>
+                                Ejemplos de Contenido
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-green-500 pl-4 bg-green-50 p-3 rounded">
+                                    <h4 class="font-semibold text-green-600">🇩🇰 Tip del Día</h4>
+                                    <p class="text-sm text-gray-600">"Kasper Schmeichel (189cm, 89kg) - Portero danés perfecto para rotación. Precio estimado: 4.5M"</p>
+                                </div>
+                                <div class="border-l-4 border-blue-500 pl-4 bg-blue-50 p-3 rounded">
+                                    <h4 class="font-semibold text-blue-600">⚽ Partido Live</h4>
+                                    <p class="text-sm text-gray-600">"LIVE: Odense BK vs Fredericia - Mi predicción: 2-1 Odense. Delanteros locales con valor."</p>
+                                </div>
+                                <div class="border-l-4 border-purple-500 pl-4 bg-purple-50 p-3 rounded">
+                                    <h4 class="font-semibold text-purple-600">📊 Análisis Técnico</h4>
+                                    <p class="text-sm text-gray-600">"Comparativa: Defensas daneses vs escoceses. Altura promedio: 186cm vs 183cm"</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROI & Strategy -->
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                                <i class="fas fa-rocket mr-3 text-orange-500"></i>
+                                Estrategia de Lanzamiento
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Fase 1: Validación</h4>
+                                        <p class="text-sm text-gray-600">Plan gratuito - 3 meses</p>
+                                    </div>
+                                    <div class="text-green-600 font-bold">€0/mes</div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Fase 2: Escalado</h4>
+                                        <p class="text-sm text-gray-600">Plan Pro + La Liga</p>
+                                    </div>
+                                    <div class="text-blue-600 font-bold">€75/mes</div>
+                                </div>
+                                <div class="bg-gradient-to-r from-green-500 to-blue-500 text-white p-4 rounded-lg">
+                                    <h4 class="font-bold mb-2">🎯 Objetivo 6 meses:</h4>
+                                    <ul class="text-sm space-y-1">
+                                        <li>• 10,000+ seguidores</li>
+                                        <li>• 5%+ engagement rate</li>
+                                        <li>• Monetización activa</li>
+                                        <li>• Autoridad en nicho</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Call to Action -->
+                    <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-xl p-8 text-white text-center">
+                        <h3 class="text-3xl font-bold mb-4">🚀 MOMENTO IDEAL PARA LANZAR</h3>
+                        <p class="text-xl mb-6 opacity-90">Estrategia dual validada - Oportunidad 2X más grande</p>
+
+                        <!-- Validated Systems -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                <h4 class="font-bold">✅ API Funcionando</h4>
+                                <p class="text-sm opacity-80">25K+ jugadores reales</p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                <h4 class="font-bold">✅ Mercados Identificados</h4>
+                                <p class="text-sm opacity-80">España + Inglaterra</p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                <h4 class="font-bold">✅ Competencia Baja</h4>
+                                <p class="text-sm opacity-80">Oportunidad única</p>
+                            </div>
+                            <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                                <h4 class="font-bold">✅ Contenido Listo</h4>
+                                <p class="text-sm opacity-80">Ejemplos validados</p>
+                            </div>
+                        </div>
+
+                        <!-- Market Potential -->
+                        <div class="bg-white bg-opacity-20 rounded-lg p-6 mb-6">
+                            <h4 class="text-2xl font-bold mb-4">🎯 POTENCIAL TOTAL DEL MERCADO</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <div class="text-3xl font-bold">17M+</div>
+                                    <div class="text-sm opacity-80">Usuarios potenciales</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold">$1.05B</div>
+                                    <div class="text-sm opacity-80">Mercado EU Fantasy</div>
+                                </div>
+                                <div>
+                                    <div class="text-3xl font-bold">12.56%</div>
+                                    <div class="text-sm opacity-80">Crecimiento anual</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Steps -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-red-500 bg-opacity-30 rounded-lg p-4 border border-red-300">
+                                <h4 class="font-bold text-lg mb-2">🇪🇸 Avatar Español</h4>
+                                <p class="text-sm opacity-90">"Scout de Ligas Secretas"</p>
+                                <p class="text-xs opacity-75">Dinamarca + Escocia</p>
+                            </div>
+                            <div class="bg-blue-500 bg-opacity-30 rounded-lg p-4 border border-blue-300">
+                                <h4 class="font-bold text-lg mb-2">🇬🇧 Avatar Inglés</h4>
+                                <p class="text-sm opacity-90">"The La Liga FPL Bridge"</p>
+                                <p class="text-xs opacity-75">15M+ FPL users sin atender</p>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <p class="text-2xl font-bold mb-2">SIGUIENTE PASO:</p>
+                            <p class="text-xl">Crear Avatares Gemelos con HeyGen</p>
+                            <p class="text-sm opacity-80 mt-2">Un avatar, dos mercados, doble oportunidad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div x-show="isLoading"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+             x-transition>
+            <div class="bg-white rounded-xl p-8 text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p class="text-lg font-medium text-gray-800">Ejecutando pruebas...</p>
+                <p class="text-sm text-gray-600 mt-2">Esto puede tomar unos segundos</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

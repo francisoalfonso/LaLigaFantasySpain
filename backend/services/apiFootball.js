@@ -1,0 +1,308 @@
+// Cliente para API-Football (RapidAPI)
+const axios = require('axios');
+
+class ApiFootballClient {
+  constructor() {
+    this.apiKey = process.env.API_FOOTBALL_KEY;
+    this.baseURL = 'https://v3.football.api-sports.io';
+    this.rateLimitDelay = 1000; // 1 segundo entre llamadas para plan Pro
+    this.lastRequestTime = 0;
+
+    // Headers requeridos por API-Sports
+    this.headers = {
+      'x-apisports-key': this.apiKey
+    };
+
+    // IDs de La Liga para diferentes temporadas
+    this.LEAGUES = {
+      LA_LIGA: 140,
+      SEASON_2024: 2024,
+      SEASON_2025: 2025,
+      CURRENT_SEASON: 2025  // Temporada actual La Liga 2024-2025
+    };
+  }
+
+  // Control de rate limiting
+  async waitForRateLimit() {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+
+    if (timeSinceLastRequest < this.rateLimitDelay) {
+      const waitTime = this.rateLimitDelay - timeSinceLastRequest;
+      console.log(`⏳ Rate limiting: esperando ${waitTime}ms`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    this.lastRequestTime = Date.now();
+  }
+
+  // Realizar petición a la API
+  async makeRequest(endpoint, params = {}) {
+    await this.waitForRateLimit();
+
+    try {
+      console.log(`🔄 API-Football: ${endpoint}`, params);
+
+      const response = await axios.get(`${this.baseURL}${endpoint}`, {
+        headers: this.headers,
+        params: {
+          ...params,
+          timezone: 'Europe/Madrid'
+        },
+        timeout: 10000
+      });
+
+      console.log(`✅ API-Football: ${response.data.results} resultados`);
+
+      return {
+        success: true,
+        data: response.data.response,
+        pagination: response.data.paging || null,
+        count: response.data.results || 0
+      };
+
+    } catch (error) {
+      console.error(`❌ Error API-Football ${endpoint}:`, error.message);
+
+      return {
+        success: false,
+        error: error.message,
+        status: error.response?.status,
+        data: null
+      };
+    }
+  }
+
+  // Test de conexión
+  async testConnection() {
+    console.log('🔄 Testeando conexión API-Football...');
+
+    try {
+      const result = await this.makeRequest('/status');
+
+      if (result.success && result.data) {
+        return {
+          success: true,
+          message: 'Conexión exitosa con API-Football',
+          data: {
+            requests_remaining: result.data.requests?.current || 'N/A',
+            plan: result.data.subscription?.plan || 'N/A'
+          }
+        };
+      }
+
+      return {
+        success: false,
+        message: 'Error en respuesta de API-Football'
+      };
+
+    } catch (error) {
+      return {
+        success: false,
+        message: `Error de conexión: ${error.message}`
+      };
+    }
+  }
+
+  // Obtener información de La Liga
+  async getLaLigaInfo() {
+    const result = await this.makeRequest('/leagues', {
+      id: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON
+    });
+
+    if (result.success && result.data) {
+      return {
+        success: true,
+        data: result.data[0] || null,
+        league_name: result.data[0]?.league?.name || 'La Liga',
+        season: result.data[0]?.seasons?.[0] || null
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener equipos de La Liga
+  async getLaLigaTeams() {
+    const result = await this.makeRequest('/teams', {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON
+    });
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(team => ({
+          id: team.team.id,
+          name: team.team.name,
+          code: team.team.code,
+          logo: team.team.logo,
+          venue: team.venue?.name
+        })),
+        count: result.count
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener jugadores de La Liga
+  async getLaLigaPlayers(page = 1, team_id = null) {
+    const params = {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON,
+      page: page
+    };
+
+    if (team_id) {
+      params.team = team_id;
+    }
+
+    const result = await this.makeRequest('/players', params);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(item => ({
+          id: item.player.id,
+          name: item.player.name,
+          firstname: item.player.firstname,
+          lastname: item.player.lastname,
+          age: item.player.age,
+          nationality: item.player.nationality,
+          height: item.player.height,
+          weight: item.player.weight,
+          photo: item.player.photo,
+          position: item.statistics?.[0]?.games?.position,
+          team: {
+            id: item.statistics?.[0]?.team?.id,
+            name: item.statistics?.[0]?.team?.name,
+            logo: item.statistics?.[0]?.team?.logo
+          },
+          stats: item.statistics?.[0] || null
+        })),
+        count: result.count,
+        pagination: result.pagination
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener fixtures de La Liga
+  async getLaLigaFixtures(from_date = null, to_date = null) {
+    const params = {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.SEASON_2024
+    };
+
+    if (from_date) params.from = from_date;
+    if (to_date) params.to = to_date;
+
+    const result = await this.makeRequest('/fixtures', params);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(fixture => ({
+          id: fixture.fixture.id,
+          date: fixture.fixture.date,
+          status: fixture.fixture.status.short,
+          minute: fixture.fixture.status.elapsed,
+          venue: fixture.fixture.venue?.name,
+          home_team: {
+            id: fixture.teams.home.id,
+            name: fixture.teams.home.name,
+            logo: fixture.teams.home.logo
+          },
+          away_team: {
+            id: fixture.teams.away.id,
+            name: fixture.teams.away.name,
+            logo: fixture.teams.away.logo
+          },
+          score: {
+            home: fixture.goals.home,
+            away: fixture.goals.away
+          }
+        })),
+        count: result.count
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener estadísticas detalladas de un jugador
+  async getPlayerStats(player_id, season = null) {
+    const params = {
+      id: player_id,
+      season: season || this.LEAGUES.SEASON_2024
+    };
+
+    const result = await this.makeRequest('/players', params);
+
+    if (result.success && result.data.length > 0) {
+      const playerData = result.data[0];
+      const stats = playerData.statistics.find(s => s.league.id === this.LEAGUES.LA_LIGA);
+
+      if (stats) {
+        return {
+          success: true,
+          data: {
+            player: playerData.player,
+            team: stats.team,
+            games: stats.games,
+            goals: stats.goals,
+            passes: stats.passes,
+            tackles: stats.tackles,
+            duels: stats.duels,
+            dribbles: stats.dribbles,
+            fouls: stats.fouls,
+            cards: stats.cards,
+            penalty: stats.penalty
+          }
+        };
+      }
+    }
+
+    return {
+      success: false,
+      message: 'No se encontraron estadísticas para este jugador'
+    };
+  }
+
+  // Obtener clasificación actual de La Liga
+  async getLaLigaStandings() {
+    const result = await this.makeRequest('/standings', {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.SEASON_2024
+    });
+
+    if (result.success && result.data.length > 0) {
+      return {
+        success: true,
+        data: result.data[0].league.standings[0].map(team => ({
+          position: team.rank,
+          team: {
+            id: team.team.id,
+            name: team.team.name,
+            logo: team.team.logo
+          },
+          points: team.points,
+          played: team.all.played,
+          won: team.all.win,
+          drawn: team.all.draw,
+          lost: team.all.lose,
+          goals_for: team.all.goals.for,
+          goals_against: team.all.goals.against,
+          goal_difference: team.goalsDiff
+        }))
+      };
+    }
+
+    return result;
+  }
+}
+
+module.exports = ApiFootballClient;

@@ -1,0 +1,134 @@
+// Servidor Express principal para Dashboard Fantasy La Liga
+require('dotenv').config();
+
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const path = require('path');
+
+// Importar rutas
+const testRoutes = require('./routes/test');
+const apiFootballRoutes = require('./routes/apiFootball');
+
+// Configuración
+const { SERVER } = require('./config/constants');
+
+const app = express();
+const PORT = SERVER.PORT;
+const HOST = SERVER.HOST;
+
+// Middlewares de seguridad
+app.use(helmet({
+  contentSecurityPolicy: false, // Deshabilitado para desarrollo
+}));
+
+// Middleware de logging
+app.use(morgan('combined'));
+
+// CORS configurado para desarrollo
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true
+}));
+
+// Parser de JSON
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Servir archivos estáticos del frontend
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Middleware para logging de peticiones
+app.use((req, res, next) => {
+  console.log(`📨 ${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
+// Rutas de la API
+app.use('/api/test', testRoutes);
+app.use('/api/laliga', apiFootballRoutes);
+
+// Ruta principal - dashboard
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Ruta de salud del servidor
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: require('../package.json').version
+  });
+});
+
+// Ruta para información de la API
+app.get('/api/info', (req, res) => {
+  res.json({
+    name: 'Fantasy La Liga Dashboard API',
+    version: require('../package.json').version,
+    description: 'API para datos reales La Liga con API-Sports',
+    endpoints: {
+      health: '/health',
+      test: '/api/test/*',
+      laliga: '/api/laliga/*'
+    },
+    api_sports_configured: !!process.env.API_FOOTBALL_KEY,
+    plan: 'Ultra - 75,000 requests/día'
+  });
+});
+
+// Manejo de errores 404
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Endpoint no encontrado',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
+
+// Manejo global de errores
+app.use((error, req, res, next) => {
+  console.error('💥 Error del servidor:', error);
+
+  res.status(error.status || 500).json({
+    error: 'Error interno del servidor',
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Algo salió mal',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Iniciar servidor
+app.listen(PORT, HOST, () => {
+  console.log('🚀 ===================================');
+  console.log('🏆 Fantasy La Liga Dashboard Server');
+  console.log('🚀 ===================================');
+  console.log(`🌐 Servidor corriendo en: http://${HOST}:${PORT}`);
+  console.log(`📊 Dashboard disponible en: http://${HOST}:${PORT}`);
+  console.log(`🔧 API Info: http://${HOST}:${PORT}/api/info`);
+  console.log(`❤️ Health check: http://${HOST}:${PORT}/health`);
+  console.log('🚀 ===================================');
+
+  // Verificar configuración
+  if (!process.env.API_FOOTBALL_KEY) {
+    console.log('⚠️ ADVERTENCIA: API_FOOTBALL_KEY no configurada');
+  } else {
+    console.log('✅ API-Sports Key configurada');
+    console.log('🏆 Plan Ultra activo - La Liga datos reales');
+  }
+});
+
+// Manejo graceful de cierre
+process.on('SIGTERM', () => {
+  console.log('🛑 Cerrando servidor...');
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 Cerrando servidor...');
+  process.exit(0);
+});
+
+module.exports = app;

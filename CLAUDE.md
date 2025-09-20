@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Fantasy La Liga Dashboard** - Dashboard de validación para un influencer virtual automatizado de Instagram que publicará contenido sobre La Liga Fantasy de fútbol. Este proyecto valida la calidad de los datos de SportMonks API antes de invertir en el avatar IA y automatización completa.
+**Fantasy La Liga Dashboard** - Dashboard de validación para un influencer virtual automatizado de Instagram que publicará contenido sobre La Liga Fantasy de fútbol. Este proyecto utiliza API-Sports para obtener datos reales de La Liga y está preparado para integración con avatares AI de HeyGen.
 
 ## Development Commands
 
@@ -25,24 +25,25 @@ npm test
 ## Project Structure
 
 ```
-fantasy-dashboard/
+Fantasy la liga/
 ├── backend/
-│   ├── server.js              # Servidor Express principal
+│   ├── server.js                           # Servidor Express principal
 │   ├── routes/
-│   │   ├── sportmonks.js     # Rutas para endpoints SportMonks
-│   │   └── test.js            # Rutas de testing y validación
+│   │   ├── apiFootball.js                 # Rutas para API-Sports/API-Football
+│   │   └── test.js                        # Rutas de testing y validación
 │   ├── services/
-│   │   ├── sportmonks.js     # Cliente para API SportMonks
-│   │   └── dataProcessor.js  # Procesador de datos Fantasy
+│   │   ├── apiFootball.js                 # Cliente para API-Sports
+│   │   ├── dataProcessor.js               # Procesador de datos Fantasy
+│   │   ├── competitiveIntelligenceAgent.js # Agente análisis competencia
+│   │   └── teamContentManager.js          # Gestor contenido del equipo
 │   └── config/
-│       └── constants.js      # IDs y configuraciones de La Liga
+│       ├── constants.js                   # IDs y configuraciones de La Liga
+│       └── reporterTeam.js                # Configuración equipo reporteros
 ├── frontend/
-│   ├── index.html            # Dashboard principal
-│   ├── style.css             # Estilos personalizados
-│   └── app.js                # Lógica Alpine.js
-├── n8n-flows/                # Flujos de automatización n8n
-├── data-samples/             # Muestras JSON de respuestas API
-└── .env                      # Variables de entorno
+│   ├── index.html                         # Dashboard principal
+│   ├── style.css                          # Estilos personalizados
+│   └── app.js                             # Lógica Alpine.js
+└── .env                                   # Variables de entorno
 ```
 
 ## API Endpoints
@@ -53,31 +54,42 @@ fantasy-dashboard/
 - `GET /api/test/full-workflow` - Test completo del flujo
 - `POST /api/test/fantasy-points` - Test calculadora de puntos
 
-### SportMonks Integration
-- `GET /api/sportmonks/test` - Prueba de conexión
-- `GET /api/sportmonks/leagues` - Ligas disponibles
-- `GET /api/sportmonks/teams` - Equipos de La Liga
-- `GET /api/sportmonks/matches/date/:date` - Partidos por fecha (YYYY-MM-DD)
-- `GET /api/sportmonks/matches/live` - Partidos en vivo
-- `GET /api/sportmonks/player/:id` - Estadísticas de jugador
-- `GET /api/sportmonks/fixture/:id` - Detalles completos de partido
-- `POST /api/sportmonks/fantasy/calculate` - Calcular puntos Fantasy
+### API-Sports/API-Football Integration
+- `GET /api/laliga/test` - Prueba de conexión API-Sports
+- `GET /api/laliga/laliga/info` - Información de La Liga
+- `GET /api/laliga/laliga/teams` - Equipos de La Liga
+- `GET /api/laliga/laliga/players` - Jugadores de La Liga
+- `GET /api/laliga/laliga/standings` - Clasificación actual
+- `POST /api/laliga/laliga/fantasy-points` - Calcular puntos Fantasy
 
 ## Configuration
 
 ### Environment Variables (.env)
 ```bash
-SPORTMONKS_API_KEY=your_api_key_here
+# API-Sports (La Liga Real Data)
+API_FOOTBALL_KEY=your_api_sports_key_here
+
+# Servidor
 NODE_ENV=development
 PORT=3000
 HOST=localhost
+
+# Debug
 DEBUG=true
+
+# GitHub (Para MCP y deployment)
+GITHUB_PERSONAL_ACCESS_TOKEN=tu_github_token_aqui
+GITHUB_USERNAME=laligafantasyspainpro-ux
+GITHUB_REPOSITORY=LaLigaFantasySpain
+
+# HeyGen API (Cuando se configure)
+HEYGEN_API_KEY=tu_heygen_api_key_aqui
 ```
 
 ### Important Constants (backend/config/constants.js)
-- **La Liga ID**: 564
-- **Temporada 2024/25 ID**: 23476
-- **Plan gratuito**: Scottish Premiership (501), Danish Superliga (271)
+- **La Liga ID**: 140 (API-Sports)
+- **Temporada 2024/25**: 2024
+- **API-Sports Plan**: Ultra ($29/mes) - 75,000 requests/día
 - **Sistema de puntos Fantasy**: Implementado según reglas oficiales
 
 ## Fantasy Points System
@@ -107,31 +119,94 @@ Sistema oficial de La Liga Fantasy implementado en `dataProcessor.js`:
 
 ## Data Flow
 
-1. **SportMonks API** → Datos en tiempo real de La Liga
-2. **dataProcessor.js** → Calcula puntos Fantasy según sistema oficial
-3. **Dashboard** → Visualiza datos y insights
-4. **data-samples/** → Guarda respuestas para análisis
-5. **Futuro**: n8n → HeyGen → Instagram
+1. **API-Sports** → Datos en tiempo real de La Liga (75k requests/día)
+2. **apiFootball.js** → Cliente API con rate limiting implementado
+3. **dataProcessor.js** → Calcula puntos Fantasy según sistema oficial
+4. **Dashboard** → Visualiza datos y insights
+5. **Futuro**: teamContentManager.js → HeyGen → Instagram
 
 ## Development Notes
 
 - Todo el código comentado en español
 - Usar async/await para llamadas asíncronas
-- Rate limiting implementado (3s entre llamadas plan gratuito)
+- Rate limiting implementado para API-Sports Plan Ultra
 - Manejo de errores con try/catch
 - Logs detallados para debugging
-- Responses guardadas automáticamente en data-samples/
+- Integración con reporterTeam.js para gestión contenido
+- competitiveIntelligenceAgent.js para análisis de competencia
 
 ## Testing Strategy
 
 Antes de proceder con avatar IA:
-1. Validar calidad y completitud de datos SportMonks
+1. Validar calidad y completitud de datos API-Sports
 2. Verificar cálculos de puntos Fantasy
-3. Evaluar insights automáticos generados
+3. Evaluar insights automáticos generados por competitiveIntelligenceAgent
 4. Confirmar suficiente contenido para posts diarios
+5. Test integración con teamContentManager para workflows
+
+## n8n MCP Integration (Oficial)
+
+Este proyecto incluye integración oficial con n8n usando Model Context Protocol (MCP) para automatización de workflows.
+
+### Configuración n8n MCP
+
+1. **Variables de entorno**: Crear `.env.n8n` con tu configuración:
+```bash
+N8N_API_TOKEN=tu_token_n8n_aqui
+N8N_BASE_URL=https://tu-instancia.n8n.cloud
+N8N_MCP_PORT=3001
+N8N_MCP_HOST=localhost
+```
+
+2. **Configuración Claude Code**: Agregar a tu configuración MCP:
+```json
+{
+  "mcpServers": {
+    "n8n-fantasy-laliga": {
+      "command": "node",
+      "args": ["/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/n8nMcpServer.js"]
+    }
+  }
+}
+```
+
+### Endpoints n8n MCP
+
+- `GET /api/n8n-mcp/test` - Test conexión n8n
+- `GET /api/n8n-mcp/workflows` - Listar workflows
+- `POST /api/n8n-mcp/workflows/:id/execute` - Ejecutar workflow
+- `GET /api/n8n-mcp/executions/:id/status` - Estado ejecución
+- `POST /api/n8n-mcp/webhooks/create` - Crear webhook
+- `GET /api/n8n-mcp/tools` - Herramientas MCP disponibles
+- `GET /api/n8n-mcp/config` - Configuración MCP
+- `POST /api/n8n-mcp/fantasy/workflow` - Workflow Fantasy específico
+
+### Herramientas MCP Disponibles
+
+1. **list_workflows** - Lista workflows n8n
+2. **execute_workflow** - Ejecuta workflow con datos
+3. **get_execution_status** - Estado de ejecución
+4. **create_webhook_workflow** - Crea webhook para Claude Code
+5. **test_connection** - Test conexión n8n
+
+### Configuración Segura
+
+- Token n8n en `.env.n8n` (incluido en .gitignore)
+- Validación de autenticación en todas las llamadas
+- Rate limiting implementado
+- Logs detallados para debugging
+
+### Workflow Fantasy La Liga
+
+Workflow automático incluido para:
+- Procesamiento datos Fantasy La Liga
+- Cálculo puntos automático
+- Integración con API-Sports
+- Webhook para Claude Code
 
 ## Future Phases
 
-- **Fase 2**: Procesamiento avanzado de datos e insights
-- **Fase 3**: Integración con n8n para automatización
-- **Fase 4**: HeyGen avatar + Instagram API para publicación
+- **Fase 2**: Procesamiento avanzado de datos e insights (competitiveIntelligenceAgent)
+- **Fase 3**: Integración completa teamContentManager + HeyGen + n8n MCP
+- **Fase 4**: Automatización Instagram API con workflows n8n
+- **Fase 5**: Expansión a otras ligas y competiciones

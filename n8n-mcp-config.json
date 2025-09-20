@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "n8n-fantasy-laliga": {
+      "command": "node",
+      "args": [
+        "/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/n8nMcpServer.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

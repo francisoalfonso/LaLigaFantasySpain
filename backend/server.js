@@ -10,6 +10,7 @@ const path = require('path');
 // Importar rutas
 const testRoutes = require('./routes/test');
 const apiFootballRoutes = require('./routes/apiFootball');
+const n8nMcpRoutes = require('./routes/n8nMcp');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
 // Rutas de la API
 app.use('/api/test', testRoutes);
 app.use('/api/laliga', apiFootballRoutes);
+app.use('/api/n8n-mcp', n8nMcpRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -73,7 +75,8 @@ app.get('/api/info', (req, res) => {
     endpoints: {
       health: '/health',
       test: '/api/test/*',
-      laliga: '/api/laliga/*'
+      laliga: '/api/laliga/*',
+      n8n_mcp: '/api/n8n-mcp/*'
     },
     api_sports_configured: !!process.env.API_FOOTBALL_KEY,
     plan: 'Ultra - 75,000 requests/día'

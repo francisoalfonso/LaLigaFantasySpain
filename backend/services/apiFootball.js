@@ -224,7 +224,7 @@ class ApiFootballClient {
   async getLaLigaFixtures(from_date = null, to_date = null) {
     const params = {
       league: this.LEAGUES.LA_LIGA,
-      season: this.LEAGUES.SEASON_2024
+      season: this.LEAGUES.CURRENT_SEASON
     };
 
     if (from_date) params.from = from_date;
@@ -267,7 +267,7 @@ class ApiFootballClient {
   async getPlayerStats(player_id, season = null) {
     const params = {
       id: player_id,
-      season: season || this.LEAGUES.SEASON_2024
+      season: season || this.LEAGUES.CURRENT_SEASON
     };
 
     const result = await this.makeRequest('/players', params);
@@ -306,7 +306,7 @@ class ApiFootballClient {
   async getLaLigaStandings() {
     const result = await this.makeRequest('/standings', {
       league: this.LEAGUES.LA_LIGA,
-      season: this.LEAGUES.SEASON_2024
+      season: this.LEAGUES.CURRENT_SEASON
     });
 
     if (result.success && result.data.length > 0) {
@@ -363,7 +363,7 @@ class ApiFootballClient {
   async getLigaFemeninaPlayers(page = 1, team_id = null, season = null) {
     const params = {
       league: this.LEAGUES.LA_LIGA_FEMENINA,
-      season: season || this.LEAGUES.SEASON_2024, // Try 2024 season for better data
+      season: season || this.LEAGUES.CURRENT_SEASON,
       page: page
     };
 
@@ -432,6 +432,166 @@ class ApiFootballClient {
     }
 
     return result;
+  }
+
+  // === MÉTODOS PARA ALINEACIONES EN TIEMPO REAL ===
+
+  // Obtener partidos de La Liga de una fecha específica con alineaciones
+  async getLiveLaLigaLineups(date) {
+    const result = await this.makeRequest('/fixtures', {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON,
+      date: date
+    });
+
+    if (result.success && result.data.length > 0) {
+      const fixturesWithLineups = [];
+
+      for (const fixture of result.data) {
+        try {
+          const lineupsResult = await this.getFixtureLineups(fixture.fixture.id);
+          fixturesWithLineups.push({
+            fixture: {
+              id: fixture.fixture.id,
+              date: fixture.fixture.date,
+              status: fixture.fixture.status,
+              venue: fixture.fixture.venue,
+              referee: fixture.fixture.referee
+            },
+            teams: {
+              home: fixture.teams.home,
+              away: fixture.teams.away
+            },
+            score: {
+              home: fixture.goals.home,
+              away: fixture.goals.away
+            },
+            lineups: lineupsResult.success ? lineupsResult.data : null
+          });
+        } catch (error) {
+          console.log(`Error obteniendo alineaciones para fixture ${fixture.fixture.id}: ${error.message}`);
+          fixturesWithLineups.push({
+            fixture: {
+              id: fixture.fixture.id,
+              date: fixture.fixture.date,
+              status: fixture.fixture.status,
+              venue: fixture.fixture.venue,
+              referee: fixture.fixture.referee
+            },
+            teams: {
+              home: fixture.teams.home,
+              away: fixture.teams.away
+            },
+            score: {
+              home: fixture.goals.home,
+              away: fixture.goals.away
+            },
+            lineups: null
+          });
+        }
+      }
+
+      return {
+        success: true,
+        data: fixturesWithLineups,
+        count: fixturesWithLineups.length
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No se encontraron partidos para la fecha especificada',
+      data: [],
+      count: 0
+    };
+  }
+
+  // Obtener alineaciones de un partido específico
+  async getFixtureLineups(fixture_id) {
+    const result = await this.makeRequest('/fixtures/lineups', {
+      fixture: fixture_id
+    });
+
+    if (result.success && result.data.length > 0) {
+      return {
+        success: true,
+        data: result.data.map(team => ({
+          team: {
+            id: team.team.id,
+            name: team.team.name,
+            logo: team.team.logo,
+            colors: team.team.colors
+          },
+          formation: team.formation,
+          startXI: team.startXI.map(player => ({
+            player: {
+              id: player.player.id,
+              name: player.player.name,
+              number: player.player.number,
+              pos: player.player.pos,
+              grid: player.player.grid
+            }
+          })),
+          substitutes: team.substitutes.map(player => ({
+            player: {
+              id: player.player.id,
+              name: player.player.name,
+              number: player.player.number,
+              pos: player.player.pos
+            }
+          })),
+          coach: team.coach
+        }))
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No se encontraron alineaciones para este partido'
+    };
+  }
+
+  // Obtener partidos en vivo de La Liga
+  async getLiveLaLigaMatches() {
+    const result = await this.makeRequest('/fixtures', {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON,
+      live: 'all'
+    });
+
+    if (result.success && result.data.length > 0) {
+      return {
+        success: true,
+        data: result.data.map(fixture => ({
+          id: fixture.fixture.id,
+          date: fixture.fixture.date,
+          status: {
+            long: fixture.fixture.status.long,
+            short: fixture.fixture.status.short,
+            elapsed: fixture.fixture.status.elapsed
+          },
+          venue: fixture.fixture.venue,
+          teams: {
+            home: fixture.teams.home,
+            away: fixture.teams.away
+          },
+          score: {
+            home: fixture.goals.home,
+            away: fixture.goals.away,
+            halftime: fixture.score.halftime,
+            fulltime: fixture.score.fulltime
+          }
+        })),
+        count: result.data.length
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No hay partidos en vivo actualmente',
+      data: [],
+      count: 0
+    };
   }
 }
 

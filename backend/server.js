@@ -15,6 +15,7 @@ const weatherRoutes = require('./routes/weather');
 const databaseRoutes = require('./routes/database');
 const dataSyncRoutes = require('./routes/dataSync');
 const contentGeneratorRoutes = require('./routes/contentGenerator');
+const fixturesRoutes = require('./routes/fixtures');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -58,10 +59,16 @@ app.use('/api/weather', weatherRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/sync', dataSyncRoutes);
 app.use('/api/content', contentGeneratorRoutes);
+app.use('/api/fixtures', fixturesRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Ruta para vista de alineaciones en tiempo real
+app.get('/lineups-live', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/lineups-live.html'));
 });
 
 // Ruta de salud del servidor

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alineaciones en Tiempo Real - La Liga Fantasy</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <style>
+        .formation-grid {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(180deg, #22c55e 0%, #16a34a 50%, #22c55e 100%);
+            border: 2px solid #fff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .player-position {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            border: 2px solid #1f2937;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+        }
+
+        .player-position:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+        }
+
+        .player-number {
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .player-name {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .field-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 2px;
+        }
+
+        .center-line {
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            transform: translateY(-50%);
+        }
+
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="lineupsApp()">
+    <nav class="bg-blue-900 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-futbol text-2xl mr-3"></i>
+                <h1 class="text-xl font-bold">Alineaciones en Tiempo Real - La Liga</h1>
+            </div>
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-2">
+                    <label for="dateSelector" class="text-sm font-medium">Fecha:</label>
+                    <input
+                        type="date"
+                        id="dateSelector"
+                        x-model="selectedDate"
+                        min="2020-01-01"
+                        :max="maxDate"
+                        class="px-3 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+                <button @click="loadLineupsForDate()"
+                        :disabled="loading"
+                        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition-colors disabled:opacity-50">
+                    <i class="fas fa-search mr-2" :class="{'fa-spin': loading}"></i>
+                    Buscar
+                </button>
+                <button @click="loadLiveLineups()"
+                        :disabled="loading"
+                        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded transition-colors disabled:opacity-50">
+                    <i class="fas fa-sync-alt mr-2" :class="{'fa-spin': loading}"></i>
+                    Hoy
+                </button>
+
+                <!-- Fechas rápidas -->
+                <div class="hidden md:flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">Fechas rápidas:</span>
+                    <button @click="quickDate('2025-09-14')"
+                            class="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-white text-sm transition-colors">
+                        Sáb 14 Sep
+                    </button>
+                    <button @click="quickDate('2025-09-13')"
+                            class="bg-green-500 hover:bg-green-600 px-3 py-1 rounded text-white text-sm transition-colors">
+                        Vie 13 Sep
+                    </button>
+                    <button @click="quickDate('2025-01-12')"
+                            class="bg-gray-500 hover:bg-gray-600 px-3 py-1 rounded text-white text-sm transition-colors">
+                        12 Ene 2025
+                    </button>
+                    <button @click="quickDate('2025-01-19')"
+                            class="bg-gray-500 hover:bg-gray-600 px-3 py-1 rounded text-white text-sm transition-colors">
+                        19 Ene 2025
+                    </button>
+                </div>
+
+                <div class="text-sm text-gray-600">
+                    <span x-text="lastUpdate"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6">
+        <!-- Estado de carga -->
+        <div x-show="loading" class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+            <p class="text-lg text-gray-600">Cargando alineaciones en tiempo real...</p>
+        </div>
+
+        <!-- Error -->
+        <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <span x-text="error"></span>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div x-show="!loading && !error" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-calendar-day text-blue-600 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-600">Fecha</div>
+                        <div class="text-lg font-semibold" x-text="currentDate"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-futbol text-green-600 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-600">Partidos Hoy</div>
+                        <div class="text-lg font-semibold" x-text="stats.total_fixtures || 0"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-users text-purple-600 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-600">Con Alineaciones</div>
+                        <div class="text-lg font-semibold" x-text="stats.fixtures_with_lineups || 0"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-orange-600 text-2xl mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-600">Estado</div>
+                        <div class="text-lg font-semibold text-green-600">En Vivo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de partidos -->
+        <div x-show="!loading && !error && fixtures.length === 0" class="text-center py-8">
+            <i class="fas fa-info-circle text-4xl text-gray-400 mb-4"></i>
+            <p class="text-lg text-gray-600">No hay partidos programados para hoy</p>
+            <p class="text-sm text-gray-500 mt-2">Las alineaciones aparecerán automáticamente cuando estén disponibles</p>
+        </div>
+
+        <!-- Partidos con alineaciones -->
+        <div class="space-y-6">
+            <template x-for="fixture in fixtures" :key="fixture.api_fixture_id">
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <!-- Header del partido -->
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <img :src="getTeamLogo(fixture.home_team_id)"
+                                         :alt="fixture.home_team_name"
+                                         class="w-12 h-12 mx-auto mb-1"
+                                         onerror="this.src='https://via.placeholder.com/48x48/1f2937/ffffff?text=?'">
+                                    <div class="text-sm font-semibold" x-text="fixture.home_team_name"></div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold">
+                                        <span x-text="fixture.goals_home || 0"></span>
+                                        -
+                                        <span x-text="fixture.goals_away || 0"></span>
+                                    </div>
+                                    <div class="text-sm" x-text="fixture.status_long"></div>
+                                </div>
+                                <div class="text-center">
+                                    <img :src="getTeamLogo(fixture.away_team_id)"
+                                         :alt="fixture.away_team_name"
+                                         class="w-12 h-12 mx-auto mb-1"
+                                         onerror="this.src='https://via.placeholder.com/48x48/1f2937/ffffff?text=?'">
+                                    <div class="text-sm font-semibold" x-text="fixture.away_team_name"></div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>
+                                    <span x-text="fixture.venue_name"></span>
+                                </div>
+                                <div class="text-sm">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    <span x-text="formatDateTime(fixture.date)"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alineaciones -->
+                    <div x-show="fixture.lineups && fixture.lineups.length > 0" class="p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <template x-for="lineup in fixture.lineups" :key="lineup.team_id">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <!-- Header del equipo -->
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center">
+                                            <img :src="getTeamLogo(lineup.team_id)"
+                                                 :alt="lineup.team_name"
+                                                 class="w-8 h-8 mr-2"
+                                                 onerror="this.src='https://via.placeholder.com/32x32/1f2937/ffffff?text=?'">
+                                            <h3 class="text-lg font-semibold" x-text="lineup.team_name"></h3>
+                                        </div>
+                                        <div class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                                            <i class="fas fa-chess-board mr-1"></i>
+                                            <span x-text="lineup.formation"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo de juego -->
+                                    <div class="formation-grid" :class="'formation-' + lineup.formation.replace('-', '-')">
+                                        <div class="field-line center-line"></div>
+                                        <div class="center-circle"></div>
+
+                                        <!-- Jugadores titulares -->
+                                        <template x-for="playerData in lineup.lineup_players?.filter(p => p.player_type === 'starter') || []" :key="playerData.player_id">
+                                            <div class="player-position"
+                                                 :style="getPlayerPosition(playerData.player_grid, lineup.formation, playerData.player_position, lineup.lineup_players?.filter(p => p.player_type === 'starter'))"
+                                                 @click="showPlayerDetails(playerData)"
+                                                 :title="playerData.player_name + ' - ' + playerData.player_position">
+                                                <div class="player-number" x-text="playerData.player_number"></div>
+                                                <div class="player-name" x-text="getShortName(playerData.player_name)"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Suplentes -->
+                                    <div class="mt-4">
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-exchange-alt mr-1"></i>
+                                            Suplentes
+                                        </h4>
+                                        <div class="grid grid-cols-6 gap-2">
+                                            <template x-for="sub in lineup.lineup_players?.filter(p => p.player_type === 'substitute') || []" :key="sub.player_id">
+                                                <div class="bg-gray-200 rounded p-2 text-center text-xs hover:bg-gray-300 transition-colors cursor-pointer"
+                                                     @click="showPlayerDetails(sub)">
+                                                    <div class="font-bold" x-text="sub.player_number"></div>
+                                                    <div class="text-gray-600" x-text="getShortName(sub.player_name)"></div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Entrenador -->
+                                    <div x-show="lineup.coach_name" class="mt-4 p-3 bg-blue-50 rounded">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-user-tie text-blue-600 mr-2"></i>
+                                            <div>
+                                                <div class="text-sm text-gray-600">Entrenador</div>
+                                                <div class="font-semibold" x-text="lineup.coach_name"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Sin alineaciones -->
+                    <div x-show="!fixture.lineups || fixture.lineups.length === 0" class="p-6 text-center text-gray-500">
+                        <i class="fas fa-clock text-2xl mb-2"></i>
+                        <p>Alineaciones no disponibles aún</p>
+                        <p class="text-sm">Se mostrarán automáticamente cuando estén confirmadas</p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script>
+        function lineupsApp() {
+            return {
+                fixtures: [],
+                loading: false,
+                error: null,
+                lastUpdate: '',
+                currentDate: new Date().toLocaleDateString('es-ES'),
+                selectedDate: new Date().toISOString().split('T')[0],
+                maxDate: new Date().toISOString().split('T')[0],
+                stats: {},
+
+                init() {
+                    this.loadLiveLineups();
+                    // Auto-refresh cada 30 segundos solo para la fecha actual
+                    setInterval(() => {
+                        if (this.selectedDate === new Date().toISOString().split('T')[0]) {
+                            this.loadLiveLineups();
+                        }
+                    }, 30000);
+                },
+
+                async loadLiveLineups() {
+                    this.loading = true;
+                    this.error = null;
+                    this.selectedDate = new Date().toISOString().split('T')[0]; // Resetear a fecha actual
+
+                    try {
+                        const response = await fetch('/api/fixtures/lineups/live');
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.fixtures = data.data || [];
+                            this.stats = {
+                                total_fixtures: data.total_fixtures || 0,
+                                fixtures_with_lineups: data.fixtures_with_lineups || 0
+                            };
+                            this.lastUpdate = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+                        } else {
+                            this.error = data.error || 'Error cargando alineaciones';
+                        }
+                    } catch (err) {
+                        this.error = 'Error de conexión: ' + err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadLineupsForDate() {
+                    if (!this.selectedDate) {
+                        this.error = 'Por favor selecciona una fecha';
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = null;
+
+                    try {
+                        const response = await fetch(`/api/fixtures/lineups/date/${this.selectedDate}`);
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.fixtures = data.data || [];
+                            this.stats = {
+                                total_fixtures: data.total_fixtures || 0,
+                                fixtures_with_lineups: data.fixtures_with_lineups || 0
+                            };
+                            this.lastUpdate = `Datos de ${this.selectedDate} - ${new Date().toLocaleTimeString('es-ES')}`;
+
+                            if (data.message) {
+                                // Si hay un mensaje, mostrarlo brevemente sin ser error
+                                this.error = data.message;
+                                setTimeout(() => {
+                                    this.error = null;
+                                }, 3000);
+                            }
+                        } else {
+                            this.error = data.error || 'Error cargando alineaciones para la fecha seleccionada';
+                        }
+                    } catch (err) {
+                        this.error = 'Error de conexión: ' + err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                getTeamLogo(teamId) {
+                    // Mapeo básico de logos de equipos
+                    const logoMap = {
+                        541: '/assets/logos/teams/541-real-madrid-logo.webp',
+                        529: '/assets/logos/teams/529-barcelona-logo.webp',
+                        530: '/assets/logos/teams/530-atletico-madrid-logo.webp',
+                        // Agregar más según sea necesario
+                    };
+                    return logoMap[teamId] || `https://via.placeholder.com/48x48/1f2937/ffffff?text=${teamId}`;
+                },
+
+                formatDateTime(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                getShortName(fullName) {
+                    if (!fullName) return '';
+                    const parts = fullName.split(' ');
+                    if (parts.length === 1) return parts[0].substring(0, 8);
+                    return parts[parts.length - 1].substring(0, 8);
+                },
+
+                // Definiciones de formaciones tácticas reales
+                getFormationLayout(formation, playerCount) {
+                    const formations = {
+                        '4-3-3': {
+                            GK: [{ x: 50, y: 95 }], // Portero
+                            DF: [ // 4 defensas
+                                { x: 20, y: 80 },   // Lateral izquierdo
+                                { x: 37, y: 80 },   // Central izquierdo
+                                { x: 63, y: 80 },   // Central derecho
+                                { x: 80, y: 80 }    // Lateral derecho
+                            ],
+                            MF: [ // 3 centrocampistas
+                                { x: 30, y: 60 },   // MC izquierdo
+                                { x: 50, y: 60 },   // MC central
+                                { x: 70, y: 60 }    // MC derecho
+                            ],
+                            FW: [ // 3 delanteros
+                                { x: 20, y: 25 },   // Extremo izquierdo
+                                { x: 50, y: 20 },   // Delantero centro
+                                { x: 80, y: 25 }    // Extremo derecho
+                            ]
+                        },
+                        '4-4-2': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 18, y: 80 },
+                                { x: 37, y: 80 },
+                                { x: 63, y: 80 },
+                                { x: 82, y: 80 }
+                            ],
+                            MF: [
+                                { x: 18, y: 55 },   // Interior izquierdo
+                                { x: 40, y: 55 },   // MC izquierdo
+                                { x: 60, y: 55 },   // MC derecho
+                                { x: 82, y: 55 }    // Interior derecho
+                            ],
+                            FW: [
+                                { x: 40, y: 25 },   // Delantero izquierdo
+                                { x: 60, y: 25 }    // Delantero derecho
+                            ]
+                        },
+                        '4-5-1': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 18, y: 80 },
+                                { x: 37, y: 80 },
+                                { x: 63, y: 80 },
+                                { x: 82, y: 80 }
+                            ],
+                            MF: [
+                                { x: 15, y: 50 },   // Carrilero izquierdo
+                                { x: 35, y: 65 },   // MC defensivo izquierdo
+                                { x: 50, y: 60 },   // Pivote central
+                                { x: 65, y: 65 },   // MC defensivo derecho
+                                { x: 85, y: 50 }    // Carrilero derecho
+                            ],
+                            FW: [
+                                { x: 50, y: 25 }    // Delantero solo
+                            ]
+                        },
+                        '3-4-3': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 30, y: 85 },   // Central izquierdo
+                                { x: 50, y: 85 },   // Central central
+                                { x: 70, y: 85 }    // Central derecho
+                            ],
+                            MF: [
+                                { x: 15, y: 60 },   // Carrilero izquierdo
+                                { x: 40, y: 65 },   // MC izquierdo
+                                { x: 60, y: 65 },   // MC derecho
+                                { x: 85, y: 60 }    // Carrilero derecho
+                            ],
+                            FW: [
+                                { x: 25, y: 25 },   // Extremo izquierdo
+                                { x: 50, y: 20 },   // Delantero centro
+                                { x: 75, y: 25 }    // Extremo derecho
+                            ]
+                        },
+                        '3-5-2': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 30, y: 85 },
+                                { x: 50, y: 85 },
+                                { x: 70, y: 85 }
+                            ],
+                            MF: [
+                                { x: 15, y: 55 },   // Carrilero izquierdo
+                                { x: 35, y: 65 },   // MC defensivo
+                                { x: 50, y: 60 },   // MC central
+                                { x: 65, y: 65 },   // MC ofensivo
+                                { x: 85, y: 55 }    // Carrilero derecho
+                            ],
+                            FW: [
+                                { x: 40, y: 25 },
+                                { x: 60, y: 25 }
+                            ]
+                        },
+                        '4-2-3-1': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 15, y: 80 },   // Lateral izquierdo
+                                { x: 35, y: 80 },   // Central izquierdo
+                                { x: 65, y: 80 },   // Central derecho
+                                { x: 85, y: 80 }    // Lateral derecho
+                            ],
+                            MF: [
+                                { x: 30, y: 68 },   // Pivote izquierdo
+                                { x: 70, y: 68 },   // Pivote derecho
+                                { x: 15, y: 48 },   // Extremo izquierdo
+                                { x: 50, y: 45 },   // Media punta
+                                { x: 85, y: 48 }    // Extremo derecho
+                            ],
+                            FW: [
+                                { x: 50, y: 22 }    // Delantero centro
+                            ]
+                        },
+                        '4-1-4-1': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 15, y: 80 },
+                                { x: 35, y: 80 },
+                                { x: 65, y: 80 },
+                                { x: 85, y: 80 }
+                            ],
+                            MF: [
+                                { x: 50, y: 70 },   // Pivote defensivo
+                                { x: 20, y: 50 },   // Lateral izquierdo
+                                { x: 40, y: 50 },   // MC izquierdo
+                                { x: 60, y: 50 },   // MC derecho
+                                { x: 80, y: 50 }    // Lateral derecho
+                            ],
+                            FW: [
+                                { x: 50, y: 25 }    // Delantero
+                            ]
+                        },
+                        '5-3-2': {
+                            GK: [{ x: 50, y: 95 }],
+                            DF: [
+                                { x: 10, y: 80 },   // Lateral izquierdo
+                                { x: 25, y: 85 },   // Central izquierdo
+                                { x: 50, y: 85 },   // Central central
+                                { x: 75, y: 85 },   // Central derecho
+                                { x: 90, y: 80 }    // Lateral derecho
+                            ],
+                            MF: [
+                                { x: 25, y: 50 },   // MC izquierdo
+                                { x: 50, y: 55 },   // MC central
+                                { x: 75, y: 50 }    // MC derecho
+                            ],
+                            FW: [
+                                { x: 35, y: 25 },   // Delantero izquierdo
+                                { x: 65, y: 25 }    // Delantero derecho
+                            ]
+                        }
+                    };
+
+                    return formations[formation] || formations['4-3-3']; // Default 4-3-3
+                },
+
+                getPlayerPosition(grid, formation, position, teamLineup) {
+                    // Usar directamente las coordenadas de la API
+                    if (grid) {
+                        return this.getGridPosition(grid);
+                    }
+
+                    // Fallback si no hay grid
+                    return {
+                        left: '50%',
+                        top: '50%'
+                    };
+                },
+
+                getGridPosition(grid) {
+                    // API format: "row:column" según documentación oficial API-Sports
+                    // X = fila (row) empezando desde línea de portería (Línea 1)
+                    // Y = columna (column) de izquierda a derecha
+                    if (!grid) return { left: '50%', top: '50%' };
+
+                    const [row, col] = grid.split(':').map(Number);
+
+                    // CAMPO VERTICAL INVERTIDO - Porteros en la parte inferior
+                    // Row 1 = Portero (ABAJO), Row 5 = Delanteros (ARRIBA)
+                    let topPercent;
+                    if (row === 1) topPercent = 90;       // Row 1: Portero (ABAJO - portería propia)
+                    else if (row === 2) topPercent = 75;  // Row 2: Defensas
+                    else if (row === 3) topPercent = 55;  // Row 3: Centrocampo
+                    else if (row === 4) topPercent = 35;  // Row 4: Medios ofensivos
+                    else if (row === 5) topPercent = 15;  // Row 5: Delanteros (ARRIBA - atacando)
+                    else topPercent = 50;
+
+                    // Col handling - NUEVO mapeo dinámico según lo observado en imagen Getafe
+                    // Los jugadores centrados (portero, algunos medios, delanteros) pueden tener col=0 o values especiales
+                    let leftPercent;
+
+                    // MAPEO BASADO EN DATOS REALES - Coordenadas exactas de API-Sports
+                    // Getafe: Portero(1:1), Defensa(2:1-2:5), Medios(3:1-3:3), Delanteros(4:1-4:2)
+                    // Oviedo: Sistema estándar 1-5
+
+                    // Ajuste específico según datos observados
+                    if (row === 1 && col === 1) leftPercent = 50;      // Portero centrado (Soria fix)
+                    else if (row === 3 && col === 2) leftPercent = 50; // Centrocampista central (Milla fix)
+                    else if (row === 4 && col === 1) leftPercent = 32; // Delantero izquierdo (Mayoral fix)
+                    else if (row === 4 && col === 2) leftPercent = 68; // Delantero derecho (Liso fix)
+                    else if (col === 1) leftPercent = 15; // Banda izquierda general
+                    else if (col === 2) leftPercent = 32; // Interior izquierdo general
+                    else if (col === 3) leftPercent = 50; // Centro general
+                    else if (col === 4) leftPercent = 68; // Interior derecho general
+                    else if (col === 5) leftPercent = 85; // Banda derecha general
+                    else leftPercent = 50;                // Fallback centro
+
+                    const position = {
+                        left: `${leftPercent}%`,
+                        top: `${topPercent}%`
+                    };
+
+
+                    return position;
+                },
+
+                showPlayerDetails(player) {
+                    alert(`${player.player_name}\nNúmero: ${player.player_number}\nPosición: ${player.player_position}`);
+                },
+
+                quickDate(date) {
+                    this.selectedDate = date;
+                    this.loadLineupsForDate();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

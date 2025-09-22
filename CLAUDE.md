@@ -110,9 +110,19 @@ PROJECT_EMAIL=laligafantasyspainpro@gmail.com
 PROJECT_DOMAIN=laligafantasyspain.com
 ```
 
+## ⚠️ INFORMACIÓN CRÍTICA - TEMPORADA ⚠️
+
+**🚨 OBLIGATORIO CONSULTAR ANTES DE CUALQUIER DESARROLLO O EDICIÓN 🚨**
+
+- **Temporada actual**: 2025-26
+- **Identificación API-Sports**: 2025 (NO 2024)
+- **Configuración actual**: `CURRENT_SEASON: 2025` en `apiFootball.js`
+- **Todas las funcionalidades deben construirse considerando temporada 25-26**
+- **Fechas de partidos**: Agosto 2024 - Mayo 2025 para temporada 2025-26
+
 ### Important Constants (backend/config/constants.js)
 - **La Liga ID**: 140 (API-Sports)
-- **Temporada 2024/25**: 2025 (Note: Updated to 2025)
+- **TEMPORADA ACTUAL**: 2025-26 (API-Sports usa 2025) ⚠️ **CRÍTICO** ⚠️
 - **API-Sports Plan**: Ultra ($29/mes) - 75,000 requests/día
 - **Sistema de puntos Fantasy**: Implementado según reglas oficiales
 - **Server Config**: PORT=3000, HOST=localhost (configurable via env vars)

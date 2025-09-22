@@ -375,5 +375,94 @@ router.post('/laliga/fantasy-points', async (req, res) => {
   }
 });
 
+// === ALINEACIONES EN TIEMPO REAL ===
+
+// Obtener partidos de hoy con alineaciones
+router.get('/laliga/lineups/today', async (req, res) => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const result = await apiFootball.getLiveLaLigaLineups(today);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        date: today,
+        fixtures_count: result.count,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// Obtener alineaciones de un partido específico
+router.get('/laliga/lineups/fixture/:fixture_id', async (req, res) => {
+  try {
+    const fixture_id = req.params.fixture_id;
+    const result = await apiFootball.getFixtureLineups(fixture_id);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        fixture_id: fixture_id,
+        data: result.data
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// Obtener partidos en vivo de La Liga
+router.get('/laliga/live', async (req, res) => {
+  try {
+    const result = await apiFootball.getLiveLaLigaMatches();
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        live_matches: result.count,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
 
 module.exports = router;

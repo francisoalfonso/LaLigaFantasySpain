@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy La Liga - Arquitectura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl p-8 mb-8">
+            <h1 class="text-4xl font-bold mb-4">🏗️ Arquitectura del Sistema Fantasy La Liga</h1>
+            <p class="text-lg opacity-90">Flujo de datos y arquitectura completa del proyecto</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mb-8">
+            <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg inline-flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+            </a>
+        </div>
+
+        <!-- Mermaid Diagram Container -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">📊 Diagrama de Flujo de Datos</h2>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="renderMermaidDiagram()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sync mr-2"></i>Renderizar
+                    </button>
+                    <button onclick="expandDiagram()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-expand mr-2"></i>Vista Completa
+                    </button>
+                    <button onclick="downloadDiagram()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>Descargar SVG
+                    </button>
+                    <button onclick="downloadMermaidJSON()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-code mr-2"></i>Descargar JSON
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mermaid Diagram -->
+            <div id="mermaid-diagram" class="border border-gray-200 rounded-lg p-4 bg-gray-50 min-h-96">
+                <div class="text-center p-8">
+                    <div class="text-gray-500 text-lg">Haz clic en "Renderizar" para cargar el diagrama</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Tables -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Channel Strategy Table -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">📱 Estrategia por Canal</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-2 px-3 font-semibold">Canal</th>
+                                <th class="text-left py-2 px-3 font-semibold">Contenido</th>
+                                <th class="text-left py-2 px-3 font-semibold">Formato</th>
+                                <th class="text-left py-2 px-3 font-semibold">Frecuencia</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 px-3">📸 Instagram</td>
+                                <td class="py-3 px-3">Tips + Análisis Visual</td>
+                                <td class="py-3 px-3">Reels, Posts, Stories</td>
+                                <td class="py-3 px-3">4-6 posts/día</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 px-3">🎵 TikTok</td>
+                                <td class="py-3 px-3">Viral + Reactions</td>
+                                <td class="py-3 px-3">Videos cortos</td>
+                                <td class="py-3 px-3">2-3 videos/día</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-3 px-3">📺 YouTube</td>
+                                <td class="py-3 px-3">Análisis + Educativo</td>
+                                <td class="py-3 px-3">Videos + Shorts</td>
+                                <td class="py-3 px-3">1 largo + 3 shorts/día</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-3">🐦 Twitter</td>
+                                <td class="py-3 px-3">Updates + Análisis</td>
+                                <td class="py-3 px-3">Tweets + Threads</td>
+                                <td class="py-3 px-3">8-12 posts/día</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Data Flow Summary -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">🔄 Flujo de Datos</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-blue-100 text-blue-600 rounded-full p-2 flex-shrink-0">
+                            <i class="fas fa-database text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">1. Recolección de Datos</h4>
+                            <p class="text-sm text-gray-600">API-Sports + Weather + GPS → Sistema centralizado</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-purple-100 text-purple-600 rounded-full p-2 flex-shrink-0">
+                            <i class="fas fa-cogs text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">2. Procesamiento IA</h4>
+                            <p class="text-sm text-gray-600">Fantasy Points + Weather Config + Content Generation</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-green-100 text-green-600 rounded-full p-2 flex-shrink-0">
+                            <i class="fas fa-video text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">3. Generación Avatar</h4>
+                            <p class="text-sm text-gray-600">HeyGen con personalización climática</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3">
+                        <div class="bg-orange-100 text-orange-600 rounded-full p-2 flex-shrink-0">
+                            <i class="fas fa-share-alt text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">4. Distribución Multi-Canal</h4>
+                            <p class="text-sm text-gray-600">Adaptación automática por plataforma</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Modal -->
+    <div id="fullscreen-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden">
+        <div class="h-full flex flex-col">
+            <!-- Modal Header -->
+            <div class="bg-white px-6 py-4 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">📊 Vista Completa - Arquitectura Fantasy La Liga</h3>
+                <div class="flex space-x-3">
+                    <button onclick="downloadDiagram()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                        <i class="fas fa-download mr-1"></i>SVG
+                    </button>
+                    <button onclick="downloadMermaidJSON()" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm">
+                        <i class="fas fa-code mr-1"></i>JSON
+                    </button>
+                    <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm">
+                        <i class="fas fa-times mr-1"></i>Cerrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="flex-1 p-6 overflow-auto">
+                <div id="fullscreen-diagram" class="bg-white rounded-lg p-4 h-full min-h-96">
+                    <!-- Diagram will be cloned here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Mermaid Source -->
+    <script type="text/plain" id="mermaid-source">
+graph TB
+    %% Datos de Entrada
+    subgraph "📊 DATOS DE ENTRADA"
+        A1[🏆 API-Sports<br/>La Liga Data<br/>75k requests/día]
+        A2[🌤️ OpenWeatherMap<br/>Weather Data<br/>1k requests/día]
+        A3[🧠 GPT-4<br/>Análisis IA<br/>Insights Fantasy]
+        A4[📍 GPS Stadiums<br/>20 Estadios<br/>Coordenadas exactas]
+    end
+
+    %% Procesamiento Central
+    subgraph "⚙️ PROCESAMIENTO"
+        B1[🎯 Fantasy Points<br/>Calculator]
+        B2[🌡️ Weather Avatar<br/>Configurator]
+        B3[📝 Content Generator<br/>GPT-4 + Templates]
+        B4[🎭 HeyGen Avatar<br/>Video Creation]
+    end
+
+    %% Canales de Salida
+    subgraph "📱 CANALES RRSS"
+        C1[📸 Instagram<br/>Meta Graph API<br/>50 posts/día]
+        C2[🎵 TikTok<br/>Community Node<br/>Experimental]
+        C3[📺 YouTube<br/>API v3<br/>Ilimitado]
+        C4[🐦 Twitter/X<br/>API v2<br/>Según plan]
+    end
+
+    %% Contenido por Canal
+    subgraph "📸 INSTAGRAM"
+        D1["🎬 Reels (15-30s)<br/>📊 Análisis Express<br/>⭐ Tips Jugadores<br/>📈 Predicciones"]
+        D2["📱 Posts<br/>🖼️ Infografías<br/>📊 Comparativas<br/>🏆 Rankings"]
+        D3["📖 Stories<br/>🔴 Live Updates<br/>📊 Encuestas<br/>❓ Quizzes"]
+    end
+
+    subgraph "🎵 TIKTOK"
+        E1["🎬 Videos (15-60s)<br/>⚡ Tips Rápidos<br/>🎭 Avatar Reactions<br/>📊 Stats Virales"]
+    end
+
+    subgraph "📺 YOUTUBE"
+        F1["🎬 Videos (3-8min)<br/>📊 Análisis Completo<br/>🎯 Estrategias Fantasy<br/>📈 Tendencias Semanales"]
+        F2["⚡ Shorts (60s)<br/>💎 Gangas Semana<br/>🔥 Highlights<br/>📊 Stats Rápidas"]
+    end
+
+    subgraph "🐦 TWITTER/X"
+        G1["🧵 Threads<br/>📊 Análisis Detallado<br/>🎯 Predicciones<br/>📈 Post-Match"]
+        G2["📝 Tweets<br/>⚡ Updates Rápidos<br/>🔴 Live Scores<br/>💡 Tips Express"]
+    end
+
+    %% Frecuencias
+    subgraph "⏰ FRECUENCIAS"
+        H1["📅 DIARIO<br/>🌅 8:00 AM - Resumen Jornada<br/>⚽ Pre-Match (2h antes)<br/>📊 Post-Match (30min después)"]
+        H2["📅 SEMANAL<br/>🏆 Lunes - Ranking Semanal<br/>📈 Análisis Tendencias<br/>🎯 Estrategias Próxima Jornada"]
+        H3["📅 TIEMPO REAL<br/>🔴 Durante Partidos<br/>⚡ Goles y Eventos<br/>📊 Puntos Fantasy Live"]
+    end
+
+    %% Conexiones principales
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    A4 --> B2
+
+    B1 --> B3
+    B2 --> B4
+    B3 --> B4
+
+    B4 --> C1
+    B4 --> C2
+    B4 --> C3
+    B4 --> C4
+
+    C1 --> D1
+    C1 --> D2
+    C1 --> D3
+
+    C2 --> E1
+
+    C3 --> F1
+    C3 --> F2
+
+    C4 --> G1
+    C4 --> G2
+
+    %% Frecuencias aplicadas
+    H1 -.-> D1
+    H1 -.-> E1
+    H1 -.-> F2
+    H1 -.-> G2
+
+    H2 -.-> D2
+    H2 -.-> F1
+    H2 -.-> G1
+
+    H3 -.-> D3
+    H3 -.-> G2
+
+    %% Estilos
+    classDef dataInput fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef processing fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef channels fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef content fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef frequency fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+
+    class A1,A2,A3,A4 dataInput
+    class B1,B2,B3,B4 processing
+    class C1,C2,C3,C4 channels
+    class D1,D2,D3,E1,F1,F2,G1,G2 content
+    class H1,H2,H3 frequency
+    </script>
+
+    <!-- Mermaid Configuration and Functions -->
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose',
+            fontFamily: 'arial',
+            fontSize: 12,
+            flowchart: {
+                htmlLabels: true,
+                curve: 'linear'
+            }
+        });
+
+        // Function to render Mermaid diagram
+        async function renderMermaidDiagram() {
+            try {
+                const sourceElement = document.querySelector('#mermaid-source');
+                const containerElement = document.querySelector('#mermaid-diagram');
+
+                if (sourceElement && containerElement) {
+                    const graphDefinition = sourceElement.textContent.trim();
+                    containerElement.innerHTML = '<div class="text-center p-4">🔄 Renderizando diagrama...</div>';
+
+                    const { svg } = await mermaid.render('architecture-diagram-' + Date.now(), graphDefinition);
+                    containerElement.innerHTML = svg;
+                    console.log('Mermaid diagram rendered successfully');
+                } else {
+                    throw new Error('No se encontraron los elementos necesarios');
+                }
+            } catch (error) {
+                console.error('Error rendering mermaid diagram:', error);
+                const containerElement = document.querySelector('#mermaid-diagram');
+                if (containerElement) {
+                    containerElement.innerHTML = `
+                        <div class="p-8 text-center">
+                            <div class="text-red-500 text-xl mb-4">⚠️ Error al cargar el diagrama</div>
+                            <p class="text-gray-600">No se pudo renderizar el diagrama Mermaid.</p>
+                            <p class="text-sm text-gray-500 mt-2">Error: ${error.message}</p>
+                            <button onclick="renderMermaidDiagram()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
+                                Reintentar
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Function to expand diagram to fullscreen
+        function expandDiagram() {
+            try {
+                const originalDiagram = document.querySelector('#mermaid-diagram svg');
+                const modal = document.getElementById('fullscreen-modal');
+                const fullscreenContainer = document.getElementById('fullscreen-diagram');
+
+                if (originalDiagram && modal && fullscreenContainer) {
+                    // Clone the diagram
+                    const clonedDiagram = originalDiagram.cloneNode(true);
+
+                    // Clear and add the cloned diagram
+                    fullscreenContainer.innerHTML = '';
+                    fullscreenContainer.appendChild(clonedDiagram);
+
+                    // Style the cloned diagram for fullscreen
+                    clonedDiagram.style.width = '100%';
+                    clonedDiagram.style.height = 'auto';
+                    clonedDiagram.style.maxWidth = 'none';
+
+                    // Show modal
+                    modal.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    alert('No se pudo encontrar el diagrama. Asegúrate de que esté renderizado primero.');
+                }
+            } catch (error) {
+                console.error('Error expanding diagram:', error);
+                alert('Error al expandir el diagrama.');
+            }
+        }
+
+        // Function to close modal
+        function closeModal() {
+            const modal = document.getElementById('fullscreen-modal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Function to download Mermaid source as JSON
+        function downloadMermaidJSON() {
+            try {
+                const sourceElement = document.querySelector('#mermaid-source');
+                if (sourceElement) {
+                    const mermaidSource = sourceElement.textContent.trim();
+
+                    // Create JSON object with metadata
+                    const jsonData = {
+                        title: "Fantasy La Liga - Arquitectura del Sistema",
+                        description: "Diagrama de flujo de datos y arquitectura completa del proyecto Fantasy La Liga",
+                        type: "mermaid",
+                        syntax: "graph TB",
+                        created: new Date().toISOString(),
+                        version: "1.0",
+                        author: "Fantasy La Liga Team",
+                        source: mermaidSource,
+                        metadata: {
+                            nodes: {
+                                dataInput: ["A1", "A2", "A3", "A4"],
+                                processing: ["B1", "B2", "B3", "B4"],
+                                channels: ["C1", "C2", "C3", "C4"],
+                                content: ["D1", "D2", "D3", "E1", "F1", "F2", "G1", "G2"],
+                                frequency: ["H1", "H2", "H3"]
+                            },
+                            platforms: ["Instagram", "TikTok", "YouTube", "Twitter/X"],
+                            dataFeatures: ["API-Sports", "OpenWeatherMap", "GPT-4", "GPS-Stadiums"],
+                            processingSteps: ["Fantasy-Points", "Weather-Config", "Content-Generation", "HeyGen-Avatar"]
+                        }
+                    };
+
+                    // Convert to JSON string
+                    const jsonString = JSON.stringify(jsonData, null, 2);
+                    const jsonBlob = new Blob([jsonString], {type: 'application/json;charset=utf-8'});
+
+                    // Create download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(jsonBlob);
+                    downloadLink.download = 'fantasy-laliga-mermaid-source.json';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
+                    console.log('Mermaid JSON downloaded successfully');
+                } else {
+                    alert('No se pudo encontrar el código fuente de Mermaid.');
+                }
+            } catch (error) {
+                console.error('Error downloading Mermaid JSON:', error);
+                alert('Error al descargar el JSON. Revisa la consola para más detalles.');
+            }
+        }
+
+        // Function to download diagram as SVG
+        function downloadDiagram() {
+            try {
+                // Try to get SVG from modal first, then from main diagram
+                let mermaidElement = document.querySelector('#fullscreen-diagram svg') ||
+                                   document.querySelector('#mermaid-diagram svg');
+
+                if (mermaidElement) {
+                    // Get SVG content
+                    const svgData = new XMLSerializer().serializeToString(mermaidElement);
+                    const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+
+                    // Create download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(svgBlob);
+                    downloadLink.download = 'fantasy-laliga-arquitectura.svg';
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                } else {
+                    alert('No se pudo encontrar el diagrama. Asegúrate de que Mermaid haya cargado correctamente.');
+                }
+            } catch (error) {
+                console.error('Error downloading diagram:', error);
+                alert('Error al descargar el diagrama. Revisa la consola para más detalles.');
+            }
+        }
+
+        // Auto-render on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, auto-rendering Mermaid diagram...');
+            setTimeout(renderMermaidDiagram, 500);
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('fullscreen-modal');
+                if (!modal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            }
+        });
+
+        // Close modal when clicking outside the diagram
+        document.getElementById('fullscreen-modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

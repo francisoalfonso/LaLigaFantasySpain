@@ -19,7 +19,7 @@ class ApiFootballClient {
       LA_LIGA_FEMENINA: 142,
       SEASON_2024: 2024,
       SEASON_2025: 2025,
-      CURRENT_SEASON: 2025  // Temporada actual La Liga 2024-2025
+      CURRENT_SEASON: 2025  // Temporada actual La Liga 2025-2026 (API usa 2025)
     };
   }
 

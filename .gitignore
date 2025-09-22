@@ -11,6 +11,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 .env.n8n
+.env.supabase
 
 # Runtime data
 pids

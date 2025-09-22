@@ -12,14 +12,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Instalar dependencias
 npm install
 
-# Iniciar servidor en modo desarrollo
+# Iniciar servidor en modo desarrollo (with nodemon)
 npm run dev
 
 # Iniciar servidor en producción
 npm start
 
-# Ejecutar tests
+# Ejecutar tests (runs test routes)
 npm test
+
+# Test API connectivity
+curl http://localhost:3000/health
+curl http://localhost:3000/api/info
 ```
 
 ## Project Structure
@@ -30,20 +34,26 @@ Fantasy la liga/
 │   ├── server.js                           # Servidor Express principal
 │   ├── routes/
 │   │   ├── apiFootball.js                 # Rutas para API-Sports/API-Football
-│   │   └── test.js                        # Rutas de testing y validación
+│   │   ├── test.js                        # Rutas de testing y validación
+│   │   ├── weather.js                     # Rutas para funcionalidad meteorológica
+│   │   └── n8nMcp.js                      # Rutas para n8n MCP integration
 │   ├── services/
 │   │   ├── apiFootball.js                 # Cliente para API-Sports
 │   │   ├── dataProcessor.js               # Procesador de datos Fantasy
+│   │   ├── weatherService.js              # Servicio integración OpenWeatherMap
+│   │   ├── n8nMcpServer.js               # Servidor MCP para n8n
 │   │   ├── competitiveIntelligenceAgent.js # Agente análisis competencia
 │   │   └── teamContentManager.js          # Gestor contenido del equipo
 │   └── config/
 │       ├── constants.js                   # IDs y configuraciones de La Liga
+│       ├── stadiumsWeatherConfig.js       # Configuración estadios + coordenadas GPS
 │       └── reporterTeam.js                # Configuración equipo reporteros
 ├── frontend/
 │   ├── index.html                         # Dashboard principal
 │   ├── style.css                          # Estilos personalizados
 │   └── app.js                             # Lógica Alpine.js
-└── .env                                   # Variables de entorno
+├── .env                                   # Variables de entorno
+└── .env.example                           # Template configuración entorno
 ```
 
 ## API Endpoints
@@ -62,12 +72,22 @@ Fantasy la liga/
 - `GET /api/laliga/laliga/standings` - Clasificación actual
 - `POST /api/laliga/laliga/fantasy-points` - Calcular puntos Fantasy
 
+### Weather Integration (Phase 2)
+- `GET /api/weather/test` - Test conexión OpenWeatherMap
+- `GET /api/weather/stadiums` - Lista estadios La Liga con coordenadas
+- `GET /api/weather/stadium/:teamId` - Clima actual estadio específico
+- `GET /api/weather/match/:matchId` - Clima para partido específico
+- `POST /api/weather/avatar-config` - Configuración avatar según clima
+
 ## Configuration
 
 ### Environment Variables (.env)
 ```bash
 # API-Sports (La Liga Real Data)
 API_FOOTBALL_KEY=your_api_sports_key_here
+
+# OpenWeatherMap API (Weather functionality)
+OPENWEATHER_API_KEY=your_openweathermap_key_here
 
 # Servidor
 NODE_ENV=development
@@ -84,13 +104,19 @@ GITHUB_REPOSITORY=LaLigaFantasySpain
 
 # HeyGen API (Cuando se configure)
 HEYGEN_API_KEY=tu_heygen_api_key_aqui
+
+# Project Information
+PROJECT_EMAIL=laligafantasyspainpro@gmail.com
+PROJECT_DOMAIN=laligafantasyspain.com
 ```
 
 ### Important Constants (backend/config/constants.js)
 - **La Liga ID**: 140 (API-Sports)
-- **Temporada 2024/25**: 2024
+- **Temporada 2024/25**: 2025 (Note: Updated to 2025)
 - **API-Sports Plan**: Ultra ($29/mes) - 75,000 requests/día
 - **Sistema de puntos Fantasy**: Implementado según reglas oficiales
+- **Server Config**: PORT=3000, HOST=localhost (configurable via env vars)
+- **Weather Integration**: 20 stadiums with GPS coordinates (stadiumsWeatherConfig.js)
 
 ## Fantasy Points System
 
@@ -134,6 +160,11 @@ Sistema oficial de La Liga Fantasy implementado en `dataProcessor.js`:
 - Logs detallados para debugging
 - Integración con reporterTeam.js para gestión contenido
 - competitiveIntelligenceAgent.js para análisis de competencia
+- **Architecture**: Express.js server with modular route structure
+- **Security**: Helmet middleware, CORS configuration, environment variables
+- **Logging**: Morgan middleware for HTTP requests, custom logging for debugging
+- **Static Files**: Frontend served from backend/server.js at root path
+- **Health Checks**: `/health` and `/api/info` endpoints for monitoring
 
 ## Testing Strategy
 

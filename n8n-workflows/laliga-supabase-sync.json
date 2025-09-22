@@ -1,0 +1,971 @@
+{
+  "name": "La Liga Data Sync to Supabase",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "laliga-sync-webhook"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Schedule (6 AM)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        220,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "workflow_start_time",
+              "name": "workflow_start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "api_sports_base_url",
+              "name": "api_sports_base_url",
+              "value": "https://v3.football.api-sports.io",
+              "type": "string"
+            },
+            {
+              "id": "laliga_id",
+              "name": "laliga_id",
+              "value": "140",
+              "type": "string"
+            },
+            {
+              "id": "current_season",
+              "name": "current_season",
+              "value": "2025",
+              "type": "string"
+            },
+            {
+              "id": "workflow_name",
+              "name": "workflow_name",
+              "value": "La Liga Data Sync to Supabase",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "init-variables",
+      "name": "Initialize Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        440,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Initialize Variables').item.json.api_sports_base_url }}/teams",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "league",
+              "value": "={{ $('Initialize Variables').item.json.laliga_id }}"
+            },
+            {
+              "name": "season",
+              "value": "={{ $('Initialize Variables').item.json.current_season }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Key",
+              "value": "={{ $vars.API_FOOTBALL_KEY }}"
+            },
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "v3.football.api-sports.io"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "id": "fetch-teams",
+      "name": "Fetch La Liga Teams",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        660,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform API-Sports teams data to Supabase schema\nconst teamsData = $input.all()[0].json.response;\nconst transformedTeams = [];\n\nfor (const teamData of teamsData) {\n  const team = teamData.team;\n  const venue = teamData.venue;\n  \n  const transformedTeam = {\n    api_sports_id: team.id,\n    name: team.name,\n    short_name: team.code || team.name.substring(0, 3).toUpperCase(),\n    logo_url: team.logo,\n    stadium: venue?.name || null,\n    city: venue?.city || null,\n    founded: team.founded || null,\n    colors: {\n      primary: team.colors?.primary || null,\n      secondary: team.colors?.secondary || null\n    },\n    national: team.national || true,\n    is_active: true,\n    updated_at: new Date().toISOString()\n  };\n  \n  transformedTeams.push(transformedTeam);\n}\n\nreturn transformedTeams.map(team => ({ json: team }));"
+      },
+      "id": "transform-teams",
+      "name": "Transform Teams Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "teams",
+        "columnToMatchOn": "api_sports_id",
+        "additionalFields": {}
+      },
+      "id": "upsert-teams",
+      "name": "Upsert Teams to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "api_requests",
+        "columns": "api_provider,endpoint,http_method,response_status,success,requested_at"
+      },
+      "id": "log-teams-request",
+      "name": "Log Teams API Request",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        380
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "api_provider",
+              "name": "api_provider",
+              "value": "api-sports",
+              "type": "string"
+            },
+            {
+              "id": "endpoint",
+              "name": "endpoint",
+              "value": "/teams",
+              "type": "string"
+            },
+            {
+              "id": "http_method",
+              "name": "http_method",
+              "value": "GET",
+              "type": "string"
+            },
+            {
+              "id": "response_status",
+              "name": "response_status",
+              "value": "={{ $('Fetch La Liga Teams').item.json.$responseStatusCode }}",
+              "type": "number"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "={{ $('Fetch La Liga Teams').item.json.$responseStatusCode === 200 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "requested_at",
+              "name": "requested_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "prepare-teams-log",
+      "name": "Prepare Teams Request Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        880,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "rate-limit-delay-1",
+      "name": "Rate Limit Delay (1s)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Initialize Variables').item.json.api_sports_base_url }}/players",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "league",
+              "value": "={{ $('Initialize Variables').item.json.laliga_id }}"
+            },
+            {
+              "name": "season",
+              "value": "={{ $('Initialize Variables').item.json.current_season }}"
+            },
+            {
+              "name": "page",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Key",
+              "value": "={{ $vars.API_FOOTBALL_KEY }}"
+            },
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "v3.football.api-sports.io"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "id": "fetch-players",
+      "name": "Fetch La Liga Players",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1540,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform API-Sports players data to Supabase schema\nconst playersData = $input.all()[0].json.response;\nconst transformedPlayers = [];\n\n// First get teams mapping from previous node\nconst teamsFromSupabase = $('Upsert Teams to Supabase').all();\nconst teamMapping = {};\n\n// Create a mapping of api_sports_id to internal team id\nfor (const teamRecord of teamsFromSupabase) {\n  if (teamRecord.json && teamRecord.json.id && teamRecord.json.api_sports_id) {\n    teamMapping[teamRecord.json.api_sports_id] = teamRecord.json.id;\n  }\n}\n\nfor (const playerData of playersData) {\n  const player = playerData.player;\n  const statistics = playerData.statistics?.[0]; // Take first stats record\n  \n  // Map position from API-Sports to our schema\n  let position = 'MID'; // default\n  if (statistics?.games?.position) {\n    const apiPosition = statistics.games.position.toLowerCase();\n    if (apiPosition.includes('goalkeeper') || apiPosition === 'g') {\n      position = 'GK';\n    } else if (apiPosition.includes('defender') || apiPosition.includes('centre-back') || apiPosition.includes('left-back') || apiPosition.includes('right-back')) {\n      position = 'DEF';\n    } else if (apiPosition.includes('midfielder') || apiPosition.includes('central') || apiPosition.includes('defensive') || apiPosition.includes('attacking')) {\n      position = 'MID';\n    } else if (apiPosition.includes('attacker') || apiPosition.includes('forward') || apiPosition.includes('striker') || apiPosition.includes('winger')) {\n      position = 'FWD';\n    }\n  }\n  \n  // Get team_id from mapping\n  const teamId = teamMapping[statistics?.team?.id] || null;\n  \n  const transformedPlayer = {\n    api_sports_id: player.id,\n    team_id: teamId,\n    name: player.name,\n    firstname: player.firstname,\n    lastname: player.lastname,\n    age: player.age,\n    birth_date: player.birth?.date ? new Date(player.birth.date).toISOString().split('T')[0] : null,\n    birth_place: player.birth?.place,\n    nationality: player.nationality,\n    height: player.height,\n    weight: player.weight,\n    injured: player.injured || false,\n    photo_url: player.photo,\n    position: position,\n    detailed_position: statistics?.games?.position || null,\n    fantasy_price: 5.0, // Default price\n    ownership_percentage: 0,\n    form: 0,\n    is_active: true,\n    is_injured: player.injured || false,\n    injury_details: null,\n    updated_at: new Date().toISOString()\n  };\n  \n  transformedPlayers.push(transformedPlayer);\n}\n\nreturn transformedPlayers.map(player => ({ json: player }));"
+      },
+      "id": "transform-players",
+      "name": "Transform Players Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "players",
+        "columnToMatchOn": "api_sports_id",
+        "additionalFields": {}
+      },
+      "id": "upsert-players",
+      "name": "Upsert Players to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "api_provider",
+              "name": "api_provider",
+              "value": "api-sports",
+              "type": "string"
+            },
+            {
+              "id": "endpoint",
+              "name": "endpoint",
+              "value": "/players",
+              "type": "string"
+            },
+            {
+              "id": "http_method",
+              "name": "http_method",
+              "value": "GET",
+              "type": "string"
+            },
+            {
+              "id": "response_status",
+              "name": "response_status",
+              "value": "={{ $('Fetch La Liga Players').item.json.$responseStatusCode }}",
+              "type": "number"
+            },
+            {
+              "id": "success",
+              "name": "success",
+              "value": "={{ $('Fetch La Liga Players').item.json.$responseStatusCode === 200 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "requested_at",
+              "name": "requested_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "prepare-players-log",
+      "name": "Prepare Players Request Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        1760,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "api_requests",
+        "columns": "api_provider,endpoint,http_method,response_status,success,requested_at"
+      },
+      "id": "log-players-request",
+      "name": "Log Players API Request",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        380
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "rate-limit-delay-2",
+      "name": "Rate Limit Delay (1s) #2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        2200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Initialize Variables').item.json.api_sports_base_url }}/fixtures",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "league",
+              "value": "={{ $('Initialize Variables').item.json.laliga_id }}"
+            },
+            {
+              "name": "season",
+              "value": "={{ $('Initialize Variables').item.json.current_season }}"
+            },
+            {
+              "name": "status",
+              "value": "NS-1H-HT-2H-ET-BT-P-FT-AET-PEN-SUSP-INT-LIVE"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-RapidAPI-Key",
+              "value": "={{ $vars.API_FOOTBALL_KEY }}"
+            },
+            {
+              "name": "X-RapidAPI-Host",
+              "value": "v3.football.api-sports.io"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "id": "fetch-fixtures",
+      "name": "Fetch La Liga Fixtures",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        2420,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform API-Sports fixtures data to Supabase schema\nconst fixturesData = $input.all()[0].json.response;\nconst transformedFixtures = [];\n\n// Get teams mapping from previous nodes\nconst teamsFromSupabase = $('Upsert Teams to Supabase').all();\nconst teamMapping = {};\n\nfor (const teamRecord of teamsFromSupabase) {\n  if (teamRecord.json && teamRecord.json.id && teamRecord.json.api_sports_id) {\n    teamMapping[teamRecord.json.api_sports_id] = teamRecord.json.id;\n  }\n}\n\nfor (const fixtureData of fixturesData) {\n  const fixture = fixtureData.fixture;\n  const league = fixtureData.league;\n  const teams = fixtureData.teams;\n  const goals = fixtureData.goals;\n  const score = fixtureData.score;\n  \n  // Map status\n  let status = 'scheduled';\n  const apiStatus = fixture.status.short;\n  if (['NS', 'TBD', 'CANC', 'PST', 'SUSP'].includes(apiStatus)) {\n    status = apiStatus === 'NS' ? 'scheduled' : \n             apiStatus === 'CANC' ? 'cancelled' : \n             apiStatus === 'PST' ? 'postponed' :\n             apiStatus === 'SUSP' ? 'suspended' : 'scheduled';\n  } else if (['1H', 'HT', '2H', 'ET', 'BT', 'P', 'LIVE'].includes(apiStatus)) {\n    status = 'live';\n  } else if (['FT', 'AET', 'PEN'].includes(apiStatus)) {\n    status = 'finished';\n  }\n  \n  // Extract gameweek from round\n  let gameweek = null;\n  if (league.round && league.round.includes('Regular Season')) {\n    const roundMatch = league.round.match(/Regular Season - (\\d+)/);\n    if (roundMatch) {\n      gameweek = parseInt(roundMatch[1]);\n    }\n  }\n  \n  const transformedFixture = {\n    api_sports_id: fixture.id,\n    season: parseInt(league.season),\n    round: league.round,\n    gameweek: gameweek,\n    home_team_id: teamMapping[teams.home.id] || null,\n    away_team_id: teamMapping[teams.away.id] || null,\n    match_date: new Date(fixture.date).toISOString(),\n    venue: fixture.venue?.name,\n    referee: fixture.referee,\n    status: status,\n    home_score: goals.home || 0,\n    away_score: goals.away || 0,\n    halftime_home: score.halftime?.home || 0,\n    halftime_away: score.halftime?.away || 0,\n    home_possession: null, // Will be updated later with detailed stats\n    away_possession: null,\n    match_stats: {\n      fixture_status: fixture.status,\n      elapsed: fixture.status.elapsed,\n      venue_id: fixture.venue?.id,\n      timezone: fixture.timezone\n    },\n    updated_at: new Date().toISOString()\n  };\n  \n  transformedFixtures.push(transformedFixture);\n}\n\nreturn transformedFixtures.map(fixture => ({ json: fixture }));"
+      },
+      "id": "transform-fixtures",
+      "name": "Transform Fixtures Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": "matches",
+        "columnToMatchOn": "api_sports_id",
+        "additionalFields": {}
+      },
+      "id": "upsert-fixtures",
+      "name": "Upsert Fixtures to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2860,
+        240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "workflow_name",
+              "name": "workflow_name",
+              "value": "={{ $('Initialize Variables').item.json.workflow_name }}",
+              "type": "string"
+            },
+            {
+              "id": "trigger_type",
+              "name": "trigger_type",
+              "value": "={{ $node.context.trigger ? 'webhook' : 'cron' }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "started_at",
+              "name": "started_at",
+              "value": "={{ $('Initialize Variables').item.json.workflow_start_time }}",
+              "type": "string"
+            },
+            {
+              "id": "finished_at",
+              "name": "finished_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "duration_seconds",
+              "name": "duration_seconds",
+              "value": "={{ Math.floor((Date.parse($now) - Date.parse($('Initialize Variables').item.json.workflow_start_time)) / 1000) }}",
+              "type": "number"
+            },
+            {
+              "id": "output_data",
+              "name": "output_data",
+              "value": "={{ {\n  teams_processed: $('Upsert Teams to Supabase').all().length,\n  players_processed: $('Upsert Players to Supabase').all().length,\n  fixtures_processed: $('Upsert Fixtures to Supabase').all().length,\n  execution_id: $workflow.id,\n  workflow_id: $workflow.id\n} }}",
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "id": "prepare-workflow-log",
+      "name": "Prepare Workflow Execution Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        3080,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "workflows",
+        "columns": "workflow_name,trigger_type,status,started_at,finished_at,duration_seconds,output_data"
+      },
+      "id": "log-workflow-execution",
+      "name": "Log Workflow Execution",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3300,
+        240
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "laliga-sync-status",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Send Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: 'success',\n  message: 'La Liga data sync completed successfully',\n  execution_id: $workflow.id,\n  duration_seconds: $('Prepare Workflow Execution Log').item.json.duration_seconds,\n  data_processed: $('Prepare Workflow Execution Log').item.json.output_data,\n  timestamp: $now\n} }}"
+      },
+      "id": "format-response",
+      "name": "Format Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        3740,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "workflow_name",
+              "name": "workflow_name",
+              "value": "={{ $('Initialize Variables').item.json.workflow_name }}",
+              "type": "string"
+            },
+            {
+              "id": "trigger_type",
+              "name": "trigger_type",
+              "value": "{{ $node.context.trigger ? 'webhook' : 'cron' }}",
+              "type": "string"
+            },
+            {
+              "id": "status",
+              "name": "status",
+              "value": "error",
+              "type": "string"
+            },
+            {
+              "id": "started_at",
+              "name": "started_at",
+              "value": "={{ $('Initialize Variables').item.json.workflow_start_time }}",
+              "type": "string"
+            },
+            {
+              "id": "finished_at",
+              "name": "finished_at",
+              "value": "={{ $now }}",
+              "type": "string"
+            },
+            {
+              "id": "error_message",
+              "name": "error_message",
+              "value": "={{ $json.error?.message || 'Unknown error occurred during workflow execution' }}",
+              "type": "string"
+            },
+            {
+              "id": "error_stack",
+              "name": "error_stack",
+              "value": "={{ $json.error?.stack || '' }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "prepare-error-log",
+      "name": "Prepare Error Log",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        2200,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "table": "workflows",
+        "columns": "workflow_name,trigger_type,status,started_at,finished_at,error_message,error_stack"
+      },
+      "id": "log-error",
+      "name": "Log Error to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2420,
+        480
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credentials",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  status: 'error',\n  message: 'La Liga data sync failed',\n  error: $('Prepare Error Log').item.json.error_message,\n  execution_id: $workflow.id,\n  timestamp: $now\n} }}"
+      },
+      "id": "format-error-response",
+      "name": "Format Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        480
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Initialize Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule (6 AM)": {
+      "main": [
+        [
+          {
+            "node": "Initialize Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Variables": {
+      "main": [
+        [
+          {
+            "node": "Fetch La Liga Teams",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch La Liga Teams": {
+      "main": [
+        [
+          {
+            "node": "Transform Teams Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Teams Request Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Teams Data": {
+      "main": [
+        [
+          {
+            "node": "Upsert Teams to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Teams to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Delay (1s)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Teams Request Log": {
+      "main": [
+        [
+          {
+            "node": "Log Teams API Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Delay (1s)": {
+      "main": [
+        [
+          {
+            "node": "Fetch La Liga Players",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch La Liga Players": {
+      "main": [
+        [
+          {
+            "node": "Transform Players Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Players Request Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Players Data": {
+      "main": [
+        [
+          {
+            "node": "Upsert Players to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Players to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit Delay (1s) #2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Players Request Log": {
+      "main": [
+        [
+          {
+            "node": "Log Players API Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit Delay (1s) #2": {
+      "main": [
+        [
+          {
+            "node": "Fetch La Liga Fixtures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch La Liga Fixtures": {
+      "main": [
+        [
+          {
+            "node": "Transform Fixtures Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Fixtures Data": {
+      "main": [
+        [
+          {
+            "node": "Upsert Fixtures to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Fixtures to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Prepare Workflow Execution Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Workflow Execution Log": {
+      "main": [
+        [
+          {
+            "node": "Log Workflow Execution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Workflow Execution": {
+      "main": [
+        [
+          {
+            "node": "Send Status Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": {
+      "onError": "continueRegularExecution"
+    }
+  },
+  "staticData": {},
+  "tags": [
+    {
+      "id": "fantasy-laliga",
+      "name": "Fantasy La Liga"
+    },
+    {
+      "id": "supabase-sync",
+      "name": "Supabase Sync"
+    },
+    {
+      "id": "api-sports",
+      "name": "API Sports"
+    }
+  ],
+  "triggerCount": 2,
+  "updatedAt": "2024-01-20T10:00:00.000Z",
+  "versionId": "1"
+}

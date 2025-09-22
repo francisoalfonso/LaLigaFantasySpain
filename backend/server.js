@@ -11,6 +11,10 @@ const path = require('path');
 const testRoutes = require('./routes/test');
 const apiFootballRoutes = require('./routes/apiFootball');
 const n8nMcpRoutes = require('./routes/n8nMcp');
+const weatherRoutes = require('./routes/weather');
+const databaseRoutes = require('./routes/database');
+const dataSyncRoutes = require('./routes/dataSync');
+const contentGeneratorRoutes = require('./routes/contentGenerator');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -50,6 +54,10 @@ app.use((req, res, next) => {
 app.use('/api/test', testRoutes);
 app.use('/api/laliga', apiFootballRoutes);
 app.use('/api/n8n-mcp', n8nMcpRoutes);
+app.use('/api/weather', weatherRoutes);
+app.use('/api/database', databaseRoutes);
+app.use('/api/sync', dataSyncRoutes);
+app.use('/api/content', contentGeneratorRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -76,7 +84,10 @@ app.get('/api/info', (req, res) => {
       health: '/health',
       test: '/api/test/*',
       laliga: '/api/laliga/*',
-      n8n_mcp: '/api/n8n-mcp/*'
+      n8n_mcp: '/api/n8n-mcp/*',
+      weather: '/api/weather/*',
+      database: '/api/database/*',
+      sync: '/api/sync/*'
     },
     api_sports_configured: !!process.env.API_FOOTBALL_KEY,
     plan: 'Ultra - 75,000 requests/día'

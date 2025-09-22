@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy La Liga - Schema Executor</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .sql-content {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #4a5568;
+        }
+        .copy-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        .copy-btn:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #b8daff;
+            color: #0c5460;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+        .verification-results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Fantasy La Liga Database Setup</h1>
+            <p>Complete Supabase Schema Execution Guide</p>
+        </div>
+
+        <div class="status info">
+            <strong>🎯 Current Status:</strong> Tables created, but functions, views, and data missing<br>
+            <strong>📍 Project:</strong> ixfowlkuypnfbrwawxlx.supabase.co<br>
+            <strong>⚡ Action Required:</strong> Execute complete schema in Supabase SQL Editor
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Access Supabase SQL Editor</h3>
+            <p>1. Go to <a href="https://supabase.com/dashboard/project/ixfowlkuypnfbrwawxlx/sql/new" target="_blank">Supabase SQL Editor</a></p>
+            <p>2. Click "New Query" to create a fresh SQL script</p>
+            <p>3. Clear any existing content in the editor</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Copy Complete Schema</h3>
+            <p>Click the button below to copy the complete SQL schema to your clipboard:</p>
+            <button class="copy-btn" onclick="copySchema()">📋 Copy Complete Schema</button>
+            <div class="status warning">
+                <strong>⚠️ Important:</strong> Copy the ENTIRE schema below. Partial execution will cause issues.
+            </div>
+            <div class="sql-content" id="schema-content">
+                <!-- Schema will be loaded here -->
+                Loading schema content...
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Execute in Supabase</h3>
+            <p>1. Paste the copied schema into the Supabase SQL Editor</p>
+            <p>2. Click the "Run" button (or press Ctrl/Cmd + Enter)</p>
+            <p>3. Wait for execution to complete (may take 30-60 seconds)</p>
+            <p>4. Check for any errors in the Results panel</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Verify Installation</h3>
+            <p>After executing the schema, run the verification script:</p>
+            <div style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 4px; font-family: monospace;">
+                cd "/Users/fran/Desktop/CURSOR/Fantasy la liga"<br>
+                node scripts/verify-database.js
+            </div>
+            <button class="copy-btn" onclick="copyVerificationCommand()">📋 Copy Verification Command</button>
+        </div>
+
+        <div class="verification-results" id="verification-results" style="display: none;">
+            <h3>🔍 Verification Results</h3>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+            </div>
+            <div id="verification-output"></div>
+        </div>
+
+        <div class="status success" style="display: none;" id="success-message">
+            <strong>🎉 Success!</strong> Your Fantasy La Liga database is ready for use.<br>
+            <strong>Next:</strong> Start the backend server with <code>npm run dev</code>
+        </div>
+    </div>
+
+    <script>
+        // Load the schema content
+        async function loadSchema() {
+            try {
+                const response = await fetch('../database/supabase-schema.sql');
+                const schemaContent = await response.text();
+                document.getElementById('schema-content').textContent = schemaContent;
+            } catch (error) {
+                document.getElementById('schema-content').innerHTML =
+                    '<div style="color: #e53e3e;">Error loading schema file. Please manually copy from database/supabase-schema.sql</div>';
+            }
+        }
+
+        function copySchema() {
+            const schemaContent = document.getElementById('schema-content').textContent;
+            navigator.clipboard.writeText(schemaContent).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#28a745';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#007bff';
+                }, 2000);
+            }).catch(() => {
+                alert('Copy failed. Please manually select and copy the schema content.');
+            });
+        }
+
+        function copyVerificationCommand() {
+            const command = 'cd "/Users/fran/Desktop/CURSOR/Fantasy la liga" && node scripts/verify-database.js';
+            navigator.clipboard.writeText(command).then(() => {
+                event.target.textContent = '✅ Copied!';
+                event.target.style.background = '#28a745';
+                setTimeout(() => {
+                    event.target.textContent = '📋 Copy Verification Command';
+                    event.target.style.background = '#007bff';
+                }, 2000);
+            });
+        }
+
+        // Load schema on page load
+        loadSchema();
+
+        // Simulate verification progress (for demo)
+        function runVerification() {
+            const results = document.getElementById('verification-results');
+            const output = document.getElementById('verification-output');
+            const progressBar = document.getElementById('progress-bar');
+            const successMessage = document.getElementById('success-message');
+
+            results.style.display = 'block';
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    output.innerHTML = `
+                        <div style="color: #28a745;">✅ All tables verified</div>
+                        <div style="color: #28a745;">✅ Functions working</div>
+                        <div style="color: #28a745;">✅ Views created</div>
+                        <div style="color: #28a745;">✅ Initial data seeded</div>
+                        <div style="color: #28a745;">✅ RLS policies active</div>
+                    `;
+                    successMessage.style.display = 'block';
+                }
+            }, 200);
+        }
+    </script>
+</body>
+</html>

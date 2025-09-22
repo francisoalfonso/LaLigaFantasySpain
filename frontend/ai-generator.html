@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador IA - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
+    <div id="app" x-data="aiGeneratorApp()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-white shadow-lg border-b-4 border-blue-500">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-4xl">🤖</div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-800">Generador IA - Fantasy La Liga</h1>
+                            <p class="text-blue-600 font-medium">Panel de Contenido Automático</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="index.html" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium">
+                            <i class="fas fa-arrow-left mr-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Data Overview -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-database mr-3 text-blue-500"></i>
+                    Estado de los Datos
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="text-center p-4 bg-green-50 rounded-lg">
+                        <div class="text-3xl font-bold text-green-600" x-text="dataStats.teams">--</div>
+                        <div class="text-sm text-gray-600">Equipos</div>
+                    </div>
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <div class="text-3xl font-bold text-blue-600" x-text="dataStats.players">--</div>
+                        <div class="text-sm text-gray-600">Jugadores</div>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <div class="text-3xl font-bold text-purple-600" x-text="dataStats.lastUpdate">--</div>
+                        <div class="text-sm text-gray-600">Última Actualización</div>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                        <div class="text-3xl font-bold text-yellow-600" x-text="dataStats.apiStatus">--</div>
+                        <div class="text-sm text-gray-600">Estado API</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Generator Controls -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Left Panel: Controls -->
+                <div class="space-y-6">
+                    <!-- Platform Selection -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-share-alt mr-3 text-purple-500"></i>
+                            Seleccionar Plataforma
+                        </h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="platform" value="instagram" x-model="selectedPlatform" class="mr-3">
+                                <i class="fab fa-instagram text-pink-500 text-xl mr-3"></i>
+                                <span class="font-medium">Instagram</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="platform" value="twitter" x-model="selectedPlatform" class="mr-3">
+                                <i class="fab fa-twitter text-blue-500 text-xl mr-3"></i>
+                                <span class="font-medium">Twitter</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="platform" value="tiktok" x-model="selectedPlatform" class="mr-3">
+                                <i class="fab fa-tiktok text-black text-xl mr-3"></i>
+                                <span class="font-medium">TikTok</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Date Selection -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-calendar mr-3 text-green-500"></i>
+                            Fecha de Análisis
+                        </h3>
+                        <div class="space-y-3">
+                            <input type="date" x-model="selectedDate"
+                                   class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <div class="flex space-x-2">
+                                <button @click="setToday()"
+                                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg">
+                                    Hoy
+                                </button>
+                                <button @click="setYesterday()"
+                                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg">
+                                    Ayer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Type Selection -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-magic mr-3 text-yellow-500"></i>
+                            Tipo de Contenido
+                        </h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="contentType" value="daily_insights" x-model="selectedContentType" class="mr-3">
+                                <span class="font-medium">📊 Insights Diarios</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="contentType" value="player_spotlight" x-model="selectedContentType" class="mr-3">
+                                <span class="font-medium">⭐ Spotlight Jugador</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="contentType" value="team_analysis" x-model="selectedContentType" class="mr-3">
+                                <span class="font-medium">🏟️ Análisis Equipo</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button @click="generateContent()"
+                            :disabled="isGenerating || !selectedPlatform || !selectedContentType"
+                            class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all">
+                        <i class="fas fa-magic mr-2"></i>
+                        <span x-text="isGenerating ? 'Generando...' : 'Generar Contenido IA'"></span>
+                    </button>
+                </div>
+
+                <!-- Right Panel: Results -->
+                <div class="space-y-6">
+                    <!-- AI Interpretation -->
+                    <div class="bg-white rounded-xl shadow-lg p-6" x-show="aiInterpretation">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-brain mr-3 text-green-500"></i>
+                            Interpretación del Agente IA
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <div class="font-semibold text-green-800 mb-2">Insight Principal:</div>
+                                <div class="text-green-700" x-text="aiInterpretation.main_insight?.message">--</div>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <div class="font-semibold text-blue-800 mb-2">Tip Accionable:</div>
+                                <div class="text-blue-700" x-text="aiInterpretation.main_insight?.actionable_tip">--</div>
+                            </div>
+                            <div class="p-4 bg-purple-50 rounded-lg">
+                                <div class="font-semibold text-purple-800 mb-2">Confianza:</div>
+                                <div class="text-purple-700" x-text="aiInterpretation.main_insight?.confidence">--</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generated Content -->
+                    <div class="bg-white rounded-xl shadow-lg p-6" x-show="generatedContent">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i :class="getPlatformIcon()" class="mr-3"></i>
+                            Contenido para <span x-text="selectedPlatform" class="capitalize"></span>
+                        </h3>
+
+                        <div x-show="selectedPlatform === 'instagram'" class="space-y-4">
+                            <div class="p-4 bg-pink-50 rounded-lg">
+                                <div class="font-semibold text-pink-800 mb-2">Caption:</div>
+                                <div class="text-pink-700 whitespace-pre-line" x-text="generatedContent?.social_variants?.instagram?.content?.caption">--</div>
+                            </div>
+                            <div class="p-4 bg-pink-50 rounded-lg">
+                                <div class="font-semibold text-pink-800 mb-2">Formato:</div>
+                                <div class="text-pink-700" x-text="generatedContent?.social_variants?.instagram?.format">--</div>
+                            </div>
+                            <div class="p-4 bg-pink-50 rounded-lg">
+                                <div class="font-semibold text-pink-800 mb-2">Mejor Hora:</div>
+                                <div class="text-pink-700" x-text="generatedContent?.social_variants?.instagram?.scheduling?.optimal_time">--</div>
+                            </div>
+                        </div>
+
+                        <div x-show="selectedPlatform === 'twitter'" class="space-y-4">
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <div class="font-semibold text-blue-800 mb-2">Thread:</div>
+                                <template x-for="(tweet, index) in generatedContent?.social_variants?.twitter?.content?.tweets" :key="index">
+                                    <div class="mb-3 p-3 border-l-4 border-blue-400">
+                                        <div class="text-sm text-blue-600 mb-1">Tweet <span x-text="index + 1"></span>:</div>
+                                        <div class="text-blue-700" x-text="tweet.text">--</div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div x-show="selectedPlatform === 'tiktok'" class="space-y-4">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="font-semibold text-gray-800 mb-2">Script del Video:</div>
+                                <template x-for="(line, index) in generatedContent?.social_variants?.tiktok?.content?.script" :key="index">
+                                    <div class="mb-2 p-2 bg-white rounded border-l-4 border-black">
+                                        <div class="text-gray-700" x-text="line">--</div>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="font-semibold text-gray-800 mb-2">Duración:</div>
+                                <div class="text-gray-700" x-text="generatedContent?.social_variants?.tiktok?.content?.duration">--</div>
+                            </div>
+                        </div>
+
+                        <!-- Copy to Clipboard Button -->
+                        <button @click="copyToClipboard()"
+                                class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg">
+                            <i class="fas fa-copy mr-2"></i>
+                            Copiar Contenido
+                        </button>
+                    </div>
+
+                    <!-- Engagement Prediction -->
+                    <div class="bg-white rounded-xl shadow-lg p-6" x-show="generatedContent">
+                        <h3 class="text-xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-chart-line mr-3 text-orange-500"></i>
+                            Predicción de Engagement
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center p-4 bg-orange-50 rounded-lg">
+                                <div class="text-2xl font-bold text-orange-600" x-text="generatedContent?.metadata?.engagement_prediction">--</div>
+                                <div class="text-sm text-gray-600">Nivel Esperado</div>
+                            </div>
+                            <div class="text-center p-4 bg-green-50 rounded-lg">
+                                <div class="text-2xl font-bold text-green-600" x-text="generatedContent?.metadata?.confidence_score ? (generatedContent.metadata.confidence_score * 100).toFixed(0) + '%' : '--'">--</div>
+                                <div class="text-sm text-gray-600">Confianza IA</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div x-show="isGenerating"
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+             x-transition>
+            <div class="bg-white rounded-xl p-8 max-w-md mx-4">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+                    <h3 class="text-xl font-bold mb-2">Generando Contenido...</h3>
+                    <p class="text-gray-600">El agente IA está analizando los datos y creando contenido personalizado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function aiGeneratorApp() {
+            return {
+                // Data
+                dataStats: {
+                    teams: '--',
+                    players: '--',
+                    lastUpdate: '--',
+                    apiStatus: '--'
+                },
+                selectedPlatform: 'instagram',
+                selectedDate: new Date().toISOString().split('T')[0],
+                selectedContentType: 'daily_insights',
+                isGenerating: false,
+                generatedContent: null,
+                aiInterpretation: null,
+
+                // Methods
+                async init() {
+                    await this.loadDataStats();
+                },
+
+                async loadDataStats() {
+                    try {
+                        const response = await fetch('/api/content/test');
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.dataStats.teams = data.result.teams_available;
+                            this.dataStats.players = data.result.players_available;
+                            this.dataStats.lastUpdate = new Date(data.result.timestamp).toLocaleTimeString();
+                            this.dataStats.apiStatus = data.result.database_connection ? '✅' : '❌';
+                        }
+                    } catch (error) {
+                        console.error('Error loading data stats:', error);
+                    }
+                },
+
+                setToday() {
+                    this.selectedDate = new Date().toISOString().split('T')[0];
+                },
+
+                setYesterday() {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    this.selectedDate = yesterday.toISOString().split('T')[0];
+                },
+
+                getPlatformIcon() {
+                    const icons = {
+                        instagram: 'fab fa-instagram text-pink-500',
+                        twitter: 'fab fa-twitter text-blue-500',
+                        tiktok: 'fab fa-tiktok text-black'
+                    };
+                    return icons[this.selectedPlatform] || 'fas fa-share-alt';
+                },
+
+                async generateContent() {
+                    if (!this.selectedPlatform || !this.selectedContentType) return;
+
+                    this.isGenerating = true;
+                    this.generatedContent = null;
+                    this.aiInterpretation = null;
+
+                    try {
+                        const endpoint = this.getApiEndpoint();
+                        const payload = {
+                            platform: this.selectedPlatform,
+                            date: this.selectedDate
+                        };
+
+                        if (this.selectedContentType === 'player_spotlight') {
+                            payload.player_id = null; // Random player
+                        }
+
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.generatedContent = data.content;
+                            this.aiInterpretation = data.content;
+                        } else {
+                            alert('Error generando contenido: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error generating content:', error);
+                        alert('Error de conexión al generar contenido');
+                    } finally {
+                        this.isGenerating = false;
+                    }
+                },
+
+                getApiEndpoint() {
+                    const endpoints = {
+                        daily_insights: '/api/content/generate/daily',
+                        player_spotlight: '/api/content/generate/player-spotlight',
+                        team_analysis: '/api/content/generate/team-analysis'
+                    };
+                    return endpoints[this.selectedContentType];
+                },
+
+                async copyToClipboard() {
+                    let textToCopy = '';
+
+                    if (this.selectedPlatform === 'instagram') {
+                        textToCopy = this.generatedContent?.social_variants?.instagram?.content?.caption || '';
+                    } else if (this.selectedPlatform === 'twitter') {
+                        const tweets = this.generatedContent?.social_variants?.twitter?.content?.tweets || [];
+                        textToCopy = tweets.map(tweet => tweet.text).join('\n\n');
+                    } else if (this.selectedPlatform === 'tiktok') {
+                        const script = this.generatedContent?.social_variants?.tiktok?.content?.script || [];
+                        textToCopy = script.join('\n');
+                    }
+
+                    try {
+                        await navigator.clipboard.writeText(textToCopy);
+                        alert('Contenido copiado al portapapeles');
+                    } catch (error) {
+                        console.error('Error copying to clipboard:', error);
+                        alert('Error al copiar al portapapeles');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

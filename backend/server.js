@@ -16,6 +16,7 @@ const databaseRoutes = require('./routes/database');
 const dataSyncRoutes = require('./routes/dataSync');
 const contentGeneratorRoutes = require('./routes/contentGenerator');
 const fixturesRoutes = require('./routes/fixtures');
+const debugRoutes = require('./routes/debug');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -60,6 +61,7 @@ app.use('/api/database', databaseRoutes);
 app.use('/api/sync', dataSyncRoutes);
 app.use('/api/content', contentGeneratorRoutes);
 app.use('/api/fixtures', fixturesRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -69,6 +71,11 @@ app.get('/', (req, res) => {
 // Ruta para vista de alineaciones en tiempo real
 app.get('/lineups-live', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/lineups-live.html'));
+});
+
+// Ruta para debug de grid de coordenadas
+app.get('/grid-debug', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/grid-debug.html'));
 });
 
 // Ruta de salud del servidor

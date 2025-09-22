@@ -599,9 +599,11 @@
                 },
 
                 getPlayerPosition(grid, formation, position, teamLineup) {
-                    // Usar directamente las coordenadas de la API
-                    if (grid) {
-                        return this.getGridPosition(grid);
+                    // Usar directamente las coordenadas de la API con centrado automático
+                    if (grid && teamLineup) {
+                        // Aplicar centrado automático usando los datos del equipo
+                        const centeredGrid = this.getCenteredGrid(grid, teamLineup);
+                        return this.getGridPosition(centeredGrid);
                     }
 
                     // Fallback si no hay grid
@@ -611,10 +613,84 @@
                     };
                 },
 
+                // Función de centrado automático basada en número real de jugadores por línea
+                centrarAlineacion(startXI) {
+                    // Agrupar jugadores por fila (row)
+                    const jugadoresPorFila = {};
+
+                    startXI.forEach(player => {
+                        if (!player.player_grid || !player.player_grid.includes(':')) return;
+
+                        const [row, col] = player.player_grid.split(':').map(Number);
+                        if (!jugadoresPorFila[row]) {
+                            jugadoresPorFila[row] = [];
+                        }
+                        jugadoresPorFila[row].push({
+                            ...player,
+                            originalRow: row,
+                            originalCol: col
+                        });
+                    });
+
+                    // Centrar jugadores en cada fila
+                    const jugadoresCentrados = [];
+
+                    Object.keys(jugadoresPorFila).forEach(row => {
+                        const jugadoresEnFila = jugadoresPorFila[row];
+                        const numJugadores = jugadoresEnFila.length;
+
+                        // Ordenar por columna original para mantener orden relativo
+                        jugadoresEnFila.sort((a, b) => a.originalCol - b.originalCol);
+
+                        // Calcular nuevas posiciones centradas
+                        jugadoresEnFila.forEach((jugador, index) => {
+                            let nuevaColumna;
+
+                            if (numJugadores === 1) {
+                                nuevaColumna = 3; // Centro
+                            } else if (numJugadores === 2) {
+                                nuevaColumna = index === 0 ? 2 : 4; // Posiciones 2 y 4
+                            } else if (numJugadores === 3) {
+                                nuevaColumna = [2, 3, 4][index]; // Posiciones 2, 3, 4
+                            } else if (numJugadores === 4) {
+                                nuevaColumna = [1.5, 2.5, 3.5, 4.5][index]; // Distribuir uniformemente
+                            } else if (numJugadores === 5) {
+                                nuevaColumna = [1, 2, 3, 4, 5][index]; // Usar todas las posiciones
+                            } else {
+                                // Para más de 5 jugadores, usar distribución proporcional
+                                nuevaColumna = 1 + (index * 4) / (numJugadores - 1);
+                            }
+
+                            jugadoresCentrados.push({
+                                ...jugador,
+                                centeredGrid: `${row}:${nuevaColumna}`
+                            });
+                        });
+                    });
+
+                    return jugadoresCentrados;
+                },
+
+                getCenteredGrid(originalGrid, teamLineup) {
+                    // Aplicar centrado usando la función centrarAlineacion
+                    const centeredPlayers = this.centrarAlineacion(teamLineup);
+
+                    // Buscar el jugador correspondiente por grid original
+                    const centeredPlayer = centeredPlayers.find(p => p.player_grid === originalGrid);
+
+                    if (centeredPlayer) {
+                        console.log(`🎯 Centrado: ${originalGrid} -> ${centeredPlayer.centeredGrid}`);
+                        return centeredPlayer.centeredGrid;
+                    }
+
+                    // Si no se encuentra, usar el grid original
+                    return originalGrid;
+                },
+
                 getGridPosition(grid) {
-                    // API format: "row:column" según documentación oficial API-Sports
+                    // API format: "row:column" con soporte para coordenadas centradas automáticamente
                     // X = fila (row) empezando desde línea de portería (Línea 1)
-                    // Y = columna (column) de izquierda a derecha
+                    // Y = columna (column) de izquierda a derecha (ahora con decimales para centrado)
                     if (!grid) return { left: '50%', top: '50%' };
 
                     const [row, col] = grid.split(':').map(Number);
@@ -629,31 +705,39 @@
                     else if (row === 5) topPercent = 15;  // Row 5: Delanteros (ARRIBA - atacando)
                     else topPercent = 50;
 
-                    // Col handling - NUEVO mapeo dinámico según lo observado en imagen Getafe
-                    // Los jugadores centrados (portero, algunos medios, delanteros) pueden tener col=0 o values especiales
+                    // NUEVO SISTEMA DE CENTRADO AUTOMÁTICO - Mapeo fluido para coordenadas decimales
+                    // Convierte coordenadas de grid 1-5 a porcentajes 10%-90%
                     let leftPercent;
 
-                    // MAPEO BASADO EN DATOS REALES - Coordenadas exactas de API-Sports
-                    // Getafe: Portero(1:1), Defensa(2:1-2:5), Medios(3:1-3:3), Delanteros(4:1-4:2)
-                    // Oviedo: Sistema estándar 1-5
+                    // Sistema de mapeo lineal mejorado que funciona con decimales
+                    // Columna 1 = 10%, Columna 2 = 30%, Columna 3 = 50%, Columna 4 = 70%, Columna 5 = 90%
+                    // Permite interpolación suave para valores intermedios (ej: 2.5 = 40%)
 
-                    // Ajuste específico según datos observados
-                    if (row === 1 && col === 1) leftPercent = 50;      // Portero centrado (Soria fix)
-                    else if (row === 3 && col === 2) leftPercent = 50; // Centrocampista central (Milla fix)
-                    else if (row === 4 && col === 1) leftPercent = 32; // Delantero izquierdo (Mayoral fix)
-                    else if (row === 4 && col === 2) leftPercent = 68; // Delantero derecho (Liso fix)
-                    else if (col === 1) leftPercent = 15; // Banda izquierda general
-                    else if (col === 2) leftPercent = 32; // Interior izquierdo general
-                    else if (col === 3) leftPercent = 50; // Centro general
-                    else if (col === 4) leftPercent = 68; // Interior derecho general
-                    else if (col === 5) leftPercent = 85; // Banda derecha general
-                    else leftPercent = 50;                // Fallback centro
+                    if (col <= 1) {
+                        leftPercent = 10; // Banda izquierda
+                    } else if (col <= 2) {
+                        // Interpolación entre banda izquierda (10%) e interior izquierdo (30%)
+                        leftPercent = 10 + (col - 1) * 20;
+                    } else if (col <= 3) {
+                        // Interpolación entre interior izquierdo (30%) y centro (50%)
+                        leftPercent = 30 + (col - 2) * 20;
+                    } else if (col <= 4) {
+                        // Interpolación entre centro (50%) e interior derecho (70%)
+                        leftPercent = 50 + (col - 3) * 20;
+                    } else if (col <= 5) {
+                        // Interpolación entre interior derecho (70%) y banda derecha (90%)
+                        leftPercent = 70 + (col - 4) * 20;
+                    } else {
+                        leftPercent = 90; // Banda derecha para valores > 5
+                    }
+
+                    // Ajustar límites para evitar jugadores demasiado cerca de los bordes
+                    leftPercent = Math.max(8, Math.min(92, leftPercent));
 
                     const position = {
                         left: `${leftPercent}%`,
                         top: `${topPercent}%`
                     };
-
 
                     return position;
                 },

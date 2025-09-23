@@ -180,7 +180,7 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <!-- Price Prediction -->
                     <div class="bg-white rounded-lg p-4 shadow-md">
-                        <h3 class="font-semibold text-gray-700 mb-2">Precio Actual vs Predicho</h3>
+                        <h3 class="font-semibold text-gray-700 mb-2">Precio Actual vs Predicción</h3>
                         <div class="flex items-center justify-between">
                             <div class="text-center">
                                 <div class="text-xl font-bold text-gray-800" x-text="`${prediction.currentPrice}M`"></div>
@@ -291,12 +291,8 @@
                                 <span class="font-semibold" x-text="player.goals?.assists || 0"></span>
                             </div>
                             <div class="flex justify-between">
-                                <span>Goles esperados:</span>
-                                <span class="font-semibold" x-text="player.goals?.expected || 'N/A'"></span>
-                            </div>
-                            <div class="flex justify-between">
                                 <span>Por 90 min:</span>
-                                <span class="font-semibold" x-text="player.goals?.per90 || 'N/A'"></span>
+                                <span class="font-semibold" x-text="player.games?.minutes > 0 ? ((player.goals?.total || 0) / player.games.minutes * 90).toFixed(2) : '0.00'"></span>
                             </div>
                         </div>
                     </div>
@@ -332,7 +328,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>Precisión:</span>
-                                <span class="font-semibold" x-text="player.passes?.accuracy || 'N/A'"></span>
+                                <span class="font-semibold" x-text="player.passes?.accuracy ? player.passes.accuracy + '%' : 'N/A'"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Clave:</span>
@@ -358,7 +354,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>Efectividad:</span>
-                                <span class="font-semibold" x-text="player.dribbles?.past || 'N/A'"></span>
+                                <span class="font-semibold" x-text="(player.dribbles?.attempts > 0) ? Math.round((player.dribbles.success / player.dribbles.attempts) * 100) + '%' : 'N/A'"></span>
                             </div>
                         </div>
                     </div>
@@ -528,10 +524,12 @@
                             console.log('🔮 Predicción cargada:', this.prediction);
                         } else {
                             console.error('Error cargando predicción:', result.error);
+                            alert('❌ Error: ' + (result.error || 'No se pudo cargar la predicción'));
                         }
 
                     } catch (error) {
                         console.error('❌ Error cargando predicción:', error);
+                        alert('❌ Error de conexión: No se pudo obtener la predicción');
                     } finally {
                         this.loadingPrediction = false;
                     }

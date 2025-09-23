@@ -87,15 +87,43 @@ router.get('/player/:playerId', async (req, res) => {
 
     console.log(`🎯 Obteniendo predicción específica para jugador ${playerId}...`);
 
-    // Buscar jugador en la base de datos de chollos
+    // Buscar jugador en chollos primero, luego en API-Sports si no está
+    let player = null;
+
     const bargains = await bargainAnalyzer.identifyBargains(200);
-    const player = bargains.data.find(p => p.id === playerId);
+    player = bargains.data.find(p => p.id === playerId);
 
     if (!player) {
-      return res.status(404).json({
-        success: false,
-        error: 'Jugador no encontrado en la base de datos'
-      });
+      console.log(`🔍 Jugador ${playerId} no encontrado en chollos, buscando en API-Sports...`);
+
+      // Obtener datos del jugador desde API-Sports
+      const playerResult = await apiFootball.getPlayerStats(playerId);
+
+      if (!playerResult.success) {
+        return res.status(404).json({
+          success: false,
+          error: 'Jugador no encontrado en API-Sports'
+        });
+      }
+
+      // Formatear datos para el predictor
+      const apiPlayer = playerResult.data;
+      player = {
+        id: apiPlayer.player.id,
+        name: apiPlayer.player.name,
+        team: apiPlayer.team.name,
+        position: apiPlayer.games.position,
+        price: 8.0, // Precio por defecto para jugadores no en chollos
+        stats: {
+          games: apiPlayer.games.appearences || 0,
+          goals: apiPlayer.goals.total || 0,
+          assists: apiPlayer.goals.assists || 0,
+          minutes: apiPlayer.games.minutes || 0,
+          rating: parseFloat(apiPlayer.games.rating) || 6.0
+        }
+      };
+
+      console.log(`✅ Jugador obtenido desde API-Sports:`, player.name);
     }
 
     // Generar predicción detallada

@@ -52,6 +52,16 @@ class WeatherService {
             throw new Error(`Municipio AEMET no encontrado para equipo: ${teamKey}`);
         }
 
+        // Priorizar datos de estación meteorológica en tiempo real si está disponible
+        if (municipioData.estacion_meteorologica) {
+            try {
+                return await this.getWeatherFromAemetStation(municipioData.estacion_meteorologica, municipioData);
+            } catch (stationError) {
+                console.warn(`Estación meteorológica ${municipioData.estacion_meteorologica} falló, usando predicción municipal...`);
+            }
+        }
+
+        // Fallback a predicción municipal
         const url = `${this.aemetBaseUrl}${AEMET_ENDPOINTS.prediccion_municipio}/${municipioData.codigo_aemet}`;
 
         try {
@@ -69,6 +79,31 @@ class WeatherService {
             throw new Error('No se pudieron obtener datos de AEMET');
         } catch (error) {
             console.error(`Error AEMET para ${teamKey}:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener datos meteorológicos en tiempo real de estación AEMET
+     */
+    async getWeatherFromAemetStation(stationId, municipioData) {
+        const url = `${this.aemetBaseUrl}${AEMET_ENDPOINTS.observacion_meteorologica}/${stationId}`;
+
+        try {
+            // AEMET API retorna URL de datos en primera llamada
+            const response = await axios.get(url, {
+                params: { api_key: this.aemetApiKey }
+            });
+
+            if (response.data && response.data.datos) {
+                // Obtener datos reales de la URL proporcionada
+                const dataResponse = await axios.get(response.data.datos);
+                return this.processAemetStationData(dataResponse.data, municipioData);
+            }
+
+            throw new Error(`No se pudieron obtener datos de la estación ${stationId}`);
+        } catch (error) {
+            console.error(`Error estación AEMET ${stationId}:`, error.message);
             throw error;
         }
     }
@@ -112,6 +147,62 @@ class WeatherService {
                 speed: vientoHoy / 3.6 // convertir km/h a m/s
             },
             rain: precipitacionHoy > 0 ? { '1h': precipitacionHoy } : undefined,
+            weather: [{
+                id: weatherCode,
+                main: description,
+                description: description.toLowerCase()
+            }]
+        };
+    }
+
+    /**
+     * Procesar datos de estación meteorológica AEMET (tiempo real)
+     */
+    processAemetStationData(stationData, municipioData) {
+        // Los datos vienen como array, obtener la lectura más reciente
+        if (!stationData || !Array.isArray(stationData) || stationData.length === 0) {
+            throw new Error('No hay datos de estación meteorológica disponibles');
+        }
+
+        // Obtener la lectura más reciente (último elemento del array)
+        const latest = stationData[stationData.length - 1];
+
+        // Extraer datos en tiempo real
+        const temperatura = Math.round(parseFloat(latest.ta) || 20); // ta = temperatura actual
+        const humedad = parseInt(latest.hr) || 60; // hr = humedad relativa
+        const presion = parseFloat(latest.pres) || 1013; // pres = presión
+        const viento = parseFloat(latest.vv) || 0; // vv = velocidad viento m/s
+        const precipitacion = parseFloat(latest.prec) || 0; // prec = precipitación
+
+        // Determinar descripción basada en precipitación y humedad
+        let description = 'despejado';
+        let weatherCode = 800;
+
+        if (precipitacion > 0.5) {
+            description = 'lluvia';
+            weatherCode = 500;
+        } else if (humedad > 85) {
+            description = 'muy nuboso';
+            weatherCode = 804;
+        } else if (humedad > 70) {
+            description = 'nuboso';
+            weatherCode = 803;
+        }
+
+        console.log(`🌡️ Estación ${latest.ubi}: ${temperatura}°C, ${description}, hr:${humedad}%, prec:${precipitacion}mm`);
+
+        // Retornar en formato compatible con OpenWeatherMap
+        return {
+            main: {
+                temp: temperatura,
+                feels_like: temperatura, // Usar misma temperatura
+                humidity: humedad,
+                pressure: presion
+            },
+            wind: {
+                speed: viento // AEMET ya en m/s
+            },
+            rain: precipitacion > 0 ? { '1h': precipitacion } : undefined,
             weather: [{
                 id: weatherCode,
                 main: description,

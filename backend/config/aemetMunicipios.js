@@ -63,7 +63,8 @@ const AEMET_MUNICIPIOS_MAPPING = {
         municipio: 'Bilbao',
         codigo_aemet: '48020', // Bilbao
         provincia: 'Vizcaya',
-        codigo_provincia: '48'
+        codigo_provincia: '48',
+        estacion_meteorologica: '1082' // Bilbao Aeropuerto - Datos en tiempo real
     },
     'real_sociedad': {
         municipio: 'San Sebastián',

@@ -1,8 +1,14 @@
-# ⚽ Fantasy La Liga Pro
+# ⚽ Fantasy La Liga Pro - TEMPORADA 2025-26
 
 ## 🏆 El equipo profesional de Fantasy La Liga
 
 Sistema automatizado de creación de contenido para Fantasy La Liga utilizando avatares AI y análisis de datos en tiempo real.
+
+### ⚠️ TEMPORADA ACTUAL: 2025-26
+- **95ª temporada de La Liga** (15 Agosto 2025 - 24 Mayo 2026)
+- **Campeón defensor**: Barcelona (28º título)
+- **Equipos nuevos**: Levante, Elche, Real Oviedo
+- **API-Sports Season ID**: 2025
 
 ## 🎯 Descripción
 

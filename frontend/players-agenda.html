@@ -330,6 +330,12 @@
                     Limpiar filtros
                 </button>
             </div>
+
+            <!-- Loading More Indicator -->
+            <div x-show="loadingMore" class="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                <span class="text-sm">Cargando más jugadores...</span>
+            </div>
         </div>
     </div>
 
@@ -340,6 +346,7 @@
                 players: [],
                 filteredPlayers: [],
                 loading: true,
+                loadingMore: false,
                 error: false,
                 errorMessage: '',
 
@@ -352,7 +359,7 @@
 
                 // Pagination
                 currentPage: 1,
-                playersPerPage: 12,
+                playersPerPage: 24,
 
                 // UI state
                 analyzingPlayer: null,
@@ -366,37 +373,68 @@
                 // Load all players
                 async loadPlayers() {
                     try {
-                        console.log('🔄 Iniciando carga de jugadores...');
+                        console.log('🔄 Iniciando carga progresiva de jugadores...');
                         this.loading = true;
                         this.error = false;
 
-                        console.log('📡 Haciendo petición a API...');
-                        const response = await fetch('/api/laliga/laliga/players?page=all');
-                        console.log('📨 Respuesta recibida:', response.status);
+                        // FASE 1: Cargar primeros 20 jugadores inmediatamente
+                        console.log('📡 Cargando primeros 20 jugadores...');
+                        const firstResponse = await fetch('/api/laliga/laliga/players?limit=20');
+                        console.log('📨 Primera respuesta recibida:', firstResponse.status);
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                        if (!firstResponse.ok) {
+                            throw new Error(`HTTP error! status: ${firstResponse.status}`);
                         }
 
-                        const result = await response.json();
-                        console.log('📋 Datos parseados:', result.success, result.count);
+                        const firstResult = await firstResponse.json();
+                        console.log('📋 Primeros datos:', firstResult.success, firstResult.count);
 
-                        if (result.success && result.data && result.data.length > 0) {
-                            this.players = result.data;
-                            this.filteredPlayers = [...result.data];
-                            console.log('✅ Jugadores cargados:', this.players.length);
-                            console.log('✅ Jugadores filtrados:', this.filteredPlayers.length);
+                        if (firstResult.success && firstResult.data && firstResult.data.length > 0) {
+                            this.players = firstResult.data;
+                            this.filteredPlayers = [...firstResult.data];
+                            this.loading = false; // ✅ Mostrar inmediatamente los primeros
+
+                            console.log('✅ Primeros 20 jugadores cargados, mostrando UI...');
+
+                            // FASE 2: Cargar resto en background si hay más
+                            if (firstResult.has_more) {
+                                this.loadMoreInBackground();
+                            }
                         } else {
-                            console.log('❌ Error en respuesta:', result.error || 'No hay datos');
-                            this.showError(result.error || 'No se encontraron jugadores');
+                            console.log('❌ Error en respuesta:', firstResult.error || 'No hay datos');
+                            this.showError(firstResult.error || 'No se encontraron jugadores');
                         }
 
                     } catch (error) {
                         console.error('❌ Error cargando jugadores:', error);
                         this.showError('Error de conexión: ' + error.message);
-                    } finally {
-                        console.log('🏁 Finalizando carga, loading = false');
                         this.loading = false;
+                    }
+                },
+
+                // Cargar resto de jugadores en background - SIMPLIFICADO
+                async loadMoreInBackground() {
+                    try {
+                        console.log('🔄 Cargando resto de jugadores en background...');
+                        this.loadingMore = true;
+
+                        // Usar endpoint completo en lugar de paginación
+                        const response = await fetch('/api/laliga/laliga/players?page=all');
+                        if (!response.ok) return;
+
+                        const result = await response.json();
+                        if (result.success && result.data && result.data.length > 0) {
+                            // Reemplazar con todos los jugadores
+                            this.players = result.data;
+                            this.filterPlayers();
+
+                            console.log(`✅ Carga background completada. Total jugadores: ${this.players.length}`);
+                        }
+
+                    } catch (error) {
+                        console.warn('⚠️ Error en carga background:', error.message);
+                    } finally {
+                        this.loadingMore = false;
                     }
                 },
 

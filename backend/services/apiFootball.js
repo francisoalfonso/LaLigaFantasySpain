@@ -1,4 +1,5 @@
 // Cliente para API-Football (RapidAPI)
+// ⚠️ CONFIGURADO PARA TEMPORADA 2025-26 ⚠️
 const axios = require('axios');
 
 class ApiFootballClient {
@@ -14,12 +15,14 @@ class ApiFootballClient {
     };
 
     // IDs de La Liga para diferentes temporadas
+    // ⚠️ TEMPORADA ACTUAL: 2025-26 ⚠️
     this.LEAGUES = {
       LA_LIGA: 140,
       LA_LIGA_FEMENINA: 142,
       SEASON_2024: 2024,
       SEASON_2025: 2025,
-      CURRENT_SEASON: 2025  // Temporada actual La Liga 2025-2026 (API usa 2025)
+      SEASON_2026: 2026,
+      CURRENT_SEASON: 2025  // ✅ CONFIRMADO: 2025 = temporada 2025-26 en API-Sports
     };
   }
 
@@ -204,6 +207,7 @@ class ApiFootballClient {
           height: item.player.height,
           weight: item.player.weight,
           photo: item.player.photo,
+          injured: item.player.injured || false, // ✅ Añadir campo de lesión
           position: item.statistics?.[0]?.games?.position,
           team: {
             id: item.statistics?.[0]?.team?.id,

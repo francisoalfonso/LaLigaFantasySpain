@@ -324,10 +324,20 @@
                                     <span x-text="formatDateTime(fixture.date)"></span>
                                 </div>
                                 <!-- Información del clima -->
-                                <div x-show="fixture.weather" class="text-sm mt-1 bg-white bg-opacity-20 rounded px-2 py-1">
+                                <div class="text-sm mt-1 bg-white bg-opacity-20 rounded px-2 py-1">
                                     <i class="fas fa-cloud-sun mr-1"></i>
-                                    <span x-text="fixture.weather?.current?.temperature || '--'"></span>°C
-                                    <span class="ml-2" x-text="fixture.weather?.current?.description || 'Clima no disponible'"></span>
+                                    <template x-if="fixture.weatherLoading">
+                                        <span class="text-gray-300">Cargando clima...</span>
+                                    </template>
+                                    <template x-if="!fixture.weatherLoading && fixture.weather">
+                                        <span>
+                                            <span x-text="fixture.weather?.current?.temperature || '--'"></span>°C
+                                            <span class="ml-2" x-text="fixture.weather?.current?.description || 'Clima no disponible'"></span>
+                                        </span>
+                                    </template>
+                                    <template x-if="!fixture.weatherLoading && !fixture.weather">
+                                        <span class="text-gray-400">Clima no disponible</span>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -850,6 +860,12 @@
                 async loadWeatherForFixtures() {
                     if (!this.fixtures || this.fixtures.length === 0) return;
 
+                    // Inicializar estado de carga para cada fixture
+                    this.fixtures.forEach(fixture => {
+                        fixture.weatherLoading = true;
+                        fixture.weather = null;
+                    });
+
                     // Cargar clima para cada fixture en paralelo
                     const weatherPromises = this.fixtures.map(async (fixture) => {
                         const homeTeamKey = this.getTeamKeyFromName(fixture.home_team_name);
@@ -865,6 +881,8 @@
                                 console.warn(`❌ Error cargando clima para ${fixture.home_team_name}:`, error);
                             }
                         }
+                        // Marcar como completado el loading
+                        fixture.weatherLoading = false;
                     });
 
                     await Promise.all(weatherPromises);

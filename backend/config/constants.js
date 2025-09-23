@@ -1,10 +1,28 @@
 // Configuraciones y constantes para el proyecto Fantasy La Liga
+// ⚠️ TEMPORADA 2025-26 - NO CAMBIAR SIN CONFIRMAR ⚠️
 module.exports = {
-  // API-Sports La Liga
+  // API-Sports La Liga TEMPORADA 2025-26
   API_SPORTS: {
     LA_LIGA_ID: 140,
-    SEASON_2024_25: 2025,
+    SEASON_2025_26: 2025, // CONFIRMADO: API-Sports usa 2025 para temporada 2025-26
     BASE_URL: 'https://v3.football.api-sports.io'
+  },
+
+  // OpenAI GPT-5 Mini para generación de contenido
+  OPENAI_GPT5_MINI: {
+    MODEL_NAME: 'gpt-5-mini',
+    PRICING: {
+      INPUT_PER_1M: 0.25,  // $0.25 per 1M tokens
+      OUTPUT_PER_1M: 2.00, // $2.00 per 1M tokens
+      CACHE_DISCOUNT: 0.90 // 90% descuento en contenido repetido
+    },
+    LIMITS: {
+      MAX_INPUT_TOKENS: 272000,
+      MAX_OUTPUT_TOKENS: 128000,
+      RECOMMENDED_OUTPUT: 4000 // Para contenido Fantasy
+    },
+    TEMPERATURE: 0.7, // Balance creatividad/consistencia
+    SELECTED_REASON: "Mejor relación calidad/precio para Fantasy La Liga 2025-26"
   },
 
   // Sistema de puntos Fantasy La Liga

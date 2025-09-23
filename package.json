@@ -1,7 +1,7 @@
 {
   "name": "fantasy-laliga-dashboard",
   "version": "1.0.0",
-  "description": "Dashboard de validación para influencer virtual de La Liga Fantasy",
+  "description": "Dashboard de validación para influencer virtual de La Liga Fantasy - TEMPORADA 2025-26",
   "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",

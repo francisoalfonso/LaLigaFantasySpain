@@ -19,6 +19,7 @@ const fixturesRoutes = require('./routes/fixtures');
 const debugRoutes = require('./routes/debug');
 const bargainsRoutes = require('./routes/bargains');
 const predictionsRoutes = require('./routes/predictions');
+const contentAIRoutes = require('./routes/contentAI');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -66,6 +67,7 @@ app.use('/api/fixtures', fixturesRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/bargains', bargainsRoutes);
 app.use('/api/predictions', predictionsRoutes);
+app.use('/api/ai', contentAIRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {

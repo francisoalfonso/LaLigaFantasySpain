@@ -41,7 +41,27 @@ curl http://localhost:3000/api/weather/test                # AEMET API test
 curl http://localhost:3000/api/database/test               # Database connectivity
 ```
 
-**Note**: This project does not use ESLint, Prettier, or TypeScript. Code quality is maintained through manual review and the existing testing infrastructure.
+**Note**: This project uses vanilla JavaScript (no TypeScript), no ESLint/Prettier, and no build process. Frontend uses CDN dependencies (Alpine.js, Tailwind) served directly. Code quality is maintained through manual review and comprehensive testing infrastructure.
+
+## Tech Stack
+
+### Backend Dependencies
+- **express**: ^4.18.2 - Main web framework
+- **axios**: ^1.6.0 - HTTP client for API calls
+- **cors**: ^2.8.5 - Cross-origin resource sharing
+- **helmet**: ^7.1.0 - Security middleware
+- **morgan**: ^1.10.0 - HTTP request logger
+- **@supabase/supabase-js**: ^2.57.4 - Database client
+- **pg**: ^8.16.3 - PostgreSQL client
+- **dotenv**: ^16.3.1 - Environment variable management
+
+### Development Dependencies
+- **nodemon**: ^3.0.1 - Development server with auto-reload
+
+### Frontend (CDN-based)
+- **Alpine.js**: Frontend reactivity framework
+- **Tailwind CSS**: Utility-first CSS framework
+- **Vanilla JavaScript**: No build process required
 
 ## Critical Development Notes
 
@@ -72,7 +92,14 @@ Fantasy la liga/
 │   │   ├── apiFootball.js                 # Rutas para API-Sports/API-Football
 │   │   ├── test.js                        # Rutas de testing y validación
 │   │   ├── weather.js                     # Rutas para funcionalidad meteorológica
-│   │   └── n8nMcp.js                      # Rutas para n8n MCP integration
+│   │   ├── n8nMcp.js                      # Rutas para n8n MCP integration
+│   │   ├── database.js                    # Rutas de base de datos
+│   │   ├── dataSync.js                    # Rutas de sincronización de datos
+│   │   ├── contentGenerator.js            # Rutas de generación de contenido
+│   │   ├── fixtures.js                    # Rutas de fixtures/partidos
+│   │   ├── debug.js                       # Rutas de debugging
+│   │   ├── bargains.js                    # Rutas sistema de chollos
+│   │   └── predictions.js                 # Rutas de predicciones
 │   ├── services/
 │   │   ├── apiFootball.js                 # Cliente para API-Sports
 │   │   ├── dataProcessor.js               # Procesador de datos Fantasy
@@ -80,7 +107,15 @@ Fantasy la liga/
 │   │   ├── weatherService.js              # Servicio integración AEMET
 │   │   ├── n8nMcpServer.js               # Servidor MCP para n8n
 │   │   ├── competitiveIntelligenceAgent.js # Agente análisis competencia
-│   │   └── teamContentManager.js          # Gestor contenido del equipo
+│   │   ├── teamContentManager.js          # Gestor contenido del equipo
+│   │   ├── contentGenerator.js            # Generador automático de contenido
+│   │   ├── fixturesSync.js                # Sincronización de fixtures
+│   │   ├── bargainCache.js                # Cache sistema de chollos
+│   │   ├── fixtureAnalyzer.js             # Analizador de fixtures
+│   │   ├── cacheRefreshScheduler.js       # Programador actualización cache
+│   │   ├── predictorValor.js              # Predictor de valor de jugadores
+│   │   ├── playersCache.js                # Cache de jugadores
+│   │   └── playersManager.js              # Gestor de jugadores
 │   └── config/
 │       ├── constants.js                   # IDs y configuraciones de La Liga
 │       ├── stadiumsWeatherConfig.js       # Configuración estadios + coordenadas GPS
@@ -179,24 +214,53 @@ SUPABASE_ANON_KEY=tu_anon_key_aqui
 DATABASE_URL=postgresql://postgres:[password]@db.tu-proyecto.supabase.co:5432/postgres
 ```
 
-## ⚠️ INFORMACIÓN CRÍTICA - TEMPORADA ⚠️
+## 🚨 INFORMACIÓN CRÍTICA - TEMPORADA 2025-26 🚨
 
-**🚨 OBLIGATORIO CONSULTAR ANTES DE CUALQUIER DESARROLLO O EDICIÓN 🚨**
+**⚠️ LEER OBLIGATORIAMENTE ANTES DE CUALQUIER DESARROLLO ⚠️**
 
-- **Temporada actual**: 2025-26
-- **Identificación API-Sports**: 2025 (NO 2024)
-- **Configuración actual**: `CURRENT_SEASON: 2025` en `apiFootball.js`
-- **Todas las funcionalidades deben construirse considerando temporada 25-26**
-- **Fechas de partidos**: Agosto 2024 - Mayo 2025 para temporada 2025-26
+### 🏆 TEMPORADA ACTUAL: 2025-26
 
-### Important Constants (backend/config/constants.js)
-- **La Liga ID**: 140 (API-Sports)
-- **TEMPORADA ACTUAL**: 2025-26 (API-Sports usa 2025) ⚠️ **CRÍTICO** ⚠️
+**CONFIGURACIÓN DEFINITIVA (NO CAMBIAR):**
+- **Temporada**: 2025-26 (95ª temporada de La Liga)
+- **API-Sports Season ID**: `2025` (confirmado - API usa 2025 para temporada 2025-26)
+- **Configuración**: `SEASON_2025_26: 2025` en `backend/config/constants.js`
+- **Fechas**: 15 Agosto 2025 - 24 Mayo 2026
+- **Campeón defensor**: Barcelona (28º título)
+
+### 🏟️ EQUIPOS OFICIALES 2025-26 (20 EQUIPOS)
+
+**ASCENSOS (3 nuevos equipos):**
+- ✅ **Levante** (ID: 539) - Promovido primero
+- ✅ **Elche** (ID: 797) - Promovido último día
+- ✅ **Real Oviedo** (ID: 718) - Ganó playoff ascenso
+
+**DESCENSOS 2024-25 (equipos que YA NO ESTÁN):**
+- ❌ **Valladolid** - Relegado
+- ❌ **Las Palmas** - Relegado
+- ❌ **Leganés** - Relegado
+
+**IMPORTANTE**: Si aparecen Valladolid, Las Palmas o Leganés en datos, ES ERROR de configuración.
+
+### 🔧 CONFIGURACIÓN TÉCNICA
+
+- **Liga ID**: 140 (La Liga)
+- **Season Parameter**: 2025 (para temporada 2025-26)
+- **Total equipos**: 20 (obligatorio)
+- **Jugadores aproximados**: ~600 (30 por equipo)
+
+### ⚠️ RECORDATORIO PARA CLAUDE CODE ⚠️
+
+**CADA VEZ QUE INICIES O TE RECARGUES:**
+1. **TEMPORADA**: Siempre 2025-26
+2. **API-Sports Season**: Siempre 2025
+3. **Equipos**: Siempre 20 (con Levante, Elche, Oviedo)
+4. **NO incluir**: Valladolid, Las Palmas, Leganés
 - **API-Sports Plan**: Ultra ($29/mes) - 75,000 requests/día
 - **Sistema de puntos Fantasy**: Implementado según reglas oficiales
 - **Server Config**: PORT=3000, HOST=localhost (configurable via env vars)
 - **Weather Integration**: 20 stadiums with GPS coordinates (stadiumsWeatherConfig.js)
 - **Database**: Supabase PostgreSQL con schema completo (database/supabase-schema.sql)
+- **AI Content Generation**: GPT-5 Mini para avatares ($0.29/mes)
 
 ## Fantasy Points System
 
@@ -406,6 +470,118 @@ Antes de proceder con avatar IA:
 3. Evaluar insights automáticos generados por competitiveIntelligenceAgent
 4. Confirmar suficiente contenido para posts diarios
 5. Test integración con teamContentManager para workflows
+
+## 🤖 GPT-5 Mini - Generación de Contenido IA
+
+Este proyecto utiliza **GPT-5 Mini** como modelo principal para la generación de contenido de avatares IA.
+
+### ✅ Modelo Seleccionado: GPT-5 Mini
+
+**Razones de la selección:**
+- **Precio**: $0.25/1M input, $2.00/1M output ($0.29/mes estimado)
+- **Calidad**: 80% del rendimiento de GPT-5 completo
+- **Contexto**: 272K tokens input, 128K output
+- **Cache**: 90% descuento en contenido repetitivo
+- **Mejor relación calidad/precio** para Fantasy Football
+
+### 📊 Comparativa con Otros Modelos
+
+| Modelo | Coste Mensual | Calidad | Seleccionado |
+|--------|---------------|---------|-------------|
+| GPT-4o mini | $0.11 | ⭐⭐⭐⭐ | ❌ |
+| **GPT-5 mini** | **$0.29** | **⭐⭐⭐⭐⭐** | **✅** |
+| o4-mini | $0.28 | ⭐⭐⭐⭐ | ❌ |
+| GPT-4o | $3.57 | ⭐⭐⭐⭐⭐ | ❌ Caro |
+
+### 🎯 Funcionalidades Implementadas
+
+#### **Endpoints Disponibles:**
+- `GET /api/ai/test` - Test de conexión GPT-5 Mini
+- `POST /api/ai/player-analysis` - Análisis de jugadores para avatar
+- `POST /api/ai/matchday-prediction` - Predicciones de jornada
+- `POST /api/ai/social-post` - Contenido para redes sociales
+- `POST /api/ai/bulk-analysis` - Análisis masivo (optimizado con cache)
+- `GET /api/ai/stats` - Estadísticas de uso y costes
+
+#### **Tipos de Contenido:**
+1. **Análisis de jugadores** (150-200 palabras)
+2. **Predicciones de jornada** (300-400 palabras)
+3. **Posts redes sociales** (50-100 palabras)
+4. **Comentarios contextuales** (con clima)
+
+### ⚙️ Configuración Técnica
+
+```javascript
+// Configuración en backend/config/constants.js
+OPENAI_GPT5_MINI: {
+  MODEL_NAME: 'gpt-5-mini',
+  PRICING: {
+    INPUT_PER_1M: 0.25,  // $0.25 per 1M tokens
+    OUTPUT_PER_1M: 2.00, // $2.00 per 1M tokens
+    CACHE_DISCOUNT: 0.90 // 90% descuento
+  },
+  TEMPERATURE: 0.7, // Balance creatividad/consistencia
+}
+```
+
+### 🔧 Variables de Entorno Requeridas
+
+```bash
+# .env
+OPENAI_API_KEY=tu_openai_api_key_aqui
+```
+
+### 📈 Estimaciones de Coste
+
+- **Diario**: ~50 análisis = $0.01
+- **Mensual**: ~1,500 análisis = $0.29
+- **Anual**: Temporada completa = $3.48
+
+### 🚀 Casos de Uso
+
+```bash
+# Análisis de jugador con contexto clima
+curl -X POST "/api/ai/player-analysis" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "playerData": {
+      "name": "Lewandowski",
+      "team": "Barcelona",
+      "position": "FWD",
+      "stats": {"goals": 2, "games": 4}
+    },
+    "includeWeather": true,
+    "teamKey": "barcelona"
+  }'
+
+# Post para redes sociales
+curl -X POST "/api/ai/social-post" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "chollo",
+    "data": {
+      "name": "Pere Milla",
+      "team": "Espanyol",
+      "price": 4.0,
+      "valueRatio": 1.25
+    }
+  }'
+```
+
+### 🎯 Integración con HeyGen
+
+El contenido generado está optimizado para:
+- **Avatares IA**: Tono profesional pero cercano
+- **Duración**: Textos de 30-60 segundos de lectura
+- **Contexto**: Integración con datos clima y estadísticas
+- **Personalización**: Adaptado por equipo/jugador
+
+### ⚠️ Consideraciones Importantes
+
+1. **Rate Limiting**: 100ms entre peticiones
+2. **Coste**: Monitorear uso con `/api/ai/stats`
+3. **Cache**: Aprovechar 90% descuento en contenido similar
+4. **Fallback**: Sistema de respaldo si GPT-5 Mini falla
 
 ## n8n MCP Integration (Oficial)
 

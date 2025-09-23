@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔍 Debug Grid Coordenadas API-Sports - Getafe</title>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -202,9 +203,131 @@
             color: #c53030;
             margin-bottom: 15px;
         }
+
+        /* Dropdown styles */
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .fas {
+            transition: transform 0.2s ease;
+        }
+        .dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            width: 288px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e5e7eb;
+            z-index: 50;
+        }
+        .dropdown-button {
+            background: #eab308;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+        }
+        .dropdown-button:hover {
+            background: #ca8a04;
+        }
+        .functionalities-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- Menú desplegable Funcionalidades -->
+    <div class="functionalities-nav" x-data="{ functionalitiesOpen: false }">
+        <button @click="functionalitiesOpen = !functionalitiesOpen"
+                class="dropdown-button">
+            <i class="fas fa-cogs" style="margin-right: 8px;"></i>
+            Funcionalidades
+            <i class="fas fa-chevron-down" style="margin-left: 8px; font-size: 0.875rem;" :class="{ 'rotate-180': functionalitiesOpen }"></i>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div x-show="functionalitiesOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.away="functionalitiesOpen = false"
+             class="dropdown-menu">
+
+            <div style="padding: 8px 0;">
+                <div style="padding: 8px 16px; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #f3f4f6;">
+                    ⚽ Fantasy La Liga
+                </div>
+
+                <a href="/bargains"
+                   style="display: flex; align-items: center; padding: 12px 16px; font-size: 0.875rem; color: #374151; text-decoration: none; transition: background-color 0.2s, color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#fef3c7'; this.style.color='#92400e';"
+                   onmouseout="this.style.backgroundColor=''; this.style.color='#374151';"
+                   @click="functionalitiesOpen = false">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #fef3c7; border-radius: 8px; margin-right: 12px;">
+                        <i class="fas fa-star" style="color: #d97706;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 500;">Chollos de la Jornada</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Jugadores con mejor ratio valor/precio</div>
+                    </div>
+                </a>
+
+                <a href="/lineups-live"
+                   style="display: flex; align-items: center; padding: 12px 16px; font-size: 0.875rem; color: #374151; text-decoration: none; transition: background-color 0.2s, color 0.2s;"
+                   onmouseover="this.style.backgroundColor='#d1fae5'; this.style.color='#065f46';"
+                   onmouseout="this.style.backgroundColor=''; this.style.color='#374151';"
+                   @click="functionalitiesOpen = false">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #d1fae5; border-radius: 8px; margin-right: 12px;">
+                        <i class="fas fa-users" style="color: #059669;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 500;">Alineaciones en Vivo</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">Formaciones y jugadores tiempo real</div>
+                    </div>
+                </a>
+
+                <div style="padding: 8px 16px; font-size: 0.75rem; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #f3f4f6; border-top: 1px solid #f3f4f6; margin-top: 8px;">
+                    🔧 Herramientas
+                </div>
+
+                <a href="/grid-debug"
+                   style="display: flex; align-items: center; padding: 12px 16px; font-size: 0.875rem; color: #2563eb; background-color: #dbeafe; text-decoration: none;"
+                   @click="functionalitiesOpen = false">
+                    <div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #dbeafe; border-radius: 8px; margin-right: 12px;">
+                        <i class="fas fa-grid-2-plus" style="color: #2563eb;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 500;">Debug Grid Coordenadas</div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">✓ Página actual</div>
+                    </div>
+                </a>
+
+                <div style="border-top: 1px solid #f3f4f6; margin-top: 8px; padding-top: 8px;">
+                    <a href="/" style="display: flex; align-items: center; padding: 8px 16px; font-size: 0.875rem; color: #6b7280; text-decoration: none; transition: background-color 0.2s;"
+                       onmouseover="this.style.backgroundColor='#f9fafb';"
+                       onmouseout="this.style.backgroundColor='';"
+                       @click="functionalitiesOpen = false">
+                        <i class="fas fa-home" style="margin-right: 12px; color: #9ca3af;"></i>
+                        ← Volver al Dashboard Principal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container" x-data="gridDebugApp()">
         <div class="header">
             <h1>🔍 Debug Grid Coordenadas API-Sports</h1>

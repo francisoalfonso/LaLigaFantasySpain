@@ -375,6 +375,66 @@ router.post('/laliga/fantasy-points', async (req, res) => {
   }
 });
 
+// === ENTRENADORES ===
+
+// Obtener entrenadores de La Liga
+router.get('/laliga/coaches', async (req, res) => {
+  try {
+    const team_id = req.query.team_id || null;
+    const result = await apiFootball.getLaLigaCoaches(team_id);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        count: result.count,
+        filters: { team_id },
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
+// Obtener detalles específicos de un entrenador
+router.get('/laliga/coach/:id', async (req, res) => {
+  try {
+    const coach_id = req.params.id;
+    const result = await apiFootball.getCoachDetails(coach_id);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        data: result.data
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football'
+    });
+  }
+});
+
 // === ALINEACIONES EN TIEMPO REAL ===
 
 // Obtener partidos de hoy con alineaciones

@@ -76,6 +76,13 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
+
+        .rotate-180 {
+            transform: rotate(180deg);
+        }
+        .fas {
+            transition: transform 0.2s ease;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="lineupsApp()">
@@ -133,6 +140,82 @@
 
                 <div class="text-sm text-gray-600">
                     <span x-text="lastUpdate"></span>
+                </div>
+
+                <!-- Menú desplegable Funcionalidades -->
+                <div class="relative" x-data="{ functionalitiesOpen: false }">
+                    <button @click="functionalitiesOpen = !functionalitiesOpen"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                        <i class="fas fa-cogs mr-2"></i>
+                        Funcionalidades
+                        <i class="fas fa-chevron-down ml-2 text-sm" :class="{ 'rotate-180': functionalitiesOpen }"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="functionalitiesOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         @click.away="functionalitiesOpen = false"
+                         class="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+
+                        <div class="py-2">
+                            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                                ⚽ Fantasy La Liga
+                            </div>
+
+                            <a href="/bargains"
+                               class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition-colors"
+                               @click="functionalitiesOpen = false">
+                                <div class="flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-lg mr-3">
+                                    <i class="fas fa-star text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Chollos de la Jornada</div>
+                                    <div class="text-xs text-gray-500">Jugadores con mejor ratio valor/precio</div>
+                                </div>
+                            </a>
+
+                            <a href="/lineups-live"
+                               class="flex items-center px-4 py-3 text-sm text-green-600 bg-green-50 transition-colors"
+                               @click="functionalitiesOpen = false">
+                                <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mr-3">
+                                    <i class="fas fa-users text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Alineaciones en Vivo</div>
+                                    <div class="text-xs text-gray-500">✓ Página actual</div>
+                                </div>
+                            </a>
+
+                            <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-t border-gray-100 mt-2">
+                                🔧 Herramientas
+                            </div>
+
+                            <a href="/grid-debug"
+                               class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                               @click="functionalitiesOpen = false">
+                                <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
+                                    <i class="fas fa-grid-2-plus text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Debug Grid Coordenadas</div>
+                                    <div class="text-xs text-gray-500">Visualización sistema posicionamiento</div>
+                                </div>
+                            </a>
+
+                            <div class="border-t border-gray-100 mt-2 pt-2">
+                                <a href="/" class="flex items-center px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                                   @click="functionalitiesOpen = false">
+                                    <i class="fas fa-home mr-3 text-gray-500"></i>
+                                    ← Volver al Dashboard Principal
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -239,6 +322,12 @@
                                 <div class="text-sm">
                                     <i class="fas fa-clock mr-1"></i>
                                     <span x-text="formatDateTime(fixture.date)"></span>
+                                </div>
+                                <!-- Información del clima -->
+                                <div x-show="fixture.weather" class="text-sm mt-1 bg-white bg-opacity-20 rounded px-2 py-1">
+                                    <i class="fas fa-cloud-sun mr-1"></i>
+                                    <span x-text="fixture.weather?.current?.temperature || '--'"></span>°C
+                                    <span class="ml-2" x-text="fixture.weather?.current?.description || 'Clima no disponible'"></span>
                                 </div>
                             </div>
                         </div>
@@ -362,6 +451,9 @@
                                 fixtures_with_lineups: data.fixtures_with_lineups || 0
                             };
                             this.lastUpdate = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+
+                            // Cargar datos meteorológicos para cada partido
+                            await this.loadWeatherForFixtures();
                         } else {
                             this.error = data.error || 'Error cargando alineaciones';
                         }
@@ -392,6 +484,9 @@
                                 fixtures_with_lineups: data.fixtures_with_lineups || 0
                             };
                             this.lastUpdate = `Datos de ${this.selectedDate} - ${new Date().toLocaleTimeString('es-ES')}`;
+
+                            // Cargar datos meteorológicos para cada partido
+                            await this.loadWeatherForFixtures();
 
                             if (data.message) {
                                 // Si hay un mensaje, mostrarlo brevemente sin ser error
@@ -749,6 +844,69 @@
                 quickDate(date) {
                     this.selectedDate = date;
                     this.loadLineupsForDate();
+                },
+
+                // Función para cargar datos meteorológicos
+                async loadWeatherForFixtures() {
+                    if (!this.fixtures || this.fixtures.length === 0) return;
+
+                    // Cargar clima para cada fixture en paralelo
+                    const weatherPromises = this.fixtures.map(async (fixture) => {
+                        const homeTeamKey = this.getTeamKeyFromName(fixture.home_team_name);
+                        if (homeTeamKey) {
+                            try {
+                                const response = await fetch(`/api/weather/current/${homeTeamKey}`);
+                                const weatherData = await response.json();
+                                if (weatherData.success) {
+                                    fixture.weather = weatherData.data;
+                                    console.log(`🌤️ Clima cargado para ${fixture.home_team_name}:`, weatherData.data.current);
+                                }
+                            } catch (error) {
+                                console.warn(`❌ Error cargando clima para ${fixture.home_team_name}:`, error);
+                            }
+                        }
+                    });
+
+                    await Promise.all(weatherPromises);
+                },
+
+                // Mapeo de nombres de equipos a claves del sistema weather
+                getTeamKeyFromName(teamName) {
+                    const teamMapping = {
+                        'Real Madrid': 'real_madrid',
+                        'Barcelona': 'barcelona',
+                        'FC Barcelona': 'barcelona',
+                        'Atletico Madrid': 'atletico_madrid',
+                        'Atlético Madrid': 'atletico_madrid',
+                        'Valencia': 'valencia',
+                        'Sevilla': 'sevilla',
+                        'Real Betis': 'real_betis',
+                        'Villarreal': 'villarreal',
+                        'Athletic Bilbao': 'athletic_bilbao',
+                        'Athletic Club': 'athletic_bilbao',
+                        'Real Sociedad': 'real_sociedad',
+                        'Getafe': 'getafe',
+                        'Leganés': 'leganes',
+                        'Leganes': 'leganes',
+                        'Osasuna': 'osasuna',
+                        'CA Osasuna': 'osasuna',
+                        'Celta Vigo': 'celta_vigo',
+                        'RC Celta de Vigo': 'celta_vigo',
+                        'Deportivo Alavés': 'deportivo_alaves',
+                        'Alaves': 'deportivo_alaves',
+                        'Girona': 'girona',
+                        'Las Palmas': 'las_palmas',
+                        'UD Las Palmas': 'las_palmas',
+                        'Mallorca': 'mallorca',
+                        'RCD Mallorca': 'mallorca',
+                        'Valladolid': 'valladolid',
+                        'Real Valladolid': 'valladolid',
+                        'Espanyol': 'espanyol',
+                        'RCD Espanyol': 'espanyol',
+                        'Rayo Vallecano': 'rayo_vallecano'
+                    };
+
+                    return teamMapping[teamName] || null;
                 }
             }
         }

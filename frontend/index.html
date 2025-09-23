@@ -34,6 +34,80 @@
                             </div>
                         </div>
 
+                        <!-- Menú desplegable Funcionalidades -->
+                        <div class="relative" x-data="{ functionalitiesOpen: false }">
+                            <button @click="functionalitiesOpen = !functionalitiesOpen"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
+                                <i class="fas fa-cogs mr-2"></i>
+                                Funcionalidades
+                                <i class="fas fa-chevron-down ml-2 text-sm" :class="{ 'rotate-180': functionalitiesOpen }"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div x-show="functionalitiesOpen"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 @click.away="functionalitiesOpen = false"
+                                 class="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+
+                                <div class="py-2">
+                                    <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-100">
+                                        ⚽ Fantasy La Liga
+                                    </div>
+
+                                    <a href="/bargains"
+                                       class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-yellow-50 hover:text-yellow-600 transition-colors"
+                                       @click="functionalitiesOpen = false">
+                                        <div class="flex items-center justify-center w-8 h-8 bg-yellow-100 rounded-lg mr-3">
+                                            <i class="fas fa-star text-yellow-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Chollos de la Jornada</div>
+                                            <div class="text-xs text-gray-500">Jugadores con mejor ratio valor/precio</div>
+                                        </div>
+                                    </a>
+
+                                    <a href="/lineups-live"
+                                       class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
+                                       @click="functionalitiesOpen = false">
+                                        <div class="flex items-center justify-center w-8 h-8 bg-green-100 rounded-lg mr-3">
+                                            <i class="fas fa-users text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Alineaciones en Vivo</div>
+                                            <div class="text-xs text-gray-500">Formaciones y jugadores tiempo real</div>
+                                        </div>
+                                    </a>
+
+                                    <div class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-t border-gray-100 mt-2">
+                                        🔧 Herramientas
+                                    </div>
+
+                                    <a href="/grid-debug"
+                                       class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                       @click="functionalitiesOpen = false">
+                                        <div class="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
+                                            <i class="fas fa-grid-2-plus text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium">Debug Grid Coordenadas</div>
+                                            <div class="text-xs text-gray-500">Visualización sistema posicionamiento</div>
+                                        </div>
+                                    </a>
+
+                                    <div class="border-t border-gray-100 mt-2 pt-2">
+                                        <div class="px-4 py-2 text-xs text-gray-400 italic">
+                                            🚀 Más funcionalidades próximamente...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <a href="ai-generator.html"
                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                             <i class="fas fa-robot mr-2"></i>

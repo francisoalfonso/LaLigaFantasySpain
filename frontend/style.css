@@ -237,6 +237,16 @@
   }
 }
 
+/* Dropdown animations */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Icon transitions */
+.fas {
+  transition: transform 0.2s ease;
+}
+
 /* Print styles */
 @media print {
   .no-print {

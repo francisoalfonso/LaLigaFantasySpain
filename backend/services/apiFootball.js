@@ -513,9 +513,25 @@ class ApiFootballClient {
     });
 
     if (result.success && result.data.length > 0) {
-      return {
-        success: true,
-        data: result.data.map(team => ({
+      const lineupsData = [];
+
+      for (const team of result.data) {
+        let coachDetails = null;
+
+        // Obtener detalles completos del entrenador incluyendo foto
+        if (team.coach && team.coach.id) {
+          try {
+            const coachResult = await this.getCoachDetails(team.coach.id);
+            if (coachResult.success) {
+              coachDetails = coachResult.data;
+            }
+          } catch (error) {
+            console.log(`⚠️ No se pudo obtener foto del entrenador ${team.coach.name}:`, error.message);
+            coachDetails = team.coach; // Fallback a datos básicos
+          }
+        }
+
+        lineupsData.push({
           team: {
             id: team.team.id,
             name: team.team.name,
@@ -540,8 +556,19 @@ class ApiFootballClient {
               pos: player.player.pos
             }
           })),
-          coach: team.coach
-        }))
+          coach: {
+            id: coachDetails?.id || team.coach?.id,
+            name: coachDetails?.name || team.coach?.name,
+            photo: coachDetails?.photo || null,
+            age: coachDetails?.age || null,
+            nationality: coachDetails?.nationality || null
+          }
+        });
+      }
+
+      return {
+        success: true,
+        data: lineupsData
       };
     }
 
@@ -591,6 +618,77 @@ class ApiFootballClient {
       error: 'No hay partidos en vivo actualmente',
       data: [],
       count: 0
+    };
+  }
+
+  // === MÉTODOS PARA ENTRENADORES ===
+
+  // Obtener entrenadores de La Liga con fotos
+  async getLaLigaCoaches(teamId = null) {
+    const params = {
+      league: this.LEAGUES.LA_LIGA,
+      season: this.LEAGUES.CURRENT_SEASON
+    };
+
+    if (teamId) {
+      params.team = teamId;
+    }
+
+    const result = await this.makeRequest('/coachs', params);
+
+    if (result.success) {
+      return {
+        success: true,
+        data: result.data.map(coach => ({
+          id: coach.id,
+          name: coach.name,
+          firstname: coach.firstname,
+          lastname: coach.lastname,
+          age: coach.age,
+          nationality: coach.nationality,
+          photo: coach.photo,
+          team: {
+            id: coach.team?.id,
+            name: coach.team?.name,
+            logo: coach.team?.logo
+          },
+          career: coach.career || []
+        })),
+        count: result.count
+      };
+    }
+
+    return result;
+  }
+
+  // Obtener información específica de un entrenador
+  async getCoachDetails(coachId) {
+    const result = await this.makeRequest('/coachs', {
+      id: coachId
+    });
+
+    if (result.success && result.data.length > 0) {
+      const coach = result.data[0];
+      return {
+        success: true,
+        data: {
+          id: coach.id,
+          name: coach.name,
+          firstname: coach.firstname,
+          lastname: coach.lastname,
+          age: coach.age,
+          nationality: coach.nationality,
+          photo: coach.photo,
+          birth: coach.birth,
+          team: coach.team,
+          career: coach.career || []
+        }
+      };
+    }
+
+    return {
+      success: false,
+      error: 'No se encontró información del entrenador'
     };
   }
 }

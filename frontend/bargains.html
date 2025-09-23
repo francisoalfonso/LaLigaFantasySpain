@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chollos de la Jornada - Fantasy La Liga</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+    .bargain-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .bargain-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .position-badge {
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+    }
+    .gk { background-color: #FEF3C7; color: #92400E; }
+    .def { background-color: #DBEAFE; color: #1E40AF; }
+    .mid { background-color: #D1FAE5; color: #065F46; }
+    .fwd { background-color: #FEE2E2; color: #991B1B; }
+    .loading-spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div x-data="bargainApp()" x-init="loadBargains()">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+          <div class="flex items-center">
+            <h1 class="text-2xl font-bold text-gray-900">⚡ Chollos de la Jornada</h1>
+            <span class="ml-3 px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+              Fantasy La Liga 2025-26
+            </span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button @click="loadBargains()"
+                    :disabled="loading"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              <span x-show="!loading">🔄 Actualizar</span>
+              <span x-show="loading">⏳ Cargando...</span>
+            </button>
+            <button @click="showDebugInfo = !showDebugInfo"
+                    class="px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm">
+              <span x-show="!showDebugInfo">🔍 Debug</span>
+              <span x-show="showDebugInfo">🔍 Ocultar</span>
+            </button>
+            <a href="/" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+              ← Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <!-- Loading State -->
+      <div x-show="loading" class="flex justify-center items-center py-12">
+        <div class="text-center">
+          <div class="loading-spinner mx-auto mb-4"></div>
+          <p class="text-gray-600">Analizando jugadores de La Liga...</p>
+          <p class="text-sm text-gray-500">Esto puede tomar unos segundos</p>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div x-show="error && !loading" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <span class="text-red-400 text-xl">⚠️</span>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Error cargando chollos</h3>
+            <p class="mt-2 text-sm text-red-700" x-text="error"></p>
+            <button @click="loadBargains()"
+                    class="mt-3 px-3 py-1 bg-red-100 text-red-800 rounded text-sm hover:bg-red-200">
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explicación del Ratio de Valor -->
+      <div x-show="!loading && !error" class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <span class="text-blue-500 text-2xl">💡</span>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-blue-900 mb-2">¿Qué es el Ratio de Valor?</h3>
+            <p class="text-blue-800 mb-3">
+              El <strong>Ratio de Valor</strong> mide la <strong>eficiencia</strong> de un jugador: <strong>puntos Fantasy estimados ÷ precio estimado</strong>.
+              Los chollos se ordenan por este criterio porque indica qué jugadores ofrecen <strong>más puntos por cada euro invertido</strong>.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div class="bg-white rounded-lg p-3 border border-blue-100">
+                <div class="font-semibold text-blue-900 mb-1">🎯 Ratio Alto (>1.5)</div>
+                <div class="text-blue-700">Excelente chollo - Muchos puntos por poco precio</div>
+              </div>
+              <div class="bg-white rounded-lg p-3 border border-blue-100">
+                <div class="font-semibold text-blue-900 mb-1">⚖️ Ratio Medio (1.0-1.5)</div>
+                <div class="text-blue-700">Buen valor - Relación equilibrada</div>
+              </div>
+              <div class="bg-white rounded-lg p-3 border border-blue-100">
+                <div class="font-semibold text-blue-900 mb-1">📈 Ejemplo Práctico</div>
+                <div class="text-blue-700">Lewandowski: 8.5 pts ÷ 7.0M = <strong>Ratio 1.21</strong></div>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-blue-600">
+              💭 <strong>¿Por qué se ordena así?</strong> Porque buscas <strong>maximizar puntos con presupuesto limitado</strong>. Un jugador que da 10 puntos por 8M es mejor chollo que uno que da 15 puntos por 15M.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div x-show="!loading && !error" class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">🔍 Filtros de Búsqueda</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Posición</label>
+            <select x-model="selectedPosition" @change="filterBargains()"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2">
+              <option value="">Todas las posiciones</option>
+              <option value="GK">🥅 Porteros</option>
+              <option value="DEF">🛡️ Defensas</option>
+              <option value="MID">⚽ Centrocampistas</option>
+              <option value="FWD">🎯 Delanteros</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Precio máximo</label>
+            <select x-model="maxPrice" @change="filterBargains()"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2">
+              <option value="">Sin límite</option>
+              <option value="5">≤ 5.0M</option>
+              <option value="6">≤ 6.0M</option>
+              <option value="7">≤ 7.0M</option>
+              <option value="8">≤ 8.0M</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Ratio mínimo</label>
+            <select x-model="minRatio" @change="filterBargains()"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2">
+              <option value="">Cualquier ratio</option>
+              <option value="1.2">≥ 1.2</option>
+              <option value="1.5">≥ 1.5</option>
+              <option value="2.0">≥ 2.0</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Ordenar por
+              <span class="text-xs text-gray-500 ml-1">ℹ️ Criterio de ordenación</span>
+            </label>
+            <select x-model="sortBy" @change="filterBargains()"
+                    class="w-full border border-gray-300 rounded-md px-3 py-2">
+              <option value="valueRatio">🎯 Ratio de valor (recomendado)</option>
+              <option value="estimatedPoints">📊 Puntos estimados</option>
+              <option value="estimatedPrice">💰 Precio (menor a mayor)</option>
+              <option value="name">📝 Nombre (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Summary -->
+      <div x-show="!loading && !error && bargains.length > 0" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-blue-600" x-text="filteredBargains.length"></div>
+          <div class="text-sm text-gray-600">Chollos encontrados</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-green-600" x-text="(avgValueRatio || 0).toFixed(2)"></div>
+          <div class="text-sm text-gray-600">Ratio promedio</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-purple-600" x-text="(avgPrice || 0).toFixed(1) + 'M'"></div>
+          <div class="text-sm text-gray-600">Precio promedio</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-orange-600" x-text="lastUpdated"></div>
+          <div class="text-sm text-gray-600">Última actualización</div>
+        </div>
+      </div>
+
+      <!-- Debug Info (solo en desarrollo) -->
+      <div x-show="!loading && showDebugInfo" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-medium text-yellow-800">🔍 Debug Info</h3>
+          <button @click="showDebugInfo = false" class="text-yellow-600 hover:text-yellow-800 text-xs">✕ Ocultar</button>
+        </div>
+        <div class="text-xs text-yellow-700">
+          <div>Loading: <span x-text="loading"></span></div>
+          <div>Error: <span x-text="error || 'No error'"></span></div>
+          <div>Bargains length: <span x-text="bargains.length"></span></div>
+          <div>Filtered length: <span x-text="filteredBargains.length"></span></div>
+          <div>Selected position: <span x-text="selectedPosition || 'None'"></span></div>
+          <div>Max price: <span x-text="maxPrice || 'None'"></span></div>
+          <div>Min ratio: <span x-text="minRatio || 'None'"></span></div>
+          <div>Cache status: <span x-text="cacheStatus || 'Unknown'"></span></div>
+          <div>Last updated: <span x-text="lastUpdated"></span></div>
+        </div>
+      </div>
+
+      <!-- Bargains Grid -->
+      <div x-show="!loading && !error && filteredBargains.length > 0"
+           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <template x-for="(player, index) in filteredBargains" :key="`bargain-${index}-${player.id || index}`">
+          <div class="bargain-card bg-white rounded-lg shadow-md p-6">
+            <!-- Player Header -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center">
+                <img :src="player.photo || '/api/placeholder/60/60'"
+                     :alt="player.name || 'Jugador'"
+                     class="w-12 h-12 rounded-full object-cover mr-3">
+                <div>
+                  <h3 class="font-semibold text-gray-900" x-text="player.name || 'Nombre no disponible'"></h3>
+                  <p class="text-sm text-gray-600" x-text="player.team?.name || 'Equipo no disponible'"></p>
+                </div>
+              </div>
+              <span :class="'position-badge ' + (player.position || 'mid').toLowerCase()"
+                    x-text="player.position || 'N/A'"></span>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-3 mb-4 text-center">
+              <div>
+                <div class="text-lg font-bold text-blue-600" x-text="player.stats?.goals || 0"></div>
+                <div class="text-xs text-gray-500">Goles</div>
+              </div>
+              <div>
+                <div class="text-lg font-bold text-green-600" x-text="player.stats?.assists || 0"></div>
+                <div class="text-xs text-gray-500">Asistencias</div>
+              </div>
+              <div>
+                <div class="text-lg font-bold text-purple-600" x-text="player.stats?.rating || 'N/A'"></div>
+                <div class="text-xs text-gray-500">Rating</div>
+              </div>
+            </div>
+
+            <!-- Value Analysis -->
+            <div class="border-t pt-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">Precio estimado:</span>
+                <span class="font-bold text-green-600" x-text="(player.analysis?.estimatedPrice || 0) + 'M'"></span>
+              </div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">Puntos estimados:</span>
+                <span class="font-bold text-blue-600" x-text="player.analysis?.estimatedPoints || 0"></span>
+              </div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-sm font-medium text-gray-700">Ratio de valor:</span>
+                <div class="flex items-center">
+                  <span class="font-bold text-orange-600 mr-2" x-text="player.analysis?.valueRatio || 0"></span>
+                  <span x-show="(player.analysis?.valueRatio || 0) >= 1.5" class="text-green-500 text-xs">🔥 ¡Chollo!</span>
+                  <span x-show="(player.analysis?.valueRatio || 0) >= 1.2 && (player.analysis?.valueRatio || 0) < 1.5" class="text-blue-500 text-xs">⭐ Bueno</span>
+                  <span x-show="(player.analysis?.valueRatio || 0) < 1.2" class="text-gray-500 text-xs">📊 Normal</span>
+                </div>
+              </div>
+
+              <!-- Value Bar -->
+              <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                <div class="bg-gradient-to-r from-yellow-400 to-green-500 h-2 rounded-full"
+                     :style="'width: ' + Math.min(100, ((player.analysis?.valueRatio || 0) / 3) * 100) + '%'"></div>
+              </div>
+
+              <!-- Recommendation -->
+              <div class="text-xs text-gray-600 italic" x-text="player.analysis?.recommendation || 'Análisis no disponible'"></div>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- No Results -->
+      <div x-show="!loading && !error && filteredBargains.length === 0"
+           class="text-center py-12">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron chollos</h3>
+        <p class="text-gray-600 mb-4">Intenta ajustar los filtros de búsqueda</p>
+        <button @click="resetFilters()"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Limpiar filtros
+        </button>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    function bargainApp() {
+      return {
+        bargains: [],
+        filteredBargains: [],
+        loading: false,
+        error: null,
+        selectedPosition: '',
+        maxPrice: '',
+        minRatio: '',
+        sortBy: 'valueRatio',
+        showDebugInfo: false, // Solo mostrar en desarrollo
+        cacheStatus: 'Unknown',
+
+        // Computed properties
+        get avgValueRatio() {
+          if (this.filteredBargains.length === 0) return 0;
+          return this.filteredBargains.reduce((sum, p) => sum + (p.analysis?.valueRatio || 0), 0) / this.filteredBargains.length;
+        },
+
+        get avgPrice() {
+          if (this.filteredBargains.length === 0) return 0;
+          return this.filteredBargains.reduce((sum, p) => sum + (p.analysis?.estimatedPrice || 0), 0) / this.filteredBargains.length;
+        },
+
+        get lastUpdated() {
+          return new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        },
+
+        async loadBargains() {
+          this.loading = true;
+          this.error = null;
+
+          try {
+            const response = await fetch('/api/bargains/top?limit=20');
+            const data = await response.json();
+
+            console.log('📊 Datos recibidos del API:', data);
+            console.log('📊 Success:', data.success);
+            console.log('📊 Data array:', data.data);
+            console.log('📊 Length:', data.data?.length);
+
+            if (data.success) {
+              this.bargains = data.data;
+              console.log('📊 Bargains asignados:', this.bargains);
+              this.filterBargains();
+              console.log('📊 Filtered bargains:', this.filteredBargains);
+            } else {
+              this.error = data.error || 'Error cargando chollos';
+            }
+          } catch (err) {
+            this.error = 'Error de conexión: ' + err.message;
+            console.error('❌ Error:', err);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        filterBargains() {
+          let filtered = [...this.bargains];
+
+          // Filter by position
+          if (this.selectedPosition) {
+            filtered = filtered.filter(p => p.position === this.selectedPosition);
+          }
+
+          // Filter by max price
+          if (this.maxPrice) {
+            filtered = filtered.filter(p => (p.analysis?.estimatedPrice || 0) <= parseFloat(this.maxPrice));
+          }
+
+          // Filter by min ratio
+          if (this.minRatio) {
+            filtered = filtered.filter(p => (p.analysis?.valueRatio || 0) >= parseFloat(this.minRatio));
+          }
+
+          // Sort
+          filtered.sort((a, b) => {
+            switch (this.sortBy) {
+              case 'valueRatio':
+                return (b.analysis?.valueRatio || 0) - (a.analysis?.valueRatio || 0);
+              case 'estimatedPoints':
+                return (b.analysis?.estimatedPoints || 0) - (a.analysis?.estimatedPoints || 0);
+              case 'estimatedPrice':
+                return (a.analysis?.estimatedPrice || 0) - (b.analysis?.estimatedPrice || 0);
+              case 'name':
+                return (a.name || '').localeCompare(b.name || '');
+              default:
+                return 0;
+            }
+          });
+
+          this.filteredBargains = filtered;
+        },
+
+        resetFilters() {
+          this.selectedPosition = '';
+          this.maxPrice = '';
+          this.minRatio = '';
+          this.sortBy = 'valueRatio';
+          this.filterBargains();
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -17,6 +17,7 @@ const dataSyncRoutes = require('./routes/dataSync');
 const contentGeneratorRoutes = require('./routes/contentGenerator');
 const fixturesRoutes = require('./routes/fixtures');
 const debugRoutes = require('./routes/debug');
+const bargainsRoutes = require('./routes/bargains');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -62,6 +63,7 @@ app.use('/api/sync', dataSyncRoutes);
 app.use('/api/content', contentGeneratorRoutes);
 app.use('/api/fixtures', fixturesRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/bargains', bargainsRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -76,6 +78,11 @@ app.get('/lineups-live', (req, res) => {
 // Ruta para debug de grid de coordenadas
 app.get('/grid-debug', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/grid-debug.html'));
+});
+
+// Ruta para chollos de la jornada
+app.get('/bargains', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/bargains.html'));
 });
 
 // Ruta de salud del servidor
@@ -98,6 +105,7 @@ app.get('/api/info', (req, res) => {
       health: '/health',
       test: '/api/test/*',
       laliga: '/api/laliga/*',
+      bargains: '/api/bargains/*',
       n8n_mcp: '/api/n8n-mcp/*',
       weather: '/api/weather/*',
       database: '/api/database/*',

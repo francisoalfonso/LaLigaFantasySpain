@@ -41,6 +41,27 @@ curl http://localhost:3000/api/weather/test                # AEMET API test
 curl http://localhost:3000/api/database/test               # Database connectivity
 ```
 
+**Note**: This project does not use ESLint, Prettier, or TypeScript. Code quality is maintained through manual review and the existing testing infrastructure.
+
+## Critical Development Notes
+
+### Working with API-Sports Data
+- **ALWAYS check the current season**: API-Sports uses 2025 for the 2024-25 season
+- **Rate limiting**: 75k requests/day on Ultra plan - use existing cache mechanisms
+- **Error handling**: All API calls use try/catch with detailed logging
+- **Testing first**: Always run `curl http://localhost:3000/api/laliga/test` before data work
+
+### Database Operations
+- **Required setup**: Must have `.env.supabase` configured before database operations
+- **Initialization**: Run `npm run db:init` after any schema changes
+- **Testing**: Use `npm run db:test:quick` for connectivity verification
+
+### Development Workflow
+1. Start server: `npm run dev` (uses nodemon for auto-reload)
+2. Test API connectivity: `curl http://localhost:3000/api/test/ping`
+3. Verify database: `npm run db:test:quick`
+4. Test specific functionality with appropriate `/api/*/test` endpoint
+
 ## Project Structure
 
 ```
@@ -355,6 +376,27 @@ La página `/bargains` incluye:
 - **PredictorValor**: AI-driven player value prediction system
 - **PlayersManager**: Centralized player data management and synchronization
 - **ContentGenerator**: Automated content creation for social media integration
+
+## Code Architecture Guidelines
+
+### Adding New Features
+1. **Always use existing patterns**: Check similar functionality in existing routes/services
+2. **Rate limiting awareness**: New API-Sports calls must respect the 75k/day limit
+3. **Error handling**: Follow the try/catch + detailed logging pattern seen in all services
+4. **Testing routes**: Every new feature should have a corresponding `/test` endpoint
+5. **Database changes**: Update both schema and init-database.js when adding tables
+
+### Service Layer Patterns
+- **Client initialization**: All external APIs use centralized client pattern (see apiFootball.js)
+- **Cache integration**: Use existing BargainCache/PlayersCache patterns for performance
+- **Data transformation**: Process raw API data through dataProcessor.js before storage
+- **Modular routes**: Each domain gets its own route file (apiFootball.js, bargains.js, etc.)
+
+### Frontend Integration
+- **Alpine.js**: All frontend reactivity uses Alpine.js, avoid vanilla DOM manipulation
+- **API calls**: Frontend makes direct calls to `/api/*` endpoints
+- **Static serving**: All frontend files served from `backend/server.js` static middleware
+- **No build process**: Frontend is vanilla HTML/CSS/JS with CDN dependencies
 
 ## Testing Strategy
 

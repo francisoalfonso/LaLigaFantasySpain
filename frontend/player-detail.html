@@ -7,8 +7,12 @@
 
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div x-data="playerDetailApp()" x-init="init()" class="min-h-screen">
@@ -63,7 +67,7 @@
         </div>
 
         <!-- Player Content -->
-        <div x-show="!loading && !error && player" class="container mx-auto px-4 py-8">
+        <div x-show="!loading && !error && player" x-cloak class="container mx-auto px-4 py-8">
 
             <!-- Player Header -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -73,56 +77,56 @@
                     <div class="flex-shrink-0">
                         <div class="relative">
                             <img
-                                :src="player.player?.photo || '/placeholder-player.png'"
-                                :alt="player.player?.name"
+                                :src="player?.player?.photo || '/placeholder-player.png'"
+                                :alt="player?.player?.name || 'Jugador'"
                                 class="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover border-4 border-blue-200 shadow-lg"
                                 onerror="this.src='/placeholder-player.png'"
                             >
                             <!-- Position Badge -->
                             <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                <span x-text="player.games?.position || 'N/A'"></span>
+                                <span x-text="player?.games?.position || 'N/A'"></span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Player Info -->
                     <div class="flex-grow text-center lg:text-left">
-                        <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-2" x-text="player.player?.name"></h1>
+                        <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-2" x-text="player?.player?.name || 'Cargando...'"></h1>
                         <div class="flex flex-wrap justify-center lg:justify-start items-center gap-4 mb-4">
                             <div class="flex items-center">
                                 <img
-                                    :src="player.team?.logo"
-                                    :alt="player.team?.name"
+                                    :src="player?.team?.logo"
+                                    :alt="player?.team?.name"
                                     class="w-6 h-6 mr-2"
                                 >
-                                <span class="text-lg font-semibold text-gray-700" x-text="player.team?.name"></span>
+                                <span class="text-lg font-semibold text-gray-700" x-text="player?.team?.name || 'N/A'"></span>
                             </div>
-                            <span class="text-gray-600" x-text="`${player.player?.age} años`"></span>
-                            <span class="text-gray-600" x-text="player.player?.nationality"></span>
+                            <span class="text-gray-600" x-text="player?.player?.age ? `${player.player.age} años` : 'N/A'"></span>
+                            <span class="text-gray-600" x-text="player?.player?.nationality || 'N/A'"></span>
                         </div>
 
                         <!-- Physical Stats -->
                         <div class="flex flex-wrap justify-center lg:justify-start gap-4 text-sm text-gray-600 mb-4">
-                            <span x-show="player.player?.height" x-text="`Altura: ${player.player?.height}`"></span>
-                            <span x-show="player.player?.weight" x-text="`Peso: ${player.player?.weight}`"></span>
+                            <span x-show="player?.player?.height" x-text="`Altura: ${player?.player?.height}`"></span>
+                            <span x-show="player?.player?.weight" x-text="`Peso: ${player?.player?.weight}`"></span>
                         </div>
 
                         <!-- Quick Stats -->
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-blue-50 p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-blue-600" x-text="player.games?.appearences || 0"></div>
+                                <div class="text-2xl font-bold text-blue-600" x-text="player?.games?.appearences || 0"></div>
                                 <div class="text-sm text-gray-600">Partidos</div>
                             </div>
                             <div class="bg-green-50 p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-green-600" x-text="player.goals?.total || 0"></div>
+                                <div class="text-2xl font-bold text-green-600" x-text="player?.goals?.total || 0"></div>
                                 <div class="text-sm text-gray-600">Goles</div>
                             </div>
                             <div class="bg-purple-50 p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-purple-600" x-text="player.goals?.assists || 0"></div>
+                                <div class="text-2xl font-bold text-purple-600" x-text="player?.goals?.assists || 0"></div>
                                 <div class="text-sm text-gray-600">Asistencias</div>
                             </div>
                             <div class="bg-yellow-50 p-3 rounded-lg text-center">
-                                <div class="text-2xl font-bold text-yellow-600" x-text="(player.games?.rating ? parseFloat(player.games?.rating).toFixed(1) : 'N/A')"></div>
+                                <div class="text-2xl font-bold text-yellow-600" x-text="(player?.games?.rating ? parseFloat(player?.games?.rating).toFixed(1) : 'N/A')"></div>
                                 <div class="text-sm text-gray-600">Rating</div>
                             </div>
                         </div>
@@ -133,17 +137,17 @@
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-4 mb-8">
                 <button
-                    @click="loadPrediction()"
-                    :disabled="loadingPrediction"
-                    class="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    @click="console.log('🔮 Prediction button clicked'); loadPrediction()"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    :class="predictionLoading ? 'opacity-75' : ''"
                 >
-                    <i class="fas fa-crystal-ball mr-2"></i>
-                    <span x-show="!loadingPrediction">Obtener Predicción</span>
-                    <span x-show="loadingPrediction">Analizando...</span>
+                    <i class="fas fa-crystal-ball mr-2" :class="predictionLoading ? 'animate-spin' : ''"></i>
+                    <span x-text="predictionLoading ? 'Cargando...' : 'Obtener Predicción'"></span>
                 </button>
 
                 <button
-                    @click="showSection = showSection === 'stats' ? '' : 'stats'"
+                    @click="console.log('📊 Stats button clicked, current section:', showSection); showSection = showSection === 'stats' ? '' : 'stats'"
+                    :disabled="false"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
                     :class="showSection === 'stats' ? 'bg-blue-800' : ''"
                 >
@@ -152,7 +156,18 @@
                 </button>
 
                 <button
+                    @click="toggleEvolution()"
+                    :disabled="false"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    :class="showSection === 'evolution' ? 'bg-indigo-800' : ''"
+                >
+                    <i class="fas fa-chart-line mr-2"></i>
+                    Evolución de Valor
+                </button>
+
+                <button
                     @click="showSection = showSection === 'history' ? '' : 'history'"
+                    :disabled="false"
                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
                     :class="showSection === 'history' ? 'bg-green-800' : ''"
                 >
@@ -162,6 +177,7 @@
 
                 <button
                     @click="showSection = showSection === 'injuries' ? '' : 'injuries'"
+                    :disabled="false"
                     class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
                     :class="showSection === 'injuries' ? 'bg-red-800' : ''"
                 >
@@ -183,20 +199,20 @@
                         <h3 class="font-semibold text-gray-700 mb-2">Precio Actual vs Predicción</h3>
                         <div class="flex items-center justify-between">
                             <div class="text-center">
-                                <div class="text-xl font-bold text-gray-800" x-text="`${prediction.currentPrice}M`"></div>
+                                <div class="text-xl font-bold text-gray-800" x-text="prediction?.currentPrice ? `${prediction.currentPrice}M` : 'N/A'"></div>
                                 <div class="text-sm text-gray-600">Actual</div>
                             </div>
                             <i class="fas fa-arrow-right text-gray-400"></i>
                             <div class="text-center">
-                                <div class="text-xl font-bold" :class="prediction.priceChange > 0 ? 'text-green-600' : prediction.priceChange < 0 ? 'text-red-600' : 'text-gray-600'" x-text="`${prediction.predictedPrice}M`"></div>
+                                <div class="text-xl font-bold" :class="prediction?.priceChange > 0 ? 'text-green-600' : prediction?.priceChange < 0 ? 'text-red-600' : 'text-gray-600'" x-text="prediction?.predictedPrice ? `${prediction.predictedPrice}M` : 'N/A'"></div>
                                 <div class="text-sm text-gray-600">Predicho</div>
                             </div>
                         </div>
                         <div class="mt-2 text-center">
                             <span
                                 class="text-sm font-semibold"
-                                :class="prediction.priceChange > 0 ? 'text-green-600' : prediction.priceChange < 0 ? 'text-red-600' : 'text-gray-600'"
-                                x-text="`${prediction.priceChange > 0 ? '+' : ''}${prediction.priceChange}M (${prediction.changePercentage}%)`"
+                                :class="prediction?.priceChange > 0 ? 'text-green-600' : prediction?.priceChange < 0 ? 'text-red-600' : 'text-gray-600'"
+                                x-text="prediction?.priceChange ? `${prediction.priceChange > 0 ? '+' : ''}${prediction.priceChange}M (${prediction.changePercentage}%)` : 'N/A'"
                             ></span>
                         </div>
                     </div>
@@ -207,12 +223,12 @@
                         <div class="text-center">
                             <div
                                 class="inline-block px-3 py-1 rounded-full text-sm font-semibold mb-2"
-                                :class="getActionColor(prediction.recommendation?.action)"
-                                x-text="prediction.recommendation?.action"
+                                :class="getActionColor(prediction?.recommendation?.action)"
+                                x-text="prediction?.recommendation?.action || 'N/A'"
                             ></div>
-                            <div class="text-sm text-gray-600 mb-2" x-text="prediction.recommendation?.reason"></div>
+                            <div class="text-sm text-gray-600 mb-2" x-text="prediction?.recommendation?.reason || 'N/A'"></div>
                             <div class="text-xs text-gray-500">
-                                Confianza: <span :class="getConfidenceColor(prediction.confidence)" x-text="`${prediction.confidence}%`"></span>
+                                Confianza: <span :class="getConfidenceColor(prediction?.confidence)" x-text="prediction?.confidence ? `${prediction.confidence}%` : 'N/A'"></span>
                             </div>
                         </div>
                     </div>
@@ -221,10 +237,10 @@
                     <div class="bg-white rounded-lg p-4 shadow-md">
                         <h3 class="font-semibold text-gray-700 mb-2">Tendencia</h3>
                         <div class="text-center">
-                            <div class="text-2xl mb-2" x-text="getTrendEmoji(prediction.trend)"></div>
-                            <div class="text-lg font-semibold capitalize" x-text="prediction.trend"></div>
+                            <div class="text-2xl mb-2" x-text="getTrendEmoji(prediction?.trend)"></div>
+                            <div class="text-lg font-semibold capitalize" x-text="prediction?.trend || 'N/A'"></div>
                             <div class="text-sm text-gray-600 mt-2">
-                                Generada: <span x-text="new Date(prediction.generatedAt).toLocaleDateString()"></span>
+                                Generada: <span x-text="prediction?.generatedAt ? new Date(prediction.generatedAt).toLocaleDateString() : 'N/A'"></span>
                             </div>
                         </div>
                     </div>
@@ -234,10 +250,118 @@
                 <div class="mt-6">
                     <h3 class="font-semibold text-gray-700 mb-3">Factores de Análisis</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <template x-for="factor in prediction.factors" :key="factor">
+                        <template x-for="factor in (prediction?.factors || [])" :key="factor">
                             <div class="bg-white bg-opacity-50 px-3 py-1 rounded text-sm" x-text="factor"></div>
                         </template>
                     </div>
+                </div>
+            </div>
+
+            <!-- Fantasy Value Evolution Section -->
+            <div x-show="showSection === 'evolution'" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-indigo-600"></i>
+                    Evolución de Valor Fantasy - Temporada 2025-26
+                </h2>
+
+                <!-- Loading State for Evolution -->
+                <div x-show="loadingEvolution" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                    <p class="mt-4 text-gray-600">Cargando evolución de valor...</p>
+                </div>
+
+                <!-- Evolution Chart and Data -->
+                <div x-show="!loadingEvolution && evolution" x-init="if (showSection === 'evolution' && evolution) loadEvolutionData()">
+                    <!-- Summary Cards -->
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-blue-600" x-text="evolution?.summary?.startValue ? `${evolution.summary.startValue}M` : 'N/A'"></div>
+                            <div class="text-sm text-gray-600">Valor Inicial</div>
+                        </div>
+                        <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold text-green-600" x-text="evolution?.summary?.currentValue ? `${evolution.summary.currentValue}M` : 'N/A'"></div>
+                            <div class="text-sm text-gray-600">Valor Actual</div>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold" :class="evolution?.summary?.totalPriceChange >= 0 ? 'text-green-600' : 'text-red-600'" x-text="evolution?.summary?.totalPriceChange ? `${evolution.summary.totalPriceChange >= 0 ? '+' : ''}${evolution.summary.totalPriceChange}M` : 'N/A'"></div>
+                            <div class="text-sm text-gray-600">Cambio Total</div>
+                        </div>
+                        <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 p-4 rounded-lg text-center">
+                            <div class="text-2xl font-bold" :class="evolution?.summary?.totalPercentChange >= 0 ? 'text-green-600' : 'text-red-600'" x-text="evolution?.summary?.totalPercentChange ? `${evolution.summary.totalPercentChange >= 0 ? '+' : ''}${evolution.summary.totalPercentChange}%` : 'N/A'"></div>
+                            <div class="text-sm text-gray-600">% Cambio</div>
+                        </div>
+                    </div>
+
+                    <!-- Trend Indicator -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-3" x-text="getTrendEmoji(evolution?.trend)"></span>
+                                <div>
+                                    <div class="font-semibold text-gray-800">Tendencia Actual</div>
+                                    <div class="text-sm text-gray-600 capitalize" x-text="evolution?.trend || 'N/A'"></div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-semibold text-gray-800" x-text="evolution?.summary?.totalFantasyPoints ? `${evolution.summary.totalFantasyPoints} puntos` : 'N/A'"></div>
+                                <div class="text-sm text-gray-600">Total Fantasy</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h3 class="font-semibold text-gray-700 mb-4">Gráfica de Evolución</h3>
+                        <div class="relative">
+                            <canvas id="evolutionChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Performance Table -->
+                    <div class="overflow-x-auto">
+                        <h3 class="font-semibold text-gray-700 mb-4">Últimas 10 Jornadas</h3>
+                        <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Jornada</th>
+                                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-600">Fecha</th>
+                                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-600">Valor</th>
+                                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-600">Cambio</th>
+                                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-600">Rating</th>
+                                    <th class="px-4 py-2 text-right text-sm font-semibold text-gray-600">Puntos</th>
+                                    <th class="px-4 py-2 text-center text-sm font-semibold text-gray-600">Forma</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="gameweek in (evolution?.evolution?.slice(-10) || [])" :key="gameweek.gameweek">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-2 text-sm font-medium text-gray-900" x-text="gameweek.gameweek"></td>
+                                        <td class="px-4 py-2 text-sm text-gray-600" x-text="new Date(gameweek.date).toLocaleDateString()"></td>
+                                        <td class="px-4 py-2 text-sm text-right font-semibold" x-text="`${gameweek.fantasyValue}M`"></td>
+                                        <td class="px-4 py-2 text-sm text-right" :class="gameweek.priceChange >= 0 ? 'text-green-600' : 'text-red-600'" x-text="`${gameweek.priceChange >= 0 ? '+' : ''}${gameweek.priceChange}M`"></td>
+                                        <td class="px-4 py-2 text-sm text-right" x-text="gameweek.rating"></td>
+                                        <td class="px-4 py-2 text-sm text-right font-semibold" x-text="gameweek.fantasyPoints"></td>
+                                        <td class="px-4 py-2 text-center">
+                                            <span class="inline-block px-2 py-1 text-xs rounded-full" :class="getFormColor(gameweek.form)" x-text="gameweek.form"></span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- No Evolution Data -->
+                <div x-show="!loadingEvolution && !evolution" class="text-center py-8">
+                    <i class="fas fa-chart-line text-gray-400 text-4xl mb-4"></i>
+                    <p class="text-gray-600 mb-4">No hay datos de evolución disponibles</p>
+                    <button
+                        @click="loadEvolutionData()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                        <i class="fas fa-refresh mr-2"></i>
+                        Cargar Evolución
+                    </button>
                 </div>
             </div>
 
@@ -471,6 +595,10 @@
                 recentGames: [],
                 injuries: [],
                 showSection: '',
+                evolution: null,
+                loadingEvolution: false,
+                evolutionChart: null,
+                predictionLoading: false,
 
                 // Initialize
                 init() {
@@ -512,27 +640,49 @@
                     }
                 },
 
-                async loadPrediction() {
-                    try {
-                        this.loadingPrediction = true;
+                loadPrediction() {
+                    console.log('🔮 Iniciando predicción...');
 
-                        const response = await fetch(`/api/predictions/player/${this.playerId}`);
-                        const result = await response.json();
-
-                        if (result.success) {
-                            this.prediction = result.data;
-                            console.log('🔮 Predicción cargada:', this.prediction);
-                        } else {
-                            console.error('Error cargando predicción:', result.error);
-                            alert('❌ Error: ' + (result.error || 'No se pudo cargar la predicción'));
-                        }
-
-                    } catch (error) {
-                        console.error('❌ Error cargando predicción:', error);
-                        alert('❌ Error de conexión: No se pudo obtener la predicción');
-                    } finally {
-                        this.loadingPrediction = false;
+                    // Prevenir clics múltiples
+                    if (this.predictionLoading) {
+                        console.log('⚠️ Predicción ya en curso, ignorando clic');
+                        return;
                     }
+
+                    // Activar indicador de carga
+                    this.predictionLoading = true;
+
+                    // Ejecutar fetch FUERA del contexto de Alpine usando setTimeout
+                    const playerId = this.playerId;
+                    const self = this;
+
+                    console.log('⏳ Ejecutando fetch en background...');
+
+                    setTimeout(async () => {
+                        try {
+                            console.log('📡 Fetch iniciado para player:', playerId);
+                            const response = await fetch(`/api/predictions/player/${playerId}`);
+                            const result = await response.json();
+
+                            if (result.success) {
+                                self.prediction = result.data;
+                                console.log('✅ Predicción cargada exitosamente');
+                            } else {
+                                console.log('❌ Error en respuesta:', result.error);
+                                alert('Error: ' + result.error);
+                            }
+                        } catch (error) {
+                            console.log('❌ Error de fetch:', error.message);
+                            alert('Error de conexión. Inténtalo más tarde.');
+                        } finally {
+                            // Resetear estado de carga
+                            self.predictionLoading = false;
+                            console.log('🔄 predictionLoading reseteado a false');
+                        }
+                    }, 10);
+
+                    // Función retorna inmediatamente - Alpine no se bloquea
+                    console.log('🔄 loadPrediction retornando inmediatamente');
                 },
 
                 showError(message) {
@@ -547,6 +697,7 @@
 
                 // Helper methods
                 getTrendEmoji(trend) {
+                    if (!trend) return '❓';
                     const emojis = {
                         'rising': '📈',
                         'falling': '📉',
@@ -556,18 +707,204 @@
                 },
 
                 getConfidenceColor(confidence) {
+                    if (!confidence && confidence !== 0) return 'text-gray-600';
                     if (confidence >= 80) return 'text-green-600 font-semibold';
                     if (confidence >= 60) return 'text-yellow-600 font-semibold';
                     return 'text-red-600 font-semibold';
                 },
 
                 getActionColor(action) {
+                    if (!action) return 'bg-gray-100 text-gray-800';
                     const colors = {
                         'BUY': 'bg-green-100 text-green-800',
                         'SELL': 'bg-red-100 text-red-800',
                         'HOLD': 'bg-gray-100 text-gray-800'
                     };
                     return colors[action] || 'bg-gray-100 text-gray-800';
+                },
+
+                getFormColor(form) {
+                    if (!form) return 'bg-gray-100 text-gray-800';
+                    const colors = {
+                        'excellent': 'bg-green-100 text-green-800',
+                        'good': 'bg-blue-100 text-blue-800',
+                        'average': 'bg-yellow-100 text-yellow-800',
+                        'poor': 'bg-red-100 text-red-800'
+                    };
+                    return colors[form] || 'bg-gray-100 text-gray-800';
+                },
+
+                async loadEvolutionData() {
+                    if (!this.playerId) return;
+
+                    try {
+                        this.loadingEvolution = true;
+
+                        const response = await fetch(`/api/evolution/player/${this.playerId}`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.evolution = result.data;
+                            console.log('📈 Evolución cargada:', this.evolution);
+
+                            // Crear gráfica cuando los datos estén disponibles
+                            this.$nextTick(() => {
+                                setTimeout(() => {
+                                    this.createEvolutionChart();
+                                }, 200);
+                            });
+                        } else {
+                            console.error('Error cargando evolución:', result.error);
+                            alert('❌ Error: ' + (result.error || 'No se pudo cargar la evolución'));
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Error cargando evolución:', error);
+                        alert('❌ Error de conexión: No se pudo obtener la evolución');
+                    } finally {
+                        this.loadingEvolution = false;
+                    }
+                },
+
+                toggleEvolution() {
+                    console.log('🔄 Toggle evolution clicked, current section:', this.showSection);
+                    if (this.showSection === 'evolution') {
+                        this.showSection = '';
+                        console.log('✅ Hiding evolution section');
+                    } else {
+                        this.showSection = 'evolution';
+                        console.log('📊 Showing evolution section');
+                        if (!this.evolution) {
+                            console.log('📈 No evolution data, loading...');
+                            this.loadEvolutionData();
+                        } else {
+                            console.log('✅ Evolution data already exists');
+                        }
+                    }
+                },
+
+                createEvolutionChart() {
+                    if (!this.evolution || !this.evolution.evolution) {
+                        console.log('❌ No evolution data for chart');
+                        return;
+                    }
+
+                    const ctx = document.getElementById('evolutionChart');
+                    if (!ctx) {
+                        console.log('❌ Canvas element not found');
+                        return;
+                    }
+
+                    console.log('📊 Creating chart with data:', this.evolution.evolution.length, 'points');
+
+                    // Destruir gráfica anterior si existe
+                    if (this.evolutionChart) {
+                        this.evolutionChart.destroy();
+                    }
+
+                    const gameweeks = this.evolution.evolution.map(e => `J${e.gameweek}`);
+                    const values = this.evolution.evolution.map(e => e.fantasyValue);
+                    const points = this.evolution.evolution.map(e => e.fantasyPoints);
+
+                    this.evolutionChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: gameweeks,
+                            datasets: [
+                                {
+                                    label: 'Valor Fantasy (M)',
+                                    data: values,
+                                    borderColor: 'rgb(99, 102, 241)',
+                                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                    tension: 0.4,
+                                    fill: true,
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Puntos Fantasy',
+                                    data: points,
+                                    borderColor: 'rgb(34, 197, 94)',
+                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                    tension: 0.4,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Jornadas'
+                                    },
+                                    ticks: {
+                                        maxTicksLimit: 10
+                                    }
+                                },
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Valor Fantasy (M)',
+                                        color: 'rgb(99, 102, 241)'
+                                    },
+                                    ticks: {
+                                        color: 'rgb(99, 102, 241)'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Puntos Fantasy',
+                                        color: 'rgb(34, 197, 94)'
+                                    },
+                                    ticks: {
+                                        color: 'rgb(34, 197, 94)'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    },
+                                }
+                            },
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: `Evolución Fantasy - ${this.evolution.playerName}`
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        afterLabel: function(context) {
+                                            const gameweek = context.parsed.x;
+                                            const evolutionData = this.evolution.evolution[gameweek];
+                                            if (evolutionData) {
+                                                return [
+                                                    `Rating: ${evolutionData.rating}`,
+                                                    `Forma: ${evolutionData.form}`,
+                                                    `Cambio: ${evolutionData.priceChange >= 0 ? '+' : ''}${evolutionData.priceChange}M`
+                                                ];
+                                            }
+                                            return [];
+                                        }.bind(this)
+                                    }
+                                }
+                            }
+                        }
+                    });
                 }
             };
         }

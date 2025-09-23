@@ -13,6 +13,10 @@ const fixtureAnalyzer = new FixtureAnalyzer();
 const bargainAnalyzer = new BargainAnalyzer(apiFootball, fixtureAnalyzer);
 const predictorValor = new PredictorValor(fixtureAnalyzer, apiFootball);
 
+// Cache para predicciones (5 minutos)
+const predictionCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
 // Obtener predicciones para jugadores top (chollos actuales)
 router.get('/top-players', async (req, res) => {
   try {
@@ -85,12 +89,25 @@ router.get('/player/:playerId', async (req, res) => {
       });
     }
 
-    console.log(`🎯 Obteniendo predicción específica para jugador ${playerId}...`);
+    // Verificar cache primero
+    const cacheKey = `prediction_${playerId}`;
+    const cached = predictionCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`⚡ Predicción en cache para jugador ${playerId}`);
+      return res.json({
+        success: true,
+        message: 'Predicción obtenida desde cache',
+        data: cached.data,
+        cached: true
+      });
+    }
 
-    // Buscar jugador en chollos primero, luego en API-Sports si no está
+    console.log(`🎯 Generando nueva predicción para jugador ${playerId}...`);
+
+    // Buscar jugador en chollos primero (menos jugadores para acelerar)
     let player = null;
 
-    const bargains = await bargainAnalyzer.identifyBargains(200);
+    const bargains = await bargainAnalyzer.identifyBargains(50); // Reducido de 200 a 50
     player = bargains.data.find(p => p.id === playerId);
 
     if (!player) {
@@ -129,6 +146,12 @@ router.get('/player/:playerId', async (req, res) => {
     // Generar predicción detallada
     const prediction = await predictorValor.predictPlayerValue(player);
 
+    // Guardar en cache
+    predictionCache.set(cacheKey, {
+      data: prediction,
+      timestamp: Date.now()
+    });
+
     res.json({
       success: true,
       message: `Predicción generada para ${player.name}`,
@@ -142,7 +165,8 @@ router.get('/player/:playerId', async (req, res) => {
           age: player.age,
           nationality: player.nationality
         },
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        cached: false
       }
     });
 

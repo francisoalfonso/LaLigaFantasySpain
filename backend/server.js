@@ -20,6 +20,7 @@ const debugRoutes = require('./routes/debug');
 const bargainsRoutes = require('./routes/bargains');
 const predictionsRoutes = require('./routes/predictions');
 const contentAIRoutes = require('./routes/contentAI');
+const evolutionRoutes = require('./routes/evolution');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -68,6 +69,7 @@ app.use('/api/debug', debugRoutes);
 app.use('/api/bargains', bargainsRoutes);
 app.use('/api/predictions', predictionsRoutes);
 app.use('/api/ai', contentAIRoutes);
+app.use('/api/evolution', evolutionRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {

@@ -18,6 +18,7 @@ const contentGeneratorRoutes = require('./routes/contentGenerator');
 const fixturesRoutes = require('./routes/fixtures');
 const debugRoutes = require('./routes/debug');
 const bargainsRoutes = require('./routes/bargains');
+const predictionsRoutes = require('./routes/predictions');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -64,6 +65,7 @@ app.use('/api/content', contentGeneratorRoutes);
 app.use('/api/fixtures', fixturesRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/bargains', bargainsRoutes);
+app.use('/api/predictions', predictionsRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -83,6 +85,21 @@ app.get('/grid-debug', (req, res) => {
 // Ruta para chollos de la jornada
 app.get('/bargains', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/bargains.html'));
+});
+
+// Ruta para vista detallada de jugador
+app.get('/player/:id', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/player-detail.html'));
+});
+
+// Ruta para agenda de jugadores
+app.get('/players', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
+});
+
+// Ruta alternativa para agenda de jugadores
+app.get('/players-agenda', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
 });
 
 // Ruta de salud del servidor

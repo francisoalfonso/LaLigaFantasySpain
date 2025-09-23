@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugadores de la Liga - Fantasy La Liga Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="playersAgendaApp()" x-init="init()" class="min-h-screen">
+        <!-- Header Navigation -->
+        <nav class="bg-gradient-to-r from-blue-900 via-purple-900 to-indigo-900 text-white p-4 shadow-lg">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-futbol mr-2 text-yellow-400"></i>
+                        Fantasy La Liga
+                    </a>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                    <span class="text-lg">⚽ Jugadores de la Liga</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/bargains" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-gem mr-2"></i>
+                        Chollos
+                    </a>
+                    <a href="/lineups-live" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-users-cog mr-2"></i>
+                        Alineaciones
+                    </a>
+                    <a href="/" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Header Info -->
+        <div class="bg-white shadow-sm border-b">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">⚽ Jugadores de La Liga</h1>
+                        <p class="text-gray-600">Todos los jugadores de La Liga 25/26 • Análisis completo • Acceso directo a detalles</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button @click="loadPlayers()"
+                                :disabled="loading"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center">
+                            <i class="fas fa-sync mr-2" :class="loading ? 'fa-spin' : ''"></i>
+                            <span x-show="!loading">Actualizar Lista</span>
+                            <span x-show="loading">Cargando...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="mt-4 text-xl text-gray-600">Cargando jugadores de La Liga...</p>
+                <p class="text-sm text-gray-500">Esto puede tardar unos segundos</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" class="container mx-auto px-4 py-8">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" x-text="errorMessage"></span>
+                <div class="mt-4">
+                    <button @click="retry()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div x-show="!loading && !error" class="container mx-auto px-4 py-8">
+
+            <!-- Filters and Controls -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h2 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-filter mr-2 text-blue-600"></i>
+                    Filtros y Ordenación
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Position Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Posición</label>
+                        <select x-model="selectedPosition" @change="filterPlayers()"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todas las posiciones</option>
+                            <option value="Goalkeeper">🥅 Porteros</option>
+                            <option value="Defender">🛡️ Defensas</option>
+                            <option value="Midfielder">⚽ Centrocampistas</option>
+                            <option value="Attacker">🎯 Delanteros</option>
+                        </select>
+                    </div>
+
+                    <!-- Team Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Equipo</label>
+                        <select x-model="selectedTeam" @change="filterPlayers()"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todos los equipos</option>
+                            <template x-for="team in availableTeams" :key="team.id">
+                                <option :value="team.id" x-text="team.name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                        <select x-model="selectedStatus" @change="filterPlayers()"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="">Todos</option>
+                            <option value="available">✅ Disponible</option>
+                            <option value="injured">🤕 Lesionado</option>
+                            <option value="no-minutes">⏸️ Sin minutos</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort By -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ordenar por</label>
+                        <select x-model="sortBy" @change="filterPlayers()"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2">
+                            <option value="name">📝 Nombre (A-Z)</option>
+                            <option value="team">🏟️ Equipo</option>
+                            <option value="position">📍 Posición</option>
+                            <option value="rating">⭐ Rating</option>
+                            <option value="goals">⚽ Goles</option>
+                            <option value="minutes">⏱️ Minutos</option>
+                            <option value="age">🎂 Edad</option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar</label>
+                        <input
+                            type="text"
+                            x-model="searchQuery"
+                            @input="filterPlayers()"
+                            placeholder="Nombre del jugador..."
+                            class="w-full border border-gray-300 rounded-md px-3 py-2"
+                        >
+                    </div>
+                </div>
+
+                <!-- Quick Filters -->
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="text-sm font-medium text-gray-700">Filtros rápidos:</span>
+                    <button @click="setQuickFilter('top-scorers')"
+                            class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs hover:bg-green-200 transition-colors">
+                        🥇 Goleadores
+                    </button>
+                    <button @click="setQuickFilter('most-minutes')"
+                            class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs hover:bg-blue-200 transition-colors">
+                        ⏱️ Más minutos
+                    </button>
+                    <button @click="setQuickFilter('young-talents')"
+                            class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs hover:bg-purple-200 transition-colors">
+                        🌟 Jóvenes promesas
+                    </button>
+                    <button @click="setQuickFilter('veterans')"
+                            class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs hover:bg-orange-200 transition-colors">
+                        👴 Veteranos
+                    </button>
+                    <button @click="resetFilters()"
+                            class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs hover:bg-gray-200 transition-colors">
+                        🔄 Limpiar filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Summary -->
+            <div x-show="players.length > 0" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-blue-600" x-text="filteredPlayers.length"></div>
+                    <div class="text-sm text-gray-600">Jugadores</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-green-600" x-text="availableTeams.length"></div>
+                    <div class="text-sm text-gray-600">Equipos</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-purple-600" x-text="(avgRating || 0).toFixed(2)"></div>
+                    <div class="text-sm text-gray-600">Rating medio</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-orange-600" x-text="totalGoals"></div>
+                    <div class="text-sm text-gray-600">Goles totales</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-red-600" x-text="injuredPlayers"></div>
+                    <div class="text-sm text-gray-600">Lesionados</div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="text-2xl font-bold text-gray-600" x-text="Math.round(avgAge)"></div>
+                    <div class="text-sm text-gray-600">Edad media</div>
+                </div>
+            </div>
+
+            <!-- Players Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <template x-for="player in paginatedPlayers" :key="player.id">
+                    <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-4">
+                        <!-- Player Header -->
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="relative">
+                                <img
+                                    :src="player.photo || '/placeholder-player.svg'"
+                                    :alt="player.name"
+                                    class="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                                    onerror="this.src='/placeholder-player.svg'"
+                                >
+                                <div class="absolute -bottom-1 -right-1 bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                                    <span x-text="getPositionIcon(player.position)"></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-800 truncate" x-text="player.name"></h3>
+                                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                                    <img :src="player.team?.logo" :alt="player.team?.name" class="w-4 h-4">
+                                    <span x-text="player.team?.name"></span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    <span x-text="player.age + ' años'"></span>
+                                    <span class="mx-1">•</span>
+                                    <span x-text="player.nationality"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Stats -->
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <div class="text-center bg-gray-50 rounded p-2">
+                                <div class="text-lg font-bold text-blue-600" x-text="player.stats?.games?.appearences || 0"></div>
+                                <div class="text-xs text-gray-600">Partidos</div>
+                            </div>
+                            <div class="text-center bg-gray-50 rounded p-2">
+                                <div class="text-lg font-bold text-green-600" x-text="player.stats?.goals?.total || 0"></div>
+                                <div class="text-xs text-gray-600">Goles</div>
+                            </div>
+                            <div class="text-center bg-gray-50 rounded p-2">
+                                <div class="text-lg font-bold text-purple-600" x-text="player.stats?.games?.rating ? parseFloat(player.stats?.games?.rating).toFixed(1) : 'N/A'"></div>
+                                <div class="text-xs text-gray-600">Rating</div>
+                            </div>
+                        </div>
+
+                        <!-- Status Indicator -->
+                        <div class="mb-4">
+                            <div x-show="player.injured" class="flex items-center text-red-600 text-sm">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                Lesionado
+                            </div>
+                            <div x-show="!player.injured && (player.stats?.games?.minutes || 0) === 0" class="flex items-center text-yellow-600 text-sm">
+                                <i class="fas fa-pause mr-2"></i>
+                                Sin minutos
+                            </div>
+                            <div x-show="!player.injured && (player.stats?.games?.minutes || 0) > 0" class="flex items-center text-green-600 text-sm">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Disponible
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2">
+                            <a :href="`/player/${player.id}`"
+                               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-center text-sm transition-colors flex items-center justify-center">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Ver Detalles
+                            </a>
+                            <button @click="quickAnalyze(player.id)"
+                                    :disabled="analyzingPlayer === player.id"
+                                    class="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-3 py-2 rounded text-sm transition-colors flex items-center justify-center">
+                                <i class="fas fa-crystal-ball mr-1" :class="analyzingPlayer === player.id ? 'fa-spin' : ''"></i>
+                                <span x-show="analyzingPlayer !== player.id">Analizar</span>
+                                <span x-show="analyzingPlayer === player.id">...</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Pagination -->
+            <div x-show="filteredPlayers.length > playersPerPage" class="mt-8 flex justify-center">
+                <div class="flex space-x-2">
+                    <button @click="changePage(currentPage - 1)"
+                            :disabled="currentPage === 1"
+                            class="px-3 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+
+                    <template x-for="page in totalPages" :key="page">
+                        <button @click="changePage(page)"
+                                :class="page === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-700'"
+                                class="px-3 py-2 rounded">
+                            <span x-text="page"></span>
+                        </button>
+                    </template>
+
+                    <button @click="changePage(currentPage + 1)"
+                            :disabled="currentPage === totalPages"
+                            class="px-3 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- No Results -->
+            <div x-show="!loading && !error && players.length > 0 && filteredPlayers.length === 0" class="text-center py-12">
+                <div class="text-6xl mb-4">🔍</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron jugadores</h3>
+                <p class="text-gray-600 mb-4">Intenta ajustar los filtros de búsqueda</p>
+                <button @click="resetFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    Limpiar filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function playersAgendaApp() {
+            return {
+                // State simple
+                players: [],
+                filteredPlayers: [],
+                loading: true,
+                error: false,
+                errorMessage: '',
+
+                // Filter state
+                selectedPosition: '',
+                selectedTeam: '',
+                selectedStatus: '',
+                sortBy: 'name',
+                searchQuery: '',
+
+                // Pagination
+                currentPage: 1,
+                playersPerPage: 12,
+
+                // UI state
+                analyzingPlayer: null,
+
+                // Initialize simple
+                async init() {
+                    console.log('🚀 INIT ejecutándose...');
+                    await this.loadPlayers();
+                },
+
+                // Load all players
+                async loadPlayers() {
+                    try {
+                        console.log('🔄 Iniciando carga de jugadores...');
+                        this.loading = true;
+                        this.error = false;
+
+                        console.log('📡 Haciendo petición a API...');
+                        const response = await fetch('/api/laliga/laliga/players?page=all');
+                        console.log('📨 Respuesta recibida:', response.status);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('📋 Datos parseados:', result.success, result.count);
+
+                        if (result.success && result.data && result.data.length > 0) {
+                            this.players = result.data;
+                            this.filteredPlayers = [...result.data];
+                            console.log('✅ Jugadores cargados:', this.players.length);
+                            console.log('✅ Jugadores filtrados:', this.filteredPlayers.length);
+                        } else {
+                            console.log('❌ Error en respuesta:', result.error || 'No hay datos');
+                            this.showError(result.error || 'No se encontraron jugadores');
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Error cargando jugadores:', error);
+                        this.showError('Error de conexión: ' + error.message);
+                    } finally {
+                        console.log('🏁 Finalizando carga, loading = false');
+                        this.loading = false;
+                    }
+                },
+
+                // Filter and sort players
+                filterPlayers() {
+                    console.log('🔄 Iniciando filtrado con', this.players.length, 'jugadores');
+                    let filtered = [...this.players];
+
+                    // Position filter
+                    if (this.selectedPosition) {
+                        filtered = filtered.filter(p => p.position === this.selectedPosition);
+                    }
+
+                    // Team filter
+                    if (this.selectedTeam) {
+                        filtered = filtered.filter(p => p.team?.id == this.selectedTeam);
+                    }
+
+                    // Status filter
+                    if (this.selectedStatus) {
+                        filtered = filtered.filter(p => {
+                            switch (this.selectedStatus) {
+                                case 'available':
+                                    // Menos restrictivo: solo no lesionados (si la propiedad existe)
+                                    return !p.injured || typeof p.injured === 'undefined';
+                                case 'injured':
+                                    return p.injured;
+                                case 'no-minutes':
+                                    return (!p.injured || typeof p.injured === 'undefined') && (p.stats?.games?.minutes || 0) === 0;
+                                default:
+                                    return true;
+                            }
+                        });
+                    }
+
+                    // Search filter
+                    if (this.searchQuery) {
+                        const query = this.searchQuery.toLowerCase();
+                        filtered = filtered.filter(p =>
+                            p.name?.toLowerCase().includes(query) ||
+                            p.team?.name?.toLowerCase().includes(query)
+                        );
+                    }
+
+                    // Sort
+                    filtered.sort((a, b) => {
+                        switch (this.sortBy) {
+                            case 'name':
+                                return (a.name || '').localeCompare(b.name || '');
+                            case 'team':
+                                return (a.team?.name || '').localeCompare(b.team?.name || '');
+                            case 'position':
+                                return (a.position || '').localeCompare(b.position || '');
+                            case 'rating':
+                                return (parseFloat(b.stats?.games?.rating) || 0) - (parseFloat(a.stats?.games?.rating) || 0);
+                            case 'goals':
+                                return (b.stats?.goals?.total || 0) - (a.stats?.goals?.total || 0);
+                            case 'minutes':
+                                return (b.stats?.games?.minutes || 0) - (a.stats?.games?.minutes || 0);
+                            case 'age':
+                                return (a.age || 0) - (b.age || 0);
+                            default:
+                                return 0;
+                        }
+                    });
+
+                    this.filteredPlayers = filtered;
+                    this.currentPage = 1;
+                    console.log('✅ Filtrado completado:', this.filteredPlayers.length, 'jugadores');
+                },
+
+                // Quick filter presets
+                setQuickFilter(type) {
+                    this.resetFilters();
+
+                    switch (type) {
+                        case 'top-scorers':
+                            this.sortBy = 'goals';
+                            break;
+                        case 'most-minutes':
+                            this.sortBy = 'minutes';
+                            break;
+                        case 'young-talents':
+                            this.sortBy = 'age';
+                            this.selectedStatus = 'available';
+                            break;
+                        case 'veterans':
+                            this.sortBy = 'age';
+                            break;
+                    }
+
+                    this.filterPlayers();
+                },
+
+                // Reset all filters
+                resetFilters() {
+                    this.selectedPosition = '';
+                    this.selectedTeam = '';
+                    this.selectedStatus = '';
+                    this.sortBy = 'name';
+                    this.searchQuery = '';
+                    this.filterPlayers();
+                },
+
+                // Quick analyze player
+                async quickAnalyze(playerId) {
+                    this.analyzingPlayer = playerId;
+
+                    try {
+                        const response = await fetch(`/api/predictions/player/${playerId}`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Redirect to player detail page with analysis
+                            window.location.href = `/player/${playerId}`;
+                        } else {
+                            console.error('Error en análisis rápido:', result.error);
+                        }
+                    } catch (error) {
+                        console.error('Error en análisis rápido:', error);
+                    } finally {
+                        this.analyzingPlayer = null;
+                    }
+                },
+
+                // Pagination
+                changePage(page) {
+                    if (page >= 1 && page <= this.totalPages) {
+                        this.currentPage = page;
+                    }
+                },
+
+                // Computed properties
+                get availableTeams() {
+                    const teams = new Set();
+                    this.players.forEach(p => {
+                        if (p.team) {
+                            teams.add(JSON.stringify({id: p.team.id, name: p.team.name}));
+                        }
+                    });
+                    return Array.from(teams).map(t => JSON.parse(t)).sort((a, b) => a.name.localeCompare(b.name));
+                },
+
+                get paginatedPlayers() {
+                    const start = (this.currentPage - 1) * this.playersPerPage;
+                    const end = start + this.playersPerPage;
+                    return this.filteredPlayers.slice(start, end);
+                },
+
+                get totalPages() {
+                    return Math.ceil(this.filteredPlayers.length / this.playersPerPage);
+                },
+
+                get avgRating() {
+                    const validRatings = this.filteredPlayers
+                        .map(p => parseFloat(p.stats?.games?.rating))
+                        .filter(r => !isNaN(r) && r > 0);
+                    return validRatings.length > 0 ?
+                        validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length : 0;
+                },
+
+                get totalGoals() {
+                    return this.filteredPlayers.reduce((sum, p) => sum + (p.stats?.goals?.total || 0), 0);
+                },
+
+                get injuredPlayers() {
+                    return this.filteredPlayers.filter(p => p.injured).length;
+                },
+
+                get avgAge() {
+                    const validAges = this.filteredPlayers
+                        .map(p => p.age)
+                        .filter(age => age && age > 0);
+                    return validAges.length > 0 ?
+                        validAges.reduce((sum, age) => sum + age, 0) / validAges.length : 0;
+                },
+
+                // Helper methods
+                getPositionIcon(position) {
+                    const icons = {
+                        'Goalkeeper': '🥅',
+                        'Defender': '🛡️',
+                        'Midfielder': '⚽',
+                        'Attacker': '🎯'
+                    };
+                    return icons[position] || '❓';
+                },
+
+                showError(message) {
+                    this.error = true;
+                    this.errorMessage = message;
+                    this.loading = false;
+                },
+
+                retry() {
+                    this.error = false;
+                    this.errorMessage = '';
+                    this.loadPlayers();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

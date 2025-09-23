@@ -2,10 +2,12 @@
 const express = require('express');
 const ApiFootballClient = require('../services/apiFootball');
 const DataProcessor = require('../services/dataProcessor');
+const PlayersManager = require('../services/playersManager');
 
 const router = express.Router();
 const apiFootball = new ApiFootballClient();
 const dataProcessor = new DataProcessor();
+const playersManager = new PlayersManager();
 
 // Test de conexión API-Football
 router.get('/test', async (req, res) => {
@@ -86,35 +88,102 @@ router.get('/laliga/teams', async (req, res) => {
   }
 });
 
-// Jugadores de La Liga
+// Jugadores de La Liga con Cache Inteligente
 router.get('/laliga/players', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
+    const pageParam = req.query.page;
     const team_id = req.query.team_id || null;
+    const position = req.query.position || null;
+    const status = req.query.status || null;
+    const search = req.query.search || null;
+    const sortBy = req.query.sortBy || null;
+    const useCache = req.query.cache !== 'false'; // Por defecto usa cache
 
-    const result = await apiFootball.getLaLigaPlayers(page, team_id);
+    // Si pide todos los jugadores (sin filtros específicos)
+    if (pageParam === 'all' && !position && !status && !search && !team_id) {
+      console.log('📋 Solicitando TODOS los jugadores de La Liga con cache...');
+      const result = await playersManager.getAllPlayers(useCache);
 
-    if (result.success) {
-      res.json({
-        success: true,
-        provider: 'API-Football',
-        count: result.count,
-        page: page,
-        has_more: result.pagination?.current < result.pagination?.total,
-        data: result.data
-      });
+      if (result.success) {
+        res.json({
+          success: true,
+          provider: 'API-Football',
+          count: result.totalPlayers,
+          total_pages: 'all',
+          cached: result.cached,
+          data: result.data
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error,
+          provider: 'API-Football',
+          cached: result.cached
+        });
+      }
+    } else if (pageParam === 'all' || position || status || search || team_id || sortBy) {
+      // Jugadores con filtros - usar sistema de filtros con cache
+      console.log('🔍 Solicitando jugadores filtrados con cache...');
+      const filters = {
+        team: team_id,
+        position,
+        status,
+        search,
+        sortBy
+      };
+
+      const result = await playersManager.getFilteredPlayers(filters);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          provider: 'API-Football',
+          count: result.totalPlayers,
+          total_pages: 'all',
+          cached: result.cached,
+          sourceCache: result.sourceCache,
+          filters: result.filters,
+          data: result.data
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error,
+          provider: 'API-Football',
+          cached: result.cached
+        });
+      }
     } else {
-      res.status(400).json({
-        success: false,
-        error: result.error,
-        provider: 'API-Football'
-      });
+      // Paginación normal (fallback al método original)
+      const page = parseInt(pageParam) || 1;
+      const result = await apiFootball.getLaLigaPlayers(page, team_id);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          provider: 'API-Football',
+          count: result.count,
+          page: page,
+          has_more: result.pagination?.current < result.pagination?.total,
+          cached: false,
+          data: result.data
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: result.error,
+          provider: 'API-Football',
+          cached: false
+        });
+      }
     }
   } catch (error) {
+    console.error('❌ Error en endpoint de jugadores:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
-      provider: 'API-Football'
+      provider: 'API-Football',
+      cached: false
     });
   }
 });
@@ -204,6 +273,55 @@ router.get('/laliga/player/:id', async (req, res) => {
       success: false,
       error: error.message,
       provider: 'API-Football'
+    });
+  }
+});
+
+// Información completa de un jugador con Cache (estadísticas + lesiones + partidos recientes)
+router.get('/laliga/player/:id/details', async (req, res) => {
+  try {
+    const player_id = req.params.id;
+    const season = req.query.season || null;
+    const useCache = req.query.cache !== 'false'; // Por defecto usa cache
+
+    console.log(`🎯 Solicitando detalles completos del jugador ${player_id} con cache...`);
+
+    const result = await playersManager.getPlayerDetails(player_id);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        provider: 'API-Football',
+        cached: result.cached,
+        data: result.data,
+        metadata: {
+          playerId: player_id,
+          season: season || apiFootball.LEAGUES.CURRENT_SEASON,
+          requestTime: new Date().toISOString(),
+          cached: result.cached,
+          sections: {
+            basicInfo: true,
+            statistics: true,
+            injuries: result.data.injuries?.length > 0,
+            recentGames: result.data.recentGames?.length > 0
+          }
+        }
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error,
+        provider: 'API-Football',
+        cached: result.cached || false
+      });
+    }
+  } catch (error) {
+    console.error(`❌ Error en detalles del jugador ${req.params.id}:`, error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'API-Football',
+      cached: false
     });
   }
 });
@@ -520,6 +638,114 @@ router.get('/laliga/live', async (req, res) => {
       success: false,
       error: error.message,
       provider: 'API-Football'
+    });
+  }
+});
+
+// === GESTIÓN DE CACHE ===
+
+// Estadísticas del cache de jugadores
+router.get('/cache/players/stats', async (req, res) => {
+  try {
+    const stats = playersManager.getCacheStats();
+
+    res.json({
+      success: true,
+      provider: 'PlayersCache',
+      timestamp: new Date().toISOString(),
+      stats: stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'PlayersCache'
+    });
+  }
+});
+
+// Invalidar cache de jugadores
+router.post('/cache/players/invalidate', async (req, res) => {
+  try {
+    const pattern = req.body.pattern || 'all';
+    const invalidated = playersManager.invalidateCache(pattern);
+
+    res.json({
+      success: true,
+      provider: 'PlayersCache',
+      message: `Cache invalidated: ${invalidated} entries removed`,
+      pattern: pattern,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'PlayersCache'
+    });
+  }
+});
+
+// Limpiar todo el cache de jugadores
+router.post('/cache/players/clear', async (req, res) => {
+  try {
+    playersManager.clearCache();
+
+    res.json({
+      success: true,
+      provider: 'PlayersCache',
+      message: 'Cache cleared completely',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'PlayersCache'
+    });
+  }
+});
+
+// Forzar actualización del cache desde API
+router.post('/cache/players/refresh', async (req, res) => {
+  try {
+    console.log('🔄 Forzando actualización del cache de jugadores...');
+    const result = await playersManager.forceRefresh();
+
+    res.json({
+      success: result.success,
+      provider: 'PlayersCache',
+      message: 'Cache refreshed from API',
+      totalPlayers: result.totalPlayers,
+      cached: result.cached,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'PlayersCache'
+    });
+  }
+});
+
+// Precalentar cache de jugadores
+router.post('/cache/players/warmup', async (req, res) => {
+  try {
+    console.log('🔥 Precalentando cache de jugadores...');
+    await playersManager.warmupCache();
+
+    res.json({
+      success: true,
+      provider: 'PlayersCache',
+      message: 'Cache warmup completed',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      provider: 'PlayersCache'
     });
   }
 });

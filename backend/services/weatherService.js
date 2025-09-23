@@ -10,15 +10,138 @@ const {
     AVATAR_WARDROBE_CONFIG,
     WEATHER_COMMENTARY_TEMPLATES
 } = require('../config/stadiumsWeatherConfig');
+const {
+    AEMET_MUNICIPIOS_MAPPING,
+    AEMET_ENDPOINTS,
+    AEMET_WEATHER_CODES,
+    AEMET_WEATHER_DESCRIPTIONS
+} = require('../config/aemetMunicipios');
 
 class WeatherService {
     constructor() {
-        this.apiKey = process.env.OPENWEATHER_API_KEY;
-        this.baseUrl = 'https://api.openweathermap.org/data/2.5';
+        // APIs configuradas
+        this.aemetApiKey = process.env.AEMET_API_KEY;
+        this.openWeatherApiKey = process.env.OPENWEATHER_API_KEY;
 
-        if (!this.apiKey) {
-            console.warn('⚠️ OPENWEATHER_API_KEY no configurada. Funcionalidad meteorológica limitada.');
+        // URLs base
+        this.aemetBaseUrl = AEMET_ENDPOINTS.base_url;
+        this.openWeatherBaseUrl = 'https://api.openweathermap.org/data/2.5';
+
+        // Configurar prioridad: AEMET principal, OpenWeather fallback
+        this.useAemet = !!this.aemetApiKey;
+        this.useOpenWeather = !!this.openWeatherApiKey;
+
+        if (!this.aemetApiKey && !this.openWeatherApiKey) {
+            console.warn('⚠️ Ninguna API meteorológica configurada. Usando datos por defecto.');
+        } else if (this.useAemet) {
+            console.log('✅ AEMET API configurada como principal');
+            if (this.useOpenWeather) {
+                console.log('✅ OpenWeatherMap configurada como fallback');
+            }
+        } else if (this.useOpenWeather) {
+            console.log('✅ OpenWeatherMap API configurada (AEMET no disponible)');
         }
+    }
+
+    /**
+     * Obtener datos meteorológicos usando AEMET (prioritario)
+     */
+    async getWeatherFromAemet(teamKey) {
+        const municipioData = AEMET_MUNICIPIOS_MAPPING[teamKey];
+        if (!municipioData) {
+            throw new Error(`Municipio AEMET no encontrado para equipo: ${teamKey}`);
+        }
+
+        const url = `${this.aemetBaseUrl}${AEMET_ENDPOINTS.prediccion_municipio}/${municipioData.codigo_aemet}`;
+
+        try {
+            // AEMET API retorna URL de datos en primera llamada
+            const response = await axios.get(url, {
+                params: { api_key: this.aemetApiKey }
+            });
+
+            if (response.data && response.data.datos) {
+                // Obtener datos reales de la URL proporcionada
+                const dataResponse = await axios.get(response.data.datos);
+                return this.processAemetData(dataResponse.data, municipioData);
+            }
+
+            throw new Error('No se pudieron obtener datos de AEMET');
+        } catch (error) {
+            console.error(`Error AEMET para ${teamKey}:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Procesar datos meteorológicos de AEMET
+     */
+    processAemetData(aemetData, municipioData) {
+        // AEMET retorna array con predicción por días
+        const today = aemetData[0];
+        if (!today) {
+            throw new Error('No hay datos meteorológicos para hoy');
+        }
+
+        // Extraer datos del primer período del día
+        const temperatura = today.temperatura || {};
+        const precipitacion = today.precipitacion || [];
+        const viento = today.viento || [];
+        const estadoCielo = today.estadoCielo || [];
+
+        const tempMax = parseInt(temperatura.maxima) || 20;
+        const tempMin = parseInt(temperatura.minima) || 15;
+        const tempActual = Math.round((tempMax + tempMin) / 2);
+
+        // Obtener precipitación y viento del período actual
+        const precipitacionHoy = precipitacion[0] ? parseInt(precipitacion[0].value) || 0 : 0;
+        const vientoHoy = viento[0] ? parseInt(viento[0].velocidad) || 0 : 0;
+        const estadoCieloHoy = estadoCielo[0] ? estadoCielo[0].value : '11';
+
+        // Convertir código AEMET a código OpenWeather equivalente
+        const weatherCode = AEMET_WEATHER_CODES[estadoCieloHoy] || 800;
+        const description = AEMET_WEATHER_DESCRIPTIONS[estadoCieloHoy] || 'Despejado';
+
+        return {
+            main: {
+                temp: tempActual,
+                feels_like: tempActual,
+                humidity: 60 // AEMET no siempre proporciona humedad
+            },
+            wind: {
+                speed: vientoHoy / 3.6 // convertir km/h a m/s
+            },
+            rain: precipitacionHoy > 0 ? { '1h': precipitacionHoy } : undefined,
+            weather: [{
+                id: weatherCode,
+                main: description,
+                description: description.toLowerCase()
+            }]
+        };
+    }
+
+    /**
+     * Obtener datos meteorológicos usando OpenWeatherMap (fallback)
+     */
+    async getWeatherFromOpenWeather(teamKey) {
+        const teamData = STADIUMS_WEATHER_CONFIG.teams[teamKey];
+        if (!teamData) {
+            throw new Error(`Equipo no encontrado: ${teamKey}`);
+        }
+
+        const { latitude, longitude } = teamData.coordinates;
+
+        const response = await axios.get(`${this.openWeatherBaseUrl}/weather`, {
+            params: {
+                lat: latitude,
+                lon: longitude,
+                appid: this.openWeatherApiKey,
+                units: 'metric',
+                lang: 'es'
+            }
+        });
+
+        return response.data;
     }
 
     /**
@@ -31,19 +154,41 @@ class WeatherService {
                 throw new Error(`Equipo no encontrado: ${teamKey}`);
             }
 
-            const { latitude, longitude } = teamData.coordinates;
+            let weatherData = null;
+            let source = 'default';
 
-            const response = await axios.get(`${this.baseUrl}/weather`, {
-                params: {
-                    lat: latitude,
-                    lon: longitude,
-                    appid: this.apiKey,
-                    units: 'metric',
-                    lang: 'es'
+            // Intentar AEMET primero
+            if (this.useAemet) {
+                try {
+                    weatherData = await this.getWeatherFromAemet(teamKey);
+                    source = 'aemet';
+                    console.log(`☀️ Datos AEMET obtenidos para ${teamKey}`);
+                } catch (aemetError) {
+                    console.warn(`⚠️ AEMET falló para ${teamKey}, intentando OpenWeather...`);
                 }
-            });
+            }
 
-            return this.processWeatherData(response.data, teamData);
+            // Fallback a OpenWeatherMap si AEMET falla
+            if (!weatherData && this.useOpenWeather) {
+                try {
+                    weatherData = await this.getWeatherFromOpenWeather(teamKey);
+                    source = 'openweather';
+                    console.log(`🌤️ Datos OpenWeather obtenidos para ${teamKey}`);
+                } catch (openWeatherError) {
+                    console.warn(`⚠️ OpenWeather también falló para ${teamKey}`);
+                }
+            }
+
+            // Si ambas APIs fallan, usar datos por defecto
+            if (!weatherData) {
+                console.log(`📋 Usando datos por defecto para ${teamKey}`);
+                return this.getDefaultWeatherData(teamKey);
+            }
+
+            const processedData = this.processWeatherData(weatherData, teamData);
+            processedData.data_source = source;
+            return processedData;
+
         } catch (error) {
             console.error(`Error obteniendo clima para ${teamKey}:`, error.message);
             return this.getDefaultWeatherData(teamKey);
@@ -378,8 +523,8 @@ class WeatherService {
     validateConfiguration() {
         const issues = [];
 
-        if (!this.apiKey) {
-            issues.push('OPENWEATHER_API_KEY no configurada');
+        if (!this.aemetApiKey && !this.openWeatherApiKey) {
+            issues.push('Ninguna API meteorológica configurada (AEMET o OpenWeatherMap)');
         }
 
         const teamCount = Object.keys(STADIUMS_WEATHER_CONFIG.teams).length;
@@ -387,14 +532,23 @@ class WeatherService {
             issues.push(`Solo ${teamCount} equipos configurados, se esperan 20`);
         }
 
+        const aemetTeams = Object.keys(AEMET_MUNICIPIOS_MAPPING).length;
+        if (aemetTeams < teamCount) {
+            issues.push(`Solo ${aemetTeams} municipios AEMET configurados de ${teamCount} equipos`);
+        }
+
         return {
             isValid: issues.length === 0,
             issues,
             configuration: {
-                api_key_configured: !!this.apiKey,
+                aemet_api_configured: !!this.aemetApiKey,
+                openweather_api_configured: !!this.openWeatherApiKey,
+                primary_source: this.useAemet ? 'AEMET' : (this.useOpenWeather ? 'OpenWeatherMap' : 'Ninguna'),
                 teams_configured: teamCount,
+                aemet_municipalities: aemetTeams,
                 weather_conditions: Object.keys(WEATHER_AVATAR_CONFIG.conditions).length,
-                clothing_options: Object.keys(AVATAR_WARDROBE_CONFIG.clothing).length
+                clothing_options: Object.keys(AVATAR_WARDROBE_CONFIG.clothing).length,
+                fallback_enabled: this.useAemet && this.useOpenWeather
             }
         };
     }

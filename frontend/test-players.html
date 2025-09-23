@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Jugadores</title>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="container mx-auto p-4" x-data="playersTest()">
+        <h1 class="text-2xl font-bold mb-4">Test Jugadores</h1>
+
+        <div x-show="loading" class="text-blue-600">
+            Cargando jugadores...
+        </div>
+
+        <div x-show="error" class="text-red-600" x-text="errorMessage"></div>
+
+        <div class="mb-4">
+            <span x-text="`Total jugadores: ${players.length}`"></span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <template x-for="player in players.slice(0, 6)" :key="player.id">
+                <div class="bg-white p-4 rounded shadow">
+                    <h3 x-text="player.name" class="font-semibold"></h3>
+                    <p x-text="player.position" class="text-gray-600"></p>
+                    <p x-text="player.team?.name" class="text-sm text-gray-500"></p>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <script>
+        function playersTest() {
+            return {
+                players: [],
+                loading: true,
+                error: false,
+                errorMessage: '',
+
+                async init() {
+                    console.log('🚀 Iniciando test de jugadores...');
+                    await this.loadPlayers();
+                },
+
+                async loadPlayers() {
+                    try {
+                        console.log('📡 Cargando jugadores...');
+                        const response = await fetch('/api/laliga/laliga/players?page=all');
+                        console.log('📨 Response status:', response.status);
+
+                        const result = await response.json();
+                        console.log('📋 Result:', result.success, result.count);
+
+                        if (result.success) {
+                            this.players = result.data;
+                            console.log('✅ Jugadores cargados:', this.players.length);
+                            console.log('🔍 Primer jugador:', this.players[0]);
+                        } else {
+                            this.error = true;
+                            this.errorMessage = result.error || 'Error desconocido';
+                        }
+                    } catch (error) {
+                        console.error('❌ Error:', error);
+                        this.error = true;
+                        this.errorMessage = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -30,6 +30,15 @@ npm run db:migrate      # Alias para db:init
 # Test API connectivity
 curl http://localhost:3000/health
 curl http://localhost:3000/api/info
+
+# Development Debugging Commands
+curl http://localhost:3000/api/test/ping                    # Basic server health
+curl http://localhost:3000/api/test/config                 # Environment validation
+curl http://localhost:3000/api/laliga/test                 # API-Sports connectivity
+curl http://localhost:3000/api/bargains/test               # Bargain analyzer test
+curl "http://localhost:3000/api/bargains/top?limit=5"      # Quick bargains test
+curl http://localhost:3000/api/weather/test                # AEMET API test
+curl http://localhost:3000/api/database/test               # Database connectivity
 ```
 
 ## Project Structure
@@ -319,6 +328,33 @@ La página `/bargains` incluye:
 - **Health Checks**: `/health` and `/api/info` endpoints for monitoring
 - **Database**: Supabase PostgreSQL integration with @supabase/supabase-js client
 - **Dependencies**: Core dependencies include axios, cors, express, helmet, morgan, pg, dotenv
+
+## Core Architecture Patterns
+
+### Service Layer Architecture
+- **ApiFootballClient** (`backend/services/apiFootball.js`): Centralized API-Sports client with rate limiting
+- **BargainAnalyzer** (`backend/services/bargainAnalyzer.js`): Complex algorithm for identifying undervalued players
+- **DataProcessor** (`backend/services/dataProcessor.js`): Fantasy points calculation engine following official La Liga rules
+- **Cache Management**: Multi-layer caching with BargainCache, PlayersCache for performance optimization
+- **Weather Integration**: AEMET API integration for stadium weather data
+
+### Route Organization
+- Routes are modular and feature-based (not RESTful resources)
+- Each route module handles a specific domain: `/api/laliga/*`, `/api/bargains/*`, `/api/weather/*`
+- Frontend routes served directly from Express server at root level
+- All API routes prefixed with `/api/` for clear separation
+
+### Data Flow Architecture
+1. **API-Sports Data Ingestion**: Rate-limited requests (75k/day Ultra plan)
+2. **Processing Pipeline**: Raw data → DataProcessor → Fantasy points calculation
+3. **Caching Strategy**: Redis-like caching with BargainCache and PlayersCache
+4. **Frontend Consumption**: Direct API calls from HTML pages using Alpine.js
+
+### Key System Components
+- **FixtureAnalyzer**: Analyzes match difficulty and fixture congestion
+- **PredictorValor**: AI-driven player value prediction system
+- **PlayersManager**: Centralized player data management and synchronization
+- **ContentGenerator**: Automated content creation for social media integration
 
 ## Testing Strategy
 

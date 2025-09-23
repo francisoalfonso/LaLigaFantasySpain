@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vanilla JS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6">Test Vanilla JavaScript</h1>
+
+        <div id="loading" class="text-blue-600 text-lg">
+            Cargando jugadores...
+        </div>
+
+        <div id="error" class="text-red-600 bg-red-100 p-4 rounded mb-4" style="display: none;"></div>
+
+        <div id="result" class="mb-4" style="display: none;">
+            <span class="text-gray-600">Jugadores cargados: <span id="count">0</span></span>
+        </div>
+
+        <div id="players-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+    </div>
+
+    <script>
+        console.log('🚀 Vanilla JS test iniciado');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM listo, iniciando carga de jugadores...');
+            loadPlayers();
+        });
+
+        async function loadPlayers() {
+            const loadingEl = document.getElementById('loading');
+            const errorEl = document.getElementById('error');
+            const resultEl = document.getElementById('result');
+            const gridEl = document.getElementById('players-grid');
+
+            try {
+                console.log('📡 Haciendo fetch a API...');
+                const response = await fetch('/api/laliga/laliga/players?page=all');
+                console.log('📨 Response recibido:', response.status);
+
+                const data = await response.json();
+                console.log('📋 Data parseado:', data.success, data.count);
+
+                if (data.success) {
+                    const players = data.data.slice(0, 8); // Solo primeros 8
+                    console.log('✅ Mostrando', players.length, 'jugadores');
+
+                    loadingEl.style.display = 'none';
+                    resultEl.style.display = 'block';
+                    document.getElementById('count').textContent = players.length;
+
+                    // Renderizar jugadores
+                    gridEl.innerHTML = players.map(player => `
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <img
+                                    src="${player.photo || '/placeholder-player.svg'}"
+                                    alt="${player.name}"
+                                    class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                    onerror="this.src='/placeholder-player.svg'"
+                                >
+                                <div>
+                                    <h3 class="font-semibold text-gray-800">${player.name}</h3>
+                                    <p class="text-sm text-gray-600">${player.position}</p>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <img src="${player.team?.logo}" alt="${player.team?.name}" class="w-4 h-4">
+                                    <span>${player.team?.name}</span>
+                                </div>
+                                <div>${player.age} años - ${player.nationality}</div>
+                            </div>
+                        </div>
+                    `).join('');
+
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

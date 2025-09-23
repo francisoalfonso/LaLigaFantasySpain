@@ -220,6 +220,55 @@ class ApiFootballClient {
     return result;
   }
 
+  // Obtener TODOS los jugadores de La Liga (todas las páginas)
+  async getAllLaLigaPlayers(team_id = null) {
+    try {
+      console.log('📋 Iniciando carga completa de jugadores de La Liga...');
+
+      const allPlayers = [];
+      let currentPage = 1;
+      let hasMorePages = true;
+
+      while (hasMorePages) {
+        console.log(`📄 Obteniendo página ${currentPage}...`);
+
+        const pageResult = await this.getLaLigaPlayers(currentPage, team_id);
+
+        if (pageResult.success && pageResult.data.length > 0) {
+          allPlayers.push(...pageResult.data);
+
+          // Verificar si hay más páginas
+          hasMorePages = pageResult.pagination &&
+                        pageResult.pagination.current < pageResult.pagination.total;
+
+          currentPage++;
+
+          // Rate limiting entre páginas
+          if (hasMorePages) {
+            await this.sleep(1000); // 1 segundo entre páginas
+          }
+        } else {
+          hasMorePages = false;
+        }
+      }
+
+      console.log(`✅ Carga completa: ${allPlayers.length} jugadores obtenidos`);
+
+      return {
+        success: true,
+        data: allPlayers,
+        totalPages: currentPage - 1
+      };
+
+    } catch (error) {
+      console.error('❌ Error obteniendo todos los jugadores:', error.message);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   // Obtener fixtures de La Liga
   async getLaLigaFixtures(from_date = null, to_date = null) {
     const params = {
@@ -300,6 +349,104 @@ class ApiFootballClient {
       success: false,
       message: 'No se encontraron estadísticas para este jugador'
     };
+  }
+
+  // Obtener información completa de un jugador (datos + estadísticas + lesiones)
+  async getPlayerDetails(player_id, season = null) {
+    try {
+      console.log(`🔍 Obteniendo detalles completos del jugador ${player_id}...`);
+
+      // Obtener datos básicos y estadísticas
+      const statsResult = await this.getPlayerStats(player_id, season);
+      if (!statsResult.success) {
+        return statsResult;
+      }
+
+      // Obtener información de lesiones
+      const injuriesResult = await this.getPlayerInjuries(player_id);
+
+      // Obtener últimos partidos del jugador
+      const recentGamesResult = await this.getPlayerRecentFixtures(player_id);
+
+      return {
+        success: true,
+        data: {
+          ...statsResult.data,
+          injuries: injuriesResult.success ? injuriesResult.data : [],
+          recentGames: recentGamesResult.success ? recentGamesResult.data : []
+        }
+      };
+
+    } catch (error) {
+      console.error(`❌ Error obteniendo detalles del jugador ${player_id}:`, error.message);
+      return {
+        success: false,
+        message: error.message
+      };
+    }
+  }
+
+  // Obtener lesiones de un jugador
+  async getPlayerInjuries(player_id) {
+    try {
+      const result = await this.makeRequest('/injuries', {
+        player: player_id,
+        league: this.LEAGUES.LA_LIGA,
+        season: this.LEAGUES.CURRENT_SEASON
+      });
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data.map(injury => ({
+            type: injury.player.type,
+            reason: injury.player.reason,
+            date: injury.fixture.date,
+            fixture_id: injury.fixture.id
+          }))
+        };
+      }
+
+      return { success: true, data: [] }; // Sin lesiones
+
+    } catch (error) {
+      console.error(`Error obteniendo lesiones del jugador ${player_id}:`, error.message);
+      return { success: false, data: [] };
+    }
+  }
+
+  // Obtener últimos partidos de un jugador
+  async getPlayerRecentFixtures(player_id, last = 5) {
+    try {
+      const result = await this.makeRequest('/fixtures/players', {
+        player: player_id,
+        league: this.LEAGUES.LA_LIGA,
+        season: this.LEAGUES.CURRENT_SEASON,
+        last: last
+      });
+
+      if (result.success) {
+        return {
+          success: true,
+          data: result.data.map(fixture => ({
+            fixture: {
+              id: fixture.fixture.id,
+              date: fixture.fixture.date,
+              status: fixture.fixture.status
+            },
+            teams: fixture.teams,
+            goals: fixture.goals,
+            player_stats: fixture.players[0]?.statistics[0] || null
+          }))
+        };
+      }
+
+      return { success: true, data: [] };
+
+    } catch (error) {
+      console.error(`Error obteniendo partidos recientes del jugador ${player_id}:`, error.message);
+      return { success: false, data: [] };
+    }
   }
 
   // Obtener clasificación actual de La Liga
@@ -690,6 +837,11 @@ class ApiFootballClient {
       success: false,
       error: 'No se encontró información del entrenador'
     };
+  }
+
+  // Utilidad para pausas
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

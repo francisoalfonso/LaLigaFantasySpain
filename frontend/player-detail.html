@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugador - Fantasy La Liga Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="playerDetailApp()" x-init="init()" class="min-h-screen">
+        <!-- Header Navigation -->
+        <nav class="bg-gradient-to-r from-blue-900 via-purple-900 to-indigo-900 text-white p-4 shadow-lg">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-2xl font-bold flex items-center">
+                        <i class="fas fa-futbol mr-2 text-yellow-400"></i>
+                        Fantasy La Liga
+                    </a>
+                    <i class="fas fa-chevron-right text-gray-300"></i>
+                    <span class="text-lg">Jugador</span>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/bargains" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-gem mr-2"></i>
+                        Chollos
+                    </a>
+                    <a href="/" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
+                <p class="mt-4 text-xl text-gray-600">Cargando datos del jugador...</p>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" class="container mx-auto px-4 py-8">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" x-text="errorMessage"></span>
+                <div class="mt-4">
+                    <button @click="retry()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reintentar
+                    </button>
+                    <a href="/bargains" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded ml-2">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Volver a Chollos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Content -->
+        <div x-show="!loading && !error && player" class="container mx-auto px-4 py-8">
+
+            <!-- Player Header -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+
+                    <!-- Player Photo -->
+                    <div class="flex-shrink-0">
+                        <div class="relative">
+                            <img
+                                :src="player.player?.photo || '/placeholder-player.png'"
+                                :alt="player.player?.name"
+                                class="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover border-4 border-blue-200 shadow-lg"
+                                onerror="this.src='/placeholder-player.png'"
+                            >
+                            <!-- Position Badge -->
+                            <div class="absolute -bottom-2 -right-2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                <span x-text="player.games?.position || 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Player Info -->
+                    <div class="flex-grow text-center lg:text-left">
+                        <h1 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-2" x-text="player.player?.name"></h1>
+                        <div class="flex flex-wrap justify-center lg:justify-start items-center gap-4 mb-4">
+                            <div class="flex items-center">
+                                <img
+                                    :src="player.team?.logo"
+                                    :alt="player.team?.name"
+                                    class="w-6 h-6 mr-2"
+                                >
+                                <span class="text-lg font-semibold text-gray-700" x-text="player.team?.name"></span>
+                            </div>
+                            <span class="text-gray-600" x-text="`${player.player?.age} años`"></span>
+                            <span class="text-gray-600" x-text="player.player?.nationality"></span>
+                        </div>
+
+                        <!-- Physical Stats -->
+                        <div class="flex flex-wrap justify-center lg:justify-start gap-4 text-sm text-gray-600 mb-4">
+                            <span x-show="player.player?.height" x-text="`Altura: ${player.player?.height}`"></span>
+                            <span x-show="player.player?.weight" x-text="`Peso: ${player.player?.weight}`"></span>
+                        </div>
+
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-blue-50 p-3 rounded-lg text-center">
+                                <div class="text-2xl font-bold text-blue-600" x-text="player.games?.appearences || 0"></div>
+                                <div class="text-sm text-gray-600">Partidos</div>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg text-center">
+                                <div class="text-2xl font-bold text-green-600" x-text="player.goals?.total || 0"></div>
+                                <div class="text-sm text-gray-600">Goles</div>
+                            </div>
+                            <div class="bg-purple-50 p-3 rounded-lg text-center">
+                                <div class="text-2xl font-bold text-purple-600" x-text="player.goals?.assists || 0"></div>
+                                <div class="text-sm text-gray-600">Asistencias</div>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg text-center">
+                                <div class="text-2xl font-bold text-yellow-600" x-text="(player.games?.rating ? parseFloat(player.games?.rating).toFixed(1) : 'N/A')"></div>
+                                <div class="text-sm text-gray-600">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4 mb-8">
+                <button
+                    @click="loadPrediction()"
+                    :disabled="loadingPrediction"
+                    class="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                >
+                    <i class="fas fa-crystal-ball mr-2"></i>
+                    <span x-show="!loadingPrediction">Obtener Predicción</span>
+                    <span x-show="loadingPrediction">Analizando...</span>
+                </button>
+
+                <button
+                    @click="showSection = showSection === 'stats' ? '' : 'stats'"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    :class="showSection === 'stats' ? 'bg-blue-800' : ''"
+                >
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Estadísticas Detalladas
+                </button>
+
+                <button
+                    @click="showSection = showSection === 'history' ? '' : 'history'"
+                    class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    :class="showSection === 'history' ? 'bg-green-800' : ''"
+                >
+                    <i class="fas fa-history mr-2"></i>
+                    Partidos Recientes
+                </button>
+
+                <button
+                    @click="showSection = showSection === 'injuries' ? '' : 'injuries'"
+                    class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors flex items-center"
+                    :class="showSection === 'injuries' ? 'bg-red-800' : ''"
+                >
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    Estado Físico
+                </button>
+            </div>
+
+            <!-- Prediction Section -->
+            <div x-show="prediction" class="bg-gradient-to-r from-purple-100 to-indigo-100 border border-purple-200 rounded-xl p-6 mb-8">
+                <h2 class="text-2xl font-bold text-purple-800 mb-4 flex items-center">
+                    <i class="fas fa-crystal-ball mr-3"></i>
+                    Predicción de Valor
+                </h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Price Prediction -->
+                    <div class="bg-white rounded-lg p-4 shadow-md">
+                        <h3 class="font-semibold text-gray-700 mb-2">Precio Actual vs Predicho</h3>
+                        <div class="flex items-center justify-between">
+                            <div class="text-center">
+                                <div class="text-xl font-bold text-gray-800" x-text="`${prediction.currentPrice}M`"></div>
+                                <div class="text-sm text-gray-600">Actual</div>
+                            </div>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                            <div class="text-center">
+                                <div class="text-xl font-bold" :class="prediction.priceChange > 0 ? 'text-green-600' : prediction.priceChange < 0 ? 'text-red-600' : 'text-gray-600'" x-text="`${prediction.predictedPrice}M`"></div>
+                                <div class="text-sm text-gray-600">Predicho</div>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-center">
+                            <span
+                                class="text-sm font-semibold"
+                                :class="prediction.priceChange > 0 ? 'text-green-600' : prediction.priceChange < 0 ? 'text-red-600' : 'text-gray-600'"
+                                x-text="`${prediction.priceChange > 0 ? '+' : ''}${prediction.priceChange}M (${prediction.changePercentage}%)`"
+                            ></span>
+                        </div>
+                    </div>
+
+                    <!-- Confidence & Recommendation -->
+                    <div class="bg-white rounded-lg p-4 shadow-md">
+                        <h3 class="font-semibold text-gray-700 mb-2">Recomendación</h3>
+                        <div class="text-center">
+                            <div
+                                class="inline-block px-3 py-1 rounded-full text-sm font-semibold mb-2"
+                                :class="getActionColor(prediction.recommendation?.action)"
+                                x-text="prediction.recommendation?.action"
+                            ></div>
+                            <div class="text-sm text-gray-600 mb-2" x-text="prediction.recommendation?.reason"></div>
+                            <div class="text-xs text-gray-500">
+                                Confianza: <span :class="getConfidenceColor(prediction.confidence)" x-text="`${prediction.confidence}%`"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trend -->
+                    <div class="bg-white rounded-lg p-4 shadow-md">
+                        <h3 class="font-semibold text-gray-700 mb-2">Tendencia</h3>
+                        <div class="text-center">
+                            <div class="text-2xl mb-2" x-text="getTrendEmoji(prediction.trend)"></div>
+                            <div class="text-lg font-semibold capitalize" x-text="prediction.trend"></div>
+                            <div class="text-sm text-gray-600 mt-2">
+                                Generada: <span x-text="new Date(prediction.generatedAt).toLocaleDateString()"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prediction Factors -->
+                <div class="mt-6">
+                    <h3 class="font-semibold text-gray-700 mb-3">Factores de Análisis</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <template x-for="factor in prediction.factors" :key="factor">
+                            <div class="bg-white bg-opacity-50 px-3 py-1 rounded text-sm" x-text="factor"></div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Stats Section -->
+            <div x-show="showSection === 'stats'" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-chart-bar mr-3 text-blue-600"></i>
+                    Estadísticas Detalladas - Temporada 2025-26
+                </h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Games Stats -->
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-800 mb-3 flex items-center">
+                            <i class="fas fa-gamepad mr-2"></i>
+                            Partidos
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Jugados:</span>
+                                <span class="font-semibold" x-text="player.games?.appearences || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Titular:</span>
+                                <span class="font-semibold" x-text="player.games?.lineups || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Minutos:</span>
+                                <span class="font-semibold" x-text="player.games?.minutes || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Rating:</span>
+                                <span class="font-semibold" x-text="player.games?.rating ? parseFloat(player.games.rating).toFixed(2) : 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goals & Assists -->
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-green-800 mb-3 flex items-center">
+                            <i class="fas fa-futbol mr-2"></i>
+                            Goles y Asistencias
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Goles totales:</span>
+                                <span class="font-semibold" x-text="player.goals?.total || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Asistencias:</span>
+                                <span class="font-semibold" x-text="player.goals?.assists || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Goles esperados:</span>
+                                <span class="font-semibold" x-text="player.goals?.expected || 'N/A'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Por 90 min:</span>
+                                <span class="font-semibold" x-text="player.goals?.per90 || 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="bg-yellow-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-yellow-800 mb-3 flex items-center">
+                            <i class="fas fa-square mr-2"></i>
+                            Tarjetas
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Amarillas:</span>
+                                <span class="font-semibold text-yellow-600" x-text="player.cards?.yellow || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Rojas:</span>
+                                <span class="font-semibold text-red-600" x-text="player.cards?.red || 0"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Passes (if available) -->
+                    <div x-show="player.passes" class="bg-purple-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-purple-800 mb-3 flex items-center">
+                            <i class="fas fa-exchange-alt mr-2"></i>
+                            Pases
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Total:</span>
+                                <span class="font-semibold" x-text="player.passes?.total || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Precisión:</span>
+                                <span class="font-semibold" x-text="player.passes?.accuracy || 'N/A'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Clave:</span>
+                                <span class="font-semibold" x-text="player.passes?.key || 0"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dribbles (if available) -->
+                    <div x-show="player.dribbles" class="bg-indigo-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-800 mb-3 flex items-center">
+                            <i class="fas fa-running mr-2"></i>
+                            Regates
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Intentos:</span>
+                                <span class="font-semibold" x-text="player.dribbles?.attempts || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Exitosos:</span>
+                                <span class="font-semibold" x-text="player.dribbles?.success || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Efectividad:</span>
+                                <span class="font-semibold" x-text="player.dribbles?.past || 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Penalties (if available) -->
+                    <div x-show="player.penalty" class="bg-red-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-red-800 mb-3 flex items-center">
+                            <i class="fas fa-dot-circle mr-2"></i>
+                            Penaltis
+                        </h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Marcados:</span>
+                                <span class="font-semibold" x-text="player.penalty?.scored || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Fallados:</span>
+                                <span class="font-semibold" x-text="player.penalty?.missed || 0"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total:</span>
+                                <span class="font-semibold" x-text="player.penalty?.total || 0"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Games Section -->
+            <div x-show="showSection === 'history'" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-history mr-3 text-green-600"></i>
+                    Partidos Recientes
+                </h2>
+
+                <div x-show="recentGames && recentGames.length > 0">
+                    <div class="space-y-4">
+                        <template x-for="game in recentGames" :key="game.fixture.id">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-2 lg:space-y-0">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="text-sm text-gray-600" x-text="new Date(game.fixture.date).toLocaleDateString()"></div>
+                                        <div class="flex items-center space-x-2">
+                                            <img :src="game.teams.home.logo" :alt="game.teams.home.name" class="w-6 h-6">
+                                            <span class="font-semibold" x-text="game.teams.home.name"></span>
+                                            <span class="text-gray-600">vs</span>
+                                            <img :src="game.teams.away.logo" :alt="game.teams.away.name" class="w-6 h-6">
+                                            <span class="font-semibold" x-text="game.teams.away.name"></span>
+                                        </div>
+                                        <div class="font-bold" x-text="`${game.goals.home} - ${game.goals.away}`"></div>
+                                    </div>
+                                    <div x-show="game.player_stats" class="text-sm text-gray-600">
+                                        Rating: <span class="font-semibold" x-text="game.player_stats?.games?.rating || 'N/A'"></span>
+                                        | Min: <span class="font-semibold" x-text="game.player_stats?.games?.minutes || 0"></span>
+                                        | G: <span class="font-semibold" x-text="game.player_stats?.goals?.total || 0"></span>
+                                        | A: <span class="font-semibold" x-text="game.player_stats?.goals?.assists || 0"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div x-show="!recentGames || recentGames.length === 0" class="text-center py-8">
+                    <i class="fas fa-info-circle text-gray-400 text-4xl mb-4"></i>
+                    <p class="text-gray-600">No hay información de partidos recientes disponible</p>
+                </div>
+            </div>
+
+            <!-- Injuries Section -->
+            <div x-show="showSection === 'injuries'" class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-heartbeat mr-3 text-red-600"></i>
+                    Estado Físico y Lesiones
+                </h2>
+
+                <div x-show="injuries && injuries.length > 0">
+                    <div class="space-y-4">
+                        <template x-for="injury in injuries" :key="injury.date">
+                            <div class="border border-red-200 rounded-lg p-4 bg-red-50">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold text-red-800" x-text="injury.type"></div>
+                                        <div class="text-sm text-red-600" x-text="injury.reason"></div>
+                                    </div>
+                                    <div class="text-sm text-red-600" x-text="new Date(injury.date).toLocaleDateString()"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div x-show="!injuries || injuries.length === 0" class="text-center py-8">
+                    <i class="fas fa-check-circle text-green-500 text-4xl mb-4"></i>
+                    <p class="text-green-600 font-semibold">¡Sin lesiones reportadas!</p>
+                    <p class="text-gray-600">El jugador está disponible para jugar</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function playerDetailApp() {
+            return {
+                // State
+                loading: true,
+                error: false,
+                errorMessage: '',
+                playerId: null,
+                player: null,
+                prediction: null,
+                loadingPrediction: false,
+                recentGames: [],
+                injuries: [],
+                showSection: '',
+
+                // Initialize
+                init() {
+                    this.playerId = this.getPlayerIdFromUrl();
+                    if (this.playerId) {
+                        this.loadPlayerData();
+                    } else {
+                        this.showError('ID de jugador no válido');
+                    }
+                },
+
+                getPlayerIdFromUrl() {
+                    const pathParts = window.location.pathname.split('/');
+                    return pathParts[pathParts.length - 1];
+                },
+
+                async loadPlayerData() {
+                    try {
+                        this.loading = true;
+                        this.error = false;
+
+                        const response = await fetch(`/api/laliga/laliga/player/${this.playerId}/details`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.player = result.data;
+                            this.recentGames = result.data.recentGames || [];
+                            this.injuries = result.data.injuries || [];
+                            console.log('✅ Datos del jugador cargados:', this.player);
+                        } else {
+                            this.showError(result.error || 'Error cargando datos del jugador');
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Error cargando jugador:', error);
+                        this.showError('Error de conexión');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadPrediction() {
+                    try {
+                        this.loadingPrediction = true;
+
+                        const response = await fetch(`/api/predictions/player/${this.playerId}`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.prediction = result.data;
+                            console.log('🔮 Predicción cargada:', this.prediction);
+                        } else {
+                            console.error('Error cargando predicción:', result.error);
+                        }
+
+                    } catch (error) {
+                        console.error('❌ Error cargando predicción:', error);
+                    } finally {
+                        this.loadingPrediction = false;
+                    }
+                },
+
+                showError(message) {
+                    this.error = true;
+                    this.errorMessage = message;
+                    this.loading = false;
+                },
+
+                retry() {
+                    this.loadPlayerData();
+                },
+
+                // Helper methods
+                getTrendEmoji(trend) {
+                    const emojis = {
+                        'rising': '📈',
+                        'falling': '📉',
+                        'stable': '➡️'
+                    };
+                    return emojis[trend] || '❓';
+                },
+
+                getConfidenceColor(confidence) {
+                    if (confidence >= 80) return 'text-green-600 font-semibold';
+                    if (confidence >= 60) return 'text-yellow-600 font-semibold';
+                    return 'text-red-600 font-semibold';
+                },
+
+                getActionColor(action) {
+                    const colors = {
+                        'BUY': 'bg-green-100 text-green-800',
+                        'SELL': 'bg-red-100 text-red-800',
+                        'HOLD': 'bg-gray-100 text-gray-800'
+                    };
+                    return colors[action] || 'bg-gray-100 text-gray-800';
+                }
+            };
+        }
+    </script>
+</body>
+</html>

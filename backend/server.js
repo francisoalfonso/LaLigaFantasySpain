@@ -21,6 +21,8 @@ const bargainsRoutes = require('./routes/bargains');
 const predictionsRoutes = require('./routes/predictions');
 const contentAIRoutes = require('./routes/contentAI');
 const evolutionRoutes = require('./routes/evolution');
+// const instagramRoutes = require('./routes/instagram'); // Temporalmente deshabilitado por error sintáctico
+const imageGeneratorRoutes = require('./routes/imageGenerator');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -50,6 +52,10 @@ app.use(express.urlencoded({ extended: true }));
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Servir imágenes generadas
+app.use('/generated/images', express.static(path.join(__dirname, 'generated/images')));
+app.use('/assets/images', express.static(path.join(__dirname, 'assets/images')));
+
 // Middleware para logging de peticiones
 app.use((req, res, next) => {
   console.log(`📨 ${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -70,6 +76,8 @@ app.use('/api/bargains', bargainsRoutes);
 app.use('/api/predictions', predictionsRoutes);
 app.use('/api/ai', contentAIRoutes);
 app.use('/api/evolution', evolutionRoutes);
+// app.use('/api/instagram', instagramRoutes); // Temporalmente deshabilitado
+app.use('/api/images', imageGeneratorRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -104,6 +112,26 @@ app.get('/players', (req, res) => {
 // Ruta alternativa para agenda de jugadores
 app.get('/players-agenda', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
+});
+
+// Ruta para matriz de planificación de contenido
+app.get('/content-strategy-matrix', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/content-matrix', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
+});
+
+// Ruta para staging/validación de contenido
+app.get('/content-staging', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/staging', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
 });
 
 // Ruta de salud del servidor

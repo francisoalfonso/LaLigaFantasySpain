@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Staging - Fantasy La Liga</title>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .staging-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .content-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-pending { @apply bg-yellow-100 text-yellow-800 border-yellow-300; }
+        .status-approved { @apply bg-green-100 text-green-800 border-green-300; }
+        .status-rejected { @apply bg-red-100 text-red-800 border-red-300; }
+        .status-scheduled { @apply bg-blue-100 text-blue-800 border-blue-300; }
+
+        .instagram-preview {
+            max-width: 400px;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+        }
+
+        .mock-insta-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mock-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="contentStaging()">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="staging-header text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-2">🎬 Content Staging</h1>
+                        <p class="text-xl opacity-90">
+                            Revisa y aprueba contenido antes de publicarlo en redes sociales
+                        </p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button @click="generateNewContent()"
+                                class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
+                            🤖 Generar Contenido
+                        </button>
+                        <button @click="refreshContent()"
+                                class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-medium transition-colors">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold" x-text="contentStats.pending"></div>
+                        <div class="text-sm opacity-75">Pendiente Revisión</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold" x-text="contentStats.approved"></div>
+                        <div class="text-sm opacity-75">Aprobado</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold" x-text="contentStats.scheduled"></div>
+                        <div class="text-sm opacity-75">Programado</div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg p-4 text-center">
+                        <div class="text-2xl font-bold" x-text="contentStats.published"></div>
+                        <div class="text-sm opacity-75">Publicado</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mr-2">Estado:</label>
+                        <select x-model="filterStatus" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                            <option value="">Todos</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="approved">Aprobado</option>
+                            <option value="rejected">Rechazado</option>
+                            <option value="scheduled">Programado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mr-2">Plataforma:</label>
+                        <select x-model="filterPlatform" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                            <option value="">Todas</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="tiktok">TikTok</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700 mr-2">Tipo:</label>
+                        <select x-model="filterType" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+                            <option value="">Todos</option>
+                            <option value="chollo">Chollos</option>
+                            <option value="analysis">Análisis</option>
+                            <option value="alert">Alertas</option>
+                            <option value="stats">Estadísticas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <template x-for="content in filteredContent" :key="content.id">
+                    <div class="content-card bg-white rounded-lg shadow-lg overflow-hidden">
+                        <!-- Content Header -->
+                        <div class="p-4 border-b border-gray-200">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span x-text="content.platform"
+                                          :class="`inline-flex px-2 py-1 text-xs font-medium rounded-full ${content.platform === 'instagram' ? 'bg-pink-100 text-pink-800' : content.platform === 'twitter' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`"></span>
+                                    <span x-text="content.type" class="text-xs text-gray-500 uppercase tracking-wide"></span>
+                                </div>
+                                <span x-text="content.status"
+                                      :class="`inline-flex px-2 py-1 text-xs font-medium rounded-full status-${content.status}`"></span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900" x-text="content.title"></h3>
+                            <p class="text-sm text-gray-500 mt-1">
+                                Generado: <span x-text="new Date(content.createdAt).toLocaleString('es-ES')"></span>
+                            </p>
+                        </div>
+
+                        <!-- Content Preview -->
+                        <div class="p-4">
+                            <!-- Instagram Preview -->
+                            <div x-show="content.platform === 'instagram'" class="instagram-preview mx-auto">
+                                <div class="mock-insta-header">
+                                    <div class="mock-avatar">FL</div>
+                                    <div>
+                                        <div class="font-semibold text-sm">fantasy.laliga.pro</div>
+                                        <div class="text-xs opacity-75">Fantasy La Liga Pro</div>
+                                    </div>
+                                </div>
+
+                                <!-- Mock Image Placeholder -->
+                                <div class="bg-white/20 rounded-lg p-8 text-center mb-3">
+                                    <div class="text-4xl mb-2" x-text="content.emoji || '📊'"></div>
+                                    <div class="text-sm opacity-75">Preview de imagen</div>
+                                </div>
+
+                                <!-- Content Text -->
+                                <div class="text-sm mb-3" x-text="content.content"></div>
+
+                                <!-- Mock Hashtags -->
+                                <div class="text-xs opacity-75" x-text="content.hashtags"></div>
+                            </div>
+
+                            <!-- Twitter Preview -->
+                            <div x-show="content.platform === 'twitter'" class="bg-white border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">FL</div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <span class="font-semibold">Fantasy La Liga Pro</span>
+                                            <span class="text-gray-500 text-sm">@FantasyLaLiga</span>
+                                            <span class="text-gray-500 text-sm">· ahora</span>
+                                        </div>
+                                        <div class="mt-2 text-sm" x-text="content.content"></div>
+                                        <div class="mt-2 text-blue-500 text-sm" x-text="content.hashtags"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Sources -->
+                            <div class="mt-4 bg-gray-50 p-3 rounded-lg">
+                                <h4 class="text-xs font-medium text-gray-900 mb-2">📊 Datos utilizados:</h4>
+                                <ul class="space-y-1">
+                                    <template x-for="source in content.dataSources" :key="source">
+                                        <li class="text-xs text-gray-600 flex items-center">
+                                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                            <span x-text="source"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="p-4 bg-gray-50 border-t border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <div class="flex space-x-2">
+                                    <button @click="editContent(content.id)"
+                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        ✏️ Editar
+                                    </button>
+                                    <button @click="previewContent(content.id)"
+                                            class="text-gray-600 hover:text-gray-800 text-sm font-medium">
+                                        👁️ Preview
+                                    </button>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button @click="approveContent(content.id)"
+                                            :disabled="content.status === 'approved'"
+                                            :class="content.status === 'approved' ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-100'"
+                                            class="bg-green-500 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                                        ✅ Aprobar
+                                    </button>
+                                    <button @click="rejectContent(content.id)"
+                                            class="bg-red-500 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-600 transition-colors">
+                                        ❌ Rechazar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Options -->
+                            <div x-show="content.status === 'approved'" x-transition class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="flex items-center space-x-4">
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700 mb-1">Programar para:</label>
+                                        <input type="datetime-local"
+                                               x-model="content.scheduledFor"
+                                               class="border border-gray-300 rounded-md px-2 py-1 text-xs">
+                                    </div>
+                                    <div class="flex-1">
+                                        <button @click="scheduleContent(content.id)"
+                                                class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-600 transition-colors">
+                                            📅 Programar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="filteredContent.length === 0" class="text-center py-12">
+                <div class="text-gray-400 text-6xl mb-4">📝</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No hay contenido para revisar</h3>
+                <p class="text-gray-500 mb-4">Genera contenido nuevo o ajusta los filtros</p>
+                <button @click="generateNewContent()"
+                        class="bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                    🤖 Generar Contenido de Prueba
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div x-show="showEditModal" x-transition class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Editar Contenido</h3>
+                <button @click="showEditModal = false" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div x-show="editingContent">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título:</label>
+                        <input type="text" x-model="editingContent.title"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contenido:</label>
+                        <textarea x-model="editingContent.content" rows="6"
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Hashtags:</label>
+                        <input type="text" x-model="editingContent.hashtags"
+                               class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button @click="showEditModal = false"
+                            class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button @click="saveEdit()"
+                            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function contentStaging() {
+            return {
+                // State
+                content: [],
+                filterStatus: '',
+                filterPlatform: '',
+                filterType: '',
+                showEditModal: false,
+                editingContent: null,
+
+                // Computed
+                get contentStats() {
+                    const stats = {
+                        pending: 0,
+                        approved: 0,
+                        scheduled: 0,
+                        published: 0
+                    };
+
+                    this.content.forEach(item => {
+                        if (stats.hasOwnProperty(item.status)) {
+                            stats[item.status]++;
+                        }
+                    });
+
+                    return stats;
+                },
+
+                get filteredContent() {
+                    return this.content.filter(item => {
+                        if (this.filterStatus && item.status !== this.filterStatus) return false;
+                        if (this.filterPlatform && item.platform !== this.filterPlatform) return false;
+                        if (this.filterType && item.type !== this.filterType) return false;
+                        return true;
+                    });
+                },
+
+                // Methods
+                init() {
+                    this.loadContent();
+                },
+
+                async loadContent() {
+                    // Simulate loading content from API
+                    this.content = [
+                        {
+                            id: 1,
+                            title: "🔥 Chollos TOP Jornada 5",
+                            content: "🔥 ¡LOS CHOLLOS DE LA JORNADA!\n\n⚽ Fran Pérez (Rayo) - 3.5M €\n• Rating: 7.1 📈\n• 1 gol en 2 partidos\n• Forma ascendente\n\n⚽ Etta Eyong (Levante) - 5.9M €\n• Rating: 7.75 🔥\n• 2 goles + 1 asistencia\n• Promovido en gran forma\n\n⚽ Alexis Sánchez (Sevilla) - 3.4M €\n• Rating: 7.07 ⭐\n• 1 gol + 1 asistencia\n• Veterano con experiencia\n\n💡 Todos con ratio valor/precio >1.25\n🎯 ¡Fichájalos antes que suban!",
+                            hashtags: "#FantasyLaLiga #Chollos #Jornada5 #FantasyFootball #LaLiga #FranPerez #EttaEyong #AlexisSanchez",
+                            platform: "instagram",
+                            type: "chollo",
+                            status: "pending",
+                            emoji: "🔥",
+                            createdAt: new Date().toISOString(),
+                            dataSources: [
+                                "API-Sports datos reales",
+                                "BargainAnalyzer algoritmo propio",
+                                "Ratings actualizados hoy",
+                                "600+ jugadores analizados"
+                            ],
+                            scheduledFor: null
+                        },
+                        {
+                            id: 2,
+                            title: "Análisis Pre-Jornada",
+                            content: "📊 ANÁLISIS JORNADA 5\n\nPartidos clave:\n🔥 Barcelona vs Real Madrid - El Clásico\n⚡ Atlético vs Sevilla - Duelo de Champions\n\n💡 Recomendaciones:\n• Lewandowski capitán (85% prob. titular)\n• Bellingham alternativa segura\n• Evitar defensas del Madrid (rival complicado)",
+                            hashtags: "#ElClasico #FantasyLaLiga #Jornada5 #Predicciones",
+                            platform: "instagram",
+                            type: "analysis",
+                            status: "approved",
+                            emoji: "📊",
+                            createdAt: new Date(Date.now() - 3600000).toISOString(),
+                            dataSources: [
+                                "Fixtures API-Sports",
+                                "Probabilidades alineación",
+                                "Análisis histórico vs rival",
+                                "PredictorValor IA"
+                            ],
+                            scheduledFor: null
+                        },
+                        {
+                            id: 3,
+                            title: "Alerta: Rotaciones Madrid",
+                            content: "🚨 ALERTA ROTACIONES\n\nAncelotti confirma rotaciones para el Clásico:\n\n❌ Modric - Descansa\n❌ Carvajal - Molestias\n✅ Bellingham - Titular confirmado\n✅ Vinicius - 90% probabilidad\n\n🎯 Ajusta tu Fantasy ANTES del cierre!",
+                            hashtags: "#AlertaFantasy #RealMadrid #Rotaciones #FantasyLaLiga",
+                            platform: "twitter",
+                            type: "alert",
+                            status: "pending",
+                            createdAt: new Date(Date.now() - 1800000).toISOString(),
+                            dataSources: [
+                                "Noticias equipos",
+                                "Ruedas de prensa",
+                                "Probabilidades alineación",
+                                "Histórico rotaciones Ancelotti"
+                            ],
+                            scheduledFor: null
+                        }
+                    ];
+                },
+
+                async generateNewContent() {
+                    // Simulate API call to generate content
+                    console.log('🤖 Generando contenido nuevo...');
+
+                    const newContent = {
+                        id: Date.now(),
+                        title: "Contenido Generado Automáticamente",
+                        content: "Este es contenido generado automáticamente por el sistema de IA. Incluye análisis basado en datos reales de La Liga.",
+                        hashtags: "#FantasyLaLiga #IA #Automatico",
+                        platform: "instagram",
+                        type: "analysis",
+                        status: "pending",
+                        emoji: "🤖",
+                        createdAt: new Date().toISOString(),
+                        dataSources: [
+                            "GPT-5 Mini",
+                            "Datos API-Sports",
+                            "BargainAnalyzer"
+                        ],
+                        scheduledFor: null
+                    };
+
+                    this.content.unshift(newContent);
+                    alert('✅ Contenido generado y añadido para revisión');
+                },
+
+                refreshContent() {
+                    this.loadContent();
+                    console.log('🔄 Contenido actualizado');
+                },
+
+                editContent(id) {
+                    this.editingContent = { ...this.content.find(c => c.id === id) };
+                    this.showEditModal = true;
+                },
+
+                saveEdit() {
+                    const index = this.content.findIndex(c => c.id === this.editingContent.id);
+                    if (index !== -1) {
+                        this.content[index] = { ...this.editingContent };
+                    }
+                    this.showEditModal = false;
+                    this.editingContent = null;
+                    console.log('✅ Contenido guardado');
+                },
+
+                approveContent(id) {
+                    const content = this.content.find(c => c.id === id);
+                    if (content) {
+                        content.status = 'approved';
+                        console.log(`✅ Contenido ${id} aprobado`);
+                    }
+                },
+
+                rejectContent(id) {
+                    const content = this.content.find(c => c.id === id);
+                    if (content) {
+                        content.status = 'rejected';
+                        console.log(`❌ Contenido ${id} rechazado`);
+                    }
+                },
+
+                scheduleContent(id) {
+                    const content = this.content.find(c => c.id === id);
+                    if (content && content.scheduledFor) {
+                        content.status = 'scheduled';
+                        console.log(`📅 Contenido ${id} programado para ${content.scheduledFor}`);
+
+                        // Aquí se integraría con n8n para la programación real
+                        this.sendToN8nScheduler(content);
+                    } else {
+                        alert('⚠️ Selecciona una fecha y hora para programar');
+                    }
+                },
+
+                async sendToN8nScheduler(content) {
+                    try {
+                        // Simulate n8n webhook call
+                        console.log('📤 Enviando a n8n scheduler:', content);
+
+                        // Real implementation would be:
+                        // const response = await fetch('/api/n8n-mcp/schedule-content', {
+                        //     method: 'POST',
+                        //     headers: { 'Content-Type': 'application/json' },
+                        //     body: JSON.stringify(content)
+                        // });
+
+                        alert('✅ Contenido programado en n8n successfully!');
+                    } catch (error) {
+                        console.error('Error scheduling content:', error);
+                        alert('❌ Error programando contenido');
+                    }
+                },
+
+                previewContent(id) {
+                    const content = this.content.find(c => c.id === id);
+                    console.log('👁️ Preview content:', content);
+                    // Aquí podrías abrir un modal con preview completo
+                }
+            }
+        }
+    </script>
+</body>
+</html>

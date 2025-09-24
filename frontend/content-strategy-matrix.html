@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matriz de Planificación de Contenido - Fantasy La Liga</title>
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .content-matrix {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .data-availability {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .content-type-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .content-type-card:hover {
+            transform: translateY(-2px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .platform-badge {
+            @apply inline-block px-3 py-1 rounded-full text-xs font-medium;
+        }
+        .instagram { @apply bg-pink-100 text-pink-800; }
+        .tiktok { @apply bg-gray-900 text-white; }
+        .youtube { @apply bg-red-100 text-red-800; }
+        .twitter { @apply bg-blue-100 text-blue-800; }
+
+        .priority-high { @apply border-l-4 border-red-500; }
+        .priority-medium { @apply border-l-4 border-yellow-500; }
+        .priority-low { @apply border-l-4 border-green-500; }
+
+        .data-status-available { @apply bg-green-100 text-green-800; }
+        .data-status-partial { @apply bg-yellow-100 text-yellow-800; }
+        .data-status-missing { @apply bg-red-100 text-red-800; }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="contentStrategyMatrix()">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="content-matrix text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold mb-4">🎯 Matriz de Planificación de Contenido</h1>
+                    <p class="text-xl opacity-90 max-w-3xl mx-auto">
+                        Estrategia completa de contenido para redes sociales de Fantasy La Liga con análisis de datos disponibles
+                    </p>
+                    <div class="mt-6 flex justify-center space-x-4">
+                        <span class="inline-flex items-center px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
+                            🏆 Temporada 2025-26
+                        </span>
+                        <span class="inline-flex items-center px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
+                            📊 Datos API-Sports Ultra
+                        </span>
+                        <span class="inline-flex items-center px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
+                            🤖 GPT-5 Mini Ready
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex space-x-8" aria-label="Tabs">
+                    <button @click="activeTab = 'insights'"
+                            :class="activeTab === 'insights' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        📊 Insights de Usuario
+                    </button>
+                    <button @click="activeTab = 'matrix'"
+                            :class="activeTab === 'matrix' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        🎯 Matriz de Contenido
+                    </button>
+                    <button @click="activeTab = 'data'"
+                            :class="activeTab === 'data' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        💾 Estado de Datos
+                    </button>
+                    <button @click="activeTab = 'roadmap'"
+                            :class="activeTab === 'roadmap' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        🚀 Roadmap
+                    </button>
+                    <button @click="activeTab = 'strategy'"
+                            :class="activeTab === 'strategy' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        📈 Estrategia de Lanzamiento
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+            <!-- Tab: User Insights -->
+            <div x-show="activeTab === 'insights'" x-transition:enter="transition ease-out duration-300" class="space-y-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">📈 Lo que valoran los jugadores de Fantasy La Liga</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Contenido Más Valorado -->
+                        <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-green-500 rounded-lg p-2">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="ml-3 text-lg font-semibold text-green-900">Contenido TOP</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-green-800">
+                                <li>• <strong>Chollos semanales</strong> - Jugadores baratos con potencial</li>
+                                <li>• <strong>Análisis de rivales</strong> - Dificultad de enfrentamientos</li>
+                                <li>• <strong>Alertas de alineación</strong> - Quién no juega</li>
+                                <li>• <strong>Tips de capitán</strong> - Mejores opciones</li>
+                                <li>• <strong>Gestión presupuesto</strong> - Estrategias financieras</li>
+                                <li>• <strong>Fichajes sorpresa</strong> - Jugadores ocultos</li>
+                            </ul>
+                        </div>
+
+                        <!-- Formatos Preferidos -->
+                        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-500 rounded-lg p-2">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="ml-3 text-lg font-semibold text-blue-900">Formatos TOP</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-blue-800">
+                                <li>• <strong>Videos cortos</strong> - Tips en 15-60s</li>
+                                <li>• <strong>Infografías</strong> - Estadísticas visuales</li>
+                                <li>• <strong>Lives previos</strong> - Análisis pre-jornada</li>
+                                <li>• <strong>Posts rápidos</strong> - Alertas urgentes</li>
+                                <li>• <strong>Historias</strong> - Behind the scenes</li>
+                                <li>• <strong>Threads</strong> - Análisis profundos</li>
+                            </ul>
+                        </div>
+
+                        <!-- Timing Crítico -->
+                        <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-purple-500 rounded-lg p-2">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="ml-3 text-lg font-semibold text-purple-900">Timing Clave</h3>
+                            </div>
+                            <ul class="space-y-2 text-sm text-purple-800">
+                                <li>• <strong>Viernes</strong> - Previas de jornada</li>
+                                <li>• <strong>Sábado mañana</strong> - Últimos fichajes</li>
+                                <li>• <strong>Domingo post</strong> - Análisis resultados</li>
+                                <li>• <strong>Lunes</strong> - Nuevos chollos</li>
+                                <li>• <strong>Martes-Miércoles</strong> - Lesiones y noticias</li>
+                                <li>• <strong>Jueves</strong> - Preparación próxima jornada</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Platform Preferences -->
+                    <div class="mt-8 bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">🌐 Preferencias por Plataforma</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="text-center">
+                                <div class="bg-pink-500 w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">IG</div>
+                                <p class="font-semibold">Instagram</p>
+                                <p class="text-sm text-gray-600">Stories + Posts visuales</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-black w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">TT</div>
+                                <p class="font-semibold">TikTok</p>
+                                <p class="text-sm text-gray-600">Videos cortos + Tips</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-red-500 w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">YT</div>
+                                <p class="font-semibold">YouTube</p>
+                                <p class="text-sm text-gray-600">Análisis profundos</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="bg-blue-500 w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center text-white font-bold">X</div>
+                                <p class="font-semibold">Twitter/X</p>
+                                <p class="text-sm text-gray-600">Tiempo real + Threads</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Content Matrix -->
+            <div x-show="activeTab === 'matrix'" x-transition:enter="transition ease-out duration-300">
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                        <h2 class="text-2xl font-bold">🎯 Matriz de Contenido por Plataforma</h2>
+                        <p class="mt-2 opacity-90">Qué contenido publicar en cada red social y qué datos necesitamos</p>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plataforma</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Contenido</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datos Necesarios</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioridad</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="content in contentMatrix" :key="content.id">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="content.platform.toLowerCase()" class="platform-badge" x-text="content.platform"></span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm font-medium text-gray-900" x-text="content.type"></div>
+                                            <div class="text-sm text-gray-500" x-text="content.description"></div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <ul class="text-sm text-gray-700">
+                                                <template x-for="data in content.requiredData" :key="data">
+                                                    <li class="flex items-center">
+                                                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                                        <span x-text="data"></span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span :class="`inline-flex px-2 py-1 text-xs font-semibold rounded-full data-status-${content.status}`" x-text="content.statusText"></span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div :class="`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full priority-${content.priority.toLowerCase()} bg-white`">
+                                                <div :class="`w-2 h-2 rounded-full mr-2 ${content.priority === 'HIGH' ? 'bg-red-500' : content.priority === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'}`"></div>
+                                                <span x-text="content.priority"></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Data Status -->
+            <div x-show="activeTab === 'data'" x-transition:enter="transition ease-out duration-300">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">💾 Estado Actual de los Datos</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <template x-for="dataCategory in dataStatus" :key="dataCategory.name">
+                                <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="font-semibold text-gray-900" x-text="dataCategory.name"></h3>
+                                        <span :class="`inline-flex px-2 py-1 text-xs font-semibold rounded-full data-status-${dataCategory.status}`" x-text="dataCategory.statusText"></span>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <template x-for="item in dataCategory.items" :key="item.name">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-700" x-text="item.name"></span>
+                                                <div class="flex items-center">
+                                                    <div :class="`w-2 h-2 rounded-full mr-2 ${item.available ? 'bg-green-500' : 'bg-red-500'}`"></div>
+                                                    <span :class="`text-xs ${item.available ? 'text-green-600' : 'text-red-600'}`" x-text="item.available ? 'Disponible' : 'Falta'"></span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <div class="mt-4 pt-4 border-t border-gray-200" x-show="dataCategory.endpoint">
+                                        <p class="text-xs text-gray-500">
+                                            API: <code class="bg-gray-200 px-1 py-0.5 rounded text-xs" x-text="dataCategory.endpoint"></code>
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Missing Data Summary -->
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <h3 class="text-lg font-semibold text-red-900 mb-4">⚠️ Datos Faltantes Críticos</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-medium text-red-800 mb-2">Para Contenido de Calidad:</h4>
+                                <ul class="space-y-1 text-sm text-red-700">
+                                    <li>• Datos históricos de rendimiento vs equipos específicos</li>
+                                    <li>• Información de lesiones y estado físico</li>
+                                    <li>• Probabilidades de alineación</li>
+                                    <li>• Precios Fantasy históricos</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-red-800 mb-2">Para Automatización:</h4>
+                                <ul class="space-y-1 text-sm text-red-700">
+                                    <li>• Calendario de fixtures completo</li>
+                                    <li>• Análisis de dificultad de rivales</li>
+                                    <li>• Tendencias de mercado Fantasy</li>
+                                    <li>• Datos de propiedad de jugadores</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Roadmap -->
+            <div x-show="activeTab === 'roadmap'" x-transition:enter="transition ease-out duration-300">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">🚀 Roadmap de Implementación</h2>
+
+                    <div class="space-y-8">
+                        <template x-for="(phase, index) in roadmapPhases" :key="index">
+                            <div class="relative">
+                                <!-- Timeline connector -->
+                                <div x-show="index < roadmapPhases.length - 1" class="absolute left-6 top-16 w-0.5 h-full bg-gray-300"></div>
+
+                                <div class="flex items-start">
+                                    <div :class="`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${phase.status === 'completed' ? 'bg-green-500' : phase.status === 'in-progress' ? 'bg-blue-500' : 'bg-gray-400'}`">
+                                        <span x-text="index + 1"></span>
+                                    </div>
+                                    <div class="ml-6 flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="text-lg font-semibold text-gray-900" x-text="phase.title"></h3>
+                                            <span :class="`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${phase.status === 'completed' ? 'bg-green-100 text-green-800' : phase.status === 'in-progress' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`" x-text="phase.statusText"></span>
+                                        </div>
+                                        <p class="mt-2 text-gray-600" x-text="phase.description"></p>
+                                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900 mb-2">Objetivos:</h4>
+                                                <ul class="space-y-1">
+                                                    <template x-for="objective in phase.objectives" :key="objective">
+                                                        <li class="flex items-center text-sm text-gray-700">
+                                                            <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                            </svg>
+                                                            <span x-text="objective"></span>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-gray-900 mb-2">Duración estimada:</h4>
+                                                <p class="text-sm text-gray-700" x-text="phase.duration"></p>
+                                                <h4 class="font-medium text-gray-900 mb-2 mt-3">Recursos necesarios:</h4>
+                                                <p class="text-sm text-gray-700" x-text="phase.resources"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Launch Strategy -->
+            <div x-show="activeTab === 'strategy'" x-transition:enter="transition ease-out duration-300">
+                <div class="space-y-8">
+
+                    <!-- Probabilidad de Alineación Explanation -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">🎯 Funcionalidad: Probabilidad de Alineación</h2>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                    <h3 class="text-lg font-semibold text-blue-900 mb-4">¿Qué es?</h3>
+                                    <ul class="space-y-2 text-sm text-blue-800">
+                                        <li>• <strong>Predicción porcentual</strong> de si un jugador va a jugar de titular</li>
+                                        <li>• <strong>Análisis de rotaciones</strong> del entrenador basado en patrones históricos</li>
+                                        <li>• <strong>Detección de descansos</strong> estratégicos antes de partidos importantes</li>
+                                        <li>• <strong>Alertas de cambios</strong> de última hora en alineaciones probables</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                    <h3 class="text-lg font-semibold text-green-900 mb-4">¿Por qué es valioso?</h3>
+                                    <ul class="space-y-2 text-sm text-green-800">
+                                        <li>• <strong>Evita decepciones:</strong> No fichas a alguien que va a jugar 0 minutos</li>
+                                        <li>• <strong>Identifica oportunidades:</strong> Titulares baratos que otros no ven</li>
+                                        <li>• <strong>Timing perfecto:</strong> Saber cuándo rotan a las estrellas</li>
+                                        <li>• <strong>Ventaja competitiva:</strong> Información que pocos manejan</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-gray-50 p-6 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-3">📊 Ejemplo de Output:</h4>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                <pre class="text-sm text-gray-700 overflow-x-auto"><code>{
+  "player": "Lewandowski",
+  "probability": 85,
+  "factors": {
+    "recentMinutes": "Ha jugado 90min los últimos 3 partidos",
+    "coachPattern": "Xavi rota delanteros cada 4 partidos",
+    "upcomingFixtures": "Champions en 4 días",
+    "physicalState": "Sin molestias reportadas",
+    "teamNews": "Confirmado en lista de convocados"
+  },
+  "recommendation": "MUY PROBABLE titular - Fichar con confianza"
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estrategia Escalonada por Redes Sociales -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">📱 Estrategia Escalonada por Redes Sociales</h2>
+                        <p class="text-gray-600 mb-6">Empezar por una plataforma, perfeccionarla, y luego expandir es la estrategia más inteligente.</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Fase 1: Instagram -->
+                            <div class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-6 rounded-lg">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-white text-pink-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mr-3">1</div>
+                                    <h3 class="font-bold text-lg">Instagram</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="bg-white/20 px-2 py-1 rounded-full text-xs">Semanas 1-4</span>
+                                </div>
+                                <h4 class="font-semibold mb-2">¿Por qué empezar aquí?</h4>
+                                <ul class="text-sm space-y-1 opacity-90">
+                                    <li>• Datos disponibles ✅</li>
+                                    <li>• Formato simple</li>
+                                    <li>• Audiencia Fantasy activa</li>
+                                    <li>• Fácil automatización</li>
+                                </ul>
+                                <div class="mt-4 pt-4 border-t border-white/20">
+                                    <h5 class="font-medium text-sm mb-1">Contenido inicial:</h5>
+                                    <ul class="text-xs space-y-1 opacity-80">
+                                        <li>✅ Chollos semanales</li>
+                                        <li>✅ Top performers</li>
+                                        <li>✅ Stories alertas</li>
+                                        <li>✅ Infografías stats</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Fase 2: Twitter/X -->
+                            <div class="bg-gradient-to-br from-blue-500 to-cyan-600 text-white p-6 rounded-lg">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-white text-blue-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mr-3">2</div>
+                                    <h3 class="font-bold text-lg">Twitter/X</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="bg-white/20 px-2 py-1 rounded-full text-xs">Semanas 5-8</span>
+                                </div>
+                                <h4 class="font-semibold mb-2">¿Por qué segundo?</h4>
+                                <ul class="text-sm space-y-1 opacity-90">
+                                    <li>• Tiempo real ideal</li>
+                                    <li>• Community muy activa</li>
+                                    <li>• Threads análisis profundos</li>
+                                    <li>• Engagement automático</li>
+                                </ul>
+                            </div>
+
+                            <!-- Fase 3: TikTok -->
+                            <div class="bg-gradient-to-br from-gray-800 to-black text-white p-6 rounded-lg">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-white text-gray-800 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mr-3">3</div>
+                                    <h3 class="font-bold text-lg">TikTok</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="bg-white/20 px-2 py-1 rounded-full text-xs">Semanas 9-12</span>
+                                </div>
+                                <h4 class="font-semibold mb-2">¿Por qué tercero?</h4>
+                                <ul class="text-sm space-y-1 opacity-90">
+                                    <li>• Requiere video complejo</li>
+                                    <li>• Trending content</li>
+                                    <li>• Gen Z audience diferente</li>
+                                    <li>• Algoritmo único</li>
+                                </ul>
+                            </div>
+
+                            <!-- Fase 4: YouTube -->
+                            <div class="bg-gradient-to-br from-red-500 to-pink-600 text-white p-6 rounded-lg">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg mr-3">4</div>
+                                    <h3 class="font-bold text-lg">YouTube</h3>
+                                </div>
+                                <div class="mb-4">
+                                    <span class="bg-white/20 px-2 py-1 rounded-full text-xs">Semanas 13-16</span>
+                                </div>
+                                <h4 class="font-semibold mb-2">¿Por qué último?</h4>
+                                <ul class="text-sm space-y-1 opacity-90">
+                                    <li>• Videos largos complejos</li>
+                                    <li>• Requiere avatares HeyGen</li>
+                                    <li>• Producción alta calidad</li>
+                                    <li>• ROI a largo plazo</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sitio Web Básico -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">🌐 Sitio Web Básico - Información Mínima</h2>
+
+                        <div class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-yellow-800">¡Importante!</h3>
+                                    <div class="mt-1 text-sm text-yellow-700">
+                                        <p>Necesitas un sitio web antes de empezar a publicar en redes sociales para dar credibilidad y contexto al proyecto.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">📄 Estructura Mínima</h3>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <ul class="space-y-2 text-sm text-gray-700">
+                                        <li class="flex items-center">
+                                            <span class="text-blue-500 mr-2">🏠</span>
+                                            <strong>Homepage</strong> - Presentación del proyecto
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="text-green-500 mr-2">🎯</span>
+                                            <strong>Quiénes Somos</strong> - Historia y misión
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="text-purple-500 mr-2">💡</span>
+                                            <strong>Servicios</strong> - Qué ofrecemos
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="text-indigo-500 mr-2">📊</span>
+                                            <strong>Dashboard Público</strong> - Demo funcionalidad
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="text-gray-500 mr-2">📞</span>
+                                            <strong>Contacto</strong> - Información de contacto
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="text-pink-500 mr-2">🔗</span>
+                                            <strong>Redes Sociales</strong> - Enlaces a perfiles
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4">🎯 Contenido Homepage</h3>
+                                <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                                    <div class="text-center">
+                                        <h4 class="text-xl font-bold text-gray-900 mb-2">🏆 Fantasy La Liga Spain Pro</h4>
+                                        <p class="text-gray-600 mb-4">"El equipo de expertos que revoluciona tu Fantasy con IA"</p>
+
+                                        <div class="space-y-2 text-sm text-left">
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <span>Análisis diarios con datos reales de La Liga</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <span>Chollos identificados por algoritmos avanzados</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <span>Predicciones basadas en 600+ jugadores</span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                </svg>
+                                                <span>Contenido creado por avatares IA especializados</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 space-x-2">
+                                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-600">Ver Dashboard</button>
+                                            <button class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-pink-600">Síguenos en Instagram</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan de Implementación Inmediato -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">🚀 Plan de Implementación Inmediato</h2>
+
+                        <div class="space-y-6">
+                            <!-- Semana 1-2 -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">1-2</div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Semana 1-2: Preparación</h3>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Tareas Técnicas:</h4>
+                                        <ul class="space-y-1 text-sm text-gray-600">
+                                            <li>• Sitio web básico (3 páginas + dashboard público)</li>
+                                            <li>• Avatar IA básico (texto, sin video aún)</li>
+                                            <li>• Testing de workflows de contenido</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Tareas de Marketing:</h4>
+                                        <ul class="space-y-1 text-sm text-gray-600">
+                                            <li>• Perfiles sociales con branding consistente</li>
+                                            <li>• Contenido inicial (10 posts preparados)</li>
+                                            <li>• Estrategia de hashtags</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Semana 3-4 -->
+                            <div class="border border-gray-200 rounded-lg p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">3-4</div>
+                                    <h3 class="text-lg font-semibold text-gray-900">Semana 3-4: Lanzamiento Instagram</h3>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Automatización:</h4>
+                                        <ul class="space-y-1 text-sm text-gray-600">
+                                            <li>• Publicación diaria automatizada</li>
+                                            <li>• Análisis de métricas para optimizar</li>
+                                            <li>• Ajustes de contenido basados en respuesta</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium text-gray-900 mb-2">Community Building:</h4>
+                                        <ul class="space-y-1 text-sm text-gray-600">
+                                            <li>• Engagement manual inicial</li>
+                                            <li>• Respuesta a comentarios</li>
+                                            <li>• Colaboraciones con cuentas Fantasy</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decisiones Críticas -->
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <h2 class="text-xl font-bold text-red-900 mb-4">⚠️ Decisiones Críticas que Necesitas Tomar YA</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="bg-white p-4 rounded-lg border border-red-200">
+                                <h3 class="font-semibold text-red-800 mb-2">🎨 Branding</h3>
+                                <ul class="space-y-1 text-sm text-red-700">
+                                    <li>• ¿Nombre definitivo?</li>
+                                    <li>• ¿Colores corporativos?</li>
+                                    <li>• ¿Estilo visual del avatar?</li>
+                                    <li>• ¿Logo/identidad visual?</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-lg border border-red-200">
+                                <h3 class="font-semibold text-red-800 mb-2">🏠 Web & Dominio</h3>
+                                <ul class="space-y-1 text-sm text-red-700">
+                                    <li>• ¿Comprar laligafantasyspain.com?</li>
+                                    <li>• ¿Hosting para el sitio web?</li>
+                                    <li>• ¿SSL y configuración técnica?</li>
+                                    <li>• ¿Email corporativo?</li>
+                                </ul>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-lg border border-red-200">
+                                <h3 class="font-semibold text-red-800 mb-2">📱 Redes Sociales</h3>
+                                <ul class="space-y-1 text-sm text-red-700">
+                                    <li>• ¿Nombres de usuario consistentes?</li>
+                                    <li>• ¿Empezar con perfil personal o business?</li>
+                                    <li>• ¿Estrategia de verificación?</li>
+                                    <li>• ¿Presupuesto para ads iniciales?</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 text-center">
+                            <p class="text-red-800 font-medium">
+                                💡 <strong>Consejo:</strong> Define estas decisiones esta semana para poder empezar la implementación técnica inmediatamente.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function contentStrategyMatrix() {
+            return {
+                activeTab: 'insights',
+
+                contentMatrix: [
+                    // Instagram Content
+                    {
+                        id: 1,
+                        platform: 'Instagram',
+                        type: 'Chollos Semanales',
+                        description: 'Posts con 3-5 jugadores baratos con potencial para la jornada',
+                        requiredData: ['Precios actuales', 'Estadísticas de rendimiento', 'Fixtures próximos', 'Rating vs rival'],
+                        status: 'available',
+                        statusText: 'Disponible',
+                        priority: 'HIGH'
+                    },
+                    {
+                        id: 2,
+                        platform: 'Instagram',
+                        type: 'Stories de Alertas',
+                        description: 'Notificaciones urgentes: lesiones, rotaciones, cambios',
+                        requiredData: ['Noticias de equipos', 'Estado físico jugadores', 'Probabilidades alineación'],
+                        status: 'missing',
+                        statusText: 'Faltan datos',
+                        priority: 'HIGH'
+                    },
+                    {
+                        id: 3,
+                        platform: 'Instagram',
+                        type: 'Infografías de Stats',
+                        description: 'Visualización de estadísticas clave por jornada',
+                        requiredData: ['Goles, asistencias', 'Minutos jugados', 'Rating promedio', 'Puntos Fantasy'],
+                        status: 'available',
+                        statusText: 'Disponible',
+                        priority: 'MEDIUM'
+                    },
+
+                    // TikTok Content
+                    {
+                        id: 4,
+                        platform: 'TikTok',
+                        type: 'Tips Express (15-30s)',
+                        description: 'Consejos rápidos: "Este jugador va a explotar"',
+                        requiredData: ['Análisis predictivo', 'Tendencias de precio', 'Forma reciente'],
+                        status: 'partial',
+                        statusText: 'Parcial',
+                        priority: 'HIGH'
+                    },
+                    {
+                        id: 5,
+                        platform: 'TikTok',
+                        type: 'Antes vs Después',
+                        description: 'Evolución de precios/rendimiento de jugadores',
+                        requiredData: ['Histórico de precios', 'Evolución de stats', 'Comparativas temporales'],
+                        status: 'missing',
+                        statusText: 'Faltan datos',
+                        priority: 'MEDIUM'
+                    },
+                    {
+                        id: 6,
+                        platform: 'TikTok',
+                        type: 'Reacciones a Jornadas',
+                        description: 'Análisis post-partido con datos en tiempo real',
+                        requiredData: ['Resultados en vivo', 'Puntos Fantasy calculados', 'Performances destacadas'],
+                        status: 'available',
+                        statusText: 'Disponible',
+                        priority: 'LOW'
+                    },
+
+                    // YouTube Content
+                    {
+                        id: 7,
+                        platform: 'YouTube',
+                        type: 'Análisis Pre-Jornada',
+                        description: 'Videos de 10-15min con análisis profundo completo',
+                        requiredData: ['Fixtures completos', 'Análisis rival', 'Datos históricos', 'Predicciones'],
+                        status: 'partial',
+                        statusText: 'Parcial',
+                        priority: 'HIGH'
+                    },
+                    {
+                        id: 8,
+                        platform: 'YouTube',
+                        type: 'Tutorials de Estrategia',
+                        description: 'Guías para optimizar plantilla y presupuesto',
+                        requiredData: ['Simulador plantillas', 'Análisis presupuesto', 'Estrategias probadas'],
+                        status: 'missing',
+                        statusText: 'Faltan datos',
+                        priority: 'MEDIUM'
+                    },
+
+                    // Twitter Content
+                    {
+                        id: 9,
+                        platform: 'Twitter',
+                        type: 'Threads Analíticos',
+                        description: 'Hilos con análisis detallado de jugadores/equipos',
+                        requiredData: ['Stats detalladas', 'Contexto histórico', 'Comparativas'],
+                        status: 'available',
+                        statusText: 'Disponible',
+                        priority: 'MEDIUM'
+                    },
+                    {
+                        id: 10,
+                        platform: 'Twitter',
+                        type: 'Alertas en Tiempo Real',
+                        description: 'Tweets inmediatos con noticias relevantes',
+                        requiredData: ['Feed noticias', 'API alertas', 'Monitoreo lesiones'],
+                        status: 'missing',
+                        statusText: 'Faltan datos',
+                        priority: 'HIGH'
+                    }
+                ],
+
+                dataStatus: [
+                    {
+                        name: 'Datos de Jugadores',
+                        status: 'available',
+                        statusText: 'Disponible',
+                        endpoint: '/api/laliga/players',
+                        items: [
+                            { name: 'Stats básicas', available: true },
+                            { name: 'Información personal', available: true },
+                            { name: 'Rating por partido', available: true },
+                            { name: 'Puntos Fantasy', available: true },
+                            { name: 'Datos físicos', available: true },
+                            { name: 'Historial vs rivales', available: false },
+                            { name: 'Probabilidad alineación', available: false },
+                            { name: 'Estado lesiones', available: false }
+                        ]
+                    },
+                    {
+                        name: 'Análisis de Chollos',
+                        status: 'available',
+                        statusText: 'Disponible',
+                        endpoint: '/api/bargains/top',
+                        items: [
+                            { name: 'Algoritmo valor/precio', available: true },
+                            { name: 'Filtros por posición', available: true },
+                            { name: 'Análisis predictivo', available: true },
+                            { name: 'Recomendaciones IA', available: true },
+                            { name: 'Tendencias precio', available: false },
+                            { name: 'Datos propiedad', available: false }
+                        ]
+                    },
+                    {
+                        name: 'Fixtures y Partidos',
+                        status: 'partial',
+                        statusText: 'Parcial',
+                        endpoint: '/api/fixtures/*',
+                        items: [
+                            { name: 'Calendario próximos', available: true },
+                            { name: 'Resultados históricos', available: true },
+                            { name: 'Análisis dificultad', available: true },
+                            { name: 'Fixtures completos temp', available: false },
+                            { name: 'Rotaciones equipos', available: false }
+                        ]
+                    },
+                    {
+                        name: 'Contenido IA',
+                        status: 'available',
+                        statusText: 'Disponible',
+                        endpoint: '/api/ai/*',
+                        items: [
+                            { name: 'GPT-5 Mini integrado', available: true },
+                            { name: 'Generación automática', available: true },
+                            { name: 'Análisis jugadores', available: true },
+                            { name: 'Posts redes sociales', available: true },
+                            { name: 'Personalización equipos', available: true },
+                            { name: 'Integración HeyGen', available: false }
+                        ]
+                    },
+                    {
+                        name: 'Datos Meteorológicos',
+                        status: 'available',
+                        statusText: 'Disponible',
+                        endpoint: '/api/weather/*',
+                        items: [
+                            { name: 'AEMET API activa', available: true },
+                            { name: 'Clima por estadio', available: true },
+                            { name: 'Coordenadas GPS', available: true },
+                            { name: 'Impacto en rendimiento', available: false }
+                        ]
+                    },
+                    {
+                        name: 'Base de Datos',
+                        status: 'available',
+                        statusText: 'Disponible',
+                        endpoint: '/api/database/*',
+                        items: [
+                            { name: 'Supabase PostgreSQL', available: true },
+                            { name: 'Schema completo', available: true },
+                            { name: 'Cache optimizado', available: true },
+                            { name: 'Backup automático', available: false }
+                        ]
+                    }
+                ],
+
+                roadmapPhases: [
+                    {
+                        title: 'Fase 1: Completar Datos Base',
+                        description: 'Obtener todos los datos necesarios para generar contenido de calidad',
+                        status: 'in-progress',
+                        statusText: 'En Progreso',
+                        duration: '2-3 semanas',
+                        resources: 'API-Sports + desarrollo interno',
+                        objectives: [
+                            'Implementar datos históricos vs rivales',
+                            'Integrar feed de noticias y lesiones',
+                            'Crear sistema de probabilidades alineación',
+                            'Añadir análisis de tendencias de precio'
+                        ]
+                    },
+                    {
+                        title: 'Fase 2: Automatización de Contenido',
+                        description: 'Crear workflows automáticos para generar contenido por plataforma',
+                        status: 'pending',
+                        statusText: 'Pendiente',
+                        duration: '3-4 semanas',
+                        resources: 'GPT-5 Mini + n8n workflows',
+                        objectives: [
+                            'Workflows automáticos por plataforma',
+                            'Templates de contenido optimizados',
+                            'Sistema de scheduling inteligente',
+                            'Personalización por audiencia'
+                        ]
+                    },
+                    {
+                        title: 'Fase 3: Avatar IA Integration',
+                        description: 'Integrar con HeyGen para crear avatares que presenten el contenido',
+                        status: 'pending',
+                        statusText: 'Pendiente',
+                        duration: '4-6 semanas',
+                        resources: 'HeyGen API + avatar training',
+                        objectives: [
+                            'Integración completa HeyGen API',
+                            'Training de avatar para Fantasy',
+                            'Generación automática de videos',
+                            'Workflows de publicación'
+                        ]
+                    },
+                    {
+                        title: 'Fase 4: Optimización y Analytics',
+                        description: 'Monitorear rendimiento y optimizar basado en métricas',
+                        status: 'pending',
+                        statusText: 'Pendiente',
+                        duration: '2-3 semanas',
+                        resources: 'Analytics tools + A/B testing',
+                        objectives: [
+                            'Sistema de métricas completo',
+                            'A/B testing de contenido',
+                            'Optimización basada en datos',
+                            'Feedback loop automatizado'
+                        ]
+                    }
+                ]
+            }
+        }
+    </script>
+</body>
+</html>

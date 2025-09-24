@@ -129,3 +129,117 @@
 4. **Integrar con sistema de alertas** para cambios de tendencia
 
 **🎯 IMPACTO**: Las predicciones ahora incluyen análisis histórico real vs rival específico, mejorando significativamente la precisión y valor del sistema.
+
+---
+
+## 🚨 **PRÓXIMA TAREA CRÍTICA PRIORITARIA** - 24/Sep/2025
+
+### ⚠️ **Fix Sistema Evolución de Valor - Datos Ficticios vs Reales**
+
+**PROBLEMA CRÍTICO IDENTIFICADO**: El sistema de evolución de valor está generando **38 jornadas de datos completamente ficticios** en lugar de usar datos reales de las pocas jornadas que realmente han ocurrido.
+
+#### 🔍 **Problemas Detectados:**
+
+1. **❌ Fecha inicio incorrecta**: `this.seasonStart = new Date('2024-08-17')`
+2. **❌ Cálculo jornada erróneo**: Calcula jornada 38 cuando solo llevamos ~3-5 jornadas reales
+3. **❌ Datos completamente simulados**: Rating, puntos Fantasy, precios son ficticios
+4. **❌ No integra API-Sports**: No usa datos reales disponibles
+
+#### 📊 **Evidencia del Problema:**
+```json
+{
+  "currentGameweek": 38,  // ❌ FALSO - Solo llevamos pocas jornadas
+  "evolution": [
+    {"gameweek": 1, "date": "2024-08-17", "fantasyValue": 8.4}, // ❌ SIMULADO
+    {"gameweek": 2, "date": "2024-08-24", "fantasyValue": 8.7}, // ❌ SIMULADO
+    // ... hasta jornada 38 ❌ TODAS SIMULADAS
+  ]
+}
+```
+
+#### 🎯 **Archivos a Modificar:**
+
+**ARCHIVO PRINCIPAL**: `backend/services/fantasyEvolution.js`
+- Línea 8: `this.seasonStart` - Corregir fecha inicio real temporada 2025-26
+- Líneas 15-19: `calculateCurrentGameweek()` - Integrar con API-Sports para jornada real
+- Líneas 29-33: Bucle generación datos - Solo generar hasta jornada real actual
+- Todo el método `generateGameweekData()` - Usar datos reales cuando disponibles
+
+**ARCHIVOS SECUNDARIOS**:
+- `backend/routes/evolution.js` - Validar entrada datos reales
+- `frontend/player-detail.html` - Gráfico evolución (reducir tamaño a 50% máx.)
+- `frontend/app.js` - Lógica renderizado gráfico
+- Frontend: Actualizar gráficos para manejar menos puntos de datos
+
+#### 🔧 **Plan de Implementación:**
+
+**Paso 1: Investigar API-Sports para Jornada Actual**
+- Endpoint para obtener jornada actual real de La Liga 2025-26
+- Verificar si hay datos históricos de evolución de precios
+- Determinar estructura de datos disponibles
+
+**Paso 2: Reescribir calculateCurrentGameweek()**
+```javascript
+async calculateCurrentGameweek() {
+  // Consultar API-Sports para jornada actual real
+  const ligaInfo = await this.apiFootball.getLaLigaInfo();
+  return ligaInfo.currentGameweek || this.fallbackCalculation();
+}
+```
+
+**Paso 3: Integrar Datos Reales**
+- Si disponibles: usar datos históricos reales de API-Sports
+- Si no disponibles: generar simulación SOLO hasta jornada actual real
+- Híbrido: datos reales + proyección simulada
+
+**Paso 4: Actualizar Frontend**
+- Gráficos deben manejar 3-5 puntos en lugar de 38
+- Añadir indicadores de "datos reales" vs "proyectados"
+- Mejorar experiencia visual con pocos datos
+- **🎨 UX MEJORA**: Reducir tamaño gráfico a máximo 50% ancho pantalla (actualmente muy grande)
+- Optimizar diseño para mejor experiencia de usuario
+
+#### ⚠️ **Consideraciones Críticas:**
+
+- **API Rate Limiting**: Verificar disponibilidad de datos históricos en API-Sports
+- **Experiencia Usuario**: Con pocas jornadas, el gráfico puede verse vacío
+- **Fallback Strategy**: Qué hacer si no hay datos suficientes para evolución
+- **Cache**: Datos históricos reales deben cachearse agresivamente
+
+#### 📈 **Objetivos de la Fix:**
+
+✅ **Jornada actual correcta** (3-5 en lugar de 38)
+✅ **Datos reales** cuando disponibles en API-Sports
+✅ **Simulación híbrida** solo cuando necesaria
+✅ **Frontend adaptado** para pocos puntos de datos
+✅ **Indicadores claros** de qué datos son reales vs simulados
+✅ **🎨 UX mejorada** - Gráfico tamaño óptimo (máx. 50% ancho pantalla)
+
+#### 🎯 **Testing Post-Fix:**
+
+```bash
+# Verificar jornada actual real
+curl "http://localhost:3000/api/evolution/player/162686" | grep currentGameweek
+
+# Debe devolver ~3-5, NO 38
+# Debe tener solo 3-5 elementos en evolution[], NO 38
+```
+
+**🎨 Testing UX:**
+- Abrir `http://localhost:3000/player/162686`
+- Verificar pestaña "Evolución de Valor"
+- Gráfico debe ocupar máximo 50% del ancho de pantalla
+- Diseño debe verse proporcionado y no excesivamente grande
+
+#### 💡 **Posibles Mejoras Futuras:**
+
+1. **Integración con Fantasy oficial**: Si La Liga tiene API de precios Fantasy
+2. **Predicción inteligente**: IA para proyectar evolución basada en rendimiento
+3. **Comparativa histórica**: Evolución vs temporadas anteriores
+4. **Alertas de cambios**: Notificaciones de cambios significativos de precio
+
+---
+
+**🚨 ESTADO**: PENDIENTE - Funcionalidad crítica que debe arreglarse antes de continuar desarrollo de features adicionales.
+
+**📅 PRIORIDAD**: MÁXIMA - Al reiniciar desarrollo, comenzar directamente por esta tarea.

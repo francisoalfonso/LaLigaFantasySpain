@@ -6,24 +6,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Al retomar el proyecto, comenzar inmediatamente con:**
 
-### 📚 Implementar Análisis Completo de Historial vs Rival
+### 🚨 Fix Sistema Evolución de Valor - CRÍTICO
 
-**CONTEXTO**: El sistema de predicciones actualmente muestra "📚 Historial vs rival: Análisis básico" como placeholder. Esta funcionalidad debe implementarse completamente.
+**CONTEXTO**: ✅ **ANÁLISIS HISTORIAL VS RIVAL COMPLETADO** - El sistema de evolución de valor está generando **38 jornadas de datos FICTICIOS** cuando solo llevamos pocas jornadas reales.
+
+**PROBLEMA CRÍTICO**:
+- Sistema muestra jornada 38 cuando solo llevamos ~3-5 jornadas reales
+- Todos los datos (precios, rating, puntos) son completamente simulados
+- Fecha inicio incorrecta: usa agosto 2024 en lugar de inicio real temporada
 
 **ARCHIVOS A MODIFICAR**:
-- `backend/services/predictorValor.js` - Método `analyzeHistoricalVsOpponent()`
-- `backend/services/apiFootball.js` - Nuevo método `getPlayerVsTeamHistory()`
+- `backend/services/fantasyEvolution.js` - **REESCRITURA COMPLETA necesaria**
+- `backend/routes/evolution.js` - Validación entrada datos reales
+- Frontend - Gráficos adaptados para pocos puntos de datos
 
-**OBJETIVO**: Mostrar estadísticas reales del jugador contra rival específico:
+**OBJETIVO**: Mostrar evolución real con jornada actual correcta:
 ```
-📚 Historial vs Real Madrid:
-   • Últimos 3 partidos: 2 goles, 1 asistencia
-   • Rating promedio: 7.8 (vs 7.2 general)
-   • Tendencia: +0.6 mejor rendimiento
-   • Análisis: "Rival fetiche - suele destacar"
+{
+  "currentGameweek": 3-5,  // NO 38
+  "evolution": [
+    // Solo datos hasta jornada actual real
+  ]
+}
 ```
 
-**PLAN**: Ver archivo `NEXT_TASK.md` para detalles completos de implementación.
+**PLAN**: Ver archivo `NEXT_TASK.md` para análisis completo y plan de implementación detallado.
 
 ---
 
@@ -721,3 +728,56 @@ Workflow automático incluido para:
 - **Mercado de fichajes**: Análisis y predicciones de traspasos
 - **Análisis histórico**: Tendencias y patrones multi-temporada
 - **Comparativas inter-ligas**: Análisis cruzado de rendimientos
+
+---
+
+## Critical Development Instructions
+
+### Core Development Principles
+- **Modification over Creation**: Always prefer editing existing files to creating new ones
+- **Minimal Scope**: Do exactly what's asked, nothing more, nothing less
+- **No Proactive Documentation**: Never create .md or README files unless explicitly requested
+- **Follow Existing Patterns**: Study similar functionality before implementing new features
+
+### Fantasy La Liga Specific Rules
+- **Season Consistency**: Always use 2025 for API-Sports calls (represents 2025-26 season)
+- **Team Validation**: Verify 20 teams total, must include Levante, Elche, Real Oviedo (promoted)
+- **Team Exclusions**: Never include Valladolid, Las Palmas, or Leganés (relegated)
+- **API Rate Limiting**: Respect 75k requests/day limit with existing cache mechanisms
+- **Error Handling**: Follow try/catch + detailed logging pattern seen throughout codebase
+- **Spanish Comments**: All code comments should be in Spanish to match existing codebase
+
+### Database Operations
+- **Required Setup**: `.env.supabase` must be configured before any database operations
+- **Schema Changes**: Always update both supabase-schema.sql and init-database.js for database modifications
+- **Testing First**: Always run `npm run db:test:quick` before database operations
+
+### API Integration Patterns
+- **Service Layer**: Use centralized client pattern (see apiFootball.js) for external APIs
+- **Cache Integration**: Leverage existing BargainCache/PlayersCache patterns
+- **Data Processing**: Always process raw API data through dataProcessor.js before storage
+- **Testing Endpoints**: Every new feature requires a corresponding `/test` endpoint
+
+### Frontend Development
+- **Alpine.js Only**: All frontend reactivity uses Alpine.js, avoid vanilla DOM manipulation
+- **CDN Dependencies**: Frontend uses CDN dependencies (Alpine.js, Tailwind) served directly
+- **No Build Process**: Frontend is vanilla HTML/CSS/JS with CDN dependencies
+- **API Calls**: Frontend makes direct calls to `/api/*` endpoints
+
+### Error Handling Standards
+- **Consistent Pattern**: All services use try/catch with detailed console.log statements
+- **Graceful Degradation**: Always provide fallback responses when external services fail
+- **Rate Limit Awareness**: Implement delays between API calls (see apiFootball.js patterns)
+- **User-Friendly Messages**: Error responses should be informative but not expose internal details
+
+### Security Practices
+- **Environment Variables**: Never commit API keys or sensitive data to git
+- **CORS Configuration**: Properly configured for development and production environments
+- **Helmet Middleware**: Security headers are properly configured in server.js
+- **Input Validation**: Validate all user inputs and API parameters
+
+### Testing Requirements
+- **Before Implementation**: Always test existing functionality with `/api/*/test` endpoints before changes
+- **New Features**: Every new route or service must have corresponding test endpoint
+- **Database Testing**: Use `npm run db:test:quick` before database operations
+- **API Connectivity**: Test API-Sports connection with `curl http://localhost:3000/api/laliga/test` before data operations

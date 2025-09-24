@@ -23,6 +23,10 @@ class PredictorValor {
       'FWD': { min: 2.5, max: 15.0, avg: 7.5 }
     };
 
+    // Cache para historiales vs rival (datos cambian poco)
+    this.historicalCache = new Map();
+    this.HISTORICAL_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 horas
+
     console.log('🔮 PredictorValor inicializado - Sistema de predicción inteligente');
   }
 
@@ -187,13 +191,100 @@ class PredictorValor {
     };
   }
 
-  // Análisis historial vs próximo rival
+
+  // Análisis historial vs próximo rival (con cache optimizado)
   async analyzeHistoricalVsOpponent(player, nextFixture) {
-    // Por ahora simplificado - en futuras versiones consultar historial
-    return {
-      score: 0,
-      factors: ['📚 Historial vs rival: Análisis básico']
-    };
+    if (!nextFixture || !this.apiFootball) {
+      return {
+        score: 0,
+        factors: ['📚 Sin información de próximo rival']
+      };
+    }
+
+    try {
+      // Determinar equipo rival
+      const playerTeamId = player.team?.id;
+      if (!playerTeamId) {
+        return {
+          score: 0,
+          factors: ['📚 No se pudo determinar equipo del jugador']
+        };
+      }
+
+      const isHome = nextFixture.teams?.home?.id === playerTeamId;
+      const opponent = isHome ? nextFixture.teams?.away : nextFixture.teams?.home;
+
+      if (!opponent) {
+        return {
+          score: 0,
+          factors: ['📚 No se pudo determinar rival']
+        };
+      }
+
+      // Verificar cache primero (datos históricos cambian poco)
+      const cacheKey = `historical_${player.id}_vs_${opponent.id}`;
+      const cached = this.historicalCache.get(cacheKey);
+
+      if (cached && Date.now() - cached.timestamp < this.HISTORICAL_CACHE_TTL) {
+        console.log(`⚡ Cache HIT: Historial ${player.name} vs ${opponent.name}`);
+        return cached.data;
+      }
+
+      console.log(`📚 Analizando historial de ${player.name} vs ${opponent.name}...`);
+
+      // OPTIMIZACIÓN: Solo buscar 1-2 temporadas más recientes para acelerar
+      const historyResult = await this.apiFootball.getPlayerVsTeamHistory(
+        player.id,
+        opponent.id,
+        [2024, this.apiFootball.LEAGUES.CURRENT_SEASON], // Reducido a 2 temporadas
+        5 // Reducido a máximo 5 partidos
+      );
+
+      if (!historyResult.success || historyResult.totalGames === 0) {
+        const result = {
+          score: 0,
+          factors: [`📚 Historial vs ${opponent.name}: Sin enfrentamientos previos`]
+        };
+
+        // Cache resultado negativo también
+        this.historicalCache.set(cacheKey, {
+          data: result,
+          timestamp: Date.now()
+        });
+
+        return result;
+      }
+
+      // Analizar los datos del historial
+      const matches = historyResult.data;
+      const analysisData = this.calculateHistoricalAnalysis(matches, opponent.name);
+
+      // Convertir análisis a score numérico para predicción
+      const score = this.convertHistoricalToScore(analysisData);
+
+      // Generar factores informativos
+      const factors = this.generateHistoricalFactors(analysisData, opponent.name);
+
+      const result = {
+        score: score,
+        factors: factors
+      };
+
+      // Guardar en cache
+      this.historicalCache.set(cacheKey, {
+        data: result,
+        timestamp: Date.now()
+      });
+
+      return result;
+
+    } catch (error) {
+      console.error(`Error analizando historial vs rival:`, error.message);
+      return {
+        score: 0,
+        factors: ['📚 Error obteniendo historial vs rival']
+      };
+    }
   }
 
   // Análisis contexto de mercado
@@ -400,6 +491,181 @@ class PredictorValor {
 
     console.log(`✅ Predicciones completadas: ${predictions.length} jugadores`);
     return predictions;
+  }
+
+  // === MÉTODOS AUXILIARES PARA ANÁLISIS HISTÓRICO ===
+
+  // Calcular análisis estadístico del historial vs rival
+  calculateHistoricalAnalysis(matches, opponentName) {
+    const validMatches = matches.filter(match => match.playerStats);
+
+    if (validMatches.length === 0) {
+      return {
+        totalGames: matches.length,
+        validGames: 0,
+        averageRating: 0,
+        totalGoals: 0,
+        totalAssists: 0,
+        averageMinutes: 0,
+        wins: 0,
+        draws: 0,
+        losses: 0
+      };
+    }
+
+    // Calcular estadísticas acumuladas
+    let totalRating = 0;
+    let totalGoals = 0;
+    let totalAssists = 0;
+    let totalMinutes = 0;
+    let ratingCount = 0;
+    let wins = 0, draws = 0, losses = 0;
+
+    for (const match of validMatches) {
+      const stats = match.playerStats;
+      const outcome = match.result?.outcome;
+
+      // Rating (solo si existe y es válido)
+      if (stats.rating && stats.rating > 0) {
+        totalRating += parseFloat(stats.rating);
+        ratingCount++;
+      }
+
+      // Goles y asistencias
+      totalGoals += stats.goals?.total || 0;
+      totalAssists += stats.assists?.total || 0;
+
+      // Minutos
+      totalMinutes += stats.minutes || 0;
+
+      // Resultados del equipo
+      if (outcome === 'win') wins++;
+      else if (outcome === 'draw') draws++;
+      else if (outcome === 'loss') losses++;
+    }
+
+    return {
+      totalGames: matches.length,
+      validGames: validMatches.length,
+      averageRating: ratingCount > 0 ? totalRating / ratingCount : 0,
+      totalGoals: totalGoals,
+      totalAssists: totalAssists,
+      averageMinutes: validMatches.length > 0 ? totalMinutes / validMatches.length : 0,
+      wins: wins,
+      draws: draws,
+      losses: losses,
+      winRate: validMatches.length > 0 ? wins / validMatches.length : 0,
+      goalsPerGame: validMatches.length > 0 ? totalGoals / validMatches.length : 0,
+      assistsPerGame: validMatches.length > 0 ? totalAssists / validMatches.length : 0
+    };
+  }
+
+  // Convertir análisis histórico a score numérico
+  convertHistoricalToScore(analysis) {
+    if (analysis.validGames === 0) return 0;
+
+    let score = 0;
+
+    // Factor rating promedio vs rival
+    if (analysis.averageRating > 0) {
+      if (analysis.averageRating >= 8.0) score += 2;
+      else if (analysis.averageRating >= 7.5) score += 1.5;
+      else if (analysis.averageRating >= 7.0) score += 1;
+      else if (analysis.averageRating >= 6.5) score += 0.5;
+      else if (analysis.averageRating < 6.0) score -= 0.5;
+    }
+
+    // Factor productividad vs rival
+    const productivity = analysis.goalsPerGame + analysis.assistsPerGame;
+    if (productivity >= 1.0) score += 1.5;
+    else if (productivity >= 0.5) score += 1;
+    else if (productivity >= 0.3) score += 0.5;
+
+    // Factor resultado del equipo vs rival
+    if (analysis.winRate >= 0.7) score += 0.5;
+    else if (analysis.winRate <= 0.3) score -= 0.5;
+
+    // Factor continuidad (minutos jugados)
+    if (analysis.averageMinutes >= 80) score += 0.5;
+    else if (analysis.averageMinutes < 45) score -= 0.5;
+
+    // Bonus por muestra significativa
+    if (analysis.validGames >= 3) score += 0.3;
+
+    return Math.max(-2, Math.min(3, score)); // Normalizar entre -2 y +3
+  }
+
+  // Generar factores informativos del historial
+  generateHistoricalFactors(analysis, opponentName) {
+    const factors = [];
+
+    if (analysis.validGames === 0) {
+      factors.push(`📚 Historial vs ${opponentName}: Sin datos de rendimiento`);
+      return factors;
+    }
+
+    // Información básica de enfrentamientos
+    const gamesSummary = analysis.validGames === 1 ?
+      '1 partido' :
+      `${analysis.validGames} partidos`;
+
+    factors.push(`📚 Historial vs ${opponentName}:`);
+
+    // Estadísticas ofensivas
+    if (analysis.totalGoals > 0 || analysis.totalAssists > 0) {
+      factors.push(`   • Últimos ${gamesSummary}: ${analysis.totalGoals} goles, ${analysis.totalAssists} asistencias`);
+    } else {
+      factors.push(`   • Últimos ${gamesSummary}: Sin goles ni asistencias`);
+    }
+
+    // Rating comparativo si está disponible
+    if (analysis.averageRating > 0) {
+      const ratingText = analysis.averageRating.toFixed(1);
+      factors.push(`   • Rating promedio: ${ratingText} vs rival`);
+    }
+
+    // Análisis de tendencia
+    const tendency = this.getHistoricalTendency(analysis);
+    factors.push(`   • Análisis: ${tendency}`);
+
+    return factors;
+  }
+
+  // Determinar tendencia histórica vs rival
+  getHistoricalTendency(analysis) {
+    if (analysis.validGames === 0) return 'Sin datos suficientes';
+
+    const productivity = analysis.goalsPerGame + analysis.assistsPerGame;
+    const rating = analysis.averageRating;
+
+    // Casos especiales
+    if (analysis.validGames === 1) {
+      if (productivity >= 1.0 || rating >= 8.0) return 'Buen debut contra este rival';
+      else if (productivity === 0 && rating < 6.5) return 'Debut complicado vs rival';
+      else return 'Primer enfrentamiento registrado';
+    }
+
+    // Múltiples partidos
+    if (productivity >= 0.8 && rating >= 7.5) return 'Rival fetiche - suele destacar';
+    else if (productivity >= 0.5 && rating >= 7.0) return 'Buen rendimiento histórico';
+    else if (productivity >= 0.3 || rating >= 6.5) return 'Rendimiento estándar vs rival';
+    else if (productivity <= 0.1 && rating <= 6.0) return 'Rival complicado - historial difícil';
+    else return 'Rendimiento variable vs rival';
+  }
+
+  // Limpiar cache de historiales (útil para mantenimiento)
+  clearHistoricalCache() {
+    const size = this.historicalCache.size;
+    this.historicalCache.clear();
+    console.log(`🗑️ Cache histórico limpiado: ${size} entradas eliminadas`);
+  }
+
+  // Estadísticas del cache
+  getCacheStats() {
+    return {
+      historicalCacheSize: this.historicalCache.size,
+      cacheTTL: this.HISTORICAL_CACHE_TTL / (60 * 60 * 1000) + ' horas'
+    };
   }
 
   // Utilidad para pausas

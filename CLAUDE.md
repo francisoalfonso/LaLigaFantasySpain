@@ -2,6 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚀 PRÓXIMA TAREA PRIORITARIA
+
+**Al retomar el proyecto, comenzar inmediatamente con:**
+
+### 📚 Implementar Análisis Completo de Historial vs Rival
+
+**CONTEXTO**: El sistema de predicciones actualmente muestra "📚 Historial vs rival: Análisis básico" como placeholder. Esta funcionalidad debe implementarse completamente.
+
+**ARCHIVOS A MODIFICAR**:
+- `backend/services/predictorValor.js` - Método `analyzeHistoricalVsOpponent()`
+- `backend/services/apiFootball.js` - Nuevo método `getPlayerVsTeamHistory()`
+
+**OBJETIVO**: Mostrar estadísticas reales del jugador contra rival específico:
+```
+📚 Historial vs Real Madrid:
+   • Últimos 3 partidos: 2 goles, 1 asistencia
+   • Rating promedio: 7.8 (vs 7.2 general)
+   • Tendencia: +0.6 mejor rendimiento
+   • Análisis: "Rival fetiche - suele destacar"
+```
+
+**PLAN**: Ver archivo `NEXT_TASK.md` para detalles completos de implementación.
+
+---
+
 ## Project Overview
 
 **Fantasy La Liga Dashboard** - Dashboard de validación para un influencer virtual automatizado de Instagram que publicará contenido sobre La Liga Fantasy de fútbol. Este proyecto utiliza API-Sports para obtener datos reales de La Liga y está preparado para integración con avatares AI de HeyGen.
@@ -30,6 +55,10 @@ npm run db:migrate      # Alias para db:init
 # Test API connectivity
 curl http://localhost:3000/health
 curl http://localhost:3000/api/info
+
+# Code Quality (No lint/typecheck - manual review only)
+# Note: Project uses vanilla JS with manual code review
+# Check recent changes with: git status && git diff
 
 # Development Debugging Commands
 curl http://localhost:3000/api/test/ping                    # Basic server health
@@ -66,10 +95,11 @@ curl http://localhost:3000/api/database/test               # Database connectivi
 ## Critical Development Notes
 
 ### Working with API-Sports Data
-- **ALWAYS check the current season**: API-Sports uses 2025 for the 2024-25 season
+- **ALWAYS check the current season**: API-Sports uses 2025 for the 2025-26 season
 - **Rate limiting**: 75k requests/day on Ultra plan - use existing cache mechanisms
 - **Error handling**: All API calls use try/catch with detailed logging
 - **Testing first**: Always run `curl http://localhost:3000/api/laliga/test` before data work
+- **Season validation**: If date conflicts arise, always use season 2025 for API calls
 
 ### Database Operations
 - **Required setup**: Must have `.env.supabase` configured before database operations
@@ -81,6 +111,8 @@ curl http://localhost:3000/api/database/test               # Database connectivi
 2. Test API connectivity: `curl http://localhost:3000/api/test/ping`
 3. Verify database: `npm run db:test:quick`
 4. Test specific functionality with appropriate `/api/*/test` endpoint
+5. **Before implementing features**: Check NEXT_TASK.md for priority tasks
+6. **After changes**: Run `git status` to review modified files
 
 ## Project Structure
 
@@ -437,18 +469,20 @@ La página `/bargains` incluye:
 
 ### Key System Components
 - **FixtureAnalyzer**: Analyzes match difficulty and fixture congestion
-- **PredictorValor**: AI-driven player value prediction system
+- **PredictorValor**: AI-driven player value prediction system (⚠️ Missing historial vs rival analysis - see NEXT_TASK.md)
 - **PlayersManager**: Centralized player data management and synchronization
 - **ContentGenerator**: Automated content creation for social media integration
 
 ## Code Architecture Guidelines
 
 ### Adding New Features
-1. **Always use existing patterns**: Check similar functionality in existing routes/services
-2. **Rate limiting awareness**: New API-Sports calls must respect the 75k/day limit
-3. **Error handling**: Follow the try/catch + detailed logging pattern seen in all services
-4. **Testing routes**: Every new feature should have a corresponding `/test` endpoint
-5. **Database changes**: Update both schema and init-database.js when adding tables
+1. **Check NEXT_TASK.md first**: Prioritize pending tasks before new features
+2. **Always use existing patterns**: Check similar functionality in existing routes/services
+3. **Rate limiting awareness**: New API-Sports calls must respect the 75k/day limit
+4. **Error handling**: Follow the try/catch + detailed logging pattern seen in all services
+5. **Testing routes**: Every new feature should have a corresponding `/test` endpoint
+6. **Database changes**: Update both schema and init-database.js when adding tables
+7. **Manual code review**: No automated linting - maintain quality through careful review
 
 ### Service Layer Patterns
 - **Client initialization**: All external APIs use centralized client pattern (see apiFootball.js)

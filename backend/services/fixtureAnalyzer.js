@@ -176,6 +176,11 @@ class FixtureAnalyzer {
     return results;
   }
 
+  // Obtener rating de dificultad de un equipo específico
+  getTeamDifficulty(teamId) {
+    return this.teamDifficultyRatings[teamId] || 3.0; // Default medio si no está en el mapping
+  }
+
   // Actualizar ratings de dificultad basado en forma reciente de equipos
   updateTeamDifficultyRatings(teamPerformanceData) {
     // Esta función podría usar datos de forma reciente para ajustar ratings

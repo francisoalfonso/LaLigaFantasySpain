@@ -89,10 +89,11 @@ router.get('/player/:playerId', async (req, res) => {
       });
     }
 
-    // Verificar cache primero
+    // Verificar cache primero (solo si no hay force=true)
+    const forceRefresh = req.query.force === 'true';
     const cacheKey = `prediction_${playerId}`;
     const cached = predictionCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
       console.log(`⚡ Predicción en cache para jugador ${playerId}`);
       return res.json({
         success: true,
@@ -100,6 +101,10 @@ router.get('/player/:playerId', async (req, res) => {
         data: cached.data,
         cached: true
       });
+    }
+
+    if (forceRefresh) {
+      console.log(`🔄 FORCE REFRESH: Regenerando predicción para jugador ${playerId}`);
     }
 
     console.log(`🎯 Generando nueva predicción para jugador ${playerId}...`);
@@ -128,7 +133,10 @@ router.get('/player/:playerId', async (req, res) => {
       player = {
         id: apiPlayer.player.id,
         name: apiPlayer.player.name,
-        team: apiPlayer.team.name,
+        team: {
+          id: apiPlayer.team.id,
+          name: apiPlayer.team.name
+        },
         position: apiPlayer.games.position,
         price: 8.0, // Precio por defecto para jugadores no en chollos
         stats: {
@@ -143,8 +151,22 @@ router.get('/player/:playerId', async (req, res) => {
       console.log(`✅ Jugador obtenido desde API-Sports:`, player.name);
     }
 
+    // Obtener próximo fixture del equipo del jugador
+    let nextFixture = null;
+    if (player.team?.id) {
+      try {
+        const fixtures = await fixtureAnalyzer.getNextFixtures(player.team.id, 1);
+        if (fixtures.length > 0) {
+          nextFixture = fixtures[0];
+          console.log(`🗓️ Próximo rival obtenido: ${nextFixture.teams?.away?.name || nextFixture.teams?.home?.name}`);
+        }
+      } catch (error) {
+        console.log(`⚠️ No se pudo obtener próximo fixture para equipo ${player.team.id}:`, error.message);
+      }
+    }
+
     // Generar predicción detallada
-    const prediction = await predictorValor.predictPlayerValue(player);
+    const prediction = await predictorValor.predictPlayerValue(player, nextFixture);
 
     // Guardar en cache
     predictionCache.set(cacheKey, {
@@ -297,6 +319,136 @@ router.get('/trading-alerts', async (req, res) => {
       success: false,
       error: error.message,
       service: 'PredictorValor'
+    });
+  }
+});
+
+// Estadísticas de rendimiento y cache
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = predictorValor.getCacheStats();
+
+    res.json({
+      success: true,
+      message: 'Estadísticas del PredictorValor',
+      data: {
+        cache: stats,
+        performance: {
+          historicalAnalysisOptimized: 'Cache 24h + Rate limiting reducido',
+          averageRequestTime: '~500ms con cache hit vs ~10s sin cache',
+          recommendedMaxPredictions: '10-20 simultáneas'
+        },
+        endpoints: {
+          clearCache: 'POST /api/predictions/cache/clear',
+          testOptimized: 'GET /api/predictions/test/historical?playerId=143&opponentId=529'
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error obteniendo estadísticas:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      service: 'PredictorValor'
+    });
+  }
+});
+
+// Limpiar cache para testing o mantenimiento
+router.post('/cache/clear', async (req, res) => {
+  try {
+    predictorValor.clearHistoricalCache();
+
+    res.json({
+      success: true,
+      message: 'Cache histórico limpiado correctamente',
+      note: 'Próximas consultas serán más lentas hasta rebuild del cache'
+    });
+
+  } catch (error) {
+    console.error('❌ Error limpiando cache:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      service: 'PredictorValor'
+    });
+  }
+});
+
+// Test específico para historial vs rival
+router.get('/test/historical', async (req, res) => {
+  try {
+    console.log('🧪 Ejecutando test del análisis histórico vs rival...');
+
+    // Parámetros de test
+    const playerId = parseInt(req.query.playerId) || 521; // Lewandowski por defecto
+    const opponentId = parseInt(req.query.opponentId) || 541; // Real Madrid por defecto
+
+    console.log(`🔍 Testeando historial del jugador ${playerId} vs equipo ${opponentId}...`);
+
+    // Test del nuevo método getPlayerVsTeamHistory
+    const historyResult = await apiFootball.getPlayerVsTeamHistory(playerId, opponentId);
+
+    if (!historyResult.success) {
+      return res.json({
+        success: true,
+        message: 'Test completado - Sin historial disponible',
+        testData: {
+          playerId,
+          opponentId,
+          historyResult,
+          reason: historyResult.error || 'No se encontraron datos'
+        }
+      });
+    }
+
+    // Test del análisis histórico
+    const mockPlayer = {
+      id: playerId,
+      name: 'Test Player',
+      team: { id: 529 }, // Barcelona como ejemplo
+      position: 'FWD'
+    };
+
+    const mockNextFixture = {
+      teams: {
+        home: { id: 529, name: 'Barcelona' },
+        away: { id: opponentId, name: 'Real Madrid' }
+      }
+    };
+
+    const analysisResult = await predictorValor.analyzeHistoricalVsOpponent(mockPlayer, mockNextFixture);
+
+    res.json({
+      success: true,
+      message: 'Test análisis histórico vs rival completado',
+      testData: {
+        playerId,
+        opponentId,
+        rawHistory: historyResult,
+        historicalAnalysis: analysisResult,
+        summary: {
+          totalGames: historyResult.totalGames,
+          dataAvailable: historyResult.data.length > 0,
+          analysisScore: analysisResult.score,
+          factors: analysisResult.factors
+        }
+      },
+      apiUsage: {
+        requestsMade: 'Variable según historial disponible',
+        rateLimitRespected: 'Sí - 200ms entre requests',
+        cacheRecommended: 'Sí - Datos cambian poco'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error en test histórico:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: 'Test histórico falló',
+      service: 'HistorialVsRival'
     });
   }
 });

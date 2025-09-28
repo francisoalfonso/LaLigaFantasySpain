@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Videos - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/chart.js"></script>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="videoDashboard()">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <h1 class="text-3xl font-bold">🎬 Dashboard de Videos</h1>
+                    <span class="ml-4 px-3 py-1 bg-blue-800 rounded-full text-sm">Bunny.net Stream</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button @click="refreshData()"
+                            class="px-4 py-2 bg-blue-500 hover:bg-blue-400 rounded-lg transition-colors">
+                        🔄 Actualizar
+                    </button>
+                    <a href="/" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
+                        ← Dashboard Principal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Loading State -->
+        <div x-show="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-gray-600">Cargando datos de videos...</p>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <strong>Error:</strong> <span x-text="error"></span>
+        </div>
+
+        <!-- Configuration Status -->
+        <div x-show="!loading" class="mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold mb-4">🔧 Estado de Configuración</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <span x-show="config.features?.upload" class="text-green-500 text-2xl">✅</span>
+                        <span x-show="!config.features?.upload" class="text-red-500 text-2xl">❌</span>
+                        <span class="ml-2">Upload automático</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span x-show="config.features?.analytics" class="text-green-500 text-2xl">✅</span>
+                        <span x-show="!config.features?.analytics" class="text-red-500 text-2xl">❌</span>
+                        <span class="ml-2">Analytics</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span x-show="config.features?.streaming" class="text-green-500 text-2xl">✅</span>
+                        <span x-show="!config.features?.streaming" class="text-red-500 text-2xl">❌</span>
+                        <span class="ml-2">Streaming CDN</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span x-show="config.features?.embed" class="text-green-500 text-2xl">✅</span>
+                        <span x-show="!config.features?.embed" class="text-red-500 text-2xl">❌</span>
+                        <span class="ml-2">Embed codes</span>
+                    </div>
+                </div>
+                <div x-show="config.libraryId" class="mt-4 text-sm text-gray-600">
+                    <p><strong>Library ID:</strong> <span x-text="config.libraryId"></span></p>
+                    <p><strong>CDN URL:</strong> <span x-text="config.cdnUrl"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div x-show="!loading && dashboardData" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Videos -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="text-3xl">🎥</div>
+                    <div class="ml-4">
+                        <p class="text-2xl font-bold" x-text="dashboardData.summary?.totalVideos || 0"></p>
+                        <p class="text-gray-600">Total Videos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Videos -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="text-3xl">🆕</div>
+                    <div class="ml-4">
+                        <p class="text-2xl font-bold" x-text="dashboardData.summary?.recentVideos || 0"></p>
+                        <p class="text-gray-600">Videos Recientes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Views -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="text-3xl">👀</div>
+                    <div class="ml-4">
+                        <p class="text-2xl font-bold" x-text="formatNumber(dashboardData.summary?.totalViews || 0)"></p>
+                        <p class="text-gray-600">Visualizaciones</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Used -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="text-3xl">💾</div>
+                    <div class="ml-4">
+                        <p class="text-2xl font-bold" x-text="formatBytes(dashboardData.storage?.used || 0)"></p>
+                        <p class="text-gray-600">Almacenamiento</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos por Tipo -->
+        <div x-show="!loading && dashboardData" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Chart: Videos por Tipo -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">📊 Videos por Tipo</h3>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" x-text="dashboardData.byType?.veo3_generated || 0"></div>
+                        <div class="text-sm text-gray-600">VEO3 Generados</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" x-text="dashboardData.byType?.chollos || 0"></div>
+                        <div class="text-sm text-gray-600">Chollos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600" x-text="dashboardData.byType?.analysis || 0"></div>
+                        <div class="text-sm text-gray-600">Análisis</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performing Videos -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">🏆 Videos Top Performance</h3>
+                <div x-show="dashboardData.topPerforming?.length > 0">
+                    <template x-for="(video, index) in dashboardData.topPerforming" :key="video.id">
+                        <div class="flex items-center justify-between py-2 border-b last:border-b-0">
+                            <div class="flex items-center">
+                                <span class="text-lg font-bold text-gray-400" x-text="`#${index + 1}`"></span>
+                                <div class="ml-3">
+                                    <p class="font-medium" x-text="video.title"></p>
+                                    <p class="text-sm text-gray-600" x-text="formatDate(video.uploadedAt)"></p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold" x-text="formatNumber(video.metadata?.views || 0)"></p>
+                                <p class="text-sm text-gray-600">views</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div x-show="!dashboardData.topPerforming?.length" class="text-center text-gray-500 py-8">
+                    Sin datos de performance aún
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Videos Recientes -->
+        <div x-show="!loading" class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">📽️ Videos Recientes</h3>
+                    <div class="flex space-x-2">
+                        <button @click="loadVideos('local')"
+                                :class="videoSource === 'local' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                class="px-3 py-1 rounded text-sm">
+                            Local
+                        </button>
+                        <button @click="loadVideos('bunny')"
+                                :class="videoSource === 'bunny' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                class="px-3 py-1 rounded text-sm">
+                            Bunny.net
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Video</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="video in videos" :key="video.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img x-show="video.thumbnailUrl"
+                                                 :src="video.thumbnailUrl"
+                                                 :alt="video.title"
+                                                 class="h-10 w-10 rounded object-cover">
+                                            <div x-show="!video.thumbnailUrl"
+                                                 class="h-10 w-10 rounded bg-gray-300 flex items-center justify-center text-gray-500">
+                                                🎬
+                                            </div>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900" x-text="video.title"></div>
+                                            <div class="text-sm text-gray-500" x-text="video.id"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span :class="getTypeColor(video.metadata?.type)"
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                        <span x-text="video.metadata?.type || 'Sin tipo'"></span>
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <span x-text="formatDate(video.uploadedAt || video.dateUploaded)"></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span x-show="video.status === 2 || video.status === 'ready'"
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        ✅ Listo
+                                    </span>
+                                    <span x-show="video.status === 1 || video.status === 'processing'"
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        ⏳ Procesando
+                                    </span>
+                                    <span x-show="video.status === 3 || video.status === 'failed'"
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        ❌ Error
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <button x-show="video.directUrl || video.url"
+                                                @click="playVideo(video)"
+                                                class="text-blue-600 hover:text-blue-900">
+                                            ▶️ Ver
+                                        </button>
+                                        <button x-show="video.embedUrl"
+                                                @click="showEmbed(video)"
+                                                class="text-green-600 hover:text-green-900">
+                                            📋 Embed
+                                        </button>
+                                        <button @click="showAnalytics(video)"
+                                                class="text-purple-600 hover:text-purple-900">
+                                            📊 Stats
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+
+                <div x-show="videos.length === 0" class="text-center py-12 text-gray-500">
+                    No hay videos disponibles
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Video Player -->
+    <div x-show="showVideoModal"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @click.away="showVideoModal = false">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium" x-text="selectedVideo?.title"></h3>
+                        <button @click="showVideoModal = false" class="text-gray-400 hover:text-gray-600">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="aspect-video bg-black rounded">
+                        <video x-show="selectedVideo?.workingUrl || selectedVideo?.directUrl"
+                               :src="selectedVideo?.workingUrl || selectedVideo?.directUrl"
+                               controls
+                               autoplay
+                               class="w-full h-full">
+                            Tu navegador no soporta video HTML5.
+                        </video>
+                        <iframe x-show="selectedVideo?.embedUrl && !selectedVideo?.directUrl"
+                                :src="selectedVideo?.embedUrl"
+                                class="w-full h-full"
+                                frameborder="0"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function videoDashboard() {
+            return {
+                loading: true,
+                error: null,
+                config: {},
+                dashboardData: null,
+                videos: [],
+                videoSource: 'local',
+                showVideoModal: false,
+                selectedVideo: null,
+
+                async init() {
+                    await this.loadConfig();
+                    await this.loadDashboardData();
+                    await this.loadVideos('local');
+                    this.loading = false;
+                },
+
+                async loadConfig() {
+                    try {
+                        const response = await fetch('/api/bunny/config');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.config = data.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading config:', error);
+                    }
+                },
+
+                async loadDashboardData() {
+                    try {
+                        const response = await fetch('/api/bunny/dashboard');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.dashboardData = data.data;
+                        }
+                    } catch (error) {
+                        console.error('Error loading dashboard data:', error);
+                    }
+                },
+
+                async loadVideos(source = 'local') {
+                    try {
+                        this.videoSource = source;
+                        const response = await fetch(`/api/bunny/videos?source=${source}&limit=20`);
+                        const data = await response.json();
+                        if (data.success) {
+                            this.videos = data.data.videos || [];
+                        }
+                    } catch (error) {
+                        console.error('Error loading videos:', error);
+                        this.error = 'Error cargando videos: ' + error.message;
+                    }
+                },
+
+                async refreshData() {
+                    this.loading = true;
+                    this.error = null;
+                    await this.loadDashboardData();
+                    await this.loadVideos(this.videoSource);
+                    this.loading = false;
+                },
+
+                async playVideo(video) {
+                    // Sistema de fallback automático para videos
+                    console.log('🎬 Intentando reproducir video:', video.title);
+
+                    // Crear copia del video con fallback URLs
+                    const videoWithFallback = { ...video };
+
+                    // Definir URLs de fallback disponibles
+                    const fallbackUrls = [
+                        // 1. URL directa de Bunny.net (puede estar privada)
+                        video.directUrl,
+                        // 2. URL local si existe (basada en el ID o título)
+                        `http://localhost:3000/api/videos/video_1759084912013_1759084912013.mp4`,
+                        // 3. URL embeddable de Bunny.net
+                        video.embedUrl
+                    ].filter(Boolean);
+
+                    // Probar URLs hasta encontrar una que funcione
+                    for (let i = 0; i < fallbackUrls.length; i++) {
+                        const testUrl = fallbackUrls[i];
+                        console.log(`🔄 Probando URL ${i + 1}:`, testUrl);
+
+                        try {
+                            const response = await fetch(testUrl, { method: 'HEAD' });
+                            if (response.ok) {
+                                console.log(`✅ URL funcional encontrada:`, testUrl);
+                                videoWithFallback.directUrl = testUrl;
+                                videoWithFallback.workingUrl = testUrl;
+                                break;
+                            }
+                        } catch (error) {
+                            console.log(`❌ URL no funcional:`, testUrl);
+                        }
+                    }
+
+                    this.selectedVideo = videoWithFallback;
+                    this.showVideoModal = true;
+                },
+
+                showEmbed(video) {
+                    // Copiar código embed al clipboard
+                    const embedCode = `<iframe src="${video.embedUrl}" width="100%" height="400" frameborder="0" allowfullscreen></iframe>`;
+                    navigator.clipboard.writeText(embedCode);
+                    alert('Código embed copiado al clipboard');
+                },
+
+                showAnalytics(video) {
+                    // Implementar analytics modal
+                    alert(`Analytics para ${video.title} - Feature próximamente`);
+                },
+
+                formatNumber(num) {
+                    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                    return num.toString();
+                },
+
+                formatBytes(bytes) {
+                    if (bytes === 0) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return 'N/A';
+                    return new Date(dateStr).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                getTypeColor(type) {
+                    const colors = {
+                        'veo3_generated': 'bg-blue-100 text-blue-800',
+                        'chollos': 'bg-green-100 text-green-800',
+                        'analysis': 'bg-purple-100 text-purple-800',
+                        'jornada': 'bg-yellow-100 text-yellow-800'
+                    };
+                    return colors[type] || 'bg-gray-100 text-gray-800';
+                }
+            };
+        }
+    </script>
+</body>
+</html>

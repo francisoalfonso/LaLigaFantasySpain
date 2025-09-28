@@ -2,6 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 NORMAS CRÍTICAS VEO3 - ANA REAL
+
+### ⭐ **NORMA #1 - CONSISTENCIA DE ANA (CRÍTICA)**
+**Ana debe ser SIEMPRE la misma persona en todos los videos. NUNCA debe cambiar.**
+
+- **SEED FIJO**: `ANA_CHARACTER_SEED=30001` (NUNCA CAMBIAR)
+- **IMAGEN FIJA**: `ANA_IMAGE_URL` debe apuntar siempre a la misma imagen
+- **VOICE LOCALE**: `es-ES` (Español de España, NO mexicano)
+- **CHARACTER BIBLE**: Nunca modificar el `ANA_CHARACTER_BIBLE`
+
+### 🗣️ **NORMA #2 - AUDIO ESPAÑOL DE ESPAÑA**
+- Configuración: `voice.locale: 'es-ES'`
+- Prompt debe especificar: "SPANISH FROM SPAIN (not Mexican)"
+- Verificar que no suene con acento mexicano
+
+### 📝 **APLICACIÓN EN CÓDIGO:**
+```javascript
+// VEO3Client - SEED SIEMPRE FIJO
+seed: this.characterSeed, // NO usar options.seed
+
+// Voice configuration
+voice: {
+    locale: 'es-ES',
+    gender: 'female',
+    style: 'professional'
+}
+```
+
+### 🔧 **SOLUCIÓN PROMPT MINIMALISTA**
+**Si Ana sigue cambiando con prompts complejos, usar endpoint especial:**
+
+```bash
+# Endpoint para máxima fidelidad a imagen
+POST /api/veo3/test-minimal-prompt
+{
+  "dialogue": "Texto que debe decir Ana"
+}
+```
+
+**Prompt generado**: `"The person in the reference image speaking in Spanish: '[dialogue]'. Exact appearance from reference image."`
+
+**⚠️ Este prompt FUERZA que VEO3 use EXACTAMENTE la persona de la imagen de referencia.**
+
 ## 🚀 PRÓXIMA TAREA PRIORITARIA
 
 **Al retomar el proyecto, comenzar inmediatamente con:**
@@ -75,6 +118,12 @@ curl http://localhost:3000/api/bargains/test               # Bargain analyzer te
 curl "http://localhost:3000/api/bargains/top?limit=5"      # Quick bargains test
 curl http://localhost:3000/api/weather/test                # AEMET API test
 curl http://localhost:3000/api/database/test               # Database connectivity
+curl http://localhost:3000/api/images/test                 # Image generation test
+curl http://localhost:3000/api/instagram/test              # Instagram integration test
+curl http://localhost:3000/api/content-ai/test             # AI content generation test
+curl http://localhost:3000/api/evolution/test              # ⚠️ Evolution system test (shows broken data)
+curl http://localhost:3000/api/veo3/health                 # VEO3 system health check
+curl http://localhost:3000/api/veo3/config                 # VEO3 configuration details
 ```
 
 **Note**: This project uses vanilla JavaScript (no TypeScript), no ESLint/Prettier, and no build process. Frontend uses CDN dependencies (Alpine.js, Tailwind) served directly. Code quality is maintained through manual review and comprehensive testing infrastructure.
@@ -83,13 +132,15 @@ curl http://localhost:3000/api/database/test               # Database connectivi
 
 ### Backend Dependencies
 - **express**: ^4.18.2 - Main web framework
-- **axios**: ^1.6.0 - HTTP client for API calls
+- **axios**: ^1.12.2 - HTTP client for API calls
 - **cors**: ^2.8.5 - Cross-origin resource sharing
 - **helmet**: ^7.1.0 - Security middleware
 - **morgan**: ^1.10.0 - HTTP request logger
 - **@supabase/supabase-js**: ^2.57.4 - Database client
 - **pg**: ^8.16.3 - PostgreSQL client
 - **dotenv**: ^16.3.1 - Environment variable management
+- **jimp**: ^1.6.0 - Image processing and manipulation
+- **node-html-to-image**: ^5.0.0 - HTML to image conversion for dynamic content
 
 ### Development Dependencies
 - **nodemon**: ^3.0.1 - Development server with auto-reload
@@ -138,7 +189,11 @@ Fantasy la liga/
 │   │   ├── fixtures.js                    # Rutas de fixtures/partidos
 │   │   ├── debug.js                       # Rutas de debugging
 │   │   ├── bargains.js                    # Rutas sistema de chollos
-│   │   └── predictions.js                 # Rutas de predicciones
+│   │   ├── predictions.js                 # Rutas de predicciones
+│   │   ├── evolution.js                   # Rutas evolución valor jugadores (⚠️ CRÍTICO - necesita fix)
+│   │   ├── contentAI.js                   # Rutas generación contenido IA
+│   │   ├── imageGenerator.js              # Rutas generación imágenes dinámicas
+│   │   └── instagram.js                   # Rutas automatización Instagram
 │   ├── services/
 │   │   ├── apiFootball.js                 # Cliente para API-Sports
 │   │   ├── dataProcessor.js               # Procesador de datos Fantasy
@@ -154,7 +209,9 @@ Fantasy la liga/
 │   │   ├── cacheRefreshScheduler.js       # Programador actualización cache
 │   │   ├── predictorValor.js              # Predictor de valor de jugadores
 │   │   ├── playersCache.js                # Cache de jugadores
-│   │   └── playersManager.js              # Gestor de jugadores
+│   │   ├── playersManager.js              # Gestor de jugadores
+│   │   ├── fantasyEvolution.js            # Servicio evolución valor (⚠️ CRÍTICO - datos ficticios)
+│   │   └── imageGenerator.js              # Generador imágenes dinámicas Instagram
 │   └── config/
 │       ├── constants.js                   # IDs y configuraciones de La Liga
 │       ├── stadiumsWeatherConfig.js       # Configuración estadios + coordenadas GPS
@@ -166,6 +223,10 @@ Fantasy la liga/
 │   ├── grid-debug.html                    # Debug posicionamiento grid
 │   ├── ai-generator.html                  # Generador de contenido IA
 │   ├── architecture.html                  # Documentación arquitectura
+│   ├── player-detail.html                 # Páginas detalle individual jugador
+│   ├── players-agenda.html                # Sistema agenda/calendario jugadores
+│   ├── content-strategy-matrix.html       # Matriz estrategia contenido
+│   ├── content-staging.html               # Área staging y preview contenido
 │   ├── style.css                          # Estilos personalizados
 │   └── app.js                             # Lógica Alpine.js
 ├── database/
@@ -206,6 +267,17 @@ Fantasy la liga/
 - `GET /api/weather/stadium/:teamId` - Clima actual estadio específico
 - `GET /api/weather/match/:matchId` - Clima para partido específico
 - `POST /api/weather/avatar-config` - Configuración avatar según clima
+
+### Instagram Content Automation
+- `GET /api/images/test` - Test generador imágenes dinámicas
+- `POST /api/images/generate` - Generar imagen personalizada para Instagram
+- `GET /api/instagram/test` - Test integración Instagram API
+- `POST /api/instagram/post` - Publicar contenido automático Instagram
+- `GET /api/content-ai/test` - Test generación contenido IA personalizado
+
+### Player Evolution System (⚠️ CRITICAL - Currently Broken)
+- `GET /api/evolution/player/:id` - Evolución valor jugador (genera datos ficticios)
+- `GET /api/evolution/test` - Test sistema evolución (muestra jornada 38 ficticia)
 
 ## Configuration
 
@@ -476,9 +548,11 @@ La página `/bargains` incluye:
 
 ### Key System Components
 - **FixtureAnalyzer**: Analyzes match difficulty and fixture congestion
-- **PredictorValor**: AI-driven player value prediction system (⚠️ Missing historial vs rival analysis - see NEXT_TASK.md)
+- **PredictorValor**: AI-driven player value prediction system (✅ Historial vs rival analysis completed)
 - **PlayersManager**: Centralized player data management and synchronization
 - **ContentGenerator**: Automated content creation for social media integration
+- **ImageGenerator**: Dynamic Instagram image generation from HTML templates with Jimp processing
+- **FantasyEvolution**: Player value evolution tracking (⚠️ **CRITICAL** - currently showing fictitious data)
 
 ## Code Architecture Guidelines
 
@@ -511,6 +585,82 @@ Antes de proceder con avatar IA:
 3. Evaluar insights automáticos generados por competitiveIntelligenceAgent
 4. Confirmar suficiente contenido para posts diarios
 5. Test integración con teamContentManager para workflows
+
+## 👥 Equipo de Reporteros Virtuales (reporterTeam.js)
+
+El proyecto incluye un equipo profesional de 4 reporteros virtuales especializados, cada uno con personalidades únicas y especialidades específicas.
+
+### 🎯 Equipo Principal
+
+#### 1. **Ana Martínez** ("Ana Fantasy") - Analista Táctica Principal
+- **Especialidades**: Análisis táctico, preview partidos, post-match analysis
+- **Personalidad**: Profesional cercana, energía media-alta
+- **Avatar**: Femenino, 28 años, estilo profesional deportivo
+- **Calendario**: Martes, jueves, sábado
+- **Tono de voz**: Confiable experta, español neutro
+
+#### 2. **Carlos González** ("Carlos Stats") - Especialista en Estadísticas
+- **Especialidades**: Estadísticas jugadores, consejos Fantasy, alineaciones optimales
+- **Personalidad**: Dinámico entusiasta, energía alta
+- **Avatar**: Masculino, 32 años, deportivo moderno
+- **Calendario**: Lunes, miércoles, viernes
+- **Tono de voz**: Entusiasta experto, velocidad media-rápida
+
+#### 3. **Lucía Rodríguez** ("Lucía Femenina") - Fútbol Femenino y Cantera
+- **Especialidades**: Liga femenina, jugadores emergentes, cantera La Liga
+- **Personalidad**: Fresca moderna, energía alta
+- **Avatar**: Femenino, 26 años, moderno deportivo
+- **Calendario**: Domingo, miércoles
+- **Tono de voz**: Moderna inspiradora
+
+#### 4. **Pablo Martín** ("Pablo GenZ") - Especialista Gen Z
+- **Especialidades**: Fantasy hacks, jugadores sorpresa, memes fútbol, trends TikTok
+- **Personalidad**: Joven conectado, energía muy alta
+- **Avatar**: Masculino, 19 años, estilo joven profesional casual
+- **Calendario**: Jueves, viernes, domingo
+- **Plataformas**: TikTok viral, Twitch streaming, stories rápidas
+
+### ⚙️ Sistema de Distribución de Contenido
+
+**Rotación Diaria Automática**:
+- **Lunes**: Carlos (stats inicio semana)
+- **Martes**: Ana (análisis táctico)
+- **Miércoles**: Lucía (liga femenina + cantera)
+- **Jueves**: Ana + Pablo (preview + hacks jóvenes)
+- **Viernes**: Carlos + Pablo (fantasy tips + contenido viral)
+- **Sábado**: Ana (análisis pre-partidos)
+- **Domingo**: Pablo + Lucía (reacciones Gen Z + resumen femenina)
+
+**Especialistas por Plataforma**:
+- **YouTube análisis profundo**: Ana Martínez
+- **TikTok contenido viral**: Pablo GenZ
+- **Instagram infografías**: Carlos González
+- **Twitch streaming en vivo**: Pablo GenZ
+
+### 🎨 Identidad Visual Uniforme
+
+**Inspirado en modelo DAZN**:
+- **Uniforme**: Polo azul profesional (#0066cc) con logo en pecho izquierdo
+- **Estudio**: Setup deportivo profesional con overlays estadísticas
+- **Colores**: Azul deportivo (#0066cc), blanco (#ffffff), rojo accento (#ff3333)
+
+### 🔧 Funciones Técnicas
+
+**Asignación Automática**: `selectReporterForContent(contentType, date)`
+**Configuración Avatar**: `getAvatarConfig(reporterId)`
+**Scripts Personalizados**: `generatePersonalizedScript(reporterId, contentData)`
+
+### 📊 Casos de Uso
+
+```javascript
+// Ejemplo asignación automática
+const reporter = TEAM_FUNCTIONS.selectReporterForContent('tactical_analysis', new Date());
+// Resultado: 'ana_martinez'
+
+// Configuración avatar personalizada
+const avatarConfig = TEAM_FUNCTIONS.getAvatarConfig('pablo_teen');
+// Resultado: configuración voz joven + apariencia Gen Z
+```
 
 ## 🤖 GPT-5 Mini - Generación de Contenido IA
 
@@ -683,6 +833,255 @@ Workflow automático incluido para:
 - Cálculo puntos automático
 - Integración con API-Sports
 - Webhook para Claude Code
+
+## 🎨 Sistema de Generación de Imágenes Dinámicas (imageGenerator.js)
+
+El proyecto incluye un sistema avanzado de generación automática de imágenes para contenido de Instagram utilizando plantillas HTML y procesamiento con Jimp.
+
+### 🔧 Arquitectura Técnica
+
+**Tecnologías Utilizadas**:
+- **node-html-to-image**: Conversión HTML a imagen
+- **Jimp**: Procesamiento y optimización de imágenes
+- **Plantillas HTML**: Templates dinámicos con datos reales
+
+### 📊 Tipos de Contenido Visual
+
+1. **Player Cards**: Tarjetas individuales de jugadores con stats
+2. **Bargain Analysis**: Visualización de chollos Fantasy
+3. **Match Previews**: Análisis pre-partido con datos contextuales
+4. **Weekly Stats**: Resúmenes estadísticos semanales
+5. **Team Formations**: Alineaciones visuales con ratings
+
+### ⚙️ Endpoints Disponibles
+
+```bash
+# Test sistema generación imágenes
+curl http://localhost:3000/api/images/test
+
+# Generar imagen personalizada
+curl -X POST http://localhost:3000/api/images/generate \
+  -H "Content-Type: application/json" \
+  -d '{"type": "player_card", "playerId": 162686}'
+```
+
+### 🎯 Integración con Equipo de Reporteros
+
+- **Estilo visual consistente** con identidad DAZN-inspired
+- **Personalización por reportero**: Cada avatar tiene su estilo visual
+- **Automatización completa**: Generación basada en calendario de contenido
+- **Optimización redes sociales**: Formatos específicos para Instagram/TikTok
+
+### 📈 Flujo de Producción
+
+1. **Obtención datos**: API-Sports + Análisis IA
+2. **Selección plantilla**: Basada en tipo contenido y reportero asignado
+3. **Generación HTML**: Template con datos reales insertados
+4. **Conversión imagen**: HTML → PNG/JPG optimizado
+5. **Post-procesado**: Jimp para ajustes finales y compresión
+6. **Distribución**: Integración con Instagram API
+
+## 🎬 Sistema de Videos VEO3 - Ana Real (Implementado)
+
+El proyecto incluye un sistema completo de generación de videos usando VEO3 (kie.ai) con Ana Martínez como reportera virtual.
+
+### 🚀 Funcionalidades Implementadas
+
+#### **Generación de Videos Ana Real**
+- **Videos de chollos**: Ana revela jugadores baratos con alta probabilidad de puntos
+- **Análisis de jugadores**: Análisis táctico profesional con estadísticas
+- **Predicciones de jornada**: Preview y predicciones para próximos partidos
+- **Videos personalizados**: Prompts custom para cualquier contenido
+
+#### **Player Cards Overlay**
+- **Tarjetas dinámicas**: Overlay de información de jugadores sobre videos
+- **Múltiples jugadores**: Sistema para agregar varias tarjetas en secuencia
+- **Diseño profesional**: Tarjetas con estadísticas, precios y ratings
+- **Timing configurable**: Control preciso de cuándo aparecen/desaparecen
+
+#### **Concatenación de Videos**
+- **Videos largos**: Combinar múltiples segmentos de 8s en videos >24s
+- **Transiciones suaves**: Crossfade entre segmentos para continuidad perfecta
+- **Generación automática**: Crear videos largos a partir de prompts temáticos
+- **Audio sincronizado**: Mezcla de audio profesional entre segmentos
+
+### 🎯 Ana Real - Character Consistency
+
+**Ana Character Bible** (NUNCA CAMBIAR):
+```
+A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. Confident posture, natural hand gestures for emphasis, professional broadcaster energy.
+```
+
+**Configuración Técnica**:
+- **Modelo**: veo3_fast (más estable)
+- **Imagen referencia**: GitHub URL para consistencia perfecta
+- **Seed**: 30001 (fijo para Ana)
+- **Aspect ratio**: 9:16 (optimizado para redes sociales)
+- **Duración**: 8 segundos por segmento
+- **Costo**: $0.30 por video
+
+### 📋 Comandos VEO3 Disponibles
+
+```bash
+# Generación de videos Ana
+npm run veo3:generate-ana           # Generar video Ana Real
+npm run veo3:test-ana               # Test generación básica
+
+# Player cards overlay
+npm run veo3:add-player-card        # Agregar tarjeta jugador
+npm run veo3:test-cards             # Test player cards
+
+# Concatenación de videos
+npm run veo3:concatenate            # Concatenar múltiples videos
+npm run veo3:test-concat            # Test concatenación
+
+# Testing completo
+npm run veo3:test-all               # Ejecutar todos los tests VEO3
+```
+
+### 🔧 API Endpoints VEO3
+
+```bash
+# Sistema de salud y configuración
+GET  /api/veo3/health               # Health check completo sistema
+GET  /api/veo3/config               # Configuración actual VEO3
+GET  /api/veo3/test                 # Test conectividad API
+
+# Generación de videos
+POST /api/veo3/generate-ana         # Generar video Ana (chollo/analysis/prediction)
+GET  /api/veo3/status/:taskId       # Estado de generación de video
+
+# Post-procesamiento
+POST /api/veo3/add-player-card      # Agregar player card a video
+POST /api/veo3/concatenate          # Concatenar múltiples videos
+POST /api/veo3/generate-long-video  # Generar video largo automático
+```
+
+### 💡 Casos de Uso Principales
+
+#### **1. Video Chollo Individual**
+```bash
+# Generar video de chollo para Pedri
+curl -X POST http://localhost:3000/api/veo3/generate-ana \
+  -H "Content-Type: application/json" \
+  -d '{"type": "chollo", "playerName": "Pedri", "price": 8.5}'
+```
+
+#### **2. Análisis Táctico de Jugador**
+```bash
+# Script command line
+node scripts/veo3/generate-ana-video.js --analysis --player "Lewandowski" --price 10.5
+```
+
+#### **3. Video Largo Multi-Segmento**
+```bash
+# Video largo tema "chollos" con 3 segmentos
+curl -X POST http://localhost:3000/api/veo3/generate-long-video \
+  -H "Content-Type: application/json" \
+  -d '{"theme": "chollos", "segmentCount": 3}'
+```
+
+#### **4. Player Card Overlay**
+```bash
+# Agregar tarjeta de jugador a video existente
+npm run veo3:add-player-card --video "ana-chollo-pedri.mp4" --player "Pedri" --price 8.5
+```
+
+### ⚙️ Variables de Entorno VEO3
+
+```bash
+# KIE.ai VEO3 API (PRINCIPAL)
+KIE_AI_API_KEY=tu_api_key_kie_ai
+VEO3_DEFAULT_MODEL=veo3_fast
+VEO3_MAX_DURATION=8
+VEO3_DEFAULT_ASPECT=9:16
+VEO3_WATERMARK=Fantasy La Liga Pro
+
+# Ana Real Configuration
+ANA_IMAGE_URL=https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-main/Ana-001.jpeg
+ANA_CHARACTER_SEED=30001
+
+# Paths y Performance
+VEO3_OUTPUT_DIR=./output/veo3
+VEO3_TEMP_DIR=./temp/veo3
+VEO3_LOGS_DIR=./logs/veo3
+VEO3_MAX_CONCURRENT=3
+VEO3_REQUEST_DELAY=6000
+VEO3_TIMEOUT=300000
+
+# Costs & Limits
+VEO3_COST_PER_VIDEO=0.30
+VEO3_DAILY_LIMIT=50.00
+VEO3_MONTHLY_LIMIT=500.00
+```
+
+### 🎭 Arcos Emocionales Implementados
+
+- **Chollo Revelation**: (susurro conspirativo) → (tensión) → (revelación explosiva) → (urgencia)
+- **Data Confidence**: (confianza analítica) → (construcción convicción) → (conclusión autoritaria)
+- **Breaking News**: (alerta urgente) → (construcción urgencia) → (anuncio explosivo) → (acción inmediata)
+- **Professional Analysis**: (autoridad profesional) → (insight construcción) → (realización explosiva)
+
+### 🔍 Estructura de Archivos VEO3
+
+```
+backend/
+├── services/veo3/
+│   ├── veo3Client.js              # Cliente API VEO3 principal
+│   ├── promptBuilder.js           # Constructor prompts optimizados
+│   ├── playerCardsOverlay.js      # Sistema overlay tarjetas
+│   └── videoConcatenator.js       # Sistema concatenación videos
+├── routes/veo3.js                 # API routes completas VEO3
+└── config/veo3/
+    └── anaCharacter.js            # Character Bible y configuración Ana
+
+scripts/veo3/
+├── generate-ana-video.js          # Script generación videos Ana
+├── add-player-cards.js            # Script overlay player cards
+└── concatenate-videos.js          # Script concatenación videos
+
+output/veo3/                       # Videos generados finales
+temp/veo3/                         # Archivos temporales
+logs/veo3/                         # Logs de operaciones
+```
+
+### 💰 Economía del Sistema
+
+- **Video individual**: $0.30 (8 segundos)
+- **Video con player card**: $0.30 + procesamiento FFmpeg
+- **Video largo (3 segmentos)**: $0.90 + concatenación
+- **Tiempo generación**: 4-6 minutos por segmento
+- **Rate limiting**: 10 requests/minuto (API KIE.ai)
+
+### ⚠️ Consideraciones Importantes
+
+1. **Ana Character Bible**: NUNCA modificar para mantener consistencia perfecta
+2. **Prompts optimizados**: Máximo 500 caracteres por limitaciones VEO3
+3. **FFmpeg requerido**: Necesario para player cards y concatenación
+4. **Rate limiting**: Respetar 10 req/min de KIE.ai API
+5. **Costos monitoreados**: Sistema tracking automático de gastos
+6. **Transiciones suaves**: Setup neutral position para concatenación perfecta
+
+### 🚨 Testing y Validación
+
+```bash
+# Health check completo
+curl http://localhost:3000/api/veo3/health
+
+# Test generación Ana Real
+npm run veo3:test-ana
+
+# Test player cards overlay
+npm run veo3:test-cards
+
+# Test concatenación videos
+npm run veo3:test-concat
+
+# Validación completa sistema
+npm run veo3:test-all
+```
+
+El sistema VEO3 está completamente integrado y listo para producción de contenido automatizado con Ana Real.
 
 ## Future Phases
 

@@ -23,6 +23,9 @@ const contentAIRoutes = require('./routes/contentAI');
 const evolutionRoutes = require('./routes/evolution');
 // const instagramRoutes = require('./routes/instagram'); // Temporalmente deshabilitado por error sintáctico
 const imageGeneratorRoutes = require('./routes/imageGenerator');
+const veo3Routes = require('./routes/veo3');
+const videosRoutes = require('./routes/videos');
+const bunnyStreamRoutes = require('./routes/bunnyStream');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -56,6 +59,9 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/generated/images', express.static(path.join(__dirname, 'generated/images')));
 app.use('/assets/images', express.static(path.join(__dirname, 'assets/images')));
 
+// Servir videos VEO3 generados
+app.use('/output/veo3', express.static(path.join(__dirname, '../output/veo3')));
+
 // Middleware para logging de peticiones
 app.use((req, res, next) => {
   console.log(`📨 ${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -78,6 +84,9 @@ app.use('/api/ai', contentAIRoutes);
 app.use('/api/evolution', evolutionRoutes);
 // app.use('/api/instagram', instagramRoutes); // Temporalmente deshabilitado
 app.use('/api/images', imageGeneratorRoutes);
+app.use('/api/veo3', veo3Routes);
+app.use('/api/videos', videosRoutes);
+app.use('/api/bunny', bunnyStreamRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -132,6 +141,16 @@ app.get('/content-staging', (req, res) => {
 // Ruta alternativa más corta
 app.get('/staging', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
+});
+
+// Ruta para dashboard de videos
+app.get('/video-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/videos', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
 });
 
 // Ruta de salud del servidor

@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-09-25T10:23:15.770Z",
+  "overall_status": "needs_setup",
+  "checks_passed": 5,
+  "checks_failed": 1,
+  "checks": {
+    "environment_variables": {
+      "status": "passed",
+      "required_vars": 3,
+      "configured_vars": 3,
+      "missing_vars": 0
+    },
+    "project_structure": {
+      "status": "passed",
+      "total_items": 15,
+      "missing_items": 0,
+      "missing_list": []
+    },
+    "main_project_connection": {
+      "status": "passed",
+      "server_status": 200,
+      "apis_tested": 2,
+      "apis_passing": 1
+    },
+    "heygen_api": {
+      "status": "passed",
+      "key_configured": true,
+      "key_length": 24
+    },
+    "dependencies": {
+      "status": "failed",
+      "total_critical": 5,
+      "installed": 4,
+      "node_modules_exists": true
+    },
+    "data_files": {
+      "status": "passed",
+      "chollos_count": 5,
+      "reporters_count": 4,
+      "reporters_list": [
+        "ana_martinez",
+        "carlos_gonzalez",
+        "lucia_rodriguez",
+        "pablo_teen"
+      ]
+    }
+  },
+  "recommendations": []
+}

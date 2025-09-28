@@ -1,0 +1,19 @@
+{
+  "videos": [
+    {
+      "id": "video_1759084912013",
+      "filename": "video_1759084912013_1759084912013.mp4",
+      "originalUrl": "https://tempfile.aiquickdraw.com/s/9ccd77e2-655f-490c-911c-05b3b1bc2770_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759084912013_1759084912013.mp4",
+      "publicUrl": "http://localhost:3000/api/videos/video_1759084912013_1759084912013.mp4",
+      "downloadedAt": "2025-09-28T18:41:57.676Z",
+      "size": 1272098,
+      "platform": "local",
+      "metadata": {
+        "taskId": "85f056cf59d65ad6a97cc0e49174fd28",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/9ccd77e2-655f-490c-911c-05b3b1bc2770_watermarked.mp4",
+        "service": "veo3"
+      }
+    }
+  ]
+}

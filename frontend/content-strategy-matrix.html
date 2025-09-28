@@ -101,6 +101,11 @@
                             class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                         📈 Estrategia de Lanzamiento
                     </button>
+                    <button @click="activeTab = 'avatar-first'"
+                            :class="activeTab === 'avatar-first' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                        👤 Avatar-First Strategy
+                    </button>
                 </nav>
             </div>
         </div>
@@ -713,6 +718,391 @@
                             </p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tab: Avatar-First Strategy -->
+            <div x-show="activeTab === 'avatar-first'" x-transition:enter="transition ease-out duration-300">
+                <div class="space-y-8">
+
+                    <!-- Decisión Estratégica Principal -->
+                    <div class="bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-lg shadow-lg p-8">
+                        <div class="text-center">
+                            <h2 class="text-3xl font-bold mb-4">🎯 DECISIÓN ESTRATÉGICA DEFINITIVA</h2>
+                            <p class="text-xl opacity-90 mb-6">Todo el contenido será generado exclusivamente con Avatares IA</p>
+                            <div class="inline-flex items-center bg-white/20 rounded-full px-6 py-3 text-lg font-semibold">
+                                ✅ Avatar-First Content Strategy - APROBADA
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ventajas Competitivas -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">🚀 Por qué Avatar-First es la Estrategia Ganadora</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Diferenciación -->
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-blue-500 rounded-lg p-2">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ml-3 text-lg font-semibold text-blue-900">Diferenciación Brutal</h4>
+                                </div>
+                                <ul class="space-y-2 text-sm text-blue-800">
+                                    <li>• <strong>Único en el mercado:</strong> Nadie más hace todo con avatares</li>
+                                    <li>• <strong>Imposible de copiar:</strong> Requiere inversión técnica masiva</li>
+                                    <li>• <strong>Barrera de entrada alta:</strong> Protege de competencia</li>
+                                    <li>• <strong>IP propia:</strong> Los avatares son activos únicos</li>
+                                </ul>
+                            </div>
+
+                            <!-- Conexión Humana -->
+                            <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-green-500 rounded-lg p-2">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ml-3 text-lg font-semibold text-green-900">Conexión Humana</h4>
+                                </div>
+                                <ul class="space-y-2 text-sm text-green-800">
+                                    <li>• <strong>Trust factor:</strong> Las personas confían en personas, no en gráficos</li>
+                                    <li>• <strong>Relaciones parasociales:</strong> Los usuarios se conectan emocionalmente</li>
+                                    <li>• <strong>Memorabilidad:</strong> "Ana me dijo que..." vs "Vi una infografía"</li>
+                                    <li>• <strong>Fidelidad:</strong> Siguen a "sus avatares favoritos"</li>
+                                </ul>
+                            </div>
+
+                            <!-- Escalabilidad -->
+                            <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+                                <div class="flex items-center mb-4">
+                                    <div class="bg-purple-500 rounded-lg p-2">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="ml-3 text-lg font-semibold text-purple-900">Escalabilidad Inteligente</h4>
+                                </div>
+                                <ul class="space-y-2 text-sm text-purple-800">
+                                    <li>• <strong>Un script = 4 videos:</strong> Cada avatar presenta a su estilo</li>
+                                    <li>• <strong>Multi-formato:</strong> 15s TikTok, 30s Reels, 5min YouTube</li>
+                                    <li>• <strong>A/B testing automático:</strong> Qué avatar funciona mejor</li>
+                                    <li>• <strong>Expansión futura:</strong> Podcasts, eventos, merchandise</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuración del Equipo -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">👥 Configuración del Equipo Avatar</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Ana Martínez -->
+                            <div class="bg-gradient-to-br from-blue-100 to-blue-50 p-6 rounded-lg border border-blue-200">
+                                <div class="text-center mb-4">
+                                    <div class="bg-blue-500 text-white rounded-full w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold mb-3">A</div>
+                                    <h4 class="font-bold text-blue-900">Ana Martínez</h4>
+                                    <p class="text-sm text-blue-700">"Ana Fantasy"</p>
+                                </div>
+                                <div class="space-y-2 text-sm text-blue-800">
+                                    <div><strong>Especialidad:</strong> Análisis Táctico</div>
+                                    <div><strong>Personalidad:</strong> Profesional cercana</div>
+                                    <div><strong>Días:</strong> Ma, Ju, Sá</div>
+                                    <div><strong>Formatos:</strong> YouTube profundo</div>
+                                </div>
+                            </div>
+
+                            <!-- Carlos González -->
+                            <div class="bg-gradient-to-br from-green-100 to-green-50 p-6 rounded-lg border border-green-200">
+                                <div class="text-center mb-4">
+                                    <div class="bg-green-500 text-white rounded-full w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold mb-3">C</div>
+                                    <h4 class="font-bold text-green-900">Carlos González</h4>
+                                    <p class="text-sm text-green-700">"Carlos Stats"</p>
+                                </div>
+                                <div class="space-y-2 text-sm text-green-800">
+                                    <div><strong>Especialidad:</strong> Estadísticas</div>
+                                    <div><strong>Personalidad:</strong> Dinámico entusiasta</div>
+                                    <div><strong>Días:</strong> Lu, Mi, Vi</div>
+                                    <div><strong>Formatos:</strong> Instagram infografías</div>
+                                </div>
+                            </div>
+
+                            <!-- Lucía Rodríguez -->
+                            <div class="bg-gradient-to-br from-pink-100 to-pink-50 p-6 rounded-lg border border-pink-200">
+                                <div class="text-center mb-4">
+                                    <div class="bg-pink-500 text-white rounded-full w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold mb-3">L</div>
+                                    <h4 class="font-bold text-pink-900">Lucía Rodríguez</h4>
+                                    <p class="text-sm text-pink-700">"Lucía Femenina"</p>
+                                </div>
+                                <div class="space-y-2 text-sm text-pink-800">
+                                    <div><strong>Especialidad:</strong> Liga Femenina</div>
+                                    <div><strong>Personalidad:</strong> Fresca moderna</div>
+                                    <div><strong>Días:</strong> Do, Mi</div>
+                                    <div><strong>Formatos:</strong> Fútbol femenino</div>
+                                </div>
+                            </div>
+
+                            <!-- Pablo Martín -->
+                            <div class="bg-gradient-to-br from-orange-100 to-orange-50 p-6 rounded-lg border border-orange-200">
+                                <div class="text-center mb-4">
+                                    <div class="bg-orange-500 text-white rounded-full w-16 h-16 mx-auto flex items-center justify-center text-2xl font-bold mb-3">P</div>
+                                    <h4 class="font-bold text-orange-900">Pablo Martín</h4>
+                                    <p class="text-sm text-orange-700">"Pablo GenZ"</p>
+                                </div>
+                                <div class="space-y-2 text-sm text-orange-800">
+                                    <div><strong>Especialidad:</strong> Contenido Viral</div>
+                                    <div><strong>Personalidad:</strong> Joven conectado</div>
+                                    <div><strong>Días:</strong> Ju, Vi, Do</div>
+                                    <div><strong>Formatos:</strong> TikTok, Twitch</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canal Único con Avatares Rotativos -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">📱 Estrategia de Canal Único</h3>
+
+                        <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-200 mb-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-medium text-indigo-900">Concepto Clave</h4>
+                                    <p class="mt-1 text-indigo-700">
+                                        <strong>UN SOLO PERFIL</strong> por red social (@FantasyLaLigaPro) donde diferentes avatares aparecen como presentadores rotativos.
+                                        Los seguidores siguen UN canal y reciben contenido variado de 4 especialistas.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">✅ Ventajas para el Usuario</h4>
+                                <ul class="space-y-2 text-sm text-gray-700">
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <strong>Un solo seguimiento</strong> para contenido completo
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <strong>Variedad diaria</strong> - siempre algo nuevo y diferente
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <strong>Especialización profunda</strong> en cada tema
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <strong>Profesionalismo percibido</strong> - "Este canal tiene especialistas para todo"
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">📈 Ventajas para el Negocio</h4>
+                                <ul class="space-y-2 text-sm text-gray-700">
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <strong>Contenido 7 días/semana</strong> sin repetición
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <strong>Diversidad algoritmica</strong> - más oportunidades de viralización
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <strong>Engagement más consistente</strong> y mayor retención
+                                    </li>
+                                    <li class="flex items-center">
+                                        <svg class="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                        <strong>A/B testing natural</strong> - qué avatar funciona mejor por tema
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workflow de Producción Avatar-First -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">⚙️ Workflow de Producción Avatar-First</h3>
+
+                        <div class="space-y-6">
+                            <!-- Flujo del Proceso -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">🔄 Flujo Completo</h4>
+                                <div class="flex items-center justify-between text-sm text-gray-700 overflow-x-auto">
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">1</div>
+                                        <span class="text-center">Data Extraction<br>(API-Sports)</span>
+                                    </div>
+                                    <div class="mx-2">→</div>
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">2</div>
+                                        <span class="text-center">Script Generation<br>(GPT-5 Mini)</span>
+                                    </div>
+                                    <div class="mx-2">→</div>
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">3</div>
+                                        <span class="text-center">Avatar Assignment<br>(reporterTeam.js)</span>
+                                    </div>
+                                    <div class="mx-2">→</div>
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">4</div>
+                                        <span class="text-center">Video Generation<br>(HeyGen)</span>
+                                    </div>
+                                    <div class="mx-2">→</div>
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-indigo-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">5</div>
+                                        <span class="text-center">Multi-format<br>(15s/30s/5min)</span>
+                                    </div>
+                                    <div class="mx-2">→</div>
+                                    <div class="flex flex-col items-center min-w-0 flex-1">
+                                        <div class="bg-yellow-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mb-2">6</div>
+                                        <span class="text-center">Distribution<br>(Automated)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ejemplo de Mismo Tema, Múltiples Avatares -->
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                                <h4 class="text-lg font-semibold text-blue-900 mb-4">💡 Ejemplo: "Chollos de la Jornada"</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-blue-700 mb-2">👩 Ana Fantasy</div>
+                                        <p class="text-gray-700">"Análisis táctico de por qué este jugador es chollo contra este rival específico"</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-green-700 mb-2">👨 Carlos Stats</div>
+                                        <p class="text-gray-700">"Los números que hacen de este jugador un chollo matemático perfecto"</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-pink-700 mb-2">👩 Lucía Femenina</div>
+                                        <p class="text-gray-700">"Jugadores jóvenes infravalorados que van a explotar este fin de semana"</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded border">
+                                        <div class="font-semibold text-orange-700 mb-2">👨 Pablo GenZ</div>
+                                        <p class="text-gray-700">"¡ESTE JUGADOR TE VA A DAR PUNTOS GRATIS! Te explico por qué en 30 segundos"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Implementación Técnica -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">🔧 Implementación Técnica</h3>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">📝 Sistema de Scripts</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <pre class="text-sm text-gray-700 overflow-x-auto"><code>const chollosTema = {
+  ana: "Análisis táctico de por qué
+        este jugador es chollo",
+  carlos: "Los números que hacen de
+          este jugador un chollo",
+  pablo: "¡ESTE JUGADOR TE VA A DAR
+         PUNTOS GRATIS!"
+};</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">📱 Formatos por Plataforma</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <pre class="text-sm text-gray-700 overflow-x-auto"><code>const formatos = {
+  instagram_reel: "30s energético",
+  tiktok: "15s ultra-dinámico",
+  youtube: "3-10min profundo",
+  stories: "15s casual"
+};</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 bg-green-50 p-6 rounded-lg border border-green-200">
+                            <div class="flex items-start">
+                                <svg class="h-6 w-6 text-green-600 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="ml-3">
+                                    <h4 class="text-lg font-medium text-green-900">Estado Actual</h4>
+                                    <p class="mt-1 text-green-700">
+                                        ✅ <strong>Equipo de reporteros configurado</strong> en reporterTeam.js<br>
+                                        ✅ <strong>GPT-5 Mini integrado</strong> para generación de scripts<br>
+                                        ✅ <strong>Funciones de asignación automática</strong> implementadas<br>
+                                        🔄 <strong>Próximo paso:</strong> Integración HeyGen para generación de videos
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap Avatar-First -->
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">🛣️ Roadmap de Implementación Avatar-First</h3>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center p-4 bg-green-50 border border-green-200 rounded-lg">
+                                <div class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">✓</div>
+                                <div>
+                                    <h4 class="font-semibold text-green-900">Fase 1: Fundación (COMPLETADA)</h4>
+                                    <p class="text-green-700 text-sm">Equipo de avatares configurado, scripts personalizados, asignación automática</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">2</div>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900">Fase 2: Integración HeyGen (EN PROGRESO)</h4>
+                                    <p class="text-blue-700 text-sm">API HeyGen, generación automática de videos, configuración de avatares</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="bg-gray-400 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">3</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Fase 3: Multi-formato Automatizado (PENDIENTE)</h4>
+                                    <p class="text-gray-600 text-sm">Generación automática 15s/30s/5min, optimización por plataforma</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="bg-gray-400 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4">4</div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">Fase 4: Distribución Automatizada (PENDIENTE)</h4>
+                                    <p class="text-gray-600 text-sm">Publicación automática en todas las redes, scheduling inteligente</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

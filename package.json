@@ -10,7 +10,15 @@
     "db:init": "node database/init-database.js",
     "db:test": "node database/test-database.js",
     "db:test:quick": "node database/test-database.js --quick",
-    "db:migrate": "npm run db:init"
+    "db:migrate": "npm run db:init",
+    "veo3:generate-ana": "node scripts/veo3/generate-ana-video.js",
+    "veo3:add-player-card": "node scripts/veo3/add-player-cards.js",
+    "veo3:concatenate": "node scripts/veo3/concatenate-videos.js",
+    "veo3:monitor": "node scripts/veo3/monitor-generation.js",
+    "veo3:test-all": "npm run veo3:test-ana && npm run veo3:test-cards && npm run veo3:test-concat",
+    "veo3:test-ana": "node scripts/veo3/generate-ana-video.js --test",
+    "veo3:test-cards": "node scripts/veo3/add-player-cards.js --test",
+    "veo3:test-concat": "node scripts/veo3/concatenate-videos.js --test"
   },
   "keywords": [
     "fantasy",
@@ -22,11 +30,13 @@
   "author": "Fantasy La Liga Bot",
   "license": "MIT",
   "dependencies": {
+    "@bunnynet/stream": "^0.1.0",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "fluent-ffmpeg": "^2.1.3",
     "helmet": "^7.1.0",
     "jimp": "^1.6.0",
     "morgan": "^1.10.0",

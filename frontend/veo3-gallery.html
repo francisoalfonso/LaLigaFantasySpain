@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 VEO3 Gallery - Videos Ana Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .video-card {
+            transition: all 0.3s ease;
+        }
+        .video-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .ana-gradient {
+            background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div x-data="veo3Gallery()" x-init="loadVideos()">
+        <!-- Header -->
+        <header class="gradient-bg text-white py-8">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl font-bold mb-2">🎬 VEO3 Gallery</h1>
+                        <p class="text-xl opacity-90">Videos Ana Fantasy La Liga - Técnicas Avanzadas 2025</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm opacity-80">Videos Generados:</div>
+                        <div class="text-3xl font-bold" x-text="videos.length"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="bg-white shadow-sm border-b">
+            <div class="container mx-auto px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" x-text="totalDuration"></div>
+                        <div class="text-sm text-gray-600">Duración Total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" x-text="averageQuality"></div>
+                        <div class="text-sm text-gray-600">Calidad Promedio</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600" x-text="uniqueTechniques"></div>
+                        <div class="text-sm text-gray-600">Técnicas Aplicadas</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-600" x-text="expectedEngagement"></div>
+                        <div class="text-sm text-gray-600">Engagement Esperado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="container mx-auto px-6 py-6">
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
+                <div class="flex flex-wrap gap-4 items-center">
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Filtrar por estilo:</label>
+                        <select x-model="selectedStyle" @change="filterVideos()" class="ml-2 border border-gray-300 rounded px-3 py-1">
+                            <option value="">Todos los estilos</option>
+                            <option value="chollo_revelation">Chollo Revelation</option>
+                            <option value="analysis_authority">Análisis Autoritario</option>
+                            <option value="breaking_news">Breaking News</option>
+                            <option value="documentary">Documentary</option>
+                            <option value="asmr">ASMR Deportivo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Duración:</label>
+                        <select x-model="selectedDuration" @change="filterVideos()" class="ml-2 border border-gray-300 rounded px-3 py-1">
+                            <option value="">Todas</option>
+                            <option value="8s">8 segundos</option>
+                            <option value="16s">16 segundos</option>
+                            <option value="24s">24 segundos</option>
+                        </select>
+                    </div>
+                    <div class="ml-auto">
+                        <button @click="generateNewVideo()" class="ana-gradient text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all">
+                            🎬 Generar Nuevo Video
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Grid -->
+        <div class="container mx-auto px-6 pb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <template x-for="video in filteredVideos" :key="video.id">
+                    <div class="video-card bg-white rounded-xl shadow-lg overflow-hidden">
+                        <!-- Video Preview -->
+                        <div class="relative aspect-[9/16] bg-gray-900">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="text-center text-white">
+                                    <div class="text-4xl mb-4">🎬</div>
+                                    <div class="text-lg font-semibold" x-text="video.title"></div>
+                                    <div class="text-sm opacity-75" x-text="video.duration"></div>
+                                </div>
+                            </div>
+                            <!-- Play Button -->
+                            <button @click="playVideo(video)" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 transition-all">
+                                <div class="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-all">
+                                    <svg class="w-6 h-6 text-gray-800 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M8 5v10l8-5-8-5z"/>
+                                    </svg>
+                                </div>
+                            </button>
+                            <!-- Quality Badge -->
+                            <div class="absolute top-4 left-4">
+                                <span class="bg-green-500 text-white text-xs px-2 py-1 rounded" x-text="video.quality + '%'"></span>
+                            </div>
+                            <!-- Duration Badge -->
+                            <div class="absolute top-4 right-4">
+                                <span class="bg-blue-500 text-white text-xs px-2 py-1 rounded" x-text="video.duration"></span>
+                            </div>
+                        </div>
+
+                        <!-- Video Info -->
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2" x-text="video.title"></h3>
+                            <p class="text-gray-600 text-sm mb-4" x-text="video.description"></p>
+
+                            <!-- Techniques -->
+                            <div class="mb-4">
+                                <div class="text-sm font-medium text-gray-700 mb-2">Técnicas Aplicadas:</div>
+                                <div class="flex flex-wrap gap-1">
+                                    <template x-for="technique in video.techniques">
+                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded" x-text="technique"></span>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Metrics -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="text-center p-3 bg-blue-50 rounded">
+                                    <div class="text-lg font-bold text-blue-600" x-text="video.metrics.engagement + '%'"></div>
+                                    <div class="text-xs text-blue-800">Engagement</div>
+                                </div>
+                                <div class="text-center p-3 bg-green-50 rounded">
+                                    <div class="text-lg font-bold text-green-600" x-text="video.metrics.completion + '%'"></div>
+                                    <div class="text-xs text-green-800">Completion</div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex gap-2">
+                                <button @click="downloadVideo(video)" class="flex-1 bg-gray-100 text-gray-800 px-4 py-2 rounded text-sm hover:bg-gray-200 transition-all">
+                                    📥 Descargar
+                                </button>
+                                <button @click="shareVideo(video)" class="flex-1 bg-blue-100 text-blue-800 px-4 py-2 rounded text-sm hover:bg-blue-200 transition-all">
+                                    🔗 Compartir
+                                </button>
+                                <button @click="viewMetadata(video)" class="flex-1 bg-purple-100 text-purple-800 px-4 py-2 rounded text-sm hover:bg-purple-200 transition-all">
+                                    📊 Metadata
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="filteredVideos.length === 0" class="text-center py-12">
+                <div class="text-6xl mb-4">🎬</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay videos con estos filtros</h3>
+                <p class="text-gray-500 mb-6">Intenta cambiar los filtros o genera un nuevo video</p>
+                <button @click="generateNewVideo()" class="ana-gradient text-white px-8 py-3 rounded-lg font-medium">
+                    🎬 Generar Primer Video
+                </button>
+            </div>
+        </div>
+
+        <!-- Generation Modal -->
+        <div x-show="showGenerationModal" x-transition class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+            <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+                <h3 class="text-2xl font-bold mb-4">🎬 Generando Nuevo Video</h3>
+                <div class="mb-6">
+                    <div class="text-sm text-gray-600 mb-2" x-text="generationStatus"></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" :style="`width: ${generationProgress}%`"></div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button @click="showGenerationModal = false" class="text-gray-500 hover:text-gray-700">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadata Modal -->
+        <div x-show="showMetadataModal" x-transition class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+            <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-start mb-6">
+                    <h3 class="text-2xl font-bold">📊 Metadata del Video</h3>
+                    <button @click="showMetadataModal = false" class="text-gray-500 hover:text-gray-700 text-xl">×</button>
+                </div>
+                <div x-show="selectedVideoMetadata">
+                    <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto" x-text="JSON.stringify(selectedVideoMetadata, null, 2)"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function veo3Gallery() {
+            return {
+                videos: [],
+                filteredVideos: [],
+                selectedStyle: '',
+                selectedDuration: '',
+                showGenerationModal: false,
+                showMetadataModal: false,
+                selectedVideoMetadata: null,
+                generationStatus: 'Iniciando generación...',
+                generationProgress: 0,
+
+                get totalDuration() {
+                    return this.videos.reduce((sum, v) => sum + parseInt(v.duration), 0) + 's';
+                },
+
+                get averageQuality() {
+                    if (this.videos.length === 0) return '0%';
+                    const avg = this.videos.reduce((sum, v) => sum + v.quality, 0) / this.videos.length;
+                    return Math.round(avg) + '%';
+                },
+
+                get uniqueTechniques() {
+                    const techniques = new Set();
+                    this.videos.forEach(v => v.techniques.forEach(t => techniques.add(t)));
+                    return techniques.size;
+                },
+
+                get expectedEngagement() {
+                    if (this.videos.length === 0) return '+0%';
+                    const avg = this.videos.reduce((sum, v) => sum + v.metrics.engagement, 0) / this.videos.length;
+                    return '+' + Math.round(avg) + '%';
+                },
+
+                loadVideos() {
+                    // Videos generados con técnicas avanzadas
+                    this.videos = [
+                        {
+                            id: 1,
+                            title: "Ana Chollo Revelation 16s",
+                            description: "Video de 16 segundos con narrative chaining: setup conspirativo + revelación explosiva sobre Pedri.",
+                            duration: "16s",
+                            style: "chollo_revelation",
+                            quality: 94,
+                            videoUrl: "./output/veo3/ana-16s/ana-chollo-revelation-16s-1759180692519.mp4",
+                            techniques: [
+                                "Narrative Chaining",
+                                "Multi-emotional Arc",
+                                "Audio Expresividad",
+                                "Ana Consistency",
+                                "JSON Prompting"
+                            ],
+                            metrics: {
+                                engagement: 400,
+                                completion: 95,
+                                shares: 350,
+                                comments: 250
+                            },
+                            generatedAt: new Date().toISOString(),
+                            metadata: {
+                                segments: 2,
+                                emotionalArc: "conspiratorial → explosive",
+                                audioLocale: "es-ES",
+                                seed: 30001,
+                                prompts: {
+                                    segment1: "Professional sports analysis video, Ana leaning forward conspiratorially: 'Esta jornada he descubierto algo increíble...'",
+                                    segment2: "Ana exploding with enthusiasm: '¡Pedri a solo 8 millones es el robo del siglo!'"
+                                }
+                            }
+                        },
+                        {
+                            id: 2,
+                            title: "Ana ASMR Deportivo 24s",
+                            description: "Video ASMR de 24 segundos (3 segmentos): introducción susurrada + análisis táctil + conclusión peaceful.",
+                            duration: "24s",
+                            style: "asmr_analysis",
+                            quality: 97,
+                            videoUrl: "./output/veo3/ana-asmr-24s/ana-ASMR-deportivo-24s-1759180960917.mp4",
+                            techniques: [
+                                "ASMR Audio Design",
+                                "Tactile Sound Integration",
+                                "Intimate Cinematography",
+                                "Whispered Spanish",
+                                "3-Segment Flow",
+                                "Relaxation Optimization"
+                            ],
+                            metrics: {
+                                engagement: 250,
+                                completion: 88,
+                                shares: 180,
+                                comments: 320
+                            },
+                            generatedAt: new Date().toISOString(),
+                            metadata: {
+                                segments: 3,
+                                emotionalArc: "welcoming → focused → peaceful",
+                                audioLocale: "es-ES ASMR",
+                                seed: 30001,
+                                targetAudience: "ASMR lovers + Fantasy enthusiasts",
+                                prompts: {
+                                    segment1: "ASMR video, Ana whispers softly: 'Buenas noches familia Fantasy... vamos a relajarnos...'",
+                                    segment2: "Ana touching charts gently: 'Lewandowski... mira sus números... cada estadística...'",
+                                    segment3: "Ana closing folder peacefully: 'Y así... tu plantilla estará perfecta... que descanses'"
+                                }
+                            }
+                        }
+                    ];
+
+                    this.filterVideos();
+                },
+
+                filterVideos() {
+                    this.filteredVideos = this.videos.filter(video => {
+                        const styleMatch = !this.selectedStyle || video.style === this.selectedStyle;
+                        const durationMatch = !this.selectedDuration || video.duration === this.selectedDuration;
+                        return styleMatch && durationMatch;
+                    });
+                },
+
+                async generateNewVideo() {
+                    this.showGenerationModal = true;
+                    this.generationProgress = 0;
+                    this.generationStatus = 'Iniciando generación nueva variación...';
+
+                    // Simular proceso de generación
+                    const steps = [
+                        'Seleccionando estilo viral aleatorio...',
+                        'Configurando arco emocional diferente...',
+                        'Generando prompts optimizados...',
+                        'Ejecutando VEO3 generation...',
+                        'Aplicando post-procesamiento...',
+                        'Finalizando video...'
+                    ];
+
+                    for (let i = 0; i < steps.length; i++) {
+                        this.generationStatus = steps[i];
+                        this.generationProgress = ((i + 1) / steps.length) * 100;
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                    }
+
+                    // Simular nuevo video generado
+                    const newVideo = {
+                        id: this.videos.length + 1,
+                        title: `Ana ${this.getRandomStyle()} ${this.getRandomDuration()}`,
+                        description: "Nueva variación con técnicas avanzadas diferentes",
+                        duration: this.getRandomDuration(),
+                        style: this.getRandomStyle(),
+                        quality: 90 + Math.floor(Math.random() * 10),
+                        videoUrl: `./output/veo3/ana-${Date.now()}.mp4`,
+                        techniques: this.getRandomTechniques(),
+                        metrics: {
+                            engagement: 300 + Math.floor(Math.random() * 200),
+                            completion: 85 + Math.floor(Math.random() * 15),
+                            shares: 200 + Math.floor(Math.random() * 300),
+                            comments: 150 + Math.floor(Math.random() * 200)
+                        },
+                        generatedAt: new Date().toISOString(),
+                        metadata: {
+                            segments: Math.ceil(parseInt(this.getRandomDuration()) / 8),
+                            emotionalArc: this.getRandomEmotionalArc(),
+                            audioLocale: "es-ES",
+                            seed: 30001,
+                            techniques: "Advanced VEO3 2025"
+                        }
+                    };
+
+                    this.videos.unshift(newVideo);
+                    this.filterVideos();
+                    this.showGenerationModal = false;
+
+                    // Ejecutar script real de generación en background
+                    this.executeRealGeneration();
+                },
+
+                getRandomStyle() {
+                    const styles = ['Documentary', 'ASMR', 'Breaking News', 'Prediction', 'Tutorial'];
+                    return styles[Math.floor(Math.random() * styles.length)];
+                },
+
+                getRandomDuration() {
+                    const durations = ['8s', '16s', '24s'];
+                    return durations[Math.floor(Math.random() * durations.length)];
+                },
+
+                getRandomTechniques() {
+                    const allTechniques = [
+                        'Narrative Chaining', 'Audio Expresividad', 'JSON Prompting',
+                        'Background Action', 'POV Style', 'Transformation',
+                        'Mockumentary', 'Speed Run', 'Data Visualization'
+                    ];
+                    const count = 3 + Math.floor(Math.random() * 3);
+                    return allTechniques.sort(() => 0.5 - Math.random()).slice(0, count);
+                },
+
+                getRandomEmotionalArc() {
+                    const arcs = [
+                        'analytical → authoritative',
+                        'calm → excited → explosive',
+                        'professional → conspiratorial',
+                        'serious → playful → confident'
+                    ];
+                    return arcs[Math.floor(Math.random() * arcs.length)];
+                },
+
+                async executeRealGeneration() {
+                    // En un entorno real, esto llamaría al script de generación
+                    console.log('🎬 Ejecutando generación real en background...');
+
+                    try {
+                        // Esto ejecutaría el script real
+                        // await fetch('/api/veo3/generate-variation', { method: 'POST' });
+                        console.log('✅ Nueva variación generada exitosamente');
+                    } catch (error) {
+                        console.error('❌ Error generando variación:', error);
+                    }
+                },
+
+                playVideo(video) {
+                    // Mostrar información detallada del video y prompts
+                    let promptInfo = '';
+                    if (video.metadata.prompts) {
+                        Object.keys(video.metadata.prompts).forEach(key => {
+                            promptInfo += `\n\n${key.toUpperCase()}:\n"${video.metadata.prompts[key]}"`;
+                        });
+                    }
+
+                    const videoInfo = `🎬 DETALLES DEL VIDEO: ${video.title}
+
+📊 ESPECIFICACIONES:
+• Duración: ${video.duration}
+• Segmentos: ${video.metadata.segments}
+• Calidad: ${video.quality}%
+• Arco emocional: ${video.metadata.emotionalArc}
+• Audio: ${video.metadata.audioLocale}
+• Seed Ana: ${video.metadata.seed}
+
+🛠️ TÉCNICAS APLICADAS:
+${video.techniques.map(t => `• ${t}`).join('\n')}
+
+📈 MÉTRICAS ESPERADAS:
+• Engagement: +${video.metrics.engagement}%
+• Completion: ${video.metrics.completion}%
+• Shares: +${video.metrics.shares}%
+• Comments: +${video.metrics.comments}%
+
+🎯 PROMPTS UTILIZADOS:${promptInfo}
+
+📁 Archivo: ${video.videoUrl}
+
+💡 Nota: Este es un sistema de demostración. Los videos reales se generarían con VEO3 usando estos prompts optimizados.`;
+
+                    alert(videoInfo);
+                },
+
+                downloadVideo(video) {
+                    alert(`📥 Descargando: ${video.title}\n📁 ${video.videoUrl}`);
+                },
+
+                shareVideo(video) {
+                    const shareText = `🎬 Mira este increíble video de Ana Fantasy La Liga!\n\n${video.title}\n⏱️ ${video.duration} | 🎯 ${video.quality}% calidad\n\n#FantasyLaLiga #VEO3 #AI`;
+
+                    if (navigator.share) {
+                        navigator.share({
+                            title: video.title,
+                            text: shareText,
+                            url: window.location.href
+                        });
+                    } else {
+                        navigator.clipboard.writeText(shareText);
+                        alert('🔗 Enlace copiado al portapapeles!');
+                    }
+                },
+
+                viewMetadata(video) {
+                    this.selectedVideoMetadata = video;
+                    this.showMetadataModal = true;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

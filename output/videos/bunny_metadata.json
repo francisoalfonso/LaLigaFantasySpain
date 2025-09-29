@@ -1,3 +1,61 @@
 {
-  "videos": []
+  "videos": [
+    {
+      "id": "59243c1e-7fbd-490a-bde0-144504ec63ae",
+      "title": "Video Manager - video_1759181467483",
+      "sourceUrl": "https://tempfile.aiquickdraw.com/s/23aa0fa2-eeaf-4f63-9a59-bd95f8f83b41_watermarked.mp4",
+      "bunnyUrl": "https://vz-139dde2a-4e6.b-cdn.net/59243c1e-7fbd-490a-bde0-144504ec63ae/playlist.m3u8",
+      "embedUrl": "https://vz-139dde2a-4e6.b-cdn.net/59243c1e-7fbd-490a-bde0-144504ec63ae/iframe",
+      "thumbnailUrl": "https://vz-139dde2a-4e6.b-cdn.net/59243c1e-7fbd-490a-bde0-144504ec63ae/preview.webp",
+      "directUrl": "https://vz-139dde2a-4e6.b-cdn.net/59243c1e-7fbd-490a-bde0-144504ec63ae/play_720p.mp4",
+      "status": 2,
+      "uploadedAt": "2025-09-29T21:31:13.511Z",
+      "metadata": {
+        "title": "Video Manager - video_1759181467483",
+        "taskId": "1d68365b8a3e1b07654faaf6222fe668",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/23aa0fa2-eeaf-4f63-9a59-bd95f8f83b41_watermarked.mp4",
+        "service": "veo3",
+        "veo3TaskId": "1d68365b8a3e1b07654faaf6222fe668",
+        "type": "veo3_generated"
+      }
+    },
+    {
+      "id": "0e591f1f-3aac-4236-a7ce-cb7c3673da87",
+      "title": "Video Manager - video_1759182074894",
+      "sourceUrl": "https://tempfile.aiquickdraw.com/s/d3255bc9-1366-461d-89e3-cc839f2a777b_watermarked.mp4",
+      "bunnyUrl": "https://vz-139dde2a-4e6.b-cdn.net/0e591f1f-3aac-4236-a7ce-cb7c3673da87/playlist.m3u8",
+      "embedUrl": "https://vz-139dde2a-4e6.b-cdn.net/0e591f1f-3aac-4236-a7ce-cb7c3673da87/iframe",
+      "thumbnailUrl": "https://vz-139dde2a-4e6.b-cdn.net/0e591f1f-3aac-4236-a7ce-cb7c3673da87/preview.webp",
+      "directUrl": "https://vz-139dde2a-4e6.b-cdn.net/0e591f1f-3aac-4236-a7ce-cb7c3673da87/play_720p.mp4",
+      "status": 2,
+      "uploadedAt": "2025-09-29T21:41:20.488Z",
+      "metadata": {
+        "title": "Video Manager - video_1759182074894",
+        "taskId": "483482789bb51154e0213783e9ccf94e",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/d3255bc9-1366-461d-89e3-cc839f2a777b_watermarked.mp4",
+        "service": "veo3",
+        "veo3TaskId": "483482789bb51154e0213783e9ccf94e",
+        "type": "veo3_generated"
+      }
+    },
+    {
+      "id": "2c06c489-a44b-4593-b602-ced6753d6174",
+      "title": "Video Manager - video_1759182334520",
+      "sourceUrl": "https://tempfile.aiquickdraw.com/s/3f183d12-3745-434a-be75-0694dcc230a9_watermarked.mp4",
+      "bunnyUrl": "https://vz-139dde2a-4e6.b-cdn.net/2c06c489-a44b-4593-b602-ced6753d6174/playlist.m3u8",
+      "embedUrl": "https://vz-139dde2a-4e6.b-cdn.net/2c06c489-a44b-4593-b602-ced6753d6174/iframe",
+      "thumbnailUrl": "https://vz-139dde2a-4e6.b-cdn.net/2c06c489-a44b-4593-b602-ced6753d6174/preview.webp",
+      "directUrl": "https://vz-139dde2a-4e6.b-cdn.net/2c06c489-a44b-4593-b602-ced6753d6174/play_720p.mp4",
+      "status": 2,
+      "uploadedAt": "2025-09-29T21:45:40.068Z",
+      "metadata": {
+        "title": "Video Manager - video_1759182334520",
+        "taskId": "ee2b1fb31a147d1f51cbfebd818c0fce",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/3f183d12-3745-434a-be75-0694dcc230a9_watermarked.mp4",
+        "service": "veo3",
+        "veo3TaskId": "ee2b1fb31a147d1f51cbfebd818c0fce",
+        "type": "veo3_generated"
+      }
+    }
+  ]
 }

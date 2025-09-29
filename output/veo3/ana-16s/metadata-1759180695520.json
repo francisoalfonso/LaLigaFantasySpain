@@ -1,0 +1,60 @@
+{
+  "finalVideoUrl": "./output/veo3/ana-16s/ana-chollo-revelation-16s-1759180692519.mp4",
+  "duration": "16 seconds",
+  "quality": "HD 1080p",
+  "format": "9:16 (vertical)",
+  "audioQuality": "Spanish ES broadcast quality",
+  "fileSize": "~45MB",
+  "techniques": [
+    "Narrative Chaining (2 segmentos)",
+    "Multi-emotional Arc (conspirativo → explosivo)",
+    "Advanced Audio Expressivity (ES-ES)",
+    "Ana Character Consistency (seed 30001)",
+    "Professional Cinematography",
+    "JSON Prompting Optimizado"
+  ],
+  "generatedAt": "2025-09-29T21:18:15.519Z",
+  "prompts": {
+    "segment1": {
+      "prompt": "Professional sports analysis video, Ana Martínez, a 32-year-old Spanish sports analyst with short blonde hair styled professionally, warm smile, athletic build, wearing red FLP Fantasy La Liga Pro polo shirt, holding blue microphone, leaning forward conspiratorially toward camera with intriguing expression, camera starts medium shot then slowly dollies in to intimate close-up, modern sports studio with FLP Fantasy La Liga Pro neon signs and player graphics in background, Ana speaks in Spanish with conspiratorial whisper: \"Esta jornada he descubierto algo increíble... algo que va a cambiar completamente vuestras plantillas\", Spanish from Spain accent with building intrigue, intimate studio ambience with soft lighting, no subtitles.",
+      "audioDesign": {
+        "style": "conspiratorial_whisper",
+        "ambient": "intimate_studio_ambience",
+        "micTechnique": "close_mic_intimacy",
+        "emotional": "building_intrigue_tension",
+        "locale": "es-ES"
+      },
+      "cinematography": {
+        "movement": "slow_dolly_in_building_intimacy",
+        "lighting": "soft_intimate_studio_lighting",
+        "composition": "medium_to_close_up_progression"
+      },
+      "metadata": {
+        "segment": 1,
+        "emotionalArc": "professional_calm_to_conspiratorial_intrigue",
+        "purpose": "setup_and_build_suspense"
+      }
+    },
+    "segment2": {
+      "prompt": "Professional sports analysis video, Ana Martínez continuing from previous analysis, same 32-year-old Spanish sports analyst with blonde hair and red FLP polo, now exploding with passionate enthusiasm while gesturing dramatically, camera quick push-in for revelation impact, studio lighting brightens dramatically, background graphics showing player statistics and price data, Ana delivers explosive revelation in Spanish: \"¡Pedri a solo 8 millones es el robo del siglo! ¡Corred antes de que suba!\", Spanish from Spain accent with explosive passionate delivery, energetic studio atmosphere with dynamic lighting, no subtitles.",
+      "audioDesign": {
+        "style": "explosive_passionate_enthusiasm",
+        "ambient": "energetic_broadcast_environment",
+        "micTechnique": "dynamic_range_capture",
+        "emotional": "explosive_revelation_excitement",
+        "locale": "es-ES"
+      },
+      "cinematography": {
+        "movement": "dramatic_push_in_for_revelation",
+        "lighting": "bright_dynamic_energetic_studio",
+        "composition": "explosive_emphasis_framing"
+      },
+      "initialFrame": "last_frame_placeholder",
+      "metadata": {
+        "segment": 2,
+        "emotionalArc": "explosive_revelation_to_urgent_call_action",
+        "purpose": "climax_and_call_to_action"
+      }
+    }
+  }
+}

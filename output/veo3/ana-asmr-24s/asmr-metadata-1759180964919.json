@@ -1,0 +1,99 @@
+{
+  "finalVideoUrl": "./output/veo3/ana-asmr-24s/ana-ASMR-deportivo-24s-1759180960917.mp4",
+  "duration": "24 seconds",
+  "quality": "HD 1080p ASMR optimized",
+  "format": "9:16 (vertical)",
+  "audioQuality": "Ultra-sensitive ASMR Spanish ES",
+  "fileSize": "~68MB",
+  "style": "ASMR Sports Analysis",
+  "techniques": [
+    "ASMR Audio Design",
+    "Tactile Sound Integration",
+    "Intimate Cinematography",
+    "Whispered Spanish Narration",
+    "3-Segment Narrative Flow",
+    "Relaxation Optimization"
+  ],
+  "targetAudience": "ASMR lovers + Fantasy enthusiasts",
+  "bestTimeToWatch": "Before sleep / Relaxation moments",
+  "generatedAt": "2025-09-29T21:22:44.918Z",
+  "videoType": "ASMR_Sports_Analysis",
+  "differentiationFromPrevious": [
+    "Completely different style: ASMR vs Explosive",
+    "Audio: Whispered vs Passionate",
+    "Duration: 24s (3 segments) vs 16s (2 segments)",
+    "Mood: Relaxing vs Energetic",
+    "Target: Before sleep vs Social sharing",
+    "Camera: Intimate close-up vs Dynamic movement"
+  ],
+  "prompts": {
+    "segment1": {
+      "prompt": "ASMR sports analysis video, Ana Martínez, a 32-year-old Spanish sports analyst with short blonde hair styled softly, gentle warm expression, wearing comfortable red FLP polo, sitting very close to camera in intimate setting, extreme close-up focusing on her calm face and gentle hand movements, soft warm lighting creating cozy atmosphere, Ana speaks in very soft Spanish whisper: \"Buenas noches familia Fantasy... esta noche vamos a relajarnos mientras analizamos la jornada\", Spanish from Spain accent with ASMR whispered delivery, intimate studio with soft paper rustling sounds and gentle ambient lighting, no subtitles.",
+      "audioDesign": {
+        "style": "ASMR_whispered_intimate",
+        "ambient": "cozy_intimate_studio_sounds",
+        "micTechnique": "ultra_close_mic_ASMR",
+        "emotional": "calm_relaxing_whisper",
+        "locale": "es-ES",
+        "additionalSounds": "soft_paper_rustling, gentle_breathing"
+      },
+      "cinematography": {
+        "movement": "static_intimate_close_up",
+        "lighting": "warm_soft_ASMR_lighting",
+        "composition": "extreme_close_up_ASMR_style"
+      },
+      "metadata": {
+        "segment": 1,
+        "style": "ASMR_sports_analysis",
+        "emotionalArc": "welcoming_calm_to_relaxed_focus",
+        "purpose": "ASMR_introduction_and_setup"
+      }
+    },
+    "segment2": {
+      "prompt": "ASMR sports analysis continuation, Ana Martínez maintaining same intimate close-up position, now gently touching and moving tactical charts with slow deliberate finger movements, soft paper sounds, camera static extreme close-up capturing finger movements and calm expression, Ana whispers softly in Spanish: \"Lewandowski... mira sus números... cada estadística cuenta una historia relajante\", Spanish from Spain ASMR whispered delivery, satisfying paper touching sounds and gentle chart movements, warm intimate lighting, no subtitles.",
+      "audioDesign": {
+        "style": "ASMR_tactile_analysis",
+        "ambient": "paper_touching_ASMR_sounds",
+        "micTechnique": "ultra_sensitive_close_recording",
+        "emotional": "focused_calm_whisper",
+        "locale": "es-ES",
+        "additionalSounds": "paper_crinkling, finger_tapping, gentle_page_turns"
+      },
+      "cinematography": {
+        "movement": "subtle_focus_on_hands_and_face",
+        "lighting": "consistent_warm_intimate_ASMR",
+        "composition": "hands_and_charts_close_detail"
+      },
+      "initialFrame": "frame_placeholder",
+      "metadata": {
+        "segment": 2,
+        "style": "ASMR_tactile_sports_analysis",
+        "emotionalArc": "relaxed_focus_to_satisfying_analysis",
+        "purpose": "ASMR_tactical_content_with_triggers"
+      }
+    },
+    "segment3": {
+      "prompt": "ASMR sports analysis conclusion, Ana Martínez in same intimate setting, now with gentle satisfied smile, slowly closing tactical folder with satisfying paper sounds, camera captures peaceful conclusion moment, Ana whispers final thoughts in Spanish: \"Y así... con estos chollos... tu plantilla estará perfecta... que descanses\", Spanish from Spain ASMR whispered delivery with peaceful conclusion tone, satisfying folder closing sounds and gentle ambient fade, warm lighting gradually dimming for peaceful ending, no subtitles.",
+      "audioDesign": {
+        "style": "ASMR_peaceful_conclusion",
+        "ambient": "gentle_closing_sounds_fade_to_calm",
+        "micTechnique": "intimate_whisper_with_gentle_fade",
+        "emotional": "satisfied_peaceful_goodnight",
+        "locale": "es-ES",
+        "additionalSounds": "folder_closing, gentle_paper_settling, peaceful_fade"
+      },
+      "cinematography": {
+        "movement": "gentle_pull_back_to_peaceful_wide",
+        "lighting": "warm_fade_to_peaceful_dim",
+        "composition": "satisfying_conclusion_framing"
+      },
+      "initialFrame": "frame_placeholder",
+      "metadata": {
+        "segment": 3,
+        "style": "ASMR_peaceful_conclusion",
+        "emotionalArc": "satisfied_analysis_to_peaceful_goodnight",
+        "purpose": "ASMR_satisfying_conclusion_and_farewell"
+      }
+    }
+  }
+}

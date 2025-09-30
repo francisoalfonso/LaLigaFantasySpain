@@ -19,7 +19,9 @@
     "veo3:test-ana": "node scripts/veo3/generate-ana-video.js --test",
     "veo3:test-cards": "node scripts/veo3/add-player-cards.js --test",
     "veo3:test-concat": "node scripts/veo3/concatenate-videos.js --test",
-    "veo3:test-framework": "node scripts/veo3/test-viral-framework.js"
+    "veo3:test-framework": "node scripts/veo3/test-viral-framework.js",
+    "veo3:test-stats-card": "node scripts/veo3/test-stats-card-prompt.js",
+    "veo3:test-3segments": "node scripts/veo3/test-three-segments.js"
   },
   "keywords": [
     "fantasy",

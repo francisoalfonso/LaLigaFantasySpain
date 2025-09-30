@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 // Sistema de Caché para Análisis de Chollos Fantasy
 // Reduce tiempo de carga de 9+ segundos a <1 segundo para requests repetidos
 
@@ -10,7 +12,7 @@ class BargainCache {
     // Limpieza automática cada 10 minutos
     setInterval(() => this.cleanup(), 10 * 60 * 1000);
 
-    console.log('🚀 BargainCache inicializado - TTL: 30min, MaxSize: 100');
+    logger.info('🚀 BargainCache inicializado - TTL: 30min, MaxSize: 100');
   }
 
   // Generar clave única basada en parámetros
@@ -24,18 +26,18 @@ class BargainCache {
     const cached = this.cache.get(key);
 
     if (!cached) {
-      console.log(`🔍 Cache MISS: ${key}`);
+      logger.info(`🔍 Cache MISS: ${key}`);
       return null;
     }
 
     // Verificar si ha expirado
     if (Date.now() - cached.timestamp > this.TTL) {
-      console.log(`⏰ Cache EXPIRED: ${key}`);
+      logger.info(`⏰ Cache EXPIRED: ${key}`);
       this.cache.delete(key);
       return null;
     }
 
-    console.log(`✅ Cache HIT: ${key} (${Math.round((Date.now() - cached.timestamp) / 1000)}s ago)`);
+    logger.info(`✅ Cache HIT: ${key} (${Math.round((Date.now() - cached.timestamp) / 1000)}s ago)`);
     return cached.data;
   }
 
@@ -45,7 +47,7 @@ class BargainCache {
     if (this.cache.size >= this.maxSize) {
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
-      console.log(`🧹 Cache evicted oldest: ${oldestKey}`);
+      logger.info(`🧹 Cache evicted oldest: ${oldestKey}`);
     }
 
     this.cache.set(key, {
@@ -53,7 +55,7 @@ class BargainCache {
       timestamp: Date.now()
     });
 
-    console.log(`💾 Cache SET: ${key} (${this.cache.size}/${this.maxSize})`);
+    logger.info(`💾 Cache SET: ${key} (${this.cache.size}/${this.maxSize})`);
   }
 
   // Limpiar entradas expiradas
@@ -69,7 +71,7 @@ class BargainCache {
     }
 
     if (cleaned > 0) {
-      console.log(`🧹 Cache cleanup: ${cleaned} expired entries removed`);
+      logger.info(`🧹 Cache cleanup: ${cleaned} expired entries removed`);
     }
   }
 
@@ -85,7 +87,7 @@ class BargainCache {
 
     keysToDelete.forEach(key => {
       this.cache.delete(key);
-      console.log(`🗑️ Cache invalidated: ${key}`);
+      logger.info(`🗑️ Cache invalidated: ${key}`);
     });
 
     return keysToDelete.length;
@@ -111,12 +113,12 @@ class BargainCache {
   clear() {
     const size = this.cache.size;
     this.cache.clear();
-    console.log(`🧽 Cache cleared: ${size} entries removed`);
+    logger.info(`🧽 Cache cleared: ${size} entries removed`);
   }
 
   // Precalentar caché con consultas comunes
   async warmup(bargainAnalyzer) {
-    console.log('🔥 Warming up cache with common queries...');
+    logger.info('🔥 Warming up cache with common queries...');
 
     const commonQueries = [
       { limit: 20 }, // Query por defecto
@@ -136,11 +138,11 @@ class BargainCache {
           }
         }
       } catch (error) {
-        console.log(`⚠️ Warmup failed for query:`, query, error.message);
+        logger.info(`⚠️ Warmup failed for query:`, query, error.message);
       }
     }
 
-    console.log('✅ Cache warmup completed');
+    logger.info('✅ Cache warmup completed');
   }
 }
 

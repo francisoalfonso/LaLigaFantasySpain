@@ -83,6 +83,54 @@
         "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/3f183d12-3745-434a-be75-0694dcc230a9_watermarked.mp4",
         "service": "veo3"
       }
+    },
+    {
+      "id": "video_1759235781729",
+      "filename": "video_1759235781729_1759235781729.mp4",
+      "originalUrl": "https://tempfile.aiquickdraw.com/s/361b3957-e6f5-4455-abea-c1f0be089a9a_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759235781729_1759235781729.mp4",
+      "publicUrl": "http://localhost:3000/api/videos/video_1759235781729_1759235781729.mp4",
+      "downloadedAt": "2025-09-30T12:36:27.510Z",
+      "size": 1468689,
+      "platform": "local",
+      "metadata": {
+        "taskId": "63186c910c2a9a0c7102f18d0c2f90c6",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/361b3957-e6f5-4455-abea-c1f0be089a9a_watermarked.mp4",
+        "service": "veo3"
+      }
+    },
+    {
+      "id": "video_1759238474736",
+      "filename": "video_1759238474736_1759238474736.mp4",
+      "originalUrl": "https://tempfile.aiquickdraw.com/s/c6ed198c-e8ca-499d-bbc4-b290a20cb285_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759238474736_1759238474736.mp4",
+      "publicUrl": "http://localhost:3000/api/videos/video_1759238474736_1759238474736.mp4",
+      "downloadedAt": "2025-09-30T13:21:20.421Z",
+      "size": 1383558,
+      "platform": "local",
+      "metadata": {
+        "taskId": "40f24d9609f4a0fd088f3fb2430e7da5",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/c6ed198c-e8ca-499d-bbc4-b290a20cb285_watermarked.mp4",
+        "service": "veo3"
+      }
+    },
+    {
+      "id": "video_1759240045636",
+      "filename": "video_1759240045636_1759240045636.mp4",
+      "originalUrl": "https://tempfile.aiquickdraw.com/s/4f5ccabd-6fb6-435d-8475-bb7e4f9f9c1a_watermarked.mp4",
+      "bunnyId": "5d321455-0d69-433f-a96e-a950b8dd68f5",
+      "bunnyUrl": "https://vz-139dde2a-4e6.b-cdn.net/5d321455-0d69-433f-a96e-a950b8dd68f5/play_720p.mp4",
+      "embedUrl": "https://vz-139dde2a-4e6.b-cdn.net/5d321455-0d69-433f-a96e-a950b8dd68f5/iframe",
+      "thumbnailUrl": "https://vz-139dde2a-4e6.b-cdn.net/5d321455-0d69-433f-a96e-a950b8dd68f5/preview.webp",
+      "publicUrl": "https://vz-139dde2a-4e6.b-cdn.net/5d321455-0d69-433f-a96e-a950b8dd68f5/play_720p.mp4",
+      "downloadedAt": "2025-09-30T13:47:31.450Z",
+      "size": 0,
+      "platform": "bunny",
+      "metadata": {
+        "taskId": "4219a7bd9658ec3338111eed50d8bc72",
+        "veo3OriginalUrl": "https://tempfile.aiquickdraw.com/s/4f5ccabd-6fb6-435d-8475-bb7e4f9f9c1a_watermarked.mp4",
+        "service": "veo3"
+      }
     }
   ]
 }

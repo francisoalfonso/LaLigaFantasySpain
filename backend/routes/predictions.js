@@ -1,5 +1,6 @@
 // Rutas para Predicciones de Valor Fantasy La Liga
 const express = require('express');
+const logger = require('../utils/logger');
 const PredictorValor = require('../services/predictorValor');
 const FixtureAnalyzer = require('../services/fixtureAnalyzer');
 const BargainAnalyzer = require('../services/bargainAnalyzer');
@@ -23,7 +24,7 @@ router.get('/top-players', async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const maxPrice = parseFloat(req.query.maxPrice) || 10.0;
 
-    console.log(`🔮 Obteniendo predicciones para top ${limit} jugadores...`);
+    logger.info(`🔮 Obteniendo predicciones para top ${limit} jugadores...`);
 
     // Obtener chollos actuales como base
     const bargains = await bargainAnalyzer.identifyBargains(limit * 2, { maxPrice });
@@ -68,7 +69,7 @@ router.get('/top-players', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo predicciones:', error.message);
+    logger.error('❌ Error obteniendo predicciones:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -94,7 +95,7 @@ router.get('/player/:playerId', async (req, res) => {
     const cacheKey = `prediction_${playerId}`;
     const cached = predictionCache.get(cacheKey);
     if (!forceRefresh && cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      console.log(`⚡ Predicción en cache para jugador ${playerId}`);
+      logger.info(`⚡ Predicción en cache para jugador ${playerId}`);
       return res.json({
         success: true,
         message: 'Predicción obtenida desde cache',
@@ -104,10 +105,10 @@ router.get('/player/:playerId', async (req, res) => {
     }
 
     if (forceRefresh) {
-      console.log(`🔄 FORCE REFRESH: Regenerando predicción para jugador ${playerId}`);
+      logger.info(`🔄 FORCE REFRESH: Regenerando predicción para jugador ${playerId}`);
     }
 
-    console.log(`🎯 Generando nueva predicción para jugador ${playerId}...`);
+    logger.info(`🎯 Generando nueva predicción para jugador ${playerId}...`);
 
     // Buscar jugador en chollos primero (menos jugadores para acelerar)
     let player = null;
@@ -116,7 +117,7 @@ router.get('/player/:playerId', async (req, res) => {
     player = bargains.data.find(p => p.id === playerId);
 
     if (!player) {
-      console.log(`🔍 Jugador ${playerId} no encontrado en chollos, buscando en API-Sports...`);
+      logger.info(`🔍 Jugador ${playerId} no encontrado en chollos, buscando en API-Sports...`);
 
       // Obtener datos del jugador desde API-Sports
       const playerResult = await apiFootball.getPlayerStats(playerId);
@@ -148,7 +149,7 @@ router.get('/player/:playerId', async (req, res) => {
         }
       };
 
-      console.log(`✅ Jugador obtenido desde API-Sports:`, player.name);
+      logger.info(`✅ Jugador obtenido desde API-Sports:`, player.name);
     }
 
     // Obtener próximo fixture del equipo del jugador
@@ -158,10 +159,10 @@ router.get('/player/:playerId', async (req, res) => {
         const fixtures = await fixtureAnalyzer.getNextFixtures(player.team.id, 1);
         if (fixtures.length > 0) {
           nextFixture = fixtures[0];
-          console.log(`🗓️ Próximo rival obtenido: ${nextFixture.teams?.away?.name || nextFixture.teams?.home?.name}`);
+          logger.info(`🗓️ Próximo rival obtenido: ${nextFixture.teams?.away?.name || nextFixture.teams?.home?.name}`);
         }
       } catch (error) {
-        console.log(`⚠️ No se pudo obtener próximo fixture para equipo ${player.team.id}:`, error.message);
+        logger.info(`⚠️ No se pudo obtener próximo fixture para equipo ${player.team.id}:`, error.message);
       }
     }
 
@@ -193,7 +194,7 @@ router.get('/player/:playerId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo predicción específica:', error.message);
+    logger.error('❌ Error obteniendo predicción específica:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -216,7 +217,7 @@ router.get('/by-position/:position', async (req, res) => {
       });
     }
 
-    console.log(`🎯 Obteniendo predicciones para posición ${position}...`);
+    logger.info(`🎯 Obteniendo predicciones para posición ${position}...`);
 
     // Obtener jugadores de la posición específica
     const bargains = await bargainAnalyzer.identifyBargains(100, { position });
@@ -248,7 +249,7 @@ router.get('/by-position/:position', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo predicciones por posición:', error.message);
+    logger.error('❌ Error obteniendo predicciones por posición:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -263,7 +264,7 @@ router.get('/trading-alerts', async (req, res) => {
     const minConfidence = parseInt(req.query.minConfidence) || 70;
     const minChange = parseFloat(req.query.minChange) || 0.3;
 
-    console.log(`🚨 Generando alertas de trading (confianza ≥${minConfidence}%, cambio ≥${minChange}M)...`);
+    logger.info(`🚨 Generando alertas de trading (confianza ≥${minConfidence}%, cambio ≥${minChange}M)...`);
 
     // Obtener predicciones para jugadores relevantes
     const bargains = await bargainAnalyzer.identifyBargains(50);
@@ -314,7 +315,7 @@ router.get('/trading-alerts', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generando alertas de trading:', error.message);
+    logger.error('❌ Error generando alertas de trading:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -346,7 +347,7 @@ router.get('/stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo estadísticas:', error.message);
+    logger.error('❌ Error obteniendo estadísticas:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -367,7 +368,7 @@ router.post('/cache/clear', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error limpiando cache:', error.message);
+    logger.error('❌ Error limpiando cache:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -379,13 +380,13 @@ router.post('/cache/clear', async (req, res) => {
 // Test específico para historial vs rival
 router.get('/test/historical', async (req, res) => {
   try {
-    console.log('🧪 Ejecutando test del análisis histórico vs rival...');
+    logger.info('🧪 Ejecutando test del análisis histórico vs rival...');
 
     // Parámetros de test
     const playerId = parseInt(req.query.playerId) || 521; // Lewandowski por defecto
     const opponentId = parseInt(req.query.opponentId) || 541; // Real Madrid por defecto
 
-    console.log(`🔍 Testeando historial del jugador ${playerId} vs equipo ${opponentId}...`);
+    logger.info(`🔍 Testeando historial del jugador ${playerId} vs equipo ${opponentId}...`);
 
     // Test del nuevo método getPlayerVsTeamHistory
     const historyResult = await apiFootball.getPlayerVsTeamHistory(playerId, opponentId);
@@ -443,7 +444,7 @@ router.get('/test/historical', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en test histórico:', error.message);
+    logger.error('❌ Error en test histórico:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -456,7 +457,7 @@ router.get('/test/historical', async (req, res) => {
 // Test endpoint para verificar funcionamiento
 router.get('/test', async (req, res) => {
   try {
-    console.log('🧪 Ejecutando test del PredictorValor...');
+    logger.info('🧪 Ejecutando test del PredictorValor...');
 
     // Test con un jugador de ejemplo
     const testPlayer = {
@@ -496,7 +497,7 @@ router.get('/test', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en test PredictorValor:', error.message);
+    logger.error('❌ Error en test PredictorValor:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,

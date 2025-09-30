@@ -4,6 +4,7 @@
 // Express routes for database management, monitoring, and admin operations
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const {
   testConnection,
@@ -24,7 +25,7 @@ const {
  */
 router.get('/test', async (req, res) => {
   try {
-    console.log('🔍 Testing database connection...');
+    logger.info('🔍 Testing database connection...');
 
     const isConnected = await testConnection();
 
@@ -48,7 +49,7 @@ router.get('/test', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('❌ Database test error:', error);
+    logger.error('❌ Database test error:', error);
     res.status(500).json({
       success: false,
       message: 'Database test failed',
@@ -64,7 +65,7 @@ router.get('/test', async (req, res) => {
  */
 router.get('/stats', async (req, res) => {
   try {
-    console.log('📊 Fetching database statistics...');
+    logger.info('📊 Fetching database statistics...');
 
     const stats = await getDatabaseStats();
 
@@ -86,7 +87,7 @@ router.get('/stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Database stats error:', error);
+    logger.error('❌ Database stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch database statistics',
@@ -119,7 +120,7 @@ router.get('/config', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Database config error:', error);
+    logger.error('❌ Database config error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch database configuration',
@@ -139,7 +140,7 @@ router.get('/config', async (req, res) => {
  */
 router.get('/teams', async (req, res) => {
   try {
-    console.log('🏟️  Fetching teams from database...');
+    logger.info('🏟️  Fetching teams from database...');
 
     const teams = await getTeams();
 
@@ -151,7 +152,7 @@ router.get('/teams', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Teams fetch error:', error);
+    logger.error('❌ Teams fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch teams',
@@ -167,7 +168,7 @@ router.get('/teams', async (req, res) => {
  */
 router.get('/players', async (req, res) => {
   try {
-    console.log('👥 Fetching players from database...');
+    logger.info('👥 Fetching players from database...');
 
     const filters = {
       teamId: req.query.team_id ? parseInt(req.query.team_id) : null,
@@ -193,7 +194,7 @@ router.get('/players', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Players fetch error:', error);
+    logger.error('❌ Players fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch players',
@@ -209,7 +210,7 @@ router.get('/players', async (req, res) => {
  */
 router.get('/fantasy-points', async (req, res) => {
   try {
-    console.log('⚽ Fetching fantasy points from database...');
+    logger.info('⚽ Fetching fantasy points from database...');
 
     const gameweek = req.query.gameweek ? parseInt(req.query.gameweek) : null;
     const points = await getFantasyPoints(gameweek);
@@ -223,7 +224,7 @@ router.get('/fantasy-points', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Fantasy points fetch error:', error);
+    logger.error('❌ Fantasy points fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch fantasy points',
@@ -239,7 +240,7 @@ router.get('/fantasy-points', async (req, res) => {
  */
 router.get('/top-performers', async (req, res) => {
   try {
-    console.log('🏆 Fetching top performers from database...');
+    logger.info('🏆 Fetching top performers from database...');
 
     const position = req.query.position || null;
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
@@ -271,7 +272,7 @@ router.get('/top-performers', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Top performers fetch error:', error);
+    logger.error('❌ Top performers fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch top performers',
@@ -287,7 +288,7 @@ router.get('/top-performers', async (req, res) => {
  */
 router.get('/current-gameweek', async (req, res) => {
   try {
-    console.log('📅 Fetching current gameweek performance...');
+    logger.info('📅 Fetching current gameweek performance...');
 
     const { supabaseClient } = require('../config/supabase');
 
@@ -309,7 +310,7 @@ router.get('/current-gameweek', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Current gameweek fetch error:', error);
+    logger.error('❌ Current gameweek fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch current gameweek performance',
@@ -329,7 +330,7 @@ router.get('/current-gameweek', async (req, res) => {
  */
 router.get('/content-plans', async (req, res) => {
   try {
-    console.log('📝 Fetching content plans from database...');
+    logger.info('📝 Fetching content plans from database...');
 
     const limit = req.query.limit ? parseInt(req.query.limit) : 20;
     const status = req.query.status || null;
@@ -362,7 +363,7 @@ router.get('/content-plans', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Content plans fetch error:', error);
+    logger.error('❌ Content plans fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch content plans',
@@ -378,7 +379,7 @@ router.get('/content-plans', async (req, res) => {
  */
 router.get('/social-posts', async (req, res) => {
   try {
-    console.log('📱 Fetching social posts from database...');
+    logger.info('📱 Fetching social posts from database...');
 
     const limit = req.query.limit ? parseInt(req.query.limit) : 20;
     const platform = req.query.platform || null;
@@ -418,7 +419,7 @@ router.get('/social-posts', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Social posts fetch error:', error);
+    logger.error('❌ Social posts fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch social posts',
@@ -434,7 +435,7 @@ router.get('/social-posts', async (req, res) => {
  */
 router.get('/content-performance', async (req, res) => {
   try {
-    console.log('📊 Fetching content performance metrics...');
+    logger.info('📊 Fetching content performance metrics...');
 
     const { supabaseClient } = require('../config/supabase');
 
@@ -455,7 +456,7 @@ router.get('/content-performance', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Content performance fetch error:', error);
+    logger.error('❌ Content performance fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch content performance',
@@ -475,7 +476,7 @@ router.get('/content-performance', async (req, res) => {
  */
 router.get('/workflows', async (req, res) => {
   try {
-    console.log('🔄 Fetching workflow executions from database...');
+    logger.info('🔄 Fetching workflow executions from database...');
 
     const limit = req.query.limit ? parseInt(req.query.limit) : 20;
     const status = req.query.status || null;
@@ -508,7 +509,7 @@ router.get('/workflows', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Workflows fetch error:', error);
+    logger.error('❌ Workflows fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch workflows',
@@ -524,7 +525,7 @@ router.get('/workflows', async (req, res) => {
  */
 router.get('/api-stats', async (req, res) => {
   try {
-    console.log('📡 Fetching API request statistics...');
+    logger.info('📡 Fetching API request statistics...');
 
     const provider = req.query.provider || null;
     const hours = req.query.hours ? parseInt(req.query.hours) : 24;
@@ -571,7 +572,7 @@ router.get('/api-stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ API stats fetch error:', error);
+    logger.error('❌ API stats fetch error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch API statistics',

@@ -1,3 +1,5 @@
+const logger = require('../../utils/logger');
+
 /**
  * Constructor de prompts VEO3 para Stats Cards
  * Genera videos de gráficos y estadísticas impactantes estilo NBA/Bleacher Report
@@ -80,8 +82,8 @@ class StatsCardPromptBuilder {
             visualComplexity: this._calculateComplexity(emphasizeStats.length, animationIntensity)
         };
 
-        console.log(`[StatsCardPromptBuilder] Stats card prompt generado para ${playerData.name}`);
-        console.log(`[StatsCardPromptBuilder] Estilo: ${style}, Duración: ${duration}s, Stats: ${emphasizeStats.length}`);
+        logger.info(`[StatsCardPromptBuilder] Stats card prompt generado para ${playerData.name}`);
+        logger.info(`[StatsCardPromptBuilder] Estilo: ${style}, Duración: ${duration}s, Stats: ${emphasizeStats.length}`);
 
         return {
             prompt,

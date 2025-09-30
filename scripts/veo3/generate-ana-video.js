@@ -7,6 +7,7 @@
 
 require('dotenv').config();
 const fs = require('fs');
+const logger = require('../../../../../../../utils/logger');
 const path = require('path');
 const VEO3Client = require('../../backend/services/veo3/veo3Client');
 const PromptBuilder = require('../../backend/services/veo3/promptBuilder');
@@ -26,7 +27,7 @@ class AnaVideoGenerator {
         [this.outputDir, this.logsDir].forEach(dir => {
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });
-                console.log(`[AnaVideoGenerator] Directorio creado: ${dir}`);
+                logger.info(`[AnaVideoGenerator] Directorio creado: ${dir}`);
             }
         });
     }
@@ -39,10 +40,10 @@ class AnaVideoGenerator {
      */
     async generateCholloVideo(playerName, price, options = {}) {
         try {
-            console.log(`[AnaVideoGenerator] Generando video chollo: ${playerName} - ${price}€`);
+            logger.info(`[AnaVideoGenerator] Generando video chollo: ${playerName} - ${price}€`);
 
             const prompt = this.promptBuilder.buildCholloPrompt(playerName, price, options);
-            console.log(`[AnaVideoGenerator] Prompt generado: ${prompt.substring(0, 100)}...`);
+            logger.info(`[AnaVideoGenerator] Prompt generado: ${prompt.substring(0, 100)}...`);
 
             const video = await this.veo3Client.generateCompleteVideo(prompt, options.veo3Options);
 
@@ -66,7 +67,7 @@ class AnaVideoGenerator {
             return result;
 
         } catch (error) {
-            console.error(`[AnaVideoGenerator] Error generando chollo ${playerName}:`, error.message);
+            logger.error(`[AnaVideoGenerator] Error generando chollo ${playerName}:`, error.message);
             throw error;
         }
     }
@@ -80,7 +81,7 @@ class AnaVideoGenerator {
      */
     async generateAnalysisVideo(playerName, price, stats = {}, options = {}) {
         try {
-            console.log(`[AnaVideoGenerator] Generando video análisis: ${playerName}`);
+            logger.info(`[AnaVideoGenerator] Generando video análisis: ${playerName}`);
 
             const prompt = this.promptBuilder.buildAnalysisPrompt(playerName, price, stats, options);
             const video = await this.veo3Client.generateCompleteVideo(prompt, options.veo3Options);
@@ -106,7 +107,7 @@ class AnaVideoGenerator {
             return result;
 
         } catch (error) {
-            console.error(`[AnaVideoGenerator] Error generando análisis ${playerName}:`, error.message);
+            logger.error(`[AnaVideoGenerator] Error generando análisis ${playerName}:`, error.message);
             throw error;
         }
     }
@@ -119,7 +120,7 @@ class AnaVideoGenerator {
      */
     async generatePredictionVideo(gameweek, prediction, options = {}) {
         try {
-            console.log(`[AnaVideoGenerator] Generando video predicción jornada ${gameweek}`);
+            logger.info(`[AnaVideoGenerator] Generando video predicción jornada ${gameweek}`);
 
             const prompt = this.promptBuilder.buildPredictionPrompt(gameweek, prediction, options);
             const video = await this.veo3Client.generateCompleteVideo(prompt, options.veo3Options);
@@ -144,7 +145,7 @@ class AnaVideoGenerator {
             return result;
 
         } catch (error) {
-            console.error(`[AnaVideoGenerator] Error generando predicción J${gameweek}:`, error.message);
+            logger.error(`[AnaVideoGenerator] Error generando predicción J${gameweek}:`, error.message);
             throw error;
         }
     }
@@ -156,7 +157,7 @@ class AnaVideoGenerator {
      */
     async generateCustomVideo(prompt, options = {}) {
         try {
-            console.log(`[AnaVideoGenerator] Generando video personalizado`);
+            logger.info(`[AnaVideoGenerator] Generando video personalizado`);
 
             // Validar prompt
             const validation = this.promptBuilder.validatePrompt(prompt);
@@ -165,7 +166,7 @@ class AnaVideoGenerator {
             }
 
             if (validation.warnings.length > 0) {
-                console.warn(`[AnaVideoGenerator] Warnings: ${validation.warnings.join(', ')}`);
+                logger.warn(`[AnaVideoGenerator] Warnings: ${validation.warnings.join(', ')}`);
             }
 
             const video = await this.veo3Client.generateCompleteVideo(prompt, options.veo3Options);
@@ -188,7 +189,7 @@ class AnaVideoGenerator {
             return result;
 
         } catch (error) {
-            console.error(`[AnaVideoGenerator] Error generando video personalizado:`, error.message);
+            logger.error(`[AnaVideoGenerator] Error generando video personalizado:`, error.message);
             throw error;
         }
     }
@@ -215,14 +216,14 @@ class AnaVideoGenerator {
 
             return new Promise((resolve, reject) => {
                 writer.on('finish', () => {
-                    console.log(`[AnaVideoGenerator] Video descargado: ${localPath}`);
+                    logger.info(`[AnaVideoGenerator] Video descargado: ${localPath}`);
                     resolve(localPath);
                 });
                 writer.on('error', reject);
             });
 
         } catch (error) {
-            console.error(`[AnaVideoGenerator] Error descargando video:`, error.message);
+            logger.error(`[AnaVideoGenerator] Error descargando video:`, error.message);
             throw error;
         }
     }
@@ -244,7 +245,7 @@ class AnaVideoGenerator {
         };
 
         fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\n');
-        console.log(`[AnaVideoGenerator] Log actualizado: ${logPath}`);
+        logger.info(`[AnaVideoGenerator] Log actualizado: ${logPath}`);
     }
 
     /**
@@ -252,7 +253,7 @@ class AnaVideoGenerator {
      */
     async runTest() {
         try {
-            console.log('[AnaVideoGenerator] 🧪 Ejecutando test básico...');
+            logger.info('[AnaVideoGenerator] 🧪 Ejecutando test básico...');
 
             // Test de conectividad
             const connected = await this.veo3Client.testConnection();
@@ -265,15 +266,15 @@ class AnaVideoGenerator {
                 dialogue: "¡Hola Misters! Este es un test de Fantasy La Liga con Ana Real."
             });
 
-            console.log('[AnaVideoGenerator] Generando video de test...');
+            logger.info('[AnaVideoGenerator] Generando video de test...');
             const video = await this.veo3Client.generateCompleteVideo(testPrompt);
 
             const filename = `ana-test-${Date.now()}.mp4`;
             const videoPath = await this.downloadVideo(video.url, filename);
 
-            console.log('[AnaVideoGenerator] ✅ Test completado exitosamente');
-            console.log(`[AnaVideoGenerator] Video test guardado: ${videoPath}`);
-            console.log(`[AnaVideoGenerator] Duración: ${video.duration}s, Coste: $${video.cost}`);
+            logger.info('[AnaVideoGenerator] ✅ Test completado exitosamente');
+            logger.info(`[AnaVideoGenerator] Video test guardado: ${videoPath}`);
+            logger.info(`[AnaVideoGenerator] Duración: ${video.duration}s, Coste: $${video.cost}`);
 
             return {
                 success: true,
@@ -285,7 +286,7 @@ class AnaVideoGenerator {
             };
 
         } catch (error) {
-            console.error('[AnaVideoGenerator] ❌ Test falló:', error.message);
+            logger.error('[AnaVideoGenerator] ❌ Test falló:', error.message);
             throw error;
         }
     }
@@ -341,19 +342,19 @@ async function main() {
             await generator.generatePredictionVideo(gameweek, prediction);
         } else {
             // Modo interactivo por defecto
-            console.log('🎬 Ana Video Generator - Fantasy La Liga');
-            console.log('Uso:');
-            console.log('  --test                              # Test básico');
-            console.log('  --chollo --player "Nombre" --price 8.5');
-            console.log('  --analysis --player "Nombre" --price 8.5');
-            console.log('  --prediction --gameweek 5 --prediction "Texto"');
+            logger.info('🎬 Ana Video Generator - Fantasy La Liga');
+            logger.info('Uso:');
+            logger.info('  --test                              # Test básico');
+            logger.info('  --chollo --player "Nombre" --price 8.5');
+            logger.info('  --analysis --player "Nombre" --price 8.5');
+            logger.info('  --prediction --gameweek 5 --prediction "Texto"');
 
             // Test por defecto
             await generator.runTest();
         }
 
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        logger.error('❌ Error:', error.message);
         process.exit(1);
     }
 }

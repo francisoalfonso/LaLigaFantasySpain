@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const path = require('path');
 const fs = require('fs').promises;
 const videoManager = require('../services/videoManager');
@@ -65,7 +66,7 @@ router.get('/:filename', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('❌ Error sirviendo video:', error.message);
+        logger.error('❌ Error sirviendo video:', error.message);
         res.status(500).json({
             success: false,
             error: 'Error interno del servidor'
@@ -91,7 +92,7 @@ router.get('/', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error listando videos:', error.message);
+        logger.error('❌ Error listando videos:', error.message);
         res.status(500).json({
             success: false,
             error: 'Error obteniendo lista de videos'
@@ -121,7 +122,7 @@ router.get('/info/:videoId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error obteniendo info de video:', error.message);
+        logger.error('❌ Error obteniendo info de video:', error.message);
         res.status(500).json({
             success: false,
             error: 'Error obteniendo información del video'
@@ -144,7 +145,7 @@ router.post('/concatenate', async (req, res) => {
             });
         }
 
-        console.log('🔗 Concatenando videos:', videoIds);
+        logger.info('🔗 Concatenando videos:', videoIds);
 
         const result = await videoManager.concatenateVideos(videoIds, metadata);
 
@@ -155,7 +156,7 @@ router.post('/concatenate', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error concatenando videos:', error.message);
+        logger.error('❌ Error concatenando videos:', error.message);
         res.status(500).json({
             success: false,
             error: `Error concatenando videos: ${error.message}`
@@ -180,7 +181,7 @@ router.post('/cleanup', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error en limpieza:', error.message);
+        logger.error('❌ Error en limpieza:', error.message);
         res.status(500).json({
             success: false,
             error: 'Error en limpieza de videos'
@@ -215,7 +216,7 @@ router.get('/test', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error en test de videos:', error.message);
+        logger.error('❌ Error en test de videos:', error.message);
         res.status(500).json({
             success: false,
             error: 'Error en sistema de videos'

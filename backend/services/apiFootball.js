@@ -1,6 +1,7 @@
 // Cliente para API-Football (RapidAPI)
 // ⚠️ CONFIGURADO PARA TEMPORADA 2025-26 ⚠️
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 class ApiFootballClient {
   constructor() {
@@ -33,7 +34,7 @@ class ApiFootballClient {
 
     if (timeSinceLastRequest < this.rateLimitDelay) {
       const waitTime = this.rateLimitDelay - timeSinceLastRequest;
-      console.log(`⏳ Rate limiting: esperando ${waitTime}ms`);
+      logger.debug('Rate limiting delay', { waitTime: `${waitTime}ms` });
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
@@ -53,7 +54,7 @@ class ApiFootballClient {
         requestParams.timezone = 'Europe/Madrid';
       }
 
-      console.log(`🔄 API-Football: ${endpoint}`, requestParams);
+      logger.info(`🔄 API-Football: ${endpoint}`, requestParams);
 
       const response = await axios.get(requestUrl, {
         headers: this.headers,
@@ -61,7 +62,7 @@ class ApiFootballClient {
         timeout: 10000
       });
 
-      console.log(`✅ API-Football: ${response.data.results} resultados`);
+      logger.info(`✅ API-Football: ${response.data.results} resultados`);
 
       return {
         success: true,
@@ -71,7 +72,7 @@ class ApiFootballClient {
       };
 
     } catch (error) {
-      console.error(`❌ Error API-Football ${endpoint}:`, error.message);
+      logger.error(`❌ Error API-Football ${endpoint}:`, error.message);
 
       return {
         success: false,
@@ -84,7 +85,7 @@ class ApiFootballClient {
 
   // Test de conexión
   async testConnection() {
-    console.log('🔄 Testeando conexión API-Football...');
+    logger.info('🔄 Testeando conexión API-Football...');
 
     try {
       const result = await this.makeRequest('/status');
@@ -227,14 +228,14 @@ class ApiFootballClient {
   // Obtener TODOS los jugadores de La Liga (todas las páginas)
   async getAllLaLigaPlayers(team_id = null) {
     try {
-      console.log('📋 Iniciando carga completa de jugadores de La Liga...');
+      logger.info('📋 Iniciando carga completa de jugadores de La Liga...');
 
       const allPlayers = [];
       let currentPage = 1;
       let hasMorePages = true;
 
       while (hasMorePages) {
-        console.log(`📄 Obteniendo página ${currentPage}...`);
+        logger.info(`📄 Obteniendo página ${currentPage}...`);
 
         const pageResult = await this.getLaLigaPlayers(currentPage, team_id);
 
@@ -256,7 +257,7 @@ class ApiFootballClient {
         }
       }
 
-      console.log(`✅ Carga completa: ${allPlayers.length} jugadores obtenidos`);
+      logger.info(`✅ Carga completa: ${allPlayers.length} jugadores obtenidos`);
 
       return {
         success: true,
@@ -265,7 +266,7 @@ class ApiFootballClient {
       };
 
     } catch (error) {
-      console.error('❌ Error obteniendo todos los jugadores:', error.message);
+      logger.error('❌ Error obteniendo todos los jugadores:', error.message);
       return {
         success: false,
         error: error.message
@@ -406,7 +407,7 @@ class ApiFootballClient {
   // Obtener información completa de un jugador (datos + estadísticas + lesiones)
   async getPlayerDetails(player_id, season = null) {
     try {
-      console.log(`🔍 Obteniendo detalles completos del jugador ${player_id}...`);
+      logger.info(`🔍 Obteniendo detalles completos del jugador ${player_id}...`);
 
       // Obtener datos básicos y estadísticas
       const statsResult = await this.getPlayerStats(player_id, season);
@@ -430,7 +431,7 @@ class ApiFootballClient {
       };
 
     } catch (error) {
-      console.error(`❌ Error obteniendo detalles del jugador ${player_id}:`, error.message);
+      logger.error(`❌ Error obteniendo detalles del jugador ${player_id}:`, error.message);
       return {
         success: false,
         message: error.message
@@ -462,7 +463,7 @@ class ApiFootballClient {
       return { success: true, data: [] }; // Sin lesiones
 
     } catch (error) {
-      console.error(`Error obteniendo lesiones del jugador ${player_id}:`, error.message);
+      logger.error(`Error obteniendo lesiones del jugador ${player_id}:`, error.message);
       return { success: false, data: [] };
     }
   }
@@ -496,7 +497,7 @@ class ApiFootballClient {
       return { success: true, data: [] };
 
     } catch (error) {
-      console.error(`Error obteniendo partidos recientes del jugador ${player_id}:`, error.message);
+      logger.error(`Error obteniendo partidos recientes del jugador ${player_id}:`, error.message);
       return { success: false, data: [] };
     }
   }
@@ -668,7 +669,7 @@ class ApiFootballClient {
             lineups: lineupsResult.success ? lineupsResult.data : null
           });
         } catch (error) {
-          console.log(`Error obteniendo alineaciones para fixture ${fixture.fixture.id}: ${error.message}`);
+          logger.info(`Error obteniendo alineaciones para fixture ${fixture.fixture.id}: ${error.message}`);
           fixturesWithLineups.push({
             fixture: {
               id: fixture.fixture.id,
@@ -725,7 +726,7 @@ class ApiFootballClient {
               coachDetails = coachResult.data;
             }
           } catch (error) {
-            console.log(`⚠️ No se pudo obtener foto del entrenador ${team.coach.name}:`, error.message);
+            logger.info(`⚠️ No se pudo obtener foto del entrenador ${team.coach.name}:`, error.message);
             coachDetails = team.coach; // Fallback a datos básicos
           }
         }
@@ -896,7 +897,7 @@ class ApiFootballClient {
   // Obtener historial de un jugador contra un equipo específico
   async getPlayerVsTeamHistory(playerId, opponentTeamId, seasons = [this.LEAGUES.CURRENT_SEASON], maxFixtures = 10) {
     try {
-      console.log(`🔍 Obteniendo historial del jugador ${playerId} vs equipo ${opponentTeamId}...`);
+      logger.info(`🔍 Obteniendo historial del jugador ${playerId} vs equipo ${opponentTeamId}...`);
 
       const historyData = [];
 
@@ -907,13 +908,13 @@ class ApiFootballClient {
           const playerStatsResult = await this.getPlayerStats(playerId, season);
 
           if (!playerStatsResult.success) {
-            console.log(`ℹ️ Sin estadísticas para jugador ${playerId} en temporada ${season}`);
+            logger.info(`ℹ️ Sin estadísticas para jugador ${playerId} en temporada ${season}`);
             continue;
           }
 
           const playerTeamId = playerStatsResult.data.team?.id;
           if (!playerTeamId) {
-            console.log(`ℹ️ No se pudo determinar equipo del jugador en temporada ${season}`);
+            logger.info(`ℹ️ No se pudo determinar equipo del jugador en temporada ${season}`);
             continue;
           }
 
@@ -923,7 +924,7 @@ class ApiFootballClient {
           });
 
           if (!teamFixturesResult.success) {
-            console.log(`ℹ️ Sin fixtures para equipo ${playerTeamId} en temporada ${season}`);
+            logger.info(`ℹ️ Sin fixtures para equipo ${playerTeamId} en temporada ${season}`);
             continue;
           }
 
@@ -941,7 +942,7 @@ class ApiFootballClient {
             return isVsOpponent && isFinished;
           });
 
-          console.log(`📊 Encontrados ${matchesVsOpponent.length} partidos vs rival en temporada ${season}`);
+          logger.info(`📊 Encontrados ${matchesVsOpponent.length} partidos vs rival en temporada ${season}`);
 
           // Obtener estadísticas del jugador en cada partido específico
           for (const match of matchesVsOpponent.slice(-maxFixtures)) {
@@ -974,19 +975,19 @@ class ApiFootballClient {
               });
 
             } catch (error) {
-              console.log(`⚠️ Error procesando partido ${match.fixture.id}: ${error.message}`);
+              logger.info(`⚠️ Error procesando partido ${match.fixture.id}: ${error.message}`);
             }
           }
 
         } catch (error) {
-          console.error(`Error procesando temporada ${season}:`, error.message);
+          logger.error(`Error procesando temporada ${season}:`, error.message);
         }
       }
 
       // Ordenar por fecha descendente (más recientes primero)
       historyData.sort((a, b) => new Date(b.fixture.date) - new Date(a.fixture.date));
 
-      console.log(`✅ Historial obtenido: ${historyData.length} partidos encontrados`);
+      logger.info(`✅ Historial obtenido: ${historyData.length} partidos encontrados`);
 
       return {
         success: true,
@@ -998,7 +999,7 @@ class ApiFootballClient {
       };
 
     } catch (error) {
-      console.error(`❌ Error obteniendo historial jugador vs equipo:`, error.message);
+      logger.error(`❌ Error obteniendo historial jugador vs equipo:`, error.message);
       return {
         success: false,
         error: error.message,
@@ -1050,7 +1051,7 @@ class ApiFootballClient {
       }
 
       // Fallback: retornar datos básicos estimados
-      console.log(`ℹ️ Stats específicas no disponibles para partido ${fixtureId}, usando estimación`);
+      logger.info(`ℹ️ Stats específicas no disponibles para partido ${fixtureId}, usando estimación`);
       return {
         success: true,
         data: {
@@ -1068,7 +1069,7 @@ class ApiFootballClient {
       };
 
     } catch (error) {
-      console.error(`Error obteniendo stats del jugador ${playerId} en partido ${fixtureId}:`, error.message);
+      logger.error(`Error obteniendo stats del jugador ${playerId} en partido ${fixtureId}:`, error.message);
       return {
         success: true,
         data: {

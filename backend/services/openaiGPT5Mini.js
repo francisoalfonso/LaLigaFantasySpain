@@ -10,6 +10,7 @@
  */
 
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 class OpenAIGPT5MiniService {
   constructor() {
@@ -35,9 +36,9 @@ class OpenAIGPT5MiniService {
       presence_penalty: 0.1
     };
 
-    console.log('🤖 OpenAI GPT-5 Mini inicializado para Fantasy La Liga 2025-26');
-    console.log(`📊 Modelo: ${this.model}`);
-    console.log('💰 Precio: $0.25/1M input, $2.00/1M output');
+    logger.info('🤖 OpenAI GPT-5 Mini inicializado para Fantasy La Liga 2025-26');
+    logger.info(`📊 Modelo: ${this.model}`);
+    logger.info('💰 Precio: $0.25/1M input, $2.00/1M output');
   }
 
   // Control de rate limiting
@@ -111,7 +112,7 @@ Tono: Profesional pero cercano, como influencer experto.`;
       };
 
     } catch (error) {
-      console.error('❌ Error en GPT-5 Mini:', error.response?.data || error.message);
+      logger.error('❌ Error en GPT-5 Mini:', error.response?.data || error.message);
       return {
         success: false,
         error: error.message,
@@ -167,7 +168,7 @@ Tono: Experto y confiado, con datos específicos.`;
       };
 
     } catch (error) {
-      console.error('❌ Error en predicción jornada:', error.message);
+      logger.error('❌ Error en predicción jornada:', error.message);
       return {
         success: false,
         error: error.message

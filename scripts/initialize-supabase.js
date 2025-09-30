@@ -6,6 +6,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const logger = require('../../../../../../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
@@ -16,8 +17,8 @@ const SUPABASE_URL = process.env.SUPABASE_PROJECT_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error('❌ Error: Missing Supabase credentials in .env.supabase');
-    console.error('Required: SUPABASE_PROJECT_URL and SUPABASE_SERVICE_ROLE_KEY');
+    logger.error('❌ Error: Missing Supabase credentials in .env.supabase');
+    logger.error('Required: SUPABASE_PROJECT_URL and SUPABASE_SERVICE_ROLE_KEY');
     process.exit(1);
 }
 
@@ -30,23 +31,23 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 });
 
 async function initializeDatabase() {
-    console.log('🚀 Starting Fantasy La Liga Database Initialization');
-    console.log(`📡 Connecting to: ${SUPABASE_URL}`);
+    logger.info('🚀 Starting Fantasy La Liga Database Initialization');
+    logger.info(`📡 Connecting to: ${SUPABASE_URL}`);
 
     try {
         // Read the SQL schema file
         const schemaPath = path.join(__dirname, '..', 'database', 'supabase-schema.sql');
-        console.log(`📖 Reading schema from: ${schemaPath}`);
+        logger.info(`📖 Reading schema from: ${schemaPath}`);
 
         if (!fs.existsSync(schemaPath)) {
             throw new Error(`Schema file not found: ${schemaPath}`);
         }
 
         const sqlSchema = fs.readFileSync(schemaPath, 'utf8');
-        console.log(`✅ Schema file loaded (${sqlSchema.length} characters)`);
+        logger.info(`✅ Schema file loaded (${sqlSchema.length} characters)`);
 
         // Test connection first with a simple query
-        console.log('🔍 Testing database connection...');
+        logger.info('🔍 Testing database connection...');
         try {
             const { data: connectionTest, error: connectionError } = await supabase
                 .from('teams')
@@ -56,26 +57,26 @@ async function initializeDatabase() {
             if (connectionError) {
                 // This might be expected if tables don't exist yet
                 if (connectionError.message.includes('relation "teams" does not exist')) {
-                    console.log('⚠️ Tables not yet created (expected for new database)');
+                    logger.info('⚠️ Tables not yet created (expected for new database)');
                 } else {
-                    console.log('⚠️ Connection test returned:', connectionError.message);
+                    logger.info('⚠️ Connection test returned:', connectionError.message);
                 }
             } else {
-                console.log('✅ Database connection successful - tables already exist');
+                logger.info('✅ Database connection successful - tables already exist');
             }
         } catch (err) {
-            console.log('⚠️ Initial connection test failed (this may be normal for new database)');
+            logger.info('⚠️ Initial connection test failed (this may be normal for new database)');
         }
 
         // Execute the schema using SQL editor approach
-        console.log('⚙️ Executing SQL schema...');
-        console.log('📋 Note: For full schema execution, please run this SQL in Supabase SQL Editor:');
-        console.log('   1. Go to your Supabase dashboard');
-        console.log('   2. Navigate to SQL Editor');
-        console.log('   3. Copy and paste the complete schema');
-        console.log('   4. Execute it there');
-        console.log('');
-        console.log('🔄 Attempting to create core tables using client methods...');
+        logger.info('⚙️ Executing SQL schema...');
+        logger.info('📋 Note: For full schema execution, please run this SQL in Supabase SQL Editor:');
+        logger.info('   1. Go to your Supabase dashboard');
+        logger.info('   2. Navigate to SQL Editor');
+        logger.info('   3. Copy and paste the complete schema');
+        logger.info('   4. Execute it there');
+        logger.info('');
+        logger.info('🔄 Attempting to create core tables using client methods...');
 
         let successCount = 0;
         let errorCount = 0;
@@ -89,46 +90,46 @@ async function initializeDatabase() {
                 .limit(1);
 
             if (testError && testError.message.includes('relation "teams" does not exist')) {
-                console.log('📝 Tables need to be created. Please execute the schema in Supabase SQL Editor.');
+                logger.info('📝 Tables need to be created. Please execute the schema in Supabase SQL Editor.');
 
                 // Show the schema file location
                 const schemaPath = path.join(__dirname, '..', 'database', 'supabase-schema.sql');
-                console.log(`📍 Schema file location: ${schemaPath}`);
+                logger.info(`📍 Schema file location: ${schemaPath}`);
 
                 // Create a simple indication that we need manual setup
-                console.log('');
-                console.log('🔧 Manual Setup Required:');
-                console.log('   1. Open Supabase Dashboard');
-                console.log('   2. Go to SQL Editor');
-                console.log('   3. Run the schema from database/supabase-schema.sql');
-                console.log('   4. Then run this script again to verify');
+                logger.info('');
+                logger.info('🔧 Manual Setup Required:');
+                logger.info('   1. Open Supabase Dashboard');
+                logger.info('   2. Go to SQL Editor');
+                logger.info('   3. Run the schema from database/supabase-schema.sql');
+                logger.info('   4. Then run this script again to verify');
 
                 return false;
             } else if (testError) {
-                console.error('❌ Unexpected error:', testError.message);
+                logger.error('❌ Unexpected error:', testError.message);
                 errorCount++;
             } else {
-                console.log('✅ Tables appear to already exist');
+                logger.info('✅ Tables appear to already exist');
                 successCount++;
             }
         } catch (err) {
-            console.error('❌ Error checking table existence:', err.message);
+            logger.error('❌ Error checking table existence:', err.message);
             errorCount++;
         }
 
-        console.log(`\n📊 Execution Summary:`);
-        console.log(`  ✅ Successful statements: ${successCount}`);
-        console.log(`  ❌ Failed statements: ${errorCount}`);
+        logger.info(`\n📊 Execution Summary:`);
+        logger.info(`  ✅ Successful statements: ${successCount}`);
+        logger.info(`  ❌ Failed statements: ${errorCount}`);
 
         // Verify database structure
-        console.log('\n🔍 Verifying database structure...');
+        logger.info('\n🔍 Verifying database structure...');
         await verifyDatabaseStructure();
 
-        console.log('\n🎉 Database initialization completed!');
+        logger.info('\n🎉 Database initialization completed!');
 
     } catch (error) {
-        console.error('❌ Database initialization failed:', error.message);
-        console.error('Stack trace:', error.stack);
+        logger.error('❌ Database initialization failed:', error.message);
+        logger.error('Stack trace:', error.stack);
         process.exit(1);
     }
 }
@@ -148,25 +149,25 @@ async function verifyDatabaseStructure() {
                 .order('table_name');
 
             if (altError) {
-                console.error('❌ Could not verify tables:', altError.message);
+                logger.error('❌ Could not verify tables:', altError.message);
                 return;
             }
 
-            console.log('📋 Created tables:');
+            logger.info('📋 Created tables:');
             altTables.forEach(table => {
-                console.log(`  - ${table.table_name}`);
+                logger.info(`  - ${table.table_name}`);
             });
 
-            console.log(`\n✅ Total tables created: ${altTables.length}`);
+            logger.info(`\n✅ Total tables created: ${altTables.length}`);
             return;
         }
 
         // If we have the custom function, use it
-        console.log('📋 Database verification results:');
-        console.log(tables);
+        logger.info('📋 Database verification results:');
+        logger.info(tables);
 
     } catch (error) {
-        console.log('⚠️ Could not verify database structure:', error.message);
+        logger.info('⚠️ Could not verify database structure:', error.message);
     }
 }
 
@@ -178,7 +179,7 @@ async function basicVerification() {
         'users', 'user_teams', 'transfers'
     ];
 
-    console.log('🔍 Checking core tables...');
+    logger.info('🔍 Checking core tables...');
 
     for (const tableName of tablesToCheck) {
         try {
@@ -187,12 +188,12 @@ async function basicVerification() {
                 .select('*', { count: 'exact', head: true });
 
             if (error) {
-                console.log(`  ❌ ${tableName}: ${error.message}`);
+                logger.info(`  ❌ ${tableName}: ${error.message}`);
             } else {
-                console.log(`  ✅ ${tableName}: ${count} records`);
+                logger.info(`  ✅ ${tableName}: ${count} records`);
             }
         } catch (err) {
-            console.log(`  ❌ ${tableName}: ${err.message}`);
+            logger.info(`  ❌ ${tableName}: ${err.message}`);
         }
     }
 }
@@ -201,11 +202,11 @@ async function basicVerification() {
 if (require.main === module) {
     initializeDatabase()
         .then(() => {
-            console.log('\n🏁 Script completed successfully');
+            logger.info('\n🏁 Script completed successfully');
             process.exit(0);
         })
         .catch((error) => {
-            console.error('\n💥 Script failed:', error.message);
+            logger.error('\n💥 Script failed:', error.message);
             process.exit(1);
         });
 }

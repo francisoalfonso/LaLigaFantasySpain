@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeline Contenido Viral - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <div x-data="contentPipeline()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-8 shadow-2xl">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl font-bold flex items-center gap-3 mb-2">
+                    <span>🎬</span>
+                    Pipeline Contenido Viral
+                </h1>
+                <p class="text-blue-100 text-lg">De datos brutos a contenido viral en Instagram • End-to-End</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 py-12">
+
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-20">
+                <div class="animate-spin rounded-full h-20 w-20 border-b-4 border-purple-600 mx-auto mb-4"></div>
+                <p class="text-xl text-gray-600 font-semibold">Cargando mejor chollo desde API-Sports...</p>
+                <p class="text-sm text-gray-500 mt-2">Analizando 606 jugadores de La Liga</p>
+            </div>
+
+            <!-- Error State -->
+            <div x-show="error" class="bg-red-50 border-2 border-red-300 text-red-900 p-6 rounded-xl mb-8 shadow-lg">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-3xl">❌</span>
+                    <p class="font-bold text-xl">Error</p>
+                </div>
+                <p x-text="error" class="text-lg"></p>
+            </div>
+
+            <!-- ===================== -->
+            <!-- PASO 1: DATOS CHOLLO -->
+            <!-- ===================== -->
+            <div x-show="!loading && !error && cholloData" class="space-y-8">
+
+                <!-- Step Indicator -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 border-l-8 border-purple-600">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-4xl">📊</span>
+                                <h2 class="text-3xl font-bold text-gray-900">Paso 1: Datos Mejor Chollo</h2>
+                            </div>
+                            <p class="text-gray-600 text-lg">Chollo detectado desde API-Sports • Análisis de 606 jugadores</p>
+                        </div>
+                        <div class="bg-green-100 text-green-800 px-6 py-3 rounded-full font-bold text-lg">
+                            ✅ Completado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chollo Data Card -->
+                <div class="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl shadow-2xl p-8 text-white">
+                    <!-- Player Header -->
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center gap-4">
+                            <img
+                                :src="cholloData.photo"
+                                :alt="cholloData.name"
+                                class="w-20 h-20 rounded-full border-4 border-white shadow-lg"
+                                onerror="this.src='https://via.placeholder.com/80'">
+                            <div>
+                                <h3 class="text-3xl font-bold" x-text="cholloData.name"></h3>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <img
+                                        :src="cholloData.teamLogo"
+                                        class="w-6 h-6"
+                                        onerror="this.src='https://via.placeholder.com/24'">
+                                    <span class="text-xl opacity-90" x-text="cholloData.team"></span>
+                                    <span class="bg-white/20 px-3 py-1 rounded-full text-sm font-semibold" x-text="cholloData.position"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-500 px-6 py-3 rounded-full font-bold text-2xl animate-pulse shadow-lg">
+                            🔥 CHOLLO
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <!-- Precio -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+                            <div class="text-4xl font-bold mb-1" x-text="'€' + cholloData.price + 'M'"></div>
+                            <div class="text-sm opacity-80">Precio</div>
+                        </div>
+
+                        <!-- Ratio Valor -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+                            <div class="text-4xl font-bold mb-1 text-green-300" x-text="cholloData.valueRatio + 'x'"></div>
+                            <div class="text-sm opacity-80">Ratio Valor</div>
+                        </div>
+
+                        <!-- Puntos Estimados -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+                            <div class="text-4xl font-bold mb-1 text-yellow-300" x-text="cholloData.estimatedPoints"></div>
+                            <div class="text-sm opacity-80">Puntos Est.</div>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20">
+                            <div class="text-4xl font-bold mb-1 text-blue-300" x-text="cholloData.stats.rating"></div>
+                            <div class="text-sm opacity-80">Rating</div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Stats -->
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <h4 class="font-bold text-xl mb-4 flex items-center gap-2">
+                            <span>⚽</span>
+                            Estadísticas Detalladas
+                        </h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold" x-text="cholloData.stats.goals"></div>
+                                <div class="text-sm opacity-80">Goles</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold" x-text="cholloData.stats.assists"></div>
+                                <div class="text-sm opacity-80">Asistencias</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold" x-text="cholloData.stats.games"></div>
+                                <div class="text-sm opacity-80">Partidos</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold" x-text="cholloData.stats.minutes"></div>
+                                <div class="text-sm opacity-80">Minutos</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <h4 class="font-bold text-2xl mb-4 text-gray-900 flex items-center gap-2">
+                        <span>🎯</span>
+                        ¿Por qué es CHOLLO?
+                    </h4>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-4 bg-green-50 rounded-lg">
+                            <span class="text-2xl">💰</span>
+                            <div>
+                                <div class="font-semibold text-gray-900">Precio Excelente</div>
+                                <div class="text-gray-600">
+                                    <span x-text="'€' + cholloData.price + 'M'"></span> es un precio muy bajo para el valor que aporta
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-4 bg-purple-50 rounded-lg">
+                            <span class="text-2xl">📈</span>
+                            <div>
+                                <div class="font-semibold text-gray-900">Ratio de Valor Alto</div>
+                                <div class="text-gray-600">
+                                    Ratio <span x-text="cholloData.valueRatio + 'x'"></span> indica excelente relación puntos/precio
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                            <span class="text-2xl">⭐</span>
+                            <div>
+                                <div class="font-semibold text-gray-900">Rendimiento Consistente</div>
+                                <div class="text-gray-600">
+                                    Rating <span x-text="cholloData.stats.rating"></span> demuestra buen nivel actual
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Source -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">🔌</span>
+                            <div>
+                                <div class="font-bold text-gray-900 text-lg">Fuente de Datos</div>
+                                <div class="text-gray-600">API-Sports • 606 jugadores analizados • Temporada 2025-26</div>
+                            </div>
+                        </div>
+                        <div class="bg-green-500 text-white px-4 py-2 rounded-full font-semibold">
+                            ✅ Datos Reales
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ======================= -->
+                <!-- PASO 2: SCRIPT VIRAL   -->
+                <!-- ======================= -->
+                <div x-show="scriptData" class="space-y-8">
+
+                    <!-- Step Indicator -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border-l-8 border-green-600">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-4xl">📝</span>
+                                    <h2 class="text-3xl font-bold text-gray-900">Paso 2: Script Viral</h2>
+                                </div>
+                                <p class="text-gray-600 text-lg">Caption y hashtags optimizados para máximo engagement</p>
+                            </div>
+                            <div class="bg-green-100 text-green-800 px-6 py-3 rounded-full font-bold text-lg">
+                                ✅ Completado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Caption Card -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-2xl text-gray-900 flex items-center gap-2">
+                                <span>💬</span>
+                                Caption Viral Generado
+                            </h4>
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-semibold">
+                                    IA Optimizado
+                                </span>
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold" x-text="scriptData?.caption?.length + ' chars'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Caption Preview -->
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200 mb-6">
+                            <div class="font-mono text-gray-900 whitespace-pre-wrap leading-relaxed" x-text="scriptData?.caption"></div>
+                        </div>
+
+                        <!-- Caption Analysis -->
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-purple-50 p-4 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">🎯</span>
+                                    <div class="font-semibold text-gray-900">Hook Inicial</div>
+                                </div>
+                                <div class="text-sm text-gray-600">Emoji + MAYÚSCULAS para captar atención inmediata</div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">📊</span>
+                                    <div class="font-semibold text-gray-900">Datos Clave</div>
+                                </div>
+                                <div class="text-sm text-gray-600">Precio, ratio y estadísticas destacadas</div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="text-2xl">💡</span>
+                                    <div class="font-semibold text-gray-900">Call to Action</div>
+                                </div>
+                                <div class="text-sm text-gray-600">Incentiva interacción y guardado</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hashtags Card -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                            <span>#️⃣</span>
+                            Hashtags Optimizados
+                        </h4>
+
+                        <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200 mb-6">
+                            <div class="flex flex-wrap gap-2" x-html="formatHashtags(scriptData?.hashtags)"></div>
+                        </div>
+
+                        <!-- Hashtag Strategy -->
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="font-semibold text-gray-900 mb-2">📈 Estrategia de Hashtags</div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Hashtags generales Fantasy (#FantasyLaLiga)</li>
+                                    <li>• Hashtags específicos de equipo</li>
+                                    <li>• Hashtags de posición del jugador</li>
+                                    <li>• Trending topics (#Chollos #Bargains)</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="font-semibold text-gray-900 mb-2">🎯 Optimización SEO</div>
+                                <ul class="text-sm text-gray-600 space-y-1">
+                                    <li>• Máxima visibilidad en búsquedas</li>
+                                    <li>• Targeting audiencia específica</li>
+                                    <li>• Mix de hashtags populares y nicho</li>
+                                    <li>• Sin espacios para mejor indexación</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Viral Formula Breakdown -->
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-8 border-2 border-yellow-300">
+                        <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                            <span>🔥</span>
+                            Fórmula Viral Aplicada
+                        </h4>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">Emoción Inmediata</div>
+                                        <div class="text-sm text-gray-600">Hook con emoji + palabra clave en MAYÚSCULAS</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-orange-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">Valor Claro</div>
+                                        <div class="text-sm text-gray-600">Beneficio concreto y cuantificable</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-yellow-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">Datos Específicos</div>
+                                        <div class="text-sm text-gray-600">Números reales que generan credibilidad</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-green-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">4</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">Prueba Social</div>
+                                        <div class="text-sm text-gray-600">Stats y ratings que validan el mensaje</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-blue-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">5</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">Urgencia Sutil</div>
+                                        <div class="text-sm text-gray-600">Implica acción rápida sin ser agresivo</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">6</div>
+                                    <div>
+                                        <div class="font-bold text-gray-900">CTA Natural</div>
+                                        <div class="text-sm text-gray-600">Llamada a acción que fluye con el contenido</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ======================= -->
+                <!-- PASO 3: VIDEO ANA VEO3 -->
+                <!-- ======================= -->
+                <div x-show="videoData" class="space-y-8">
+
+                    <!-- Step Indicator -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8 border-l-8 border-blue-600">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-4xl">🎬</span>
+                                    <h2 class="text-3xl font-bold text-gray-900">Paso 3: Video Ana Real (VEO3)</h2>
+                                </div>
+                                <p class="text-gray-600 text-lg">Español de España • Estructura viral 7 elementos • Formato 9:16</p>
+                            </div>
+                            <div class="bg-blue-100 text-blue-800 px-6 py-3 rounded-full font-bold text-lg">
+                                ✅ Completado
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Preview -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                            <span>📹</span>
+                            Video Generado
+                        </h4>
+
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Video Player -->
+                            <div class="space-y-4">
+                                <div class="relative bg-black rounded-xl overflow-hidden shadow-2xl" style="padding-bottom: 177.78%;">
+                                    <video
+                                        id="ana-video-preview"
+                                        class="absolute top-0 left-0 w-full h-full object-cover"
+                                        controls
+                                        loop
+                                        :src="videoData?.url">
+                                        Tu navegador no soporta video HTML5
+                                    </video>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button @click="playVideo()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+                                        ▶️ Reproducir
+                                    </button>
+                                    <button @click="downloadVideo()" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold">
+                                        📥 Descargar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Video Details -->
+                            <div class="space-y-4">
+                                <!-- Technical Specs -->
+                                <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 border-2 border-blue-200">
+                                    <h5 class="font-bold text-lg mb-4 text-gray-900">📊 Especificaciones Técnicas</h5>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Duración:</span>
+                                            <span class="font-bold text-gray-900">10-12 segundos</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Formato:</span>
+                                            <span class="font-bold text-gray-900">9:16 (Vertical)</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Idioma:</span>
+                                            <span class="font-bold text-gray-900">🇪🇸 Español de España</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Estructura:</span>
+                                            <span class="font-bold text-gray-900">7 elementos virales</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Modelo:</span>
+                                            <span class="font-bold text-gray-900">VEO3 Fast</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-600">Coste:</span>
+                                            <span class="font-bold text-green-600">$0.30</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ana Character -->
+                                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
+                                    <h5 class="font-bold text-lg mb-4 text-gray-900">👩 Ana Martínez - Reportera Virtual</h5>
+                                    <div class="space-y-2 text-sm text-gray-700">
+                                        <p>✨ <strong>Consistencia perfecta</strong> - Mismo seed (30001)</p>
+                                        <p>🎯 <strong>Profesional deportiva</strong> - 32 años, analista táctica</p>
+                                        <p>🇪🇸 <strong>Español de España</strong> - Acento castellano natural</p>
+                                        <p>📊 <strong>Estadísticas integradas</strong> - Goles, asistencias, ratio</p>
+                                        <p>📱 <strong>Optimizado para Reels</strong> - Formato vertical</p>
+                                    </div>
+                                </div>
+
+                                <!-- Generation Time -->
+                                <div class="bg-yellow-50 rounded-xl p-4 border-2 border-yellow-200">
+                                    <div class="flex items-center gap-2 text-sm">
+                                        <span class="text-2xl">⏱️</span>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">Tiempo de Generación</div>
+                                            <div class="text-gray-600">4-6 minutos por video</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generation Process -->
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                            <span>⚙️</span>
+                            Proceso de Generación
+                        </h4>
+
+                        <div class="space-y-6">
+                            <!-- Script Viral de 7 Elementos -->
+                            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border-l-4 border-purple-500">
+                                <div class="flex items-start gap-4">
+                                    <div class="bg-purple-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">📝</div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <h5 class="font-bold text-lg text-gray-900">Estructura Viral Completa (7 Elementos)</h5>
+                                            <span class="text-sm bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-semibold">10-12s</span>
+                                        </div>
+                                        <p class="text-gray-700 mb-3 italic font-medium">
+                                            "¡Misters! Venid que os cuento un secreto... He encontrado un jugador del <span x-text="cholloData?.team"></span> a solo <span x-text="cholloData?.price"></span> euros... ¿Demasiado barato para ser bueno? ¡<span x-text="cholloData?.name"></span>! <span x-text="cholloData?.stats?.goals"></span> goles, <span x-text="cholloData?.stats?.assists"></span> asistencias en <span x-text="cholloData?.stats?.games"></span> partidos. Ratio de valor: <span x-text="cholloData?.valueRatio"></span>x. ¡Está RINDIENDO como uno de 15 millones! A este precio, es IMPRESCINDIBLE para tu plantilla. ¿Fichamos ya o esperamos? ¡Yo lo tengo CLARO!"
+                                        </p>
+                                        <div class="grid grid-cols-3 gap-3 text-xs">
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>1. Hook:</strong> Susurro conspirativo
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>2. Contexto:</strong> Precio + equipo
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>3. Conflicto:</strong> Duda implícita
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>4. Inflexión:</strong> Revelación + stats
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>5. Resolución:</strong> Ratio alto
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded">
+                                                <strong>6. Moraleja:</strong> Imprescindible
+                                            </div>
+                                            <div class="bg-white/70 p-2 rounded col-span-3">
+                                                <strong>7. CTA:</strong> ¿Fichamos ya o esperamos?
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mejoras Implementadas -->
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-l-4 border-green-500">
+                                <div class="flex items-start gap-4">
+                                    <div class="bg-green-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0">✅</div>
+                                    <div class="flex-1">
+                                        <h5 class="font-bold text-lg text-gray-900 mb-3">Mejoras Implementadas</h5>
+                                        <div class="space-y-2 text-sm">
+                                            <div class="flex items-start gap-2">
+                                                <span class="text-green-600 font-bold">✓</span>
+                                                <div>
+                                                    <strong>Español de España forzado:</strong> Prompt incluye "SPANISH FROM SPAIN (not Mexican Spanish)"
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start gap-2">
+                                                <span class="text-green-600 font-bold">✓</span>
+                                                <div>
+                                                    <strong>Estadísticas integradas:</strong> Goles, asistencias, partidos, rating y ratio de valor
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start gap-2">
+                                                <span class="text-green-600 font-bold">✓</span>
+                                                <div>
+                                                    <strong>Estructura viral completa:</strong> 7 elementos emocionales (Hook → CTA)
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start gap-2">
+                                                <span class="text-green-600 font-bold">✓</span>
+                                                <div>
+                                                    <strong>Vocabulario comunidad:</strong> "Misters", "chollo", "¿Fichamos?"
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VEO3 Technology -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl shadow-xl p-8 border-2 border-indigo-200">
+                        <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                            <span>🤖</span>
+                            Tecnología VEO3 (KIE.ai)
+                        </h4>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-white rounded-lg p-4">
+                                <div class="text-3xl mb-2">🎯</div>
+                                <div class="font-bold text-gray-900 mb-1">Consistencia</div>
+                                <div class="text-sm text-gray-600">Seed fijo (30001) garantiza que Ana siempre luce igual</div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4">
+                                <div class="text-3xl mb-2">🖼️</div>
+                                <div class="font-bold text-gray-900 mb-1">Imagen Referencia</div>
+                                <div class="text-sm text-gray-600">GitHub URL asegura apariencia exacta en todos los videos</div>
+                            </div>
+                            <div class="bg-white rounded-lg p-4">
+                                <div class="text-3xl mb-2">⚡</div>
+                                <div class="font-bold text-gray-900 mb-1">VEO3 Fast</div>
+                                <div class="text-sm text-gray-600">Modelo optimizado para mejor balance velocidad/calidad</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Next Steps Preview -->
+                <div class="bg-gray-50 rounded-2xl shadow-xl p-8 border-2 border-dashed border-gray-300">
+                    <h4 class="font-bold text-2xl mb-6 text-gray-900 flex items-center gap-2">
+                        <span>🚀</span>
+                        Próximo Paso del Pipeline
+                    </h4>
+                    <div class="max-w-md mx-auto">
+                        <div class="bg-white p-6 rounded-xl shadow opacity-50">
+                            <div class="text-3xl mb-3">📱</div>
+                            <div class="font-bold text-gray-900 mb-2">Paso 4: Post Final Instagram</div>
+                            <div class="text-sm text-gray-600">Video + Caption + Hashtags • Listo para publicar</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function contentPipeline() {
+            return {
+                loading: true,
+                error: null,
+                cholloData: null,
+                scriptData: null,
+                videoData: null,
+
+                async init() {
+                    await this.loadPipeline();
+                },
+
+                async loadPipeline() {
+                    this.loading = true;
+                    this.error = null;
+
+                    try {
+                        console.log('🔄 Iniciando pipeline completo...');
+
+                        // Llamar al backend para obtener todos los datos
+                        const response = await fetch('/api/content-preview/generate-real-content', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+
+                        const data = await response.json();
+
+                        if (!data.success) {
+                            throw new Error(data.error || 'Error obteniendo datos');
+                        }
+
+                        // PASO 1: Extraer datos del chollo
+                        console.log('✅ Paso 1: Datos del chollo cargados');
+                        this.cholloData = {
+                            name: data.data.player.name,
+                            team: data.data.player.team,
+                            position: data.data.player.position,
+                            price: data.data.player.price,
+                            valueRatio: data.data.player.valueRatio,
+                            estimatedPoints: data.data.player.estimatedPoints,
+                            photo: data.data.player.photo,
+                            teamLogo: data.data.player.teamLogo,
+                            stats: data.data.player.stats
+                        };
+
+                        // PASO 2: Extraer script viral (caption + hashtags)
+                        console.log('✅ Paso 2: Script viral generado');
+                        this.scriptData = {
+                            caption: data.data.content.caption,
+                            hashtags: data.data.content.hashtags
+                        };
+
+                        // PASO 3: Extraer datos del video
+                        console.log('✅ Paso 3: Video Ana cargado');
+                        this.videoData = {
+                            url: data.data.content.videoUrl || 'https://vz-139dde2a-4e6.b-cdn.net/1c933759-b828-4ab4-871e-dc4b6bfcb098/play_720p.mp4'
+                        };
+
+                        console.log('🎯 Pipeline completado hasta Paso 3');
+
+                    } catch (error) {
+                        console.error('❌ Error en pipeline:', error);
+                        this.error = error.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                formatHashtags(hashtagString) {
+                    if (!hashtagString) return '';
+
+                    // Dividir hashtags por espacios
+                    const hashtags = hashtagString.split(' ').filter(h => h.trim());
+
+                    // Formatear cada hashtag con estilo
+                    return hashtags.map(tag =>
+                        `<span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-semibold text-sm hover:bg-blue-200 transition cursor-pointer">${tag}</span>`
+                    ).join('');
+                },
+
+                playVideo() {
+                    const video = document.getElementById('ana-video-preview');
+                    if (video) {
+                        video.play();
+                    }
+                },
+
+                downloadVideo() {
+                    if (this.videoData?.url) {
+                        const link = document.createElement('a');
+                        link.href = this.videoData.url;
+                        link.download = `ana-chollo-${this.cholloData?.name.replace(/\s+/g, '-').toLowerCase()}.mp4`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

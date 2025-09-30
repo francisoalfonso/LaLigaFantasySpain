@@ -5,6 +5,7 @@
 // Used as backup when n8n workflows are not available
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const ApiFootballClient = require('../services/apiFootball');
 const apiFootballService = new ApiFootballClient();
@@ -27,7 +28,7 @@ const {
  */
 router.post('/teams', async (req, res) => {
   try {
-    console.log('🔄 Starting teams sync from API-Sports to Supabase...');
+    logger.info('🔄 Starting teams sync from API-Sports to Supabase...');
     const startTime = Date.now();
 
     // Get teams from API-Sports
@@ -38,7 +39,7 @@ router.post('/teams', async (req, res) => {
     }
 
     const teams = teamsResponse.data || [];
-    console.log(`📊 Found ${teams.length} teams to sync`);
+    logger.info(`📊 Found ${teams.length} teams to sync`);
 
     let successCount = 0;
     let errors = [];
@@ -72,15 +73,15 @@ router.post('/teams', async (req, res) => {
 
         if (result.success) {
           successCount++;
-          console.log(`✅ Synced team: ${team.name}`);
+          logger.info(`✅ Synced team: ${team.name}`);
         } else {
           errors.push(`Failed to sync ${team.name}: ${result.error}`);
-          console.error(`❌ Failed to sync team ${team.name}:`, result.error);
+          logger.error(`❌ Failed to sync team ${team.name}:`, result.error);
         }
 
       } catch (error) {
         errors.push(`Error processing team: ${error.message}`);
-        console.error('❌ Team processing error:', error);
+        logger.error('❌ Team processing error:', error);
       }
     }
 
@@ -111,7 +112,7 @@ router.post('/teams', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Teams sync failed:', error);
+    logger.error('❌ Teams sync failed:', error);
 
     // Log failed API request
     await logApiRequest({
@@ -136,7 +137,7 @@ router.post('/teams', async (req, res) => {
  */
 router.post('/players', async (req, res) => {
   try {
-    console.log('🔄 Starting players sync from API-Sports to Supabase...');
+    logger.info('🔄 Starting players sync from API-Sports to Supabase...');
     const startTime = Date.now();
 
     // Get all pages of players
@@ -145,7 +146,7 @@ router.post('/players', async (req, res) => {
     let hasMorePages = true;
 
     while (hasMorePages && page <= 30) { // Limit to 30 pages max
-      console.log(`📄 Fetching players page ${page}...`);
+      logger.info(`📄 Fetching players page ${page}...`);
 
       const playersResponse = await apiFootballService.getLaLigaPlayers(page);
 
@@ -153,13 +154,13 @@ router.post('/players', async (req, res) => {
         throw new Error(`API-Sports error on page ${page}: ${playersResponse.error}`);
       }
 
-      console.log(`🔍 API Response structure:`, Object.keys(playersResponse.data));
+      logger.info(`🔍 API Response structure:`, Object.keys(playersResponse.data));
 
       const pageData = playersResponse.data || [];
 
-      console.log(`📊 Page ${page}: Found ${pageData.length} players`);
+      logger.info(`📊 Page ${page}: Found ${pageData.length} players`);
       if (pageData.length > 0) {
-        console.log(`🔍 First player structure:`, JSON.stringify(pageData[0], null, 2));
+        logger.info(`🔍 First player structure:`, JSON.stringify(pageData[0], null, 2));
       }
 
       if (pageData.length === 0) {
@@ -174,7 +175,7 @@ router.post('/players', async (req, res) => {
       await new Promise(resolve => setTimeout(resolve, 1100)); // Wait 1.1 seconds
     }
 
-    console.log(`📊 Found ${allPlayers.length} players total to sync`);
+    logger.info(`📊 Found ${allPlayers.length} players total to sync`);
 
     let successCount = 0;
     let errors = [];
@@ -209,7 +210,7 @@ router.post('/players', async (req, res) => {
         const team_id = teamMap[player.team?.id];
 
         if (!team_id) {
-          console.warn(`⚠️ Team not found for player ${player.name}, team ID: ${player.team?.id}`);
+          logger.warn(`⚠️ Team not found for player ${player.name}, team ID: ${player.team?.id}`);
           continue;
         }
 
@@ -239,16 +240,16 @@ router.post('/players', async (req, res) => {
         if (result.success) {
           successCount++;
           if (successCount % 50 === 0) {
-            console.log(`✅ Synced ${successCount} players so far...`);
+            logger.info(`✅ Synced ${successCount} players so far...`);
           }
         } else {
           errors.push(`Failed to sync ${player.name}: ${result.error}`);
-          console.error(`❌ Failed to sync player ${player.name}:`, result.error);
+          logger.error(`❌ Failed to sync player ${player.name}:`, result.error);
         }
 
       } catch (error) {
         errors.push(`Error processing player: ${error.message}`);
-        console.error('❌ Player processing error:', error);
+        logger.error('❌ Player processing error:', error);
       }
     }
 
@@ -265,7 +266,7 @@ router.post('/players', async (req, res) => {
       error_message: errors.length > 0 ? errors.slice(0, 10).join('; ') : null // Limit error message length
     });
 
-    console.log(`🎉 Players sync completed! ${successCount}/${allPlayers.length} successful`);
+    logger.info(`🎉 Players sync completed! ${successCount}/${allPlayers.length} successful`);
 
     res.json({
       success: true,
@@ -282,7 +283,7 @@ router.post('/players', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Players sync failed:', error);
+    logger.error('❌ Players sync failed:', error);
 
     // Log failed API request
     await logApiRequest({
@@ -307,7 +308,7 @@ router.post('/players', async (req, res) => {
  */
 router.post('/fixtures', async (req, res) => {
   try {
-    console.log('🔄 Starting fixtures sync from API-Sports to Supabase...');
+    logger.info('🔄 Starting fixtures sync from API-Sports to Supabase...');
     const startTime = Date.now();
 
     // Get fixtures from API-Sports
@@ -318,7 +319,7 @@ router.post('/fixtures', async (req, res) => {
     }
 
     const fixtures = fixturesResponse.data.response || [];
-    console.log(`📊 Found ${fixtures.length} fixtures to sync`);
+    logger.info(`📊 Found ${fixtures.length} fixtures to sync`);
 
     let successCount = 0;
     let errors = [];
@@ -346,7 +347,7 @@ router.post('/fixtures', async (req, res) => {
         const away_team_id = teamMap[teams.away.id];
 
         if (!home_team_id || !away_team_id) {
-          console.warn(`⚠️ Teams not found for fixture ${fixture.id}`);
+          logger.warn(`⚠️ Teams not found for fixture ${fixture.id}`);
           continue;
         }
 
@@ -378,12 +379,12 @@ router.post('/fixtures', async (req, res) => {
           successCount++;
         } else {
           errors.push(`Failed to sync fixture ${fixture.id}: ${result.error}`);
-          console.error(`❌ Failed to sync fixture ${fixture.id}:`, result.error);
+          logger.error(`❌ Failed to sync fixture ${fixture.id}:`, result.error);
         }
 
       } catch (error) {
         errors.push(`Error processing fixture: ${error.message}`);
-        console.error('❌ Fixture processing error:', error);
+        logger.error('❌ Fixture processing error:', error);
       }
     }
 
@@ -414,7 +415,7 @@ router.post('/fixtures', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Fixtures sync failed:', error);
+    logger.error('❌ Fixtures sync failed:', error);
 
     // Log failed API request
     await logApiRequest({
@@ -439,7 +440,7 @@ router.post('/fixtures', async (req, res) => {
  */
 router.post('/full', async (req, res) => {
   try {
-    console.log('🚀 Starting FULL sync from API-Sports to Supabase...');
+    logger.info('🚀 Starting FULL sync from API-Sports to Supabase...');
     const startTime = Date.now();
 
     const results = {
@@ -449,7 +450,7 @@ router.post('/full', async (req, res) => {
     };
 
     // Step 1: Sync Teams
-    console.log('📝 Step 1: Syncing teams...');
+    logger.info('📝 Step 1: Syncing teams...');
     try {
       const teamsReq = await fetch(`${req.protocol}://${req.get('host')}/api/sync/teams`, {
         method: 'POST',
@@ -465,7 +466,7 @@ router.post('/full', async (req, res) => {
 
     // Step 2: Sync Players (only if teams succeeded)
     if (results.teams.success) {
-      console.log('👥 Step 2: Syncing players...');
+      logger.info('👥 Step 2: Syncing players...');
       try {
         const playersReq = await fetch(`${req.protocol}://${req.get('host')}/api/sync/players`, {
           method: 'POST',
@@ -481,7 +482,7 @@ router.post('/full', async (req, res) => {
     }
 
     // Step 3: Sync Fixtures
-    console.log('⚽ Step 3: Syncing fixtures...');
+    logger.info('⚽ Step 3: Syncing fixtures...');
     try {
       const fixturesReq = await fetch(`${req.protocol}://${req.get('host')}/api/sync/fixtures`, {
         method: 'POST',
@@ -497,7 +498,7 @@ router.post('/full', async (req, res) => {
     // Calculate overall success
     const overallSuccess = results.teams?.success && results.players?.success && results.fixtures?.success;
 
-    console.log(`🎉 Full sync completed in ${executionTime}ms`);
+    logger.info(`🎉 Full sync completed in ${executionTime}ms`);
 
     res.json({
       success: overallSuccess,
@@ -508,7 +509,7 @@ router.post('/full', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Full sync failed:', error);
+    logger.error('❌ Full sync failed:', error);
 
     res.status(500).json({
       success: false,
@@ -564,7 +565,7 @@ router.get('/status', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Sync status error:', error);
+    logger.error('❌ Sync status error:', error);
 
     res.status(500).json({
       success: false,

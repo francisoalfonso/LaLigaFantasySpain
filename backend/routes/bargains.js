@@ -1,5 +1,12 @@
-// Rutas para análisis de chollos Fantasy
+/**
+ * Rutas para análisis de chollos Fantasy
+ * Sistema predictivo de identificación de jugadores infravalorados
+ * Refactorizado para usar Error Handler centralizado
+ */
 const express = require('express');
+const logger = require('../utils/logger');
+const { validate, schemas, commonSchemas } = require('../middleware/validation');
+const { asyncHandler, ValidationError } = require('../middleware/errorHandler');
 const router = express.Router();
 const BargainAnalyzer = require('../services/bargainAnalyzer');
 
@@ -7,9 +14,10 @@ const BargainAnalyzer = require('../services/bargainAnalyzer');
 const bargainAnalyzer = new BargainAnalyzer();
 
 // Test de conexión del analizador
-router.get('/test', async (req, res) => {
-  try {
-    console.log('🔄 Test del analizador de chollos...');
+router.get(
+  '/test',
+  asyncHandler(async (req, res) => {
+    logger.info('🔄 Test del analizador de chollos...');
 
     res.json({
       success: true,
@@ -23,26 +31,20 @@ router.get('/test', async (req, res) => {
         '/api/bargains/analysis': 'Análisis detallado con parámetros personalizados'
       }
     });
-
-  } catch (error) {
-    console.error('❌ Error en test de bargains:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // Obtener los mejores chollos de la jornada
-router.get('/top', async (req, res) => {
-  try {
-    console.log('🔍 Obteniendo mejores chollos de la jornada...');
+router.get(
+  '/top',
+  asyncHandler(async (req, res) => {
+    logger.info('🔍 Obteniendo mejores chollos de la jornada...');
 
     // Parámetros opcionales
     const limit = parseInt(req.query.limit) || 10;
     const maxPrice = parseFloat(req.query.maxPrice) || undefined;
 
-    console.log(`📊 Parámetros: limit=${limit}, maxPrice=${maxPrice}`);
+    logger.info(`📊 Parámetros: limit=${limit}, maxPrice=${maxPrice}`);
 
     // Obtener chollos
     const options = { maxPrice };
@@ -52,7 +54,7 @@ router.get('/top', async (req, res) => {
       // Filtrar por precio máximo si se especifica
       let filteredData = result.data;
       if (maxPrice) {
-        filteredData = result.data.filter(player => player.analysis.estimatedPrice <= maxPrice);
+        filteredData = result.data.filter((player) => player.analysis.estimatedPrice <= maxPrice);
       }
 
       res.json({
@@ -78,191 +80,147 @@ router.get('/top', async (req, res) => {
         details: result.error
       });
     }
-
-  } catch (error) {
-    console.error('❌ Error obteniendo chollos:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // Obtener chollos por posición específica
-router.get('/position/:position', async (req, res) => {
-  try {
-    const position = req.params.position.toUpperCase();
-    const limit = parseInt(req.query.limit) || 5;
+router.get('/position/:position', asyncHandler(async (req, res) => {
+  const position = req.params.position.toUpperCase();
+  const limit = parseInt(req.query.limit) || 5;
 
-    console.log(`🔍 Obteniendo chollos para posición: ${position}`);
+  logger.info(`🔍 Obteniendo chollos para posición: ${position}`);
 
-    // Validar posición
-    const validPositions = ['GK', 'DEF', 'MID', 'FWD'];
-    if (!validPositions.includes(position)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Posición inválida',
-        validPositions: validPositions
-      });
-    }
+  // Validar posición
+  const validPositions = ['GK', 'DEF', 'MID', 'FWD'];
+  if (!validPositions.includes(position)) {
+    throw new ValidationError(`Posición inválida: ${position}. Válidas: ${validPositions.join(', ')}`);
+  }
 
-    const result = await bargainAnalyzer.getBargainsByPosition(position, limit);
+  const result = await bargainAnalyzer.getBargainsByPosition(position, limit);
 
-    if (result.success) {
-      res.json({
-        success: true,
-        message: `${result.data.length} chollos encontrados para ${position}`,
-        data: result.data,
-        metadata: result.metadata,
-        positionInfo: {
-          position: position,
-          description: getPositionDescription(position),
-          fantasyTips: getPositionTips(position)
-        }
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error obteniendo chollos por posición',
-        details: result.error
-      });
-    }
-
-  } catch (error) {
-    console.error('❌ Error obteniendo chollos por posición:', error.message);
+  if (result.success) {
+    res.json({
+      success: true,
+      message: `${result.data.length} chollos encontrados para ${position}`,
+      data: result.data,
+      metadata: result.metadata,
+      positionInfo: {
+        position: position,
+        description: getPositionDescription(position),
+        fantasyTips: getPositionTips(position)
+      }
+    });
+  } else {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Error obteniendo chollos por posición',
+      details: result.error
     });
   }
-});
+}));
 
 // Comparar valor entre dos jugadores
-router.get('/compare/:id1/:id2', async (req, res) => {
-  try {
-    const playerId1 = parseInt(req.params.id1);
-    const playerId2 = parseInt(req.params.id2);
+router.get('/compare/:id1/:id2', asyncHandler(async (req, res) => {
+  const playerId1 = parseInt(req.params.id1);
+  const playerId2 = parseInt(req.params.id2);
 
-    console.log(`🔍 Comparando jugadores: ${playerId1} vs ${playerId2}`);
+  logger.info(`🔍 Comparando jugadores: ${playerId1} vs ${playerId2}`);
 
-    if (!playerId1 || !playerId2) {
-      return res.status(400).json({
-        success: false,
-        error: 'IDs de jugadores inválidos'
-      });
-    }
+  if (!playerId1 || !playerId2) {
+    throw new ValidationError('IDs de jugadores inválidos');
+  }
 
-    if (playerId1 === playerId2) {
-      return res.status(400).json({
-        success: false,
-        error: 'No puedes comparar un jugador consigo mismo'
-      });
-    }
+  if (playerId1 === playerId2) {
+    throw new ValidationError('No puedes comparar un jugador consigo mismo');
+  }
 
-    const result = await bargainAnalyzer.comparePlayerValue(playerId1, playerId2);
+  const result = await bargainAnalyzer.comparePlayerValue(playerId1, playerId2);
 
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Comparación completada',
-        data: result.data,
-        analysis: {
-          summary: `${result.data.winner === 'player1' ? result.data.player1.name : result.data.player2.name} ofrece mejor valor`,
-          difference: `Diferencia de ratio: ${result.data.difference.toFixed(3)}`,
-          recommendation: result.data.difference > 0.5 ?
-            'Diferencia significativa - clara ventaja' :
-            'Ambos jugadores tienen valor similar'
-        }
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error comparando jugadores',
-        details: result.error
-      });
-    }
-
-  } catch (error) {
-    console.error('❌ Error comparando jugadores:', error.message);
+  if (result.success) {
+    res.json({
+      success: true,
+      message: 'Comparación completada',
+      data: result.data,
+      analysis: {
+        summary: `${result.data.winner === 'player1' ? result.data.player1.name : result.data.player2.name} ofrece mejor valor`,
+        difference: `Diferencia de ratio: ${result.data.difference.toFixed(3)}`,
+        recommendation: result.data.difference > 0.5 ?
+          'Diferencia significativa - clara ventaja' :
+          'Ambos jugadores tienen valor similar'
+      }
+    });
+  } else {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Error comparando jugadores',
+      details: result.error
     });
   }
-});
+}));
 
 // Análisis personalizado con parámetros avanzados
-router.post('/analysis', async (req, res) => {
-  try {
-    console.log('🔍 Análisis personalizado de chollos...');
+router.post('/analysis', validate(schemas.bargainAnalysis), asyncHandler(async (req, res) => {
+  logger.info('🔍 Análisis personalizado de chollos...');
 
-    const {
-      maxPrice = 8.0,
-      minGames = 3,
-      minMinutes = 90,
-      minValueRatio = 1.2,
-      positions = ['GK', 'DEF', 'MID', 'FWD'],
-      limit = 15
-    } = req.body;
+  const {
+    maxPrice = 8.0,
+    minGames = 3,
+    minMinutes = 90,
+    minValueRatio = 1.2,
+    positions = [],
+    limit = 15
+  } = req.body;
 
-    console.log('📊 Parámetros personalizados:', {
-      maxPrice, minGames, minMinutes, minValueRatio, positions, limit
-    });
+  logger.info('📊 Parámetros personalizados:', {
+    maxPrice, minGames, minMinutes, minValueRatio, positions, limit
+  });
 
-    // Actualizar configuración temporal
-    const originalConfig = { ...bargainAnalyzer.config };
-    bargainAnalyzer.config.MAX_PRICE = maxPrice;
-    bargainAnalyzer.config.MIN_GAMES = minGames;
-    bargainAnalyzer.config.MIN_MINUTES = minMinutes;
-    bargainAnalyzer.config.VALUE_RATIO_MIN = minValueRatio;
+  // Actualizar configuración temporal
+  const originalConfig = { ...bargainAnalyzer.config };
+  bargainAnalyzer.config.MAX_PRICE = maxPrice;
+  bargainAnalyzer.config.MIN_GAMES = minGames;
+  bargainAnalyzer.config.MIN_MINUTES = minMinutes;
+  bargainAnalyzer.config.VALUE_RATIO_MIN = minValueRatio;
 
-    // Obtener chollos con nueva configuración
-    const result = await bargainAnalyzer.identifyBargains(limit * 2);
+  // Obtener chollos con nueva configuración
+  const result = await bargainAnalyzer.identifyBargains(limit * 2);
 
-    // Restaurar configuración original
-    bargainAnalyzer.config = originalConfig;
+  // Restaurar configuración original
+  bargainAnalyzer.config = originalConfig;
 
-    if (result.success) {
-      // Filtrar por posiciones si se especifica
-      let filteredData = result.data;
-      if (positions && positions.length > 0) {
-        filteredData = result.data.filter(player => positions.includes(player.position));
-      }
-
-      // Limitar resultados
-      filteredData = filteredData.slice(0, limit);
-
-      res.json({
-        success: true,
-        message: `Análisis personalizado completado - ${filteredData.length} chollos encontrados`,
-        data: filteredData,
-        metadata: {
-          ...result.metadata,
-          customParams: {
-            maxPrice, minGames, minMinutes, minValueRatio, positions, limit
-          },
-          filteredCount: filteredData.length
-        },
-        insights: generateCustomInsights(filteredData, {
-          maxPrice, minGames, minMinutes, minValueRatio
-        })
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: 'Error en análisis personalizado',
-        details: result.error
-      });
+  if (result.success) {
+    // Filtrar por posiciones si se especifica
+    let filteredData = result.data;
+    if (positions && positions.length > 0) {
+      filteredData = result.data.filter(player => positions.includes(player.position));
     }
 
-  } catch (error) {
-    console.error('❌ Error en análisis personalizado:', error.message);
+    // Limitar resultados
+    filteredData = filteredData.slice(0, limit);
+
+    res.json({
+      success: true,
+      message: `Análisis personalizado completado - ${filteredData.length} chollos encontrados`,
+      data: filteredData,
+      metadata: {
+        ...result.metadata,
+        customParams: {
+          maxPrice, minGames, minMinutes, minValueRatio, positions, limit
+        },
+        filteredCount: filteredData.length
+      },
+      insights: generateCustomInsights(filteredData, {
+        maxPrice, minGames, minMinutes, minValueRatio
+      })
+    });
+  } else {
     res.status(500).json({
       success: false,
-      error: error.message
+      error: 'Error en análisis personalizado',
+      details: result.error
     });
   }
-});
+}));
 
 // Helper: Descripción de posiciones
 function getPositionDescription(position) {

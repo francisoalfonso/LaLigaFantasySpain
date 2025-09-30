@@ -1,12 +1,13 @@
 // Rutas para generación de imágenes - Fantasy La Liga Pro
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const imageGenerator = require('../services/imageGenerator');
 
 // GET /api/images/test - Test del generador de imágenes
 router.get('/test', async (req, res) => {
   try {
-    console.log('🎨 Testing Image Generator...');
+    logger.info('🎨 Testing Image Generator...');
 
     // Datos de prueba
     const testPlayerData = {
@@ -51,7 +52,7 @@ router.get('/test', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Image generator test error:', error);
+    logger.error('❌ Image generator test error:', error);
     res.status(500).json({
       success: false,
       message: 'Error testing image generator',
@@ -72,7 +73,7 @@ router.post('/generate-chollo', async (req, res) => {
       });
     }
 
-    console.log('🔥 Generating chollo image for:', playerData.name);
+    logger.info('🔥 Generating chollo image for:', playerData.name);
 
     const generatedImage = await imageGenerator.generateCholloImage(playerData, bargainData || {});
 
@@ -84,7 +85,7 @@ router.post('/generate-chollo', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating chollo image:', error);
+    logger.error('❌ Error generating chollo image:', error);
     res.status(500).json({
       success: false,
       message: 'Error generating chollo image',
@@ -98,7 +99,7 @@ router.post('/generate-analysis', async (req, res) => {
   try {
     const { analysisData } = req.body;
 
-    console.log('📊 Generating analysis image');
+    logger.info('📊 Generating analysis image');
 
     const generatedImage = await imageGenerator.generateAnalysisImage(analysisData || {});
 
@@ -110,7 +111,7 @@ router.post('/generate-analysis', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating analysis image:', error);
+    logger.error('❌ Error generating analysis image:', error);
     res.status(500).json({
       success: false,
       message: 'Error generating analysis image',
@@ -124,7 +125,7 @@ router.post('/generate-alert', async (req, res) => {
   try {
     const { alertData } = req.body;
 
-    console.log('🚨 Generating alert image');
+    logger.info('🚨 Generating alert image');
 
     const generatedImage = await imageGenerator.generateAlertImage(alertData || {});
 
@@ -136,7 +137,7 @@ router.post('/generate-alert', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating alert image:', error);
+    logger.error('❌ Error generating alert image:', error);
     res.status(500).json({
       success: false,
       message: 'Error generating alert image',
@@ -158,7 +159,7 @@ router.post('/generate-from-bargain', async (req, res) => {
     }
 
     // Obtener datos del chollo
-    console.log('📡 Getting bargain data for player:', playerId);
+    logger.info('📡 Getting bargain data for player:', playerId);
 
     // Simular datos del chollo (en producción vendría del BargainAnalyzer)
     const mockPlayerData = {
@@ -192,7 +193,7 @@ router.post('/generate-from-bargain', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating image from bargain:', error);
+    logger.error('❌ Error generating image from bargain:', error);
     res.status(500).json({
       success: false,
       message: 'Error generating image from bargain data',
@@ -253,7 +254,7 @@ router.get('/list', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ Error listing images:', error);
+    logger.error('❌ Error listing images:', error);
     res.status(500).json({
       success: false,
       message: 'Error listing generated images',
@@ -267,7 +268,7 @@ router.delete('/cleanup', async (req, res) => {
   try {
     const { maxAgeHours = 24 } = req.body;
 
-    console.log(`🗑️ Cleaning images older than ${maxAgeHours} hours`);
+    logger.info(`🗑️ Cleaning images older than ${maxAgeHours} hours`);
 
     await imageGenerator.cleanOldImages(maxAgeHours);
 
@@ -277,7 +278,7 @@ router.delete('/cleanup', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error during cleanup:', error);
+    logger.error('❌ Error during cleanup:', error);
     res.status(500).json({
       success: false,
       message: 'Error during image cleanup',

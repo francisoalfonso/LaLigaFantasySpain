@@ -1,16 +1,40 @@
 // Servidor Express principal para Dashboard Fantasy La Liga
 require('dotenv').config();
 
+// Validar variables de entorno ANTES de inicializar cualquier servicio
+const { validateAllEnv } = require('./config/envValidator');
+try {
+    validateAllEnv();
+} catch (error) {
+    // NOTA: console.error aquí es correcto - error ANTES de inicializar logger
+    console.error('💥 Error fatal: Configuración inválida');
+    console.error(error.message);
+    process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+const logger = require('./utils/logger');
+const {
+    generalLimiter,
+    heavyOperationsLimiter,
+    apiSportsLimiter,
+    imageGenerationLimiter,
+    veo3Limiter,
+    publicLimiter
+} = require('./middleware/rateLimiter');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 // Importar rutas
 const testRoutes = require('./routes/test');
 const apiFootballRoutes = require('./routes/apiFootball');
 const n8nMcpRoutes = require('./routes/n8nMcp');
+const n8nVersionsRoutes = require('./routes/n8nVersions');
 const weatherRoutes = require('./routes/weather');
 const databaseRoutes = require('./routes/database');
 const dataSyncRoutes = require('./routes/dataSync');
@@ -26,6 +50,7 @@ const imageGeneratorRoutes = require('./routes/imageGenerator');
 const veo3Routes = require('./routes/veo3');
 const videosRoutes = require('./routes/videos');
 const bunnyStreamRoutes = require('./routes/bunnyStream');
+const contentPreviewRoutes = require('./routes/contentPreview');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -52,6 +77,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting general para toda la API
+// Aplica a todos los endpoints excepto /health y /api/info
+app.use('/api/', generalLimiter);
+
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -64,29 +93,63 @@ app.use('/output/veo3', express.static(path.join(__dirname, '../output/veo3')));
 
 // Middleware para logging de peticiones
 app.use((req, res, next) => {
-  console.log(`📨 ${new Date().toISOString()} - ${req.method} ${req.path}`);
-  next();
+    logger.http(`${req.method} ${req.path}`, {
+        ip: req.ip,
+        userAgent: req.get('user-agent')
+    });
+    next();
 });
 
-// Rutas de la API
+// Swagger UI - Documentación API interactiva
+app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+        customSiteTitle: 'Fantasy La Liga API Docs',
+        customCss: '.swagger-ui .topbar { display: none }',
+        customfavIcon: '/favicon.ico'
+    })
+);
+
+// Swagger JSON spec
+app.get('/api-docs.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+
+// Rutas de la API con rate limiting específico
+
+// Endpoints públicos sin rate limiting adicional
 app.use('/api/test', testRoutes);
-app.use('/api/laliga', apiFootballRoutes);
+app.use('/api/debug', debugRoutes);
+
+// API-Sports endpoints - rate limiting específico (75 req/min)
+app.use('/api/laliga', apiSportsLimiter, apiFootballRoutes);
+app.use('/api/fixtures', apiSportsLimiter, fixturesRoutes);
+app.use('/api/bargains', apiSportsLimiter, bargainsRoutes);
+app.use('/api/predictions', apiSportsLimiter, predictionsRoutes);
+app.use('/api/evolution', apiSportsLimiter, evolutionRoutes);
+
+// Endpoints de operaciones pesadas (10 req/hora)
+app.use('/api/sync', heavyOperationsLimiter, dataSyncRoutes);
+app.use('/api/content', heavyOperationsLimiter, contentGeneratorRoutes);
+app.use('/api/ai', heavyOperationsLimiter, contentAIRoutes);
+
+// Generación de imágenes (30 req/15min)
+app.use('/api/images', imageGenerationLimiter, imageGeneratorRoutes);
+
+// VEO3 - muy restrictivo (5 req/hora)
+app.use('/api/veo3', veo3Limiter, veo3Routes);
+
+// Otros endpoints con rate limiting general
 app.use('/api/n8n-mcp', n8nMcpRoutes);
+app.use('/api/n8n-versions', n8nVersionsRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/database', databaseRoutes);
-app.use('/api/sync', dataSyncRoutes);
-app.use('/api/content', contentGeneratorRoutes);
-app.use('/api/fixtures', fixturesRoutes);
-app.use('/api/debug', debugRoutes);
-app.use('/api/bargains', bargainsRoutes);
-app.use('/api/predictions', predictionsRoutes);
-app.use('/api/ai', contentAIRoutes);
-app.use('/api/evolution', evolutionRoutes);
-// app.use('/api/instagram', instagramRoutes); // Temporalmente deshabilitado
-app.use('/api/images', imageGeneratorRoutes);
-app.use('/api/veo3', veo3Routes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/bunny', bunnyStreamRoutes);
+app.use('/api/content-preview', contentPreviewRoutes);
+// app.use('/api/instagram', instagramRoutes); // Temporalmente deshabilitado
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -153,14 +216,43 @@ app.get('/videos', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
 });
 
-// Ruta de salud del servidor
+// Ruta para pipeline de contenido viral (nuevo)
+app.get('/content-pipeline', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/pipeline', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
+});
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check del servidor
+ *     description: Verifica que el servidor está funcionando correctamente
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Servidor funcionando correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthCheck'
+ *             example:
+ *               status: OK
+ *               timestamp: '2025-09-30T12:00:00.000Z'
+ *               environment: development
+ *               version: '1.0.0'
+ */
 app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    version: require('../package.json').version
-  });
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+        version: require('../package.json').version
+    });
 });
 
 // Ruta para información de la API
@@ -184,54 +276,60 @@ app.get('/api/info', (req, res) => {
   });
 });
 
-// Manejo de errores 404
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Endpoint no encontrado',
-    path: req.originalUrl,
-    method: req.method
-  });
-});
+// Manejo de errores 404 - debe ir después de todas las rutas
+app.use(notFoundHandler);
 
-// Manejo global de errores
-app.use((error, req, res, next) => {
-  console.error('💥 Error del servidor:', error);
-
-  res.status(error.status || 500).json({
-    error: 'Error interno del servidor',
-    message: process.env.NODE_ENV === 'development' ? error.message : 'Algo salió mal',
-    timestamp: new Date().toISOString()
-  });
-});
+// Manejo global de errores - debe ir al final
+app.use(errorHandler);
 
 // Iniciar servidor
 app.listen(PORT, HOST, () => {
-  console.log('🚀 ===================================');
-  console.log('🏆 Fantasy La Liga Dashboard Server');
-  console.log('🚀 ===================================');
-  console.log(`🌐 Servidor corriendo en: http://${HOST}:${PORT}`);
-  console.log(`📊 Dashboard disponible en: http://${HOST}:${PORT}`);
-  console.log(`🔧 API Info: http://${HOST}:${PORT}/api/info`);
-  console.log(`❤️ Health check: http://${HOST}:${PORT}/health`);
-  console.log('🚀 ===================================');
+    // Banner de inicio con logger estructurado
+    const banner = [
+        '',
+        '🚀 ===================================',
+        '🏆 Fantasy La Liga Dashboard Server',
+        '🚀 ===================================',
+        `🌐 Servidor: http://${HOST}:${PORT}`,
+        `📊 Dashboard: http://${HOST}:${PORT}`,
+        `🔧 API Info: http://${HOST}:${PORT}/api/info`,
+        `❤️  Health: http://${HOST}:${PORT}/health`,
+        '🚀 ===================================',
+        ''
+    ].join('\n');
 
-  // Verificar configuración
-  if (!process.env.API_FOOTBALL_KEY) {
-    console.log('⚠️ ADVERTENCIA: API_FOOTBALL_KEY no configurada');
-  } else {
-    console.log('✅ API-Sports Key configurada');
-    console.log('🏆 Plan Ultra activo - La Liga datos reales');
-  }
+    logger.info(banner);
+
+    logger.info('Servidor Fantasy La Liga iniciado', {
+        port: PORT,
+        host: HOST,
+        environment: process.env.NODE_ENV || 'development',
+        rateLimiting: 'enabled',
+        endpoints: {
+            general: '100 req/15min',
+            apiSports: '75 req/min',
+            heavy: '10 req/hora',
+            veo3: '5 req/hora',
+            images: '30 req/15min'
+        }
+    });
+
+    // Verificar configuración
+    if (!process.env.API_FOOTBALL_KEY) {
+        logger.warn('API_FOOTBALL_KEY no configurada');
+    } else {
+        logger.success('API-Sports Key configurada - Plan Ultra activo');
+    }
 });
 
 // Manejo graceful de cierre
 process.on('SIGTERM', () => {
-  console.log('🛑 Cerrando servidor...');
+  logger.info('🛑 Señal SIGTERM recibida - Cerrando servidor gracefully...');
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  console.log('🛑 Cerrando servidor...');
+  logger.info('🛑 Señal SIGINT recibida - Cerrando servidor gracefully...');
   process.exit(0);
 });
 

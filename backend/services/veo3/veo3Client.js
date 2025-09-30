@@ -1,4 +1,5 @@
 const axios = require('axios');
+const logger = require('../../utils/logger');
 const videoManager = require('../videoManager');
 const BunnyStreamManager = require('../bunnyStreamManager');
 
@@ -61,8 +62,8 @@ class VEO3Client {
                 ...options
             };
 
-            console.log(`[VEO3Client] Generando video con prompt: ${prompt.substring(0, 100)}...`);
-            console.log(`[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`);
+            logger.info(`[VEO3Client] Generando video con prompt: ${prompt.substring(0, 100)}...`);
+            logger.info(`[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`);
 
             const response = await axios.post(`${this.baseUrl}/generate`, params, {
                 headers: {
@@ -78,11 +79,11 @@ class VEO3Client {
                 throw new Error(`Error API VEO3: ${result.msg}`);
             }
 
-            console.log(`[VEO3Client] Video iniciado, taskId: ${result.data.taskId}`);
+            logger.info(`[VEO3Client] Video iniciado, taskId: ${result.data.taskId}`);
             return result;
 
         } catch (error) {
-            console.error('[VEO3Client] Error generando video:', error.message);
+            logger.error('[VEO3Client] Error generando video:', error.message);
 
             // Manejo específico de errores
             if (error.response?.status === 401) {
@@ -115,7 +116,7 @@ class VEO3Client {
             return response.data;
 
         } catch (error) {
-            console.error(`[VEO3Client] Error obteniendo estado ${taskId}:`, error.message);
+            logger.error(`[VEO3Client] Error obteniendo estado ${taskId}:`, error.message);
             throw error;
         }
     }
@@ -130,7 +131,7 @@ class VEO3Client {
         const startTime = Date.now();
         let attempts = 0;
 
-        console.log(`[VEO3Client] Esperando completar video ${taskId} (timeout: ${timeout}ms)`);
+        logger.info(`[VEO3Client] Esperando completar video ${taskId} (timeout: ${timeout}ms)`);
 
         while (Date.now() - startTime < timeout) {
             attempts++;
@@ -140,14 +141,14 @@ class VEO3Client {
 
                 // Video completado exitosamente
                 if (status.data?.successFlag === 1) {
-                    console.log(`[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`);
+                    logger.info(`[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`);
 
                     const veo3Url = status.data.response.resultUrls[0];
-                    console.log(`[VEO3Client] Descargando video de VEO3: ${veo3Url}`);
+                    logger.info(`[VEO3Client] Descargando video de VEO3: ${veo3Url}`);
 
                     // NUEVA ESTRATEGIA: Subir directamente a Bunny.net Stream
                     try {
-                        console.log(`[VEO3Client] Subiendo video a Bunny.net Stream: ${veo3Url}`);
+                        logger.info(`[VEO3Client] Subiendo video a Bunny.net Stream: ${veo3Url}`);
 
                         const bunnyData = await this.bunnyStream.uploadFromVeo3Url(veo3Url, {
                             taskId,
@@ -160,7 +161,7 @@ class VEO3Client {
                             seeds: status.data.response.seeds
                         });
 
-                        console.log(`[VEO3Client] Video subido exitosamente a Bunny.net: ${bunnyData.directUrl}`);
+                        logger.info(`[VEO3Client] Video subido exitosamente a Bunny.net: ${bunnyData.directUrl}`);
 
                         return {
                             taskId,
@@ -179,11 +180,11 @@ class VEO3Client {
                         };
 
                     } catch (bunnyError) {
-                        console.error(`[VEO3Client] Error subiendo a Bunny.net: ${bunnyError.message}`);
+                        logger.error(`[VEO3Client] Error subiendo a Bunny.net: ${bunnyError.message}`);
 
                         // Fallback: Intentar descarga local como antes
                         try {
-                            console.log(`[VEO3Client] Fallback: intentando descarga local`);
+                            logger.info(`[VEO3Client] Fallback: intentando descarga local`);
 
                             const videoData = await videoManager.downloadAndStore(veo3Url, {
                                 taskId,
@@ -193,7 +194,7 @@ class VEO3Client {
                                 service: 'veo3'
                             });
 
-                            console.log(`[VEO3Client] Video almacenado localmente como fallback: ${videoData.publicUrl}`);
+                            logger.info(`[VEO3Client] Video almacenado localmente como fallback: ${videoData.publicUrl}`);
 
                             return {
                                 taskId,
@@ -210,10 +211,10 @@ class VEO3Client {
                             };
 
                         } catch (localError) {
-                            console.error(`[VEO3Client] Ambos fallback fallaron: ${localError.message}`);
+                            logger.error(`[VEO3Client] Ambos fallback fallaron: ${localError.message}`);
 
                             // Último fallback: URL original (lo que teníamos antes)
-                            console.warn('[VEO3Client] Usando URL original como último recurso');
+                            logger.warn('[VEO3Client] Usando URL original como último recurso');
                             return {
                                 taskId,
                                 url: veo3Url,
@@ -232,15 +233,16 @@ class VEO3Client {
                 // Video falló
                 if (status.data?.successFlag >= 2) {
                     const errorMsg = status.data.errorMessage || 'Error desconocido en generación';
-                    console.error(`[VEO3Client] Video ${taskId} falló: ${errorMsg}`);
+                    logger.error(`[VEO3Client] Video ${taskId} falló: ${errorMsg}`);
+                    logger.error(`[VEO3Client] Status completo:`, JSON.stringify(status.data, null, 2));
                     throw new Error(`Generación falló: ${errorMsg}`);
                 }
 
                 // Aún procesando (successFlag: 0)
-                console.log(`[VEO3Client] Video ${taskId} aún procesando... (intento ${attempts})`);
+                logger.info(`[VEO3Client] Video ${taskId} aún procesando... (intento ${attempts})`);
 
             } catch (error) {
-                console.error(`[VEO3Client] Error comprobando estado:`, error.message);
+                logger.error(`[VEO3Client] Error comprobando estado:`, error.message);
                 throw error;
             }
 
@@ -268,11 +270,11 @@ class VEO3Client {
             // Esperar completar
             const video = await this.waitForCompletion(initResult.data.taskId);
 
-            console.log(`[VEO3Client] Video completo: ${video.url} (${video.duration}s, $${video.cost})`);
+            logger.info(`[VEO3Client] Video completo: ${video.url} (${video.duration}s, $${video.cost})`);
             return video;
 
         } catch (error) {
-            console.error('[VEO3Client] Error generación completa:', error.message);
+            logger.error('[VEO3Client] Error generación completa:', error.message);
             throw error;
         }
     }
@@ -313,7 +315,7 @@ class VEO3Client {
      */
     async generateMultipleVideos(prompts, options = {}) {
         try {
-            console.log(`[VEO3Client] Generando ${prompts.length} videos para concatenar`);
+            logger.info(`[VEO3Client] Generando ${prompts.length} videos para concatenar`);
 
             const videos = [];
             const videoIds = [];
@@ -321,7 +323,7 @@ class VEO3Client {
             // Generar videos en paralelo (limitado por API)
             for (let i = 0; i < prompts.length; i++) {
                 const prompt = prompts[i];
-                console.log(`[VEO3Client] Generando video ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`);
+                logger.info(`[VEO3Client] Generando video ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`);
 
                 const video = await this.generateCompleteVideo(prompt, options);
                 videos.push(video);
@@ -333,7 +335,7 @@ class VEO3Client {
                 }
             }
 
-            console.log(`[VEO3Client] ${videos.length} videos generados, iniciando concatenación`);
+            logger.info(`[VEO3Client] ${videos.length} videos generados, iniciando concatenación`);
 
             // Concatenar todos los videos
             const concatenatedVideo = await videoManager.concatenateVideos(videoIds, {
@@ -344,7 +346,7 @@ class VEO3Client {
                 type: 'multi_segment'
             });
 
-            console.log(`[VEO3Client] Video final concatenado: ${concatenatedVideo.publicUrl}`);
+            logger.info(`[VEO3Client] Video final concatenado: ${concatenatedVideo.publicUrl}`);
 
             return {
                 success: true,
@@ -355,7 +357,89 @@ class VEO3Client {
             };
 
         } catch (error) {
-            console.error('[VEO3Client] Error generando videos múltiples:', error.message);
+            logger.error('[VEO3Client] Error generando videos múltiples:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Descargar video desde URL de VEO3
+     * @param {string} videoUrl - URL del video generado
+     * @param {string} outputPath - Ruta donde guardar el video
+     * @returns {Promise<void>}
+     */
+    async downloadVideo(videoUrl, outputPath) {
+        const fs = require('fs');
+        const path = require('path');
+
+        try {
+            logger.info(`[VEO3Client] Descargando video: ${videoUrl}`);
+
+            const response = await axios({
+                method: 'GET',
+                url: videoUrl,
+                responseType: 'stream',
+                timeout: 120000 // 2 minutos para descarga
+            });
+
+            // Crear directorio si no existe
+            const dir = path.dirname(outputPath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+
+            // Escribir stream a archivo
+            const writer = fs.createWriteStream(outputPath);
+            response.data.pipe(writer);
+
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    logger.info(`[VEO3Client] ✅ Video descargado: ${outputPath}`);
+                    resolve();
+                });
+                writer.on('error', (error) => {
+                    logger.error(`[VEO3Client] ❌ Error descargando video:`, error.message);
+                    reject(error);
+                });
+            });
+
+        } catch (error) {
+            logger.error('[VEO3Client] Error en downloadVideo:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Obtener estado de tarea (alias para compatibilidad)
+     * @param {string} taskId - ID de la tarea
+     * @returns {Promise<object>} - Estado formateado
+     */
+    async getTaskStatus(taskId) {
+        try {
+            const status = await this.getStatus(taskId);
+
+            // Formatear respuesta para compatibilidad
+            if (status.data?.successFlag === 1) {
+                return {
+                    state: 'SUCCEEDED',
+                    progress: 100,
+                    videoUrl: status.data.response.resultUrls[0]
+                };
+            } else if (status.data?.successFlag === 0) {
+                return {
+                    state: 'FAILED',
+                    error: status.data.response?.error || 'Unknown error'
+                };
+            } else {
+                // En progreso
+                return {
+                    state: 'PROCESSING',
+                    progress: 50
+                };
+            }
+
+        } catch (error) {
+            logger.error(`[VEO3Client] Error en getTaskStatus:`, error.message);
             throw error;
         }
     }
@@ -368,19 +452,19 @@ class VEO3Client {
         try {
             const testPrompt = `The person in the reference image speaking in Spanish: "¡Hola Misters! Bienvenidos a Fantasy La Liga." Exact appearance from reference image.`;
 
-            console.log('[VEO3Client] Testando conexión con API...');
+            logger.info('[VEO3Client] Testando conexión con API...');
             const result = await this.generateVideo(testPrompt);
 
             if (result.code === 200 && result.data?.taskId) {
-                console.log('[VEO3Client] ✅ Conexión API exitosa');
+                logger.info('[VEO3Client] ✅ Conexión API exitosa');
                 return true;
             } else {
-                console.log('[VEO3Client] ❌ Conexión API falló');
+                logger.info('[VEO3Client] ❌ Conexión API falló');
                 return false;
             }
 
         } catch (error) {
-            console.error('[VEO3Client] ❌ Error testando conexión:', error.message);
+            logger.error('[VEO3Client] ❌ Error testando conexión:', error.message);
             return false;
         }
     }

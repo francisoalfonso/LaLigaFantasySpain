@@ -1,4 +1,5 @@
 const ffmpeg = require('fluent-ffmpeg');
+const logger = require('../../utils/logger');
 const path = require('path');
 const fs = require('fs');
 
@@ -215,7 +216,7 @@ class PlayerCardsOverlay {
             const nodeHtmlToImage = require('node-html-to-image');
             const html = this.generatePlayerCardHTML(playerData);
 
-            console.log(`[PlayerCardsOverlay] Generando tarjeta de ${playerData.name}...`);
+            logger.info(`[PlayerCardsOverlay] Generando tarjeta de ${playerData.name}...`);
 
             await nodeHtmlToImage({
                 output: outputPath,
@@ -228,11 +229,11 @@ class PlayerCardsOverlay {
                 }
             });
 
-            console.log(`[PlayerCardsOverlay] Tarjeta generada: ${outputPath}`);
+            logger.info(`[PlayerCardsOverlay] Tarjeta generada: ${outputPath}`);
             return outputPath;
 
         } catch (error) {
-            console.error('[PlayerCardsOverlay] Error generando tarjeta:', error.message);
+            logger.error('[PlayerCardsOverlay] Error generando tarjeta:', error.message);
             throw error;
         }
     }
@@ -246,7 +247,7 @@ class PlayerCardsOverlay {
      */
     async addPlayerCardOverlay(videoPath, playerData, options = {}) {
         try {
-            console.log(`[PlayerCardsOverlay] Agregando overlay de ${playerData.name} al video`);
+            logger.info(`[PlayerCardsOverlay] Agregando overlay de ${playerData.name} al video`);
 
             // Generar nombre de archivos
             const videoBaseName = path.basename(videoPath, path.extname(videoPath));
@@ -274,15 +275,15 @@ class PlayerCardsOverlay {
                     .audioCodec('aac')
                     .format('mp4')
                     .on('start', (commandLine) => {
-                        console.log(`[PlayerCardsOverlay] FFmpeg iniciado: ${commandLine}`);
+                        logger.info(`[PlayerCardsOverlay] FFmpeg iniciado: ${commandLine}`);
                     })
                     .on('progress', (progress) => {
                         if (progress.percent) {
-                            console.log(`[PlayerCardsOverlay] Progreso: ${Math.round(progress.percent)}%`);
+                            logger.info(`[PlayerCardsOverlay] Progreso: ${Math.round(progress.percent)}%`);
                         }
                     })
                     .on('end', () => {
-                        console.log(`[PlayerCardsOverlay] ✅ Overlay completado: ${outputVideoPath}`);
+                        logger.info(`[PlayerCardsOverlay] ✅ Overlay completado: ${outputVideoPath}`);
 
                         // Limpiar archivo temporal de tarjeta
                         if (fs.existsSync(cardImagePath)) {
@@ -292,14 +293,14 @@ class PlayerCardsOverlay {
                         resolve(outputVideoPath);
                     })
                     .on('error', (error) => {
-                        console.error('[PlayerCardsOverlay] ❌ Error FFmpeg:', error.message);
+                        logger.error('[PlayerCardsOverlay] ❌ Error FFmpeg:', error.message);
                         reject(error);
                     })
                     .save(outputVideoPath);
             });
 
         } catch (error) {
-            console.error('[PlayerCardsOverlay] Error aplicando overlay:', error.message);
+            logger.error('[PlayerCardsOverlay] Error aplicando overlay:', error.message);
             throw error;
         }
     }
@@ -313,7 +314,7 @@ class PlayerCardsOverlay {
      */
     async addMultiplePlayerCards(videoPath, playersData, options = {}) {
         try {
-            console.log(`[PlayerCardsOverlay] Agregando ${playersData.length} tarjetas al video`);
+            logger.info(`[PlayerCardsOverlay] Agregando ${playersData.length} tarjetas al video`);
 
             let currentVideoPath = videoPath;
             const baseName = path.basename(videoPath, path.extname(videoPath));
@@ -346,11 +347,11 @@ class PlayerCardsOverlay {
             const finalOutputPath = path.join(this.outputDir, `${baseName}-multi-cards.mp4`);
             fs.renameSync(currentVideoPath, finalOutputPath);
 
-            console.log(`[PlayerCardsOverlay] ✅ Múltiples overlays completados: ${finalOutputPath}`);
+            logger.info(`[PlayerCardsOverlay] ✅ Múltiples overlays completados: ${finalOutputPath}`);
             return finalOutputPath;
 
         } catch (error) {
-            console.error('[PlayerCardsOverlay] Error con múltiples overlays:', error.message);
+            logger.error('[PlayerCardsOverlay] Error con múltiples overlays:', error.message);
             throw error;
         }
     }
@@ -362,7 +363,7 @@ class PlayerCardsOverlay {
      */
     async runTest(videoPath) {
         try {
-            console.log('[PlayerCardsOverlay] 🧪 Ejecutando test de overlay...');
+            logger.info('[PlayerCardsOverlay] 🧪 Ejecutando test de overlay...');
 
             // Datos de test
             const testPlayerData = {
@@ -376,7 +377,7 @@ class PlayerCardsOverlay {
 
             const resultPath = await this.addPlayerCardOverlay(videoPath, testPlayerData);
 
-            console.log('[PlayerCardsOverlay] ✅ Test completado exitosamente');
+            logger.info('[PlayerCardsOverlay] ✅ Test completado exitosamente');
             return {
                 success: true,
                 outputPath: resultPath,
@@ -384,7 +385,7 @@ class PlayerCardsOverlay {
             };
 
         } catch (error) {
-            console.error('[PlayerCardsOverlay] ❌ Test falló:', error.message);
+            logger.error('[PlayerCardsOverlay] ❌ Test falló:', error.message);
             throw error;
         }
     }

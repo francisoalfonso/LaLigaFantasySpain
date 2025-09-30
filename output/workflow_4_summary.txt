@@ -1,0 +1,223 @@
+====================================================================
+🎯 WORKFLOW #4: Fantasy La Liga - Weekly Content Pipeline
+====================================================================
+
+✅ ESTADO: CREADO EXITOSAMENTE
+
+📋 INFORMACIÓN BÁSICA:
+=======================
+- Workflow ID: auxtq56gNSSTrlSc
+- Nombre: Fantasy La Liga - Weekly Content Pipeline
+- Estado actual: INACTIVO (activar manualmente en n8n UI)
+- Creado: 2025-09-30T10:59:27.160Z
+- URL n8n: https://n8n-n8n.6ld9pv.easypanel.host/workflow/auxtq56gNSSTrlSc
+
+⏰ SCHEDULE CONFIGURADO:
+========================
+- Cron Expression: 0 6 * * 1
+- Horario: Lunes 6:00 AM
+- Timezone: Europe/Madrid
+- Trigger Type: Schedule Trigger (n8n-nodes-base.scheduleTrigger)
+
+🔧 ARQUITECTURA (10 NODOS):
+===========================
+
+1. Schedule Trigger - Every Monday 6AM
+   - Tipo: n8n-nodes-base.scheduleTrigger
+   - Cron: 0 6 * * 1
+   - Dispara workflow automáticamente cada lunes 6:00 AM
+
+2. Get Next Gameweek Fixtures
+   - Tipo: n8n-nodes-base.httpRequest
+   - Método: GET
+   - URL: http://localhost:3000/api/fixtures?next=true
+   - Obtiene partidos próxima jornada
+
+3. Get Top Bargains
+   - Tipo: n8n-nodes-base.httpRequest
+   - Método: GET
+   - URL: http://localhost:3000/api/bargains/top?limit=10
+   - Obtiene top 10 chollos de la semana
+
+4. Get Team Standings
+   - Tipo: n8n-nodes-base.httpRequest
+   - Método: GET
+   - URL: http://localhost:3000/api/laliga/laliga/standings
+   - Obtiene clasificación actual de La Liga
+
+5. Create Weekly Content Plan
+   - Tipo: n8n-nodes-base.function
+   - JavaScript que genera plan de contenido para 7 días
+   - Asigna contenido a reporteros según calendario
+   - Output: metadata + contentPlan (7 días)
+
+6. Loop Over Days
+   - Tipo: n8n-nodes-base.splitInBatches
+   - Itera sobre cada día del plan (7 iteraciones)
+   - Batch size: 1 (procesa día por día)
+
+7. Set Variables - Day Content
+   - Tipo: n8n-nodes-base.set
+   - Prepara variables para día actual:
+     * day (Lunes-Domingo)
+     * date (YYYY-MM-DD)
+     * contentType
+     * reporter
+     * scheduledTime
+
+8. Schedule Content
+   - Tipo: n8n-nodes-base.httpRequest
+   - Método: POST
+   - URL: http://localhost:3000/api/content/schedule
+   - Body: { day, contentType, scheduledDate, reporter, scheduledTime }
+   - ⚠️ ENDPOINT PENDIENTE DE IMPLEMENTAR
+
+9. Aggregate Results
+   - Tipo: n8n-nodes-base.function
+   - Acumula todos los contenidos programados
+   - Output: { totalScheduled, scheduledContent, aggregatedAt }
+
+10. Send Email Summary
+    - Tipo: n8n-nodes-base.httpRequest
+    - Método: POST
+    - URL: http://localhost:3000/api/email/send
+    - To: laligafantasyspainpro@gmail.com
+    - Subject: 📅 Plan Contenido Semanal - [Fecha]
+    - Body: HTML con calendario completo 7 días
+    - ⚠️ ENDPOINT PENDIENTE DE IMPLEMENTAR
+
+📅 CALENDARIO DE CONTENIDO (7 DÍAS):
+=====================================
+
+LUNES:
+- Tipo: chollos
+- Reportero: Carlos González
+- Hora: 09:00
+- Descripción: Chollos inicio semana - Top jugadores infravalorados
+- Plataformas: Instagram, TikTok
+- Prioridad: 5
+
+MARTES:
+- Tipo: analysis
+- Reportero: Ana Martínez
+- Hora: 10:00
+- Descripción: Análisis táctico jornada - Tendencias y patrones
+- Plataformas: YouTube, Instagram
+- Prioridad: 4
+
+MIÉRCOLES:
+- Tipo: femenina
+- Reportero: Lucía Rodríguez
+- Hora: 09:00
+- Descripción: Fútbol femenino + cantera emergente
+- Plataformas: Instagram, YouTube
+- Prioridad: 3
+
+JUEVES:
+- Tipo: preview
+- Reportero: Ana Martínez + Pablo Martín
+- Hora: 11:00
+- Descripción: Preview jornada + Fantasy hacks Gen Z
+- Plataformas: YouTube, TikTok, Instagram
+- Prioridad: 5
+
+VIERNES:
+- Tipo: tips
+- Reportero: Carlos González + Pablo Martín
+- Hora: 10:00
+- Descripción: Tips Fantasy + contenido viral fin de semana
+- Plataformas: TikTok, Instagram Stories, Twitch
+- Prioridad: 5
+
+SÁBADO:
+- Tipo: pre-match
+- Reportero: Ana Martínez
+- Hora: 08:00
+- Descripción: Análisis pre-partidos + alineaciones optimales
+- Plataformas: Instagram, YouTube
+- Prioridad: 4
+
+DOMINGO:
+- Tipo: reactions
+- Reportero: Pablo Martín + Lucía Rodríguez
+- Hora: 20:00
+- Descripción: Reacciones Gen Z + resumen liga femenina
+- Plataformas: TikTok, Instagram Stories, Twitch
+- Prioridad: 3
+
+👥 EQUIPO DE REPORTEROS:
+========================
+- Ana Martínez (Ana Fantasy): Analista táctica principal
+- Carlos González (Carlos Stats): Especialista en estadísticas
+- Lucía Rodríguez (Lucía Femenina): Fútbol femenino y cantera
+- Pablo Martín (Pablo GenZ): Especialista Gen Z y contenido viral
+
+⚠️ ENDPOINTS BACKEND PENDIENTES:
+==================================
+
+1. POST /api/content/schedule
+   - Endpoint para programar contenido en base de datos
+   - Body esperado:
+     {
+       "day": "Lunes",
+       "contentType": "chollos",
+       "scheduledDate": "2025-09-29",
+       "reporter": "Carlos González",
+       "scheduledTime": "09:00"
+     }
+   - Response esperado: { success: true, scheduledId: "..." }
+
+2. POST /api/email/send
+   - Endpoint para envío de emails
+   - Body esperado:
+     {
+       "to": "laligafantasyspainpro@gmail.com",
+       "subject": "📅 Plan Contenido Semanal - 2025-09-29",
+       "html": "<html>...</html>"
+     }
+   - Response esperado: { success: true, emailSent: true }
+
+🔍 TESTING SUGERIDO:
+====================
+
+1. ACTIVAR WORKFLOW EN N8N UI:
+   - Ir a: https://n8n-n8n.6ld9pv.easypanel.host
+   - Abrir workflow: auxtq56gNSSTrlSc
+   - Click en toggle "Active" (esquina superior derecha)
+
+2. VERIFICAR ENDPOINTS BACKEND (antes de ejecutar workflow):
+   curl http://localhost:3000/api/fixtures?next=true
+   curl http://localhost:3000/api/bargains/top?limit=10
+   curl http://localhost:3000/api/laliga/laliga/standings
+
+3. EJECUTAR WORKFLOW MANUALMENTE (para testing):
+   curl -X POST "https://n8n-n8n.6ld9pv.easypanel.host/api/v1/workflows/auxtq56gNSSTrlSc/execute" \
+     -H "X-N8N-API-KEY: [tu_api_key]"
+
+4. MONITOREAR EJECUCIONES:
+   - Dashboard n8n: https://n8n-n8n.6ld9pv.easypanel.host/workflow/auxtq56gNSSTrlSc/executions
+   - Logs backend: npm run dev
+
+💡 PRÓXIMOS PASOS (ORDEN DE PRIORIDAD):
+========================================
+
+1. ✅ COMPLETADO: Workflow #4 creado con 10 nodos
+2. ⏳ TODO: Implementar POST /api/content/schedule en backend
+3. ⏳ TODO: Implementar POST /api/email/send en backend
+4. ⏳ TODO: Activar workflow en n8n UI
+5. ⏳ TODO: Testing completo con ejecución manual
+6. ⏳ TODO: Monitorear primera ejecución automática (próximo lunes)
+
+📊 MÉTRICAS DEL WORKFLOW:
+==========================
+- Total nodos: 10
+- HTTP Requests: 5 (3 GET, 2 POST)
+- Function nodes: 2 (planificación + agregación)
+- Loops: 1 (7 iteraciones - una por día)
+- Triggers: 1 (Schedule - cron)
+- Ejecuciones esperadas: 1 vez por semana (lunes 6:00 AM)
+- Tiempo estimado de ejecución: 2-3 minutos (incluyendo loops)
+
+====================================================================
+END OF SUMMARY
+====================================================================

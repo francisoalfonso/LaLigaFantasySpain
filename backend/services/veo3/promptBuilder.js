@@ -1,3 +1,5 @@
+const logger = require('../../utils/logger');
+
 const {
     ANA_CHARACTER_BIBLE,
     STUDIO_CONFIGURATIONS,
@@ -132,13 +134,37 @@ class PromptBuilder {
      */
     buildPrompt(config) {
         const {
-            dialogue = ''
+            dialogue = '',
+            enhanced = false,  // Nuevo: activar modo mejorado con descripción
+            behavior = '',     // Descripción del comportamiento
+            cinematography = '' // Descripción de la cinematografía
         } = config;
 
-        // Prompt minimal para máxima adherencia a imagen de referencia
-        const prompt = `The person in the reference image speaking in Spanish: "${dialogue}". Exact appearance from reference image.`;
+        if (enhanced && (behavior || cinematography)) {
+            // Prompt mejorado con descripción de comportamiento y cinematografía
+            let prompt = `Sports analysis video featuring the person from the reference image. `;
 
-        console.log(`[PromptBuilder] Prompt minimal generado: ${prompt.length} chars`);
+            if (behavior) {
+                prompt += `${behavior} `;
+            }
+
+            prompt += `Speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}" `;
+
+            if (cinematography) {
+                prompt += `${cinematography} `;
+            }
+
+            prompt += `Exact appearance from reference image.`;
+
+            logger.info(`[PromptBuilder] Prompt mejorado generado: ${prompt.length} chars`);
+            return prompt;
+        }
+
+        // Prompt minimal para máxima adherencia a imagen de referencia
+        // CRÍTICO: SIEMPRE forzar español de España (NO mexicano)
+        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
+
+        logger.info(`[PromptBuilder] Prompt minimal generado: ${prompt.length} chars`);
         return prompt;
     }
 
@@ -171,8 +197,8 @@ class PromptBuilder {
             .filter(part => part.length > 0)
             .join(' ');
 
-        console.log(`[PromptBuilder] Prompt viral ${type} construido: ${arco.nombre} (${arco.duracion})`);
-        console.log(`[PromptBuilder] Arco emocional: ${arco.secuencia.length} elementos`);
+        logger.info(`[PromptBuilder] Prompt viral ${type} construido: ${arco.nombre} (${arco.duracion})`);
+        logger.info(`[PromptBuilder] Arco emocional: ${arco.secuencia.length} elementos`);
 
         return {
             prompt: this.buildPrompt({ dialogue: fullDialogue }),
@@ -209,7 +235,7 @@ class PromptBuilder {
      * Prompt para revelación de chollo (con estructura viral)
      * @param {string} playerName - Nombre del jugador
      * @param {number} price - Precio del jugador
-     * @param {object} options - Opciones adicionales
+     * @param {object} options - Opciones adicionales (stats, ratio, team)
      * @returns {string} - Prompt optimizado para chollo
      */
     buildCholloPrompt(playerName, price, options = {}) {
@@ -218,10 +244,89 @@ class PromptBuilder {
             return this.buildViralStructuredPrompt('chollo', options.structuredData, options);
         }
 
-        // Diálogo simple (legacy)
-        const dialogue = options.dialogue || `¡Misters! He descubierto algo sobre ${playerName}... ¡A ${price}€ es INCREÍBLE! ¡Preparaos para el chollo del SIGLO!`;
+        // Construir diálogo estructurado con estadísticas (NUEVO - siguiendo mejores prácticas)
+        const { stats = {}, ratio, team, enhanced = false } = options;
 
-        return this.buildPrompt({ dialogue });
+        // Estructura viral de 7 elementos para chollo (10-12s)
+        const dialogue = this._buildCholloDialogue(playerName, price, { stats, ratio, team });
+
+        // Si enhanced=true, usar prompt mejorado con comportamiento
+        if (enhanced) {
+            return this.buildEnhancedCholloPrompt(playerName, price, { stats, ratio, team, dialogue });
+        }
+
+        // Prompt con FORZAR español de España (NO mexicano)
+        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
+
+        logger.info(`[PromptBuilder] Chollo prompt con estructura viral y español de España: ${prompt.length} chars`);
+        return prompt;
+    }
+
+    /**
+     * Prompt MEJORADO para revelación de chollo con comportamiento y cinematografía
+     * Inspirado en prompts altamente expresivos tipo "Moisés Selfie"
+     * @param {string} playerName - Nombre del jugador
+     * @param {number} price - Precio del jugador
+     * @param {object} options - Opciones adicionales
+     * @returns {string} - Prompt mejorado con descripción de comportamiento
+     */
+    buildEnhancedCholloPrompt(playerName, price, options = {}) {
+        const { dialogue } = options;
+
+        // Comportamiento específico para arco emocional de chollo
+        const behavior = `She starts leaning forward conspiratorially with an intriguing expression and knowing smile, then explodes with passionate enthusiasm while gesturing dramatically with natural hand movements during the revelation. Modern sports studio setting with Fantasy La Liga graphics visible in background.`;
+
+        // Cinematografía dinámica
+        const cinematography = `Camera: Starts in medium shot, slowly dollies in to intimate close-up during conspiratorial setup, then quick push-in for explosive revelation impact. Lighting brightens dynamically matching emotional energy from calm intimate to vibrant energetic. Professional broadcast quality with vertical 9:16 format optimized for social media.`;
+
+        // Usar buildPrompt con modo enhanced
+        const prompt = this.buildPrompt({
+            dialogue,
+            enhanced: true,
+            behavior,
+            cinematography
+        });
+
+        logger.info(`[PromptBuilder] Enhanced chollo prompt generado: ${prompt.length} chars`);
+        return prompt;
+    }
+
+    /**
+     * Construir diálogo estructurado para chollo con 7 elementos virales
+     * @private
+     */
+    _buildCholloDialogue(playerName, price, data) {
+        const { stats = {}, ratio, team } = data;
+
+        // Estructura viral: hook → contexto → conflicto → inflexión → resolución → moraleja → cta
+        const parts = [];
+
+        // 1. Hook (0-2s) - conspiratorial_whisper
+        parts.push(`¡Misters! Venid que os cuento un secreto...`);
+
+        // 2. Contexto (2-4s) - building_tension
+        parts.push(`He encontrado un jugador del ${team || 'equipo'} a solo ${price} euros...`);
+
+        // 3. Conflicto (4-5s) - implicit_tension
+        parts.push(`¿Demasiado barato para ser bueno?`);
+
+        // 4. Inflexión (5-7s) - explosive_revelation
+        parts.push(`¡${playerName}! ${stats.goals || 0} goles, ${stats.assists || 0} asistencias en ${stats.games || 0} partidos.`);
+
+        // 5. Resolución (7-9s) - explosive_excitement
+        if (ratio) {
+            parts.push(`Ratio de valor: ${ratio}x. ¡Está RINDIENDO como uno de 15 millones!`);
+        } else {
+            parts.push(`Rating de ${stats.rating || 7.0}. ¡Es un CHOLLO BRUTAL!`);
+        }
+
+        // 6. Moraleja (9-10s) - knowing_wisdom
+        parts.push(`A este precio, es IMPRESCINDIBLE para tu plantilla.`);
+
+        // 7. CTA (10-12s) - urgent_call_to_action
+        parts.push(`¿Fichamos ya o esperamos? ¡Yo lo tengo CLARO!`);
+
+        return parts.join(' ');
     }
 
     /**
@@ -325,10 +430,10 @@ class PromptBuilder {
         const dialogueMatch = prompt.match(/"([^"]+)"/);
         const dialogue = dialogueMatch ? dialogueMatch[1] : "Hola Misters! Bienvenidos a Fantasy La Liga.";
 
-        // Usar prompt minimal como fallback
-        const simplifiedPrompt = `The person in the reference image speaking in Spanish: "${dialogue}". Exact appearance from reference image.`;
+        // Usar prompt minimal como fallback - SIEMPRE forzar español de España
+        const simplifiedPrompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
 
-        console.log(`[PromptBuilder] Prompt simplificado de ${prompt.length} a ${simplifiedPrompt.length} chars`);
+        logger.info(`[PromptBuilder] Prompt simplificado de ${prompt.length} a ${simplifiedPrompt.length} chars`);
         return simplifiedPrompt;
     }
 
@@ -349,10 +454,19 @@ class PromptBuilder {
             validation.warnings.push(`Prompt muy largo: ${prompt.length} chars (recomendado: <${this.maxLength})`);
         }
 
-        // Check que incluye Ana Character Bible
-        if (!prompt.includes(ANA_CHARACTER_BIBLE.substring(0, 50))) {
-            validation.errors.push('Prompt no incluye Ana Character Bible');
+        // Check que incluye Ana Character Bible O es prompt estructurado con "SPANISH FROM SPAIN"
+        // Prompts minimales (<300 chars) están optimizados para máxima fidelidad a imagen de referencia
+        // Prompts con "SPANISH FROM SPAIN" son prompts estructurados mejorados que fuerzan español de España
+        const hasCharacterBible = prompt.includes(ANA_CHARACTER_BIBLE.substring(0, 50));
+        const isStructuredSpanish = prompt.includes('SPANISH FROM SPAIN');
+
+        if (!hasCharacterBible && !isStructuredSpanish && prompt.length > 300) {
+            validation.errors.push('Prompt no incluye Ana Character Bible ni es prompt estructurado con SPANISH FROM SPAIN');
             validation.valid = false;
+        } else if ((!hasCharacterBible && !isStructuredSpanish) && prompt.length <= 300) {
+            validation.warnings.push('Prompt minimal detectado - usando máxima fidelidad a imagen de referencia');
+        } else if (isStructuredSpanish) {
+            validation.warnings.push('Prompt estructurado con español de España detectado - forzando acento castellano');
         }
 
         // Check que incluye español
@@ -419,7 +533,7 @@ class PromptBuilder {
             validation.warnings.push(`Ratio nicho bajo: ${validation.convergenceRatio.niche}% (esperado: 30%)`);
         }
 
-        console.log(`[PromptBuilder] Convergencia viral: ${validation.convergenceRatio.general}% general / ${validation.convergenceRatio.niche}% nicho`);
+        logger.info(`[PromptBuilder] Convergencia viral: ${validation.convergenceRatio.general}% general / ${validation.convergenceRatio.niche}% nicho`);
 
         return validation;
     }

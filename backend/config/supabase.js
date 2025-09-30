@@ -5,6 +5,7 @@
 // Supports both client-side (anon) and server-side (service role) operations
 
 const { createClient } = require('@supabase/supabase-js');
+const logger = require('../utils/logger');
 require('dotenv').config({ path: '.env.supabase' });
 
 // Validate required environment variables
@@ -78,14 +79,14 @@ async function testConnection() {
       .limit(1);
 
     if (error) {
-      console.error('❌ Database connection failed:', error.message);
+      logger.error('❌ Database connection failed:', error.message);
       return false;
     }
 
-    console.log('✅ Database connection successful');
+    logger.info('✅ Database connection successful');
     return true;
   } catch (error) {
-    console.error('❌ Database connection error:', error.message);
+    logger.error('❌ Database connection error:', error.message);
     return false;
   }
 }
@@ -113,7 +114,7 @@ async function getDatabaseStats() {
 
     return stats;
   } catch (error) {
-    console.error('Error getting database stats:', error.message);
+    logger.error('Error getting database stats:', error.message);
     return {};
   }
 }
@@ -133,7 +134,7 @@ async function executeRawQuery(query) {
 
     return { success: true, data };
   } catch (error) {
-    console.error('Raw query execution error:', error.message);
+    logger.error('Raw query execution error:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -157,7 +158,7 @@ async function getTeams() {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching teams:', error.message);
+    logger.error('Error fetching teams:', error.message);
     return [];
   }
 }
@@ -199,7 +200,7 @@ async function getPlayers(filters = {}) {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching players:', error.message);
+    logger.error('Error fetching players:', error.message);
     return [];
   }
 }
@@ -247,7 +248,7 @@ async function getFantasyPoints(gameweek = null) {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error fetching fantasy points:', error.message);
+    logger.error('Error fetching fantasy points:', error.message);
     return [];
   }
 }
@@ -269,7 +270,7 @@ async function upsertTeam(teamData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error upserting team:', error.message);
+    logger.error('Error upserting team:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -291,7 +292,7 @@ async function upsertPlayer(playerData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error upserting player:', error.message);
+    logger.error('Error upserting player:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -313,7 +314,7 @@ async function insertMatch(matchData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error inserting match:', error.message);
+    logger.error('Error inserting match:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -335,7 +336,7 @@ async function insertPlayerStats(statsData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error inserting player stats:', error.message);
+    logger.error('Error inserting player stats:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -357,7 +358,7 @@ async function insertFantasyPoints(pointsData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error inserting fantasy points:', error.message);
+    logger.error('Error inserting fantasy points:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -382,7 +383,7 @@ async function createContentPlan(contentData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error creating content plan:', error.message);
+    logger.error('Error creating content plan:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -403,7 +404,7 @@ async function createSocialPost(postData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error creating social post:', error.message);
+    logger.error('Error creating social post:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -424,7 +425,7 @@ async function logWorkflowExecution(workflowData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error logging workflow:', error.message);
+    logger.error('Error logging workflow:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -445,7 +446,7 @@ async function logApiRequest(requestData) {
     if (error) throw error;
     return { success: true, data };
   } catch (error) {
-    console.error('Error logging API request:', error.message);
+    logger.error('Error logging API request:', error.message);
     return { success: false, error: error.message };
   }
 }

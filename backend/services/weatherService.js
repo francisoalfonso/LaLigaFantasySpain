@@ -4,6 +4,7 @@
  */
 
 const axios = require('axios');
+const logger = require('../utils/logger');
 const {
     STADIUMS_WEATHER_CONFIG,
     WEATHER_AVATAR_CONFIG,
@@ -32,14 +33,14 @@ class WeatherService {
         this.useOpenWeather = !!this.openWeatherApiKey;
 
         if (!this.aemetApiKey && !this.openWeatherApiKey) {
-            console.warn('⚠️ Ninguna API meteorológica configurada. Usando datos por defecto.');
+            logger.warn('⚠️ Ninguna API meteorológica configurada. Usando datos por defecto.');
         } else if (this.useAemet) {
-            console.log('✅ AEMET API configurada como principal');
+            logger.info('✅ AEMET API configurada como principal');
             if (this.useOpenWeather) {
-                console.log('✅ OpenWeatherMap configurada como fallback');
+                logger.info('✅ OpenWeatherMap configurada como fallback');
             }
         } else if (this.useOpenWeather) {
-            console.log('✅ OpenWeatherMap API configurada (AEMET no disponible)');
+            logger.info('✅ OpenWeatherMap API configurada (AEMET no disponible)');
         }
     }
 
@@ -57,7 +58,7 @@ class WeatherService {
             try {
                 return await this.getWeatherFromAemetStation(municipioData.estacion_meteorologica, municipioData);
             } catch (stationError) {
-                console.warn(`Estación meteorológica ${municipioData.estacion_meteorologica} falló, usando predicción municipal...`);
+                logger.warn(`Estación meteorológica ${municipioData.estacion_meteorologica} falló, usando predicción municipal...`);
             }
         }
 
@@ -78,7 +79,7 @@ class WeatherService {
 
             throw new Error('No se pudieron obtener datos de AEMET');
         } catch (error) {
-            console.error(`Error AEMET para ${teamKey}:`, error.message);
+            logger.error(`Error AEMET para ${teamKey}:`, error.message);
             throw error;
         }
     }
@@ -103,7 +104,7 @@ class WeatherService {
 
             throw new Error(`No se pudieron obtener datos de la estación ${stationId}`);
         } catch (error) {
-            console.error(`Error estación AEMET ${stationId}:`, error.message);
+            logger.error(`Error estación AEMET ${stationId}:`, error.message);
             throw error;
         }
     }
@@ -189,7 +190,7 @@ class WeatherService {
             weatherCode = 803;
         }
 
-        console.log(`🌡️ Estación ${latest.ubi}: ${temperatura}°C, ${description}, hr:${humedad}%, prec:${precipitacion}mm`);
+        logger.info(`🌡️ Estación ${latest.ubi}: ${temperatura}°C, ${description}, hr:${humedad}%, prec:${precipitacion}mm`);
 
         // Retornar en formato compatible con OpenWeatherMap
         return {
@@ -253,9 +254,9 @@ class WeatherService {
                 try {
                     weatherData = await this.getWeatherFromAemet(teamKey);
                     source = 'aemet';
-                    console.log(`☀️ Datos AEMET obtenidos para ${teamKey}`);
+                    logger.info(`☀️ Datos AEMET obtenidos para ${teamKey}`);
                 } catch (aemetError) {
-                    console.warn(`⚠️ AEMET falló para ${teamKey}, intentando OpenWeather...`);
+                    logger.warn(`⚠️ AEMET falló para ${teamKey}, intentando OpenWeather...`);
                 }
             }
 
@@ -264,15 +265,15 @@ class WeatherService {
                 try {
                     weatherData = await this.getWeatherFromOpenWeather(teamKey);
                     source = 'openweather';
-                    console.log(`🌤️ Datos OpenWeather obtenidos para ${teamKey}`);
+                    logger.info(`🌤️ Datos OpenWeather obtenidos para ${teamKey}`);
                 } catch (openWeatherError) {
-                    console.warn(`⚠️ OpenWeather también falló para ${teamKey}`);
+                    logger.warn(`⚠️ OpenWeather también falló para ${teamKey}`);
                 }
             }
 
             // Si ambas APIs fallan, usar datos por defecto
             if (!weatherData) {
-                console.log(`📋 Usando datos por defecto para ${teamKey}`);
+                logger.info(`📋 Usando datos por defecto para ${teamKey}`);
                 return this.getDefaultWeatherData(teamKey);
             }
 
@@ -281,7 +282,7 @@ class WeatherService {
             return processedData;
 
         } catch (error) {
-            console.error(`Error obteniendo clima para ${teamKey}:`, error.message);
+            logger.error(`Error obteniendo clima para ${teamKey}:`, error.message);
             return this.getDefaultWeatherData(teamKey);
         }
     }
@@ -314,7 +315,7 @@ class WeatherService {
 
             return this.processWeatherData(forecast, teamData, matchTime);
         } catch (error) {
-            console.error(`Error obteniendo pronóstico para ${teamKey}:`, error.message);
+            logger.error(`Error obteniendo pronóstico para ${teamKey}:`, error.message);
             return this.getDefaultWeatherData(teamKey);
         }
     }
@@ -568,7 +569,7 @@ class WeatherService {
         return results.reduce((acc, result) => {
             if (result.error) {
                 acc[result.teamKey] = result.data;
-                console.warn(`Weather fallback for ${result.teamKey}: ${result.error}`);
+                logger.warn(`Weather fallback for ${result.teamKey}: ${result.error}`);
             } else {
                 acc[result.teamKey] = result;
             }

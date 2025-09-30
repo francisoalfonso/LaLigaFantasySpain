@@ -4,6 +4,7 @@
 // Express routes para generación automática de contenido Fantasy La Liga
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const ContentGenerator = require('../services/contentGenerator');
 
@@ -20,7 +21,7 @@ const contentGen = new ContentGenerator();
  */
 router.post('/generate/daily', async (req, res) => {
   try {
-    console.log('🎯 Generando contenido diario automático...');
+    logger.info('🎯 Generando contenido diario automático...');
 
     const { platform = 'instagram', gameweek } = req.body;
 
@@ -37,7 +38,7 @@ router.post('/generate/daily', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generando contenido diario:', error);
+    logger.error('❌ Error generando contenido diario:', error);
     res.status(500).json({
       success: false,
       message: 'Error generando contenido diario',
@@ -53,7 +54,7 @@ router.post('/generate/daily', async (req, res) => {
  */
 router.post('/generate/player-spotlight', async (req, res) => {
   try {
-    console.log('⭐ Generando spotlight de jugador...');
+    logger.info('⭐ Generando spotlight de jugador...');
 
     const { player_id, platform = 'instagram' } = req.body;
 
@@ -76,7 +77,7 @@ router.post('/generate/player-spotlight', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generando player spotlight:', error);
+    logger.error('❌ Error generando player spotlight:', error);
     res.status(500).json({
       success: false,
       message: 'Error generando player spotlight',
@@ -92,7 +93,7 @@ router.post('/generate/player-spotlight', async (req, res) => {
  */
 router.post('/generate/team-analysis', async (req, res) => {
   try {
-    console.log('🏟️ Generando análisis de equipo...');
+    logger.info('🏟️ Generando análisis de equipo...');
 
     const { team_id, platform = 'instagram' } = req.body;
 
@@ -115,7 +116,7 @@ router.post('/generate/team-analysis', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generando team analysis:', error);
+    logger.error('❌ Error generando team analysis:', error);
     res.status(500).json({
       success: false,
       message: 'Error generando team analysis',
@@ -131,7 +132,7 @@ router.post('/generate/team-analysis', async (req, res) => {
  */
 router.post('/generate/fantasy-tips', async (req, res) => {
   try {
-    console.log('💡 Generando tips Fantasy...');
+    logger.info('💡 Generando tips Fantasy...');
 
     const { platform = 'instagram', gameweek } = req.body;
 
@@ -147,7 +148,7 @@ router.post('/generate/fantasy-tips', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generando fantasy tips:', error);
+    logger.error('❌ Error generando fantasy tips:', error);
     res.status(500).json({
       success: false,
       message: 'Error generando fantasy tips',
@@ -167,14 +168,14 @@ router.post('/generate/fantasy-tips', async (req, res) => {
  */
 router.post('/workflow/complete', async (req, res) => {
   try {
-    console.log('🔄 Ejecutando workflow completo de contenido...');
+    logger.info('🔄 Ejecutando workflow completo de contenido...');
 
     const { platforms = ['instagram'], gameweek } = req.body;
     const results = [];
 
     // Generar contenido para cada plataforma
     for (const platform of platforms) {
-      console.log(`📱 Generando contenido para ${platform}...`);
+      logger.info(`📱 Generando contenido para ${platform}...`);
 
       // 1. Insights diarios
       const dailyContent = await contentGen.generateDailyInsights(platform, gameweek);
@@ -207,7 +208,7 @@ router.post('/workflow/complete', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en workflow completo:', error);
+    logger.error('❌ Error en workflow completo:', error);
     res.status(500).json({
       success: false,
       message: 'Error en workflow completo',
@@ -223,7 +224,7 @@ router.post('/workflow/complete', async (req, res) => {
  */
 router.post('/workflow/schedule', async (req, res) => {
   try {
-    console.log('📅 Programando contenido automático...');
+    logger.info('📅 Programando contenido automático...');
 
     const {
       schedule_type = 'daily',
@@ -259,7 +260,7 @@ router.post('/workflow/schedule', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error programando contenido:', error);
+    logger.error('❌ Error programando contenido:', error);
     res.status(500).json({
       success: false,
       message: 'Error programando contenido automático',
@@ -279,7 +280,7 @@ router.post('/workflow/schedule', async (req, res) => {
  */
 router.get('/analytics/stats', async (req, res) => {
   try {
-    console.log('📊 Obteniendo estadísticas de contenido...');
+    logger.info('📊 Obteniendo estadísticas de contenido...');
 
     const { supabaseClient } = require('../config/supabase');
 
@@ -315,7 +316,7 @@ router.get('/analytics/stats', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error obteniendo estadísticas:', error);
+    logger.error('❌ Error obteniendo estadísticas:', error);
     res.status(500).json({
       success: false,
       message: 'Error obteniendo estadísticas de contenido',
@@ -331,7 +332,7 @@ router.get('/analytics/stats', async (req, res) => {
  */
 router.get('/test', async (req, res) => {
   try {
-    console.log('🧪 Testeando generador de contenido...');
+    logger.info('🧪 Testeando generador de contenido...');
 
     // Test básico de conexión y funcionalidad
     const testResult = await contentGen.testConnection();
@@ -350,7 +351,7 @@ router.get('/test', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error test contenido:', error);
+    logger.error('❌ Error test contenido:', error);
     res.status(500).json({
       success: false,
       message: 'Error en test del generador',

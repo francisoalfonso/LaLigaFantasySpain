@@ -5,6 +5,7 @@
  */
 
 const PromptBuilder = require('./promptBuilder');
+const logger = require('../../utils/logger');
 const StatsCardPromptBuilder = require('./statsCardPromptBuilder');
 
 class ThreeSegmentGenerator {
@@ -59,8 +60,8 @@ class ThreeSegmentGenerator {
 
         const durations = this.durationPresets[preset];
 
-        console.log(`[ThreeSegmentGenerator] Generando estructura 3-segmentos: ${contentType}`);
-        console.log(`[ThreeSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
+        logger.info(`[ThreeSegmentGenerator] Generando estructura 3-segmentos: ${contentType}`);
+        logger.info(`[ThreeSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
 
         // Segmento 1: Ana Intro (Hook + Contexto)
         const segment1 = this._buildIntroSegment(contentType, playerData, viralData, {
@@ -110,7 +111,7 @@ class ThreeSegmentGenerator {
             }
         };
 
-        console.log(`[ThreeSegmentGenerator] Estructura generada: ${durations.total}s (${segment1.duration}s + ${segment2.duration}s + ${segment3.duration}s)`);
+        logger.info(`[ThreeSegmentGenerator] Estructura generada: ${durations.total}s (${segment1.duration}s + ${segment2.duration}s + ${segment3.duration}s)`);
 
         return structure;
     }
@@ -320,9 +321,9 @@ class ThreeSegmentGenerator {
             validation.valid = false;
         }
 
-        console.log(`[ThreeSegmentGenerator] Validación: ${validation.valid ? 'PASSED' : 'FAILED'}`);
+        logger.info(`[ThreeSegmentGenerator] Validación: ${validation.valid ? 'PASSED' : 'FAILED'}`);
         if (validation.warnings.length > 0) {
-            console.log(`[ThreeSegmentGenerator] Warnings: ${validation.warnings.join(', ')}`);
+            logger.info(`[ThreeSegmentGenerator] Warnings: ${validation.warnings.join(', ')}`);
         }
 
         return validation;

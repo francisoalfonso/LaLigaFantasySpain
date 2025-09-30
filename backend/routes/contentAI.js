@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const OpenAIGPT5MiniService = require('../services/openaiGPT5Mini');
 const WeatherService = require('../services/weatherService');
@@ -72,7 +73,7 @@ router.post('/player-analysis', async (req, res) => {
                     temperature: weatherData.current.temperature
                 };
             } catch (weatherError) {
-                console.warn('⚠️ No se pudo obtener clima:', weatherError.message);
+                logger.warn('⚠️ No se pudo obtener clima:', weatherError.message);
             }
         }
 

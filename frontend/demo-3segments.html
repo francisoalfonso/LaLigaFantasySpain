@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Sistema 3-Segmentos | Fantasy La Liga Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            aspect-ratio: 9 / 16;
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+        }
+
+        .segment-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .segment-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse-slow {
+            animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div x-data="demoApp()" x-init="init()">
+        <!-- Header -->
+        <header class="gradient-bg text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="max-w-4xl mx-auto text-center">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                        🎬 Sistema 3-Segmentos
+                    </h1>
+                    <p class="text-xl md:text-2xl text-purple-100 mb-6">
+                        Ana Real + Stats Cards Impactantes
+                    </p>
+                    <div class="flex items-center justify-center gap-2 flex-wrap">
+                        <span class="badge bg-white text-purple-700">VEO3 Powered</span>
+                        <span class="badge bg-purple-700 text-white">Framework Viral</span>
+                        <span class="badge bg-white text-purple-700">Stats NBA Style</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-12">
+            <div class="max-w-6xl mx-auto">
+
+                <!-- Video Demo Section -->
+                <div class="mb-16">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <!-- Video Player -->
+                        <div>
+                            <div class="video-container">
+                                <template x-if="videoReady">
+                                    <video
+                                        controls
+                                        autoplay
+                                        loop
+                                        muted
+                                        class="w-full h-full"
+                                    >
+                                        <source :src="videoUrl" type="video/mp4">
+                                        Tu navegador no soporta el elemento video.
+                                    </video>
+                                </template>
+
+                                <template x-if="!videoReady && loading">
+                                    <div class="absolute inset-0 flex items-center justify-center bg-gray-900">
+                                        <div class="text-center text-white">
+                                            <div class="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-purple-500 border-r-transparent mb-4"></div>
+                                            <p class="text-lg font-medium">Generando video...</p>
+                                            <p class="text-sm text-gray-400 mt-2" x-text="progressText"></p>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template x-if="!videoReady && !loading">
+                                    <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 to-indigo-900 text-white p-8">
+                                        <div class="text-center">
+                                            <svg class="w-20 h-20 mx-auto mb-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <h3 class="text-2xl font-bold mb-2">Video Demo Pedri</h3>
+                                            <p class="text-purple-200">Sistema 3-Segmentos • 18 segundos</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Info -->
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                                Video Chollo: Pedri
+                            </h2>
+                            <p class="text-lg text-gray-600 mb-6">
+                                Ejemplo completo del sistema de videos 3-segmentos con Ana Real + Stats Cards impactantes.
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">18 segundos totales</p>
+                                        <p class="text-sm text-gray-500">Optimizado para Instagram Reels / TikTok</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">Framework Viral</p>
+                                        <p class="text-sm text-gray-500">Metodología 1,350M visitas</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">Stats Impactantes</p>
+                                        <p class="text-sm text-gray-500">Gráficos estilo NBA/ESPN</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <template x-if="videoReady">
+                                <a
+                                    :href="videoUrl"
+                                    download
+                                    class="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    Descargar Video
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Segments Breakdown -->
+                <div class="mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+                        📋 Estructura 3-Segmentos
+                    </h2>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <!-- Segmento 1 -->
+                        <div class="segment-card rounded-xl p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
+                                    1
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Ana Intro</h3>
+                                    <p class="text-sm text-gray-500">6 segundos</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                <strong>Hook + Contexto:</strong> "¿Listos para un secreto del Barcelona? Mientras todos gastan en caros delanteros..."
+                            </p>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="badge bg-purple-100 text-purple-700">Seed: 30001</span>
+                                <span class="badge bg-gray-100 text-gray-700">Ana Real</span>
+                            </div>
+                        </div>
+
+                        <!-- Segmento 2 -->
+                        <div class="segment-card rounded-xl p-6 border-green-300 bg-green-50">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                    2
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Stats Card</h3>
+                                    <p class="text-sm text-gray-500">6 segundos</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                <strong>Gráficos Impactantes:</strong> Foto Pedri + Escudo Barça + Stats animadas (Precio, Goles, Valor Fantasy, Probabilidad)
+                            </p>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="badge bg-green-100 text-green-700">Fantasy Premium</span>
+                                <span class="badge bg-gray-100 text-gray-700">VEO3</span>
+                            </div>
+                        </div>
+
+                        <!-- Segmento 3 -->
+                        <div class="segment-card rounded-xl p-6">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-lg">
+                                    3
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Ana Outro</h3>
+                                    <p class="text-sm text-gray-500">6 segundos</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-3">
+                                <strong>Resolución + CTA:</strong> "¡78% probabilidad de puntos! Los chollos están donde nadie mira. ¡Fichalo AHORA!"
+                            </p>
+                            <div class="flex gap-2 flex-wrap">
+                                <span class="badge bg-purple-100 text-purple-700">Seed: 30001</span>
+                                <span class="badge bg-gray-100 text-gray-700">Ana Real</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Details -->
+                <div class="bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        🔧 Detalles Técnicos
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-3">Sistema de Generación</h3>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span><strong>VEO3Client:</strong> Generación segmentos individuales</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span><strong>ThreeSegmentGenerator:</strong> Orquestación completa</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span><strong>VideoConcatenator:</strong> Fusión con FFmpeg</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span><strong>Bunny.net:</strong> Hosting y CDN</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 class="font-semibold text-gray-900 mb-3">Características</h3>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Ana consistente (seed fijo 30001)</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Framework viral (convergencia 70/30)</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Stats cards estilo NBA/ESPN</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>Formato 9:16 (móvil optimizado)</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-8 mt-16">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">
+                    Fantasy La Liga Pro © 2025 | Powered by VEO3 + Claude Code
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        function demoApp() {
+            return {
+                videoUrl: '',
+                videoReady: false,
+                loading: false,
+                progressText: '',
+
+                init() {
+                    // Simular carga de video
+                    this.checkVideoAvailability();
+                },
+
+                async checkVideoAvailability() {
+                    // Intentar cargar video del directorio output
+                    try {
+                        // En producción, esto vendría de Bunny.net
+                        // Por ahora, placeholder
+                        this.loading = true;
+                        this.progressText = 'Buscando video generado...';
+
+                        // Simular búsqueda
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+
+                        // Aquí se integraría con el backend para obtener el video
+                        // this.videoUrl = await fetch('/api/veo3/latest-demo').then(r => r.json()).then(d => d.url);
+
+                        // Por ahora, placeholder
+                        this.loading = false;
+                        this.videoReady = false; // Cambiar a true cuando el video esté disponible
+                    } catch (error) {
+                        console.error('Error cargando video:', error);
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

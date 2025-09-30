@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 // =====================================================
 // CONTENT GENERATOR SERVICE
 // =====================================================
@@ -42,7 +44,7 @@ class ContentGenerator {
    */
   async analyzeLaLigaData() {
     try {
-      console.log('🔍 Analyzing La Liga data for insights...');
+      logger.info('🔍 Analyzing La Liga data for insights...');
 
       // Get current data
       const teams = await getTeams();
@@ -73,11 +75,11 @@ class ContentGenerator {
         recent_performance: recentPoints
       };
 
-      console.log(`✅ Analysis completed: ${teams.length} teams, ${players.length} players`);
+      logger.info(`✅ Analysis completed: ${teams.length} teams, ${players.length} players`);
       return analysis;
 
     } catch (error) {
-      console.error('❌ Error analyzing La Liga data:', error);
+      logger.error('❌ Error analyzing La Liga data:', error);
       throw error;
     }
   }
@@ -128,7 +130,7 @@ class ContentGenerator {
           }))
       };
     } catch (error) {
-      console.error('Error getting recent performance:', error);
+      logger.error('Error getting recent performance:', error);
       return { total_records: 0, gameweeks: 0, top_performers: [] };
     }
   }
@@ -262,7 +264,7 @@ class ContentGenerator {
    */
   async generateDailyInsights() {
     try {
-      console.log('📝 Generating daily insights content...');
+      logger.info('📝 Generating daily insights content...');
 
       const analysis = await this.analyzeLaLigaData();
 
@@ -293,11 +295,11 @@ class ContentGenerator {
       // Save to database
       await this.saveContentPlan(content);
 
-      console.log('✅ Daily insights generated successfully');
+      logger.info('✅ Daily insights generated successfully');
       return content;
 
     } catch (error) {
-      console.error('❌ Error generating daily insights:', error);
+      logger.error('❌ Error generating daily insights:', error);
       throw error;
     }
   }
@@ -309,7 +311,7 @@ class ContentGenerator {
    */
   async generatePlayerSpotlight(playerId = null) {
     try {
-      console.log('⭐ Generating player spotlight content...');
+      logger.info('⭐ Generating player spotlight content...');
 
       let spotlightPlayer;
 
@@ -351,11 +353,11 @@ class ContentGenerator {
 
       await this.saveContentPlan(content);
 
-      console.log(`✅ Player spotlight generated for ${spotlightPlayer.name}`);
+      logger.info(`✅ Player spotlight generated for ${spotlightPlayer.name}`);
       return content;
 
     } catch (error) {
-      console.error('❌ Error generating player spotlight:', error);
+      logger.error('❌ Error generating player spotlight:', error);
       throw error;
     }
   }
@@ -366,7 +368,7 @@ class ContentGenerator {
    */
   async generateWeeklyContentPlan() {
     try {
-      console.log('📅 Generating weekly content plan...');
+      logger.info('📅 Generating weekly content plan...');
 
       const weeklyPlan = {
         week_start: new Date().toISOString(),
@@ -411,11 +413,11 @@ class ContentGenerator {
 
       await this.saveContentPlan(weeklyPlan);
 
-      console.log(`✅ Weekly content plan generated with ${weeklyPlan.content_schedule.length} posts`);
+      logger.info(`✅ Weekly content plan generated with ${weeklyPlan.content_schedule.length} posts`);
       return weeklyPlan;
 
     } catch (error) {
-      console.error('❌ Error generating weekly content plan:', error);
+      logger.error('❌ Error generating weekly content plan:', error);
       throw error;
     }
   }
@@ -659,12 +661,12 @@ class ContentGenerator {
 
       if (result.success) {
         content.id = result.data.id;
-        console.log(`💾 Content plan saved with ID: ${content.id}`);
+        logger.info(`💾 Content plan saved with ID: ${content.id}`);
       }
 
       return result;
     } catch (error) {
-      console.error('Error saving content plan:', error);
+      logger.error('Error saving content plan:', error);
       return { success: false, error: error.message };
     }
   }
@@ -758,7 +760,7 @@ class ContentGenerator {
    */
   async testConnection() {
     try {
-      console.log('🧪 Testing ContentGenerator functionality...');
+      logger.info('🧪 Testing ContentGenerator functionality...');
 
       // Test database connection
       const teams = await getTeams();
@@ -780,11 +782,11 @@ class ContentGenerator {
         timestamp: new Date().toISOString()
       };
 
-      console.log('✅ ContentGenerator test completed successfully');
+      logger.info('✅ ContentGenerator test completed successfully');
       return testResult;
 
     } catch (error) {
-      console.error('❌ ContentGenerator test failed:', error);
+      logger.error('❌ ContentGenerator test failed:', error);
       return {
         success: false,
         error: error.message,

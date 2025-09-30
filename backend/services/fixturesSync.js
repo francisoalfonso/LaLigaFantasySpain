@@ -4,6 +4,7 @@
 // Sincroniza partidos actuales de La Liga con base de datos local
 
 const { createClient } = require('@supabase/supabase-js');
+const logger = require('../utils/logger');
 const ApiFootballClient = require('./apiFootball');
 
 class FixturesSync {
@@ -21,7 +22,7 @@ class FixturesSync {
   async syncTodayFixtures() {
     try {
       const today = new Date().toISOString().split('T')[0];
-      console.log(`🔄 Sincronizando fixtures de La Liga para: ${today}`);
+      logger.info(`🔄 Sincronizando fixtures de La Liga para: ${today}`);
 
       // Obtener fixtures de API-Sports
       const fixturesResult = await this.apiFootball.getLaLigaFixtures(today, today);
@@ -31,7 +32,7 @@ class FixturesSync {
       }
 
       const fixtures = fixturesResult.data;
-      console.log(`📅 ${fixtures.length} partidos encontrados para hoy`);
+      logger.info(`📅 ${fixtures.length} partidos encontrados para hoy`);
 
       if (fixtures.length === 0) {
         return {
@@ -48,7 +49,7 @@ class FixturesSync {
           await this.syncSingleFixture(fixture);
           this.processed++;
         } catch (error) {
-          console.error(`Error procesando fixture ${fixture.id}: ${error.message}`);
+          logger.error(`Error procesando fixture ${fixture.id}: ${error.message}`);
           this.errors.push({
             fixture_id: fixture.id,
             error: error.message
@@ -65,7 +66,7 @@ class FixturesSync {
       };
 
     } catch (error) {
-      console.error('Error en sincronización de fixtures:', error.message);
+      logger.error('Error en sincronización de fixtures:', error.message);
       return {
         success: false,
         error: error.message,
@@ -78,7 +79,7 @@ class FixturesSync {
   // Sincronizar fixtures de un rango de fechas
   async syncFixturesRange(from_date, to_date) {
     try {
-      console.log(`🔄 Sincronizando fixtures de La Liga desde ${from_date} hasta ${to_date}`);
+      logger.info(`🔄 Sincronizando fixtures de La Liga desde ${from_date} hasta ${to_date}`);
 
       const fixturesResult = await this.apiFootball.getLaLigaFixtures(from_date, to_date);
 
@@ -87,7 +88,7 @@ class FixturesSync {
       }
 
       const fixtures = fixturesResult.data;
-      console.log(`📅 ${fixtures.length} partidos encontrados en el rango`);
+      logger.info(`📅 ${fixtures.length} partidos encontrados en el rango`);
 
       // Procesar cada fixture
       for (const fixture of fixtures) {
@@ -95,7 +96,7 @@ class FixturesSync {
           await this.syncSingleFixture(fixture);
           this.processed++;
         } catch (error) {
-          console.error(`Error procesando fixture ${fixture.id}: ${error.message}`);
+          logger.error(`Error procesando fixture ${fixture.id}: ${error.message}`);
           this.errors.push({
             fixture_id: fixture.id,
             error: error.message
@@ -112,7 +113,7 @@ class FixturesSync {
       };
 
     } catch (error) {
-      console.error('Error en sincronización de fixtures:', error.message);
+      logger.error('Error en sincronización de fixtures:', error.message);
       return {
         success: false,
         error: error.message,
@@ -168,7 +169,7 @@ class FixturesSync {
           .eq('api_fixture_id', fixture.id);
 
         if (error) throw error;
-        console.log(`📝 Fixture ${fixture.id} actualizado: ${fixture.teams.home.name} vs ${fixture.teams.away.name}`);
+        logger.info(`📝 Fixture ${fixture.id} actualizado: ${fixture.teams.home.name} vs ${fixture.teams.away.name}`);
       } else {
         // Crear nuevo fixture
         fixtureData.created_at = new Date().toISOString();
@@ -178,7 +179,7 @@ class FixturesSync {
           .insert([fixtureData]);
 
         if (error) throw error;
-        console.log(`✅ Fixture ${fixture.id} creado: ${fixture.teams.home.name} vs ${fixture.teams.away.name}`);
+        logger.info(`✅ Fixture ${fixture.id} creado: ${fixture.teams.home.name} vs ${fixture.teams.away.name}`);
       }
 
       // Sincronizar alineaciones si están disponibles
@@ -195,7 +196,7 @@ class FixturesSync {
       const lineupsResult = await this.apiFootball.getFixtureLineups(fixture_id);
 
       if (!lineupsResult.success) {
-        console.log(`⚠️ No hay alineaciones disponibles para fixture ${fixture_id}`);
+        logger.info(`⚠️ No hay alineaciones disponibles para fixture ${fixture_id}`);
         return;
       }
 
@@ -241,10 +242,10 @@ class FixturesSync {
         await this.syncLineupPlayers(fixture_id, teamLineup.team.id, teamLineup.substitutes, 'substitute');
       }
 
-      console.log(`⚽ Alineaciones sincronizadas para fixture ${fixture_id}`);
+      logger.info(`⚽ Alineaciones sincronizadas para fixture ${fixture_id}`);
 
     } catch (error) {
-      console.error(`Error sincronizando alineaciones para fixture ${fixture_id}: ${error.message}`);
+      logger.error(`Error sincronizando alineaciones para fixture ${fixture_id}: ${error.message}`);
     }
   }
 
@@ -281,7 +282,7 @@ class FixturesSync {
       }
 
     } catch (error) {
-      console.error(`Error sincronizando jugadores ${player_type} para fixture ${fixture_id}: ${error.message}`);
+      logger.error(`Error sincronizando jugadores ${player_type} para fixture ${fixture_id}: ${error.message}`);
     }
   }
 

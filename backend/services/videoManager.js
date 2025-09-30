@@ -5,6 +5,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 const axios = require('axios');
 const { exec } = require('child_process');
 const { promisify } = require('util');
@@ -40,9 +41,9 @@ class VideoManager {
                 await fs.writeFile(this.metadataFile, JSON.stringify({ videos: [] }, null, 2));
             }
 
-            console.log('✅ VideoManager: Almacenamiento inicializado');
+            logger.info('✅ VideoManager: Almacenamiento inicializado');
         } catch (error) {
-            console.error('❌ VideoManager: Error inicializando almacenamiento:', error.message);
+            logger.error('❌ VideoManager: Error inicializando almacenamiento:', error.message);
         }
     }
 
@@ -51,7 +52,7 @@ class VideoManager {
      */
     async downloadAndStore(veo3Url, metadata = {}) {
         try {
-            console.log('📥 Descargando video desde VEO3:', veo3Url);
+            logger.info('📥 Descargando video desde VEO3:', veo3Url);
 
             // Generar nombre único para el archivo
             const timestamp = Date.now();
@@ -62,7 +63,7 @@ class VideoManager {
             // Intentar subir a Bunny.net primero si está configurado
             if (this.bunnyStream && this.bunnyStream.isConfigured()) {
                 try {
-                    console.log('📤 Intentando subir a Bunny.net Stream:', veo3Url);
+                    logger.info('📤 Intentando subir a Bunny.net Stream:', veo3Url);
 
                     const bunnyData = await this.bunnyStream.uploadFromVeo3Url(veo3Url, {
                         title: metadata.title || `Video Manager - ${videoId}`,
@@ -86,11 +87,11 @@ class VideoManager {
 
                     await this.updateMetadata(videoData);
 
-                    console.log('✅ Video subido a Bunny.net:', bunnyData.directUrl);
+                    logger.info('✅ Video subido a Bunny.net:', bunnyData.directUrl);
                     return videoData;
 
                 } catch (bunnyError) {
-                    console.warn('⚠️ Bunny.net falló, usando almacenamiento local:', bunnyError.message);
+                    logger.warn('⚠️ Bunny.net falló, usando almacenamiento local:', bunnyError.message);
                 }
             }
 
@@ -115,11 +116,11 @@ class VideoManager {
 
             await this.updateMetadata(videoData);
 
-            console.log('✅ Video descargado y almacenado localmente:', filename);
+            logger.info('✅ Video descargado y almacenado localmente:', filename);
             return videoData;
 
         } catch (error) {
-            console.error('❌ Error descargando video:', error.message);
+            logger.error('❌ Error descargando video:', error.message);
             throw new Error(`Fallo descarga video: ${error.message}`);
         }
     }
@@ -130,7 +131,7 @@ class VideoManager {
     async downloadWithRetry(url, maxRetries = 3) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log(`📥 Intento ${attempt}/${maxRetries} descargando...`);
+                logger.info(`📥 Intento ${attempt}/${maxRetries} descargando...`);
 
                 const response = await axios({
                     method: 'GET',
@@ -145,7 +146,7 @@ class VideoManager {
                 return response;
 
             } catch (error) {
-                console.warn(`⚠️ Intento ${attempt} falló:`, error.message);
+                logger.warn(`⚠️ Intento ${attempt} falló:`, error.message);
 
                 if (attempt === maxRetries) {
                     throw error;
@@ -162,7 +163,7 @@ class VideoManager {
      */
     async concatenateVideos(videoIds, outputMetadata = {}) {
         try {
-            console.log('🔗 Concatenando videos:', videoIds);
+            logger.info('🔗 Concatenando videos:', videoIds);
 
             const metadata = await this.getMetadata();
             const videos = videoIds.map(id =>
@@ -180,7 +181,7 @@ class VideoManager {
             // Si todos los videos están en Bunny.net, usar herramientas de Bunny.net si están disponibles
             if (bunnyVideos.length === videos.length && this.bunnyStream && this.bunnyStream.isConfigured()) {
                 try {
-                    console.log('🐰 Intentando concatenación con Bunny.net Stream...');
+                    logger.info('🐰 Intentando concatenación con Bunny.net Stream...');
 
                     // Para concatenación en Bunny.net, crear un nuevo video y subir el resultado
                     // Por ahora, descargamos, concatenamos localmente y resubimos
@@ -188,7 +189,7 @@ class VideoManager {
                     const tempDir = path.join(this.videoDir, `temp_${timestamp}`);
                     await fs.mkdir(tempDir, { recursive: true });
 
-                    console.log('📥 Descargando videos de Bunny.net para concatenación...');
+                    logger.info('📥 Descargando videos de Bunny.net para concatenación...');
                     const downloadedFiles = [];
 
                     for (let i = 0; i < bunnyVideos.length; i++) {
@@ -209,11 +210,11 @@ class VideoManager {
                     await fs.writeFile(fileListPath, fileList);
 
                     const ffmpegCmd = `cd "${tempDir}" && ffmpeg -f concat -safe 0 -i "${path.basename(fileListPath)}" -c copy "${outputFilename}"`;
-                    console.log('🎬 Ejecutando FFmpeg para videos Bunny.net:', ffmpegCmd);
+                    logger.info('🎬 Ejecutando FFmpeg para videos Bunny.net:', ffmpegCmd);
                     await execAsync(ffmpegCmd);
 
                     // Subir resultado a Bunny.net
-                    console.log('📤 Subiendo video concatenado a Bunny.net...');
+                    logger.info('📤 Subiendo video concatenado a Bunny.net...');
                     const bunnyData = await this.bunnyStream.uploadFromFile(outputPath, {
                         title: outputMetadata.title || `Video Concatenado ${new Date().toISOString().slice(0, 10)}`,
                         type: 'concatenated',
@@ -241,11 +242,11 @@ class VideoManager {
 
                     await this.updateMetadata(concatData);
 
-                    console.log('✅ Videos concatenados y subidos a Bunny.net:', bunnyData.directUrl);
+                    logger.info('✅ Videos concatenados y subidos a Bunny.net:', bunnyData.directUrl);
                     return concatData;
 
                 } catch (bunnyError) {
-                    console.warn('⚠️ Concatenación Bunny.net falló, usando método local:', bunnyError.message);
+                    logger.warn('⚠️ Concatenación Bunny.net falló, usando método local:', bunnyError.message);
                 }
             }
 
@@ -267,7 +268,7 @@ class VideoManager {
             // Ejecutar concatenación con FFmpeg
             const ffmpegCmd = `cd "${this.videoDir}" && ffmpeg -f concat -safe 0 -i "${path.basename(fileListPath)}" -c copy "${outputFilename}"`;
 
-            console.log('🎬 Ejecutando FFmpeg local:', ffmpegCmd);
+            logger.info('🎬 Ejecutando FFmpeg local:', ffmpegCmd);
             await execAsync(ffmpegCmd);
 
             // Limpiar archivo temporal
@@ -288,11 +289,11 @@ class VideoManager {
 
             await this.updateMetadata(concatData);
 
-            console.log('✅ Videos concatenados exitosamente (local):', outputFilename);
+            logger.info('✅ Videos concatenados exitosamente (local):', outputFilename);
             return concatData;
 
         } catch (error) {
-            console.error('❌ Error concatenando videos:', error.message);
+            logger.error('❌ Error concatenando videos:', error.message);
             throw new Error(`Fallo concatenación: ${error.message}`);
         }
     }
@@ -305,7 +306,7 @@ class VideoManager {
             const data = await fs.readFile(this.metadataFile, 'utf8');
             return JSON.parse(data);
         } catch (error) {
-            console.warn('⚠️ Error leyendo metadata, creando nuevo archivo');
+            logger.warn('⚠️ Error leyendo metadata, creando nuevo archivo');
             return { videos: [] };
         }
     }
@@ -328,7 +329,7 @@ class VideoManager {
             await fs.writeFile(this.metadataFile, JSON.stringify(metadata, null, 2));
 
         } catch (error) {
-            console.error('❌ Error actualizando metadata:', error.message);
+            logger.error('❌ Error actualizando metadata:', error.message);
         }
     }
 
@@ -342,7 +343,7 @@ class VideoManager {
                 .sort((a, b) => new Date(b.downloadedAt || b.createdAt) - new Date(a.downloadedAt || a.createdAt))
                 .slice(0, limit);
         } catch (error) {
-            console.error('❌ Error listando videos:', error.message);
+            logger.error('❌ Error listando videos:', error.message);
             return [];
         }
     }
@@ -355,7 +356,7 @@ class VideoManager {
             const metadata = await this.getMetadata();
             return metadata.videos.find(v => v.id === videoId);
         } catch (error) {
-            console.error('❌ Error obteniendo video:', error.message);
+            logger.error('❌ Error obteniendo video:', error.message);
             return null;
         }
     }
@@ -405,20 +406,20 @@ class VideoManager {
             for (const video of videosToDelete) {
                 try {
                     await fs.unlink(video.localPath);
-                    console.log(`🗑️ Video eliminado: ${video.filename}`);
+                    logger.info(`🗑️ Video eliminado: ${video.filename}`);
                 } catch (error) {
-                    console.warn(`⚠️ No se pudo eliminar: ${video.filename}`);
+                    logger.warn(`⚠️ No se pudo eliminar: ${video.filename}`);
                 }
             }
 
             // Actualizar metadata
             await fs.writeFile(this.metadataFile, JSON.stringify({ videos: videosToKeep }, null, 2));
 
-            console.log(`✅ Limpieza completada: ${videosToDelete.length} videos eliminados`);
+            logger.info(`✅ Limpieza completada: ${videosToDelete.length} videos eliminados`);
             return { deleted: videosToDelete.length, remaining: videosToKeep.length };
 
         } catch (error) {
-            console.error('❌ Error en limpieza:', error.message);
+            logger.error('❌ Error en limpieza:', error.message);
             return { deleted: 0, remaining: 0 };
         }
     }

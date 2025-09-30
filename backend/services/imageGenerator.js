@@ -1,5 +1,6 @@
 // Generador de imágenes dinámicas para Instagram - Fantasy La Liga Pro
 const nodeHtmlToImage = require('node-html-to-image');
+const logger = require('../utils/logger');
 const Jimp = require('jimp');
 const path = require('path');
 const fs = require('fs').promises;
@@ -26,16 +27,16 @@ class ImageGenerator {
       await fs.mkdir(this.logosPath, { recursive: true });
       await fs.mkdir(this.templatesPath, { recursive: true });
       await fs.mkdir(this.outputPath, { recursive: true });
-      console.log('📁 Assets directories ensured');
+      logger.info('📁 Assets directories ensured');
     } catch (error) {
-      console.log('📁 Directories already exist or created');
+      logger.info('📁 Directories already exist or created');
     }
   }
 
   // Generar imagen para chollo
   async generateCholloImage(playerData, bargainData) {
     try {
-      console.log('🎨 Generating chollo image for:', playerData.name);
+      logger.info('🎨 Generating chollo image for:', playerData.name);
 
       // Template HTML para chollo con recursos optimizados
       const htmlTemplate = await this.getCholloTemplate(playerData, bargainData);
@@ -58,7 +59,7 @@ class ImageGenerator {
 
       await fs.writeFile(filePath, imageBuffer);
 
-      console.log('✅ Chollo image generated:', fileName);
+      logger.info('✅ Chollo image generated:', fileName);
 
       return {
         fileName,
@@ -70,7 +71,7 @@ class ImageGenerator {
       };
 
     } catch (error) {
-      console.error('❌ Error generating chollo image:', error);
+      logger.error('❌ Error generating chollo image:', error);
       throw error;
     }
   }
@@ -78,7 +79,7 @@ class ImageGenerator {
   // Generar imagen para análisis
   async generateAnalysisImage(analysisData) {
     try {
-      console.log('📊 Generating analysis image');
+      logger.info('📊 Generating analysis image');
 
       const htmlTemplate = this.getAnalysisTemplate(analysisData);
 
@@ -98,7 +99,7 @@ class ImageGenerator {
 
       await fs.writeFile(filePath, imageBuffer);
 
-      console.log('✅ Analysis image generated:', fileName);
+      logger.info('✅ Analysis image generated:', fileName);
 
       return {
         fileName,
@@ -108,7 +109,7 @@ class ImageGenerator {
       };
 
     } catch (error) {
-      console.error('❌ Error generating analysis image:', error);
+      logger.error('❌ Error generating analysis image:', error);
       throw error;
     }
   }
@@ -116,7 +117,7 @@ class ImageGenerator {
   // Generar imagen para alerta
   async generateAlertImage(alertData) {
     try {
-      console.log('🚨 Generating alert image');
+      logger.info('🚨 Generating alert image');
 
       const htmlTemplate = this.getAlertTemplate(alertData);
 
@@ -136,7 +137,7 @@ class ImageGenerator {
 
       await fs.writeFile(filePath, imageBuffer);
 
-      console.log('✅ Alert image generated:', fileName);
+      logger.info('✅ Alert image generated:', fileName);
 
       return {
         fileName,
@@ -146,7 +147,7 @@ class ImageGenerator {
       };
 
     } catch (error) {
-      console.error('❌ Error generating alert image:', error);
+      logger.error('❌ Error generating alert image:', error);
       throw error;
     }
   }
@@ -189,11 +190,11 @@ class ImageGenerator {
 
       const localPath = await this.getLocalPlayerPhoto(playerId);
       if (localPath) {
-        console.log('📷 Using cached player photo:', playerId);
+        logger.info('📷 Using cached player photo:', playerId);
         return localPath;
       }
 
-      console.log('⬇️ Downloading player photo:', playerId);
+      logger.info('⬇️ Downloading player photo:', playerId);
       const response = await axios({
         method: 'GET',
         url: imageUrl,
@@ -208,7 +209,7 @@ class ImageGenerator {
       return `/assets/player-photos/${fileName}`;
 
     } catch (error) {
-      console.log('⚠️ Could not download player image:', error.message);
+      logger.info('⚠️ Could not download player image:', error.message);
       return null;
     }
   }
@@ -220,11 +221,11 @@ class ImageGenerator {
 
       const localPath = await this.getLocalTeamLogo(teamId);
       if (localPath) {
-        console.log('🛡️ Using cached team logo:', teamId);
+        logger.info('🛡️ Using cached team logo:', teamId);
         return localPath;
       }
 
-      console.log('⬇️ Downloading team logo:', teamId);
+      logger.info('⬇️ Downloading team logo:', teamId);
       const response = await axios({
         method: 'GET',
         url: logoUrl,
@@ -239,7 +240,7 @@ class ImageGenerator {
       return `/assets/team-logos/${fileName}`;
 
     } catch (error) {
-      console.log('⚠️ Could not download team logo:', error.message);
+      logger.info('⚠️ Could not download team logo:', error.message);
       return null;
     }
   }
@@ -890,11 +891,11 @@ class ImageGenerator {
 
         if (now - stats.mtime.getTime() > maxAge) {
           await fs.unlink(filePath);
-          console.log('🗑️ Cleaned old image:', file);
+          logger.info('🗑️ Cleaned old image:', file);
         }
       }
     } catch (error) {
-      console.log('⚠️ Error cleaning old images:', error.message);
+      logger.info('⚠️ Error cleaning old images:', error.message);
     }
   }
 }

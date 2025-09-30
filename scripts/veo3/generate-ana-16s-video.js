@@ -4,6 +4,7 @@
 // Implementa todas las técnicas avanzadas de VEO3-AVANZADO-2025.md
 
 const axios = require('axios');
+const logger = require('../../../../../../../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
@@ -92,10 +93,10 @@ class Ana16sVideoGenerator {
 
   // Simular llamada a VEO3 API
   async generateVideoSegment(promptConfig, segmentNumber) {
-    console.log(`🎬 Generando Segmento ${segmentNumber}/2...`);
-    console.log(`📝 Prompt: ${promptConfig.prompt.substring(0, 100)}...`);
-    console.log(`🎵 Audio: ${promptConfig.audioDesign.style}`);
-    console.log(`🎥 Camera: ${promptConfig.cinematography.movement}`);
+    logger.info(`🎬 Generando Segmento ${segmentNumber}/2...`);
+    logger.info(`📝 Prompt: ${promptConfig.prompt.substring(0, 100)}...`);
+    logger.info(`🎵 Audio: ${promptConfig.audioDesign.style}`);
+    logger.info(`🎥 Camera: ${promptConfig.cinematography.movement}`);
 
     // Simulación de generación VEO3
     const simulatedVideoGeneration = {
@@ -110,8 +111,8 @@ class Ana16sVideoGenerator {
       }
     };
 
-    console.log(`⏳ Simulando generación VEO3...`);
-    console.log(`📊 Task ID: ${simulatedVideoGeneration.taskId}`);
+    logger.info(`⏳ Simulando generación VEO3...`);
+    logger.info(`📊 Task ID: ${simulatedVideoGeneration.taskId}`);
 
     // Simular tiempo de generación
     await this.simulateProgress(segmentNumber);
@@ -119,7 +120,7 @@ class Ana16sVideoGenerator {
     // Simular URL de video generado
     const videoUrl = `https://veo3-output.kie.ai/videos/${simulatedVideoGeneration.taskId}.mp4`;
 
-    console.log(`✅ Segmento ${segmentNumber} generado: ${videoUrl}`);
+    logger.info(`✅ Segmento ${segmentNumber} generado: ${videoUrl}`);
 
     return {
       videoUrl,
@@ -141,39 +142,39 @@ class Ana16sVideoGenerator {
     ];
 
     for (let i = 0; i < steps.length; i++) {
-      console.log(`   ${i + 1}/5: ${steps[i]}`);
+      logger.info(`   ${i + 1}/5: ${steps[i]}`);
       await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay
     }
   }
 
   // Extraer último frame para narrative chaining
   async extractLastFrame(videoUrl) {
-    console.log(`🎞️ Extrayendo último frame para narrative chaining...`);
+    logger.info(`🎞️ Extrayendo último frame para narrative chaining...`);
 
     // Simulación de extracción de frame usando File.ai
     const lastFrameUrl = videoUrl.replace('.mp4', '_last_frame.jpg');
 
-    console.log(`📸 Último frame extraído: ${lastFrameUrl}`);
+    logger.info(`📸 Último frame extraído: ${lastFrameUrl}`);
 
     return lastFrameUrl;
   }
 
   // Concatenar ambos segmentos
   async concatenateSegments(segment1Url, segment2Url) {
-    console.log(`🔗 Concatenando segmentos para video final de 16s...`);
+    logger.info(`🔗 Concatenando segmentos para video final de 16s...`);
 
     const finalVideoUrl = `${this.outputDir}/ana-chollo-revelation-16s-${Date.now()}.mp4`;
 
     // Simulación de concatenación con FFmpeg o File.ai
-    console.log(`   📹 Segmento 1: ${segment1Url}`);
-    console.log(`   📹 Segmento 2: ${segment2Url}`);
-    console.log(`   🎬 Aplicando transición suave...`);
-    console.log(`   🎵 Masterizando audio continuo...`);
-    console.log(`   ⬆️ Upscaling a 1080p...`);
+    logger.info(`   📹 Segmento 1: ${segment1Url}`);
+    logger.info(`   📹 Segmento 2: ${segment2Url}`);
+    logger.info(`   🎬 Aplicando transición suave...`);
+    logger.info(`   🎵 Masterizando audio continuo...`);
+    logger.info(`   ⬆️ Upscaling a 1080p...`);
 
     await new Promise(resolve => setTimeout(resolve, 3000)); // Simular concatenación
 
-    console.log(`✅ Video final 16s generado: ${finalVideoUrl}`);
+    logger.info(`✅ Video final 16s generado: ${finalVideoUrl}`);
 
     return {
       finalVideoUrl,
@@ -194,71 +195,71 @@ class Ana16sVideoGenerator {
 
   // Proceso completo
   async generateComplete16sVideo() {
-    console.log(`🚀 INICIANDO GENERACIÓN VIDEO ANA 16 SEGUNDOS`);
-    console.log(`📊 Técnicas aplicadas: Narrative Chaining + Audio Expresivo + JSON Prompting`);
-    console.log(`🎯 Referencia Ana: ${this.anaReferenceImage}`);
-    console.log(`⚙️ Configuración VEO3:`, this.veo3Config);
-    console.log(`\n`);
+    logger.info(`🚀 INICIANDO GENERACIÓN VIDEO ANA 16 SEGUNDOS`);
+    logger.info(`📊 Técnicas aplicadas: Narrative Chaining + Audio Expresivo + JSON Prompting`);
+    logger.info(`🎯 Referencia Ana: ${this.anaReferenceImage}`);
+    logger.info(`⚙️ Configuración VEO3:`, this.veo3Config);
+    logger.info(`\n`);
 
     try {
       // FASE 1: Generar Segmento 1 (Conspirativo)
-      console.log(`📋 FASE 1: SEGMENTO CONSPIRATIVO (8s)`);
+      logger.info(`📋 FASE 1: SEGMENTO CONSPIRATIVO (8s)`);
       const segment1Prompt = this.generateSegment1Prompt();
       const segment1Result = await this.generateVideoSegment(segment1Prompt, 1);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 2: Extraer último frame para narrative chaining
-      console.log(`📋 FASE 2: NARRATIVE CHAINING`);
+      logger.info(`📋 FASE 2: NARRATIVE CHAINING`);
       const lastFrame = await this.extractLastFrame(segment1Result.videoUrl);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 3: Generar Segmento 2 (Explosivo)
-      console.log(`📋 FASE 3: SEGMENTO EXPLOSIVO (8s)`);
+      logger.info(`📋 FASE 3: SEGMENTO EXPLOSIVO (8s)`);
       const segment2Prompt = this.generateSegment2Prompt(lastFrame);
       const segment2Result = await this.generateVideoSegment(segment2Prompt, 2);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 4: Concatenación final
-      console.log(`📋 FASE 4: CONCATENACIÓN FINAL`);
+      logger.info(`📋 FASE 4: CONCATENACIÓN FINAL`);
       const finalResult = await this.concatenateSegments(
         segment1Result.videoUrl,
         segment2Result.videoUrl
       );
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // RESULTADO FINAL
-      console.log(`🎉 ¡VIDEO 16s COMPLETADO CON ÉXITO!`);
-      console.log(`=======================================`);
-      console.log(`📺 Video final: ${finalResult.finalVideoUrl}`);
-      console.log(`⏱️ Duración: ${finalResult.duration}`);
-      console.log(`📐 Formato: ${finalResult.format}`);
-      console.log(`🎵 Audio: ${finalResult.audioQuality}`);
-      console.log(`📊 Calidad: ${finalResult.quality}`);
-      console.log(`💾 Tamaño: ${finalResult.fileSize}`);
-      console.log(`\n🛠️ Técnicas aplicadas:`);
-      finalResult.techniques.forEach(tech => console.log(`   ✅ ${tech}`));
+      logger.info(`🎉 ¡VIDEO 16s COMPLETADO CON ÉXITO!`);
+      logger.info(`=======================================`);
+      logger.info(`📺 Video final: ${finalResult.finalVideoUrl}`);
+      logger.info(`⏱️ Duración: ${finalResult.duration}`);
+      logger.info(`📐 Formato: ${finalResult.format}`);
+      logger.info(`🎵 Audio: ${finalResult.audioQuality}`);
+      logger.info(`📊 Calidad: ${finalResult.quality}`);
+      logger.info(`💾 Tamaño: ${finalResult.fileSize}`);
+      logger.info(`\n🛠️ Técnicas aplicadas:`);
+      finalResult.techniques.forEach(tech => logger.info(`   ✅ ${tech}`));
 
-      console.log(`\n🎯 ANÁLISIS DE CALIDAD:`);
-      console.log(`   🎭 Consistencia Ana: 98% (referencia perfecta)`);
-      console.log(`   🎵 Audio ES España: 96% (acento perfecto)`);
-      console.log(`   🎬 Narrative Chain: 94% (transición suave)`);
-      console.log(`   💥 Arco Emocional: 92% (progresión natural)`);
-      console.log(`   📱 Optimización Social: 95% (formato 9:16)`);
+      logger.info(`\n🎯 ANÁLISIS DE CALIDAD:`);
+      logger.info(`   🎭 Consistencia Ana: 98% (referencia perfecta)`);
+      logger.info(`   🎵 Audio ES España: 96% (acento perfecto)`);
+      logger.info(`   🎬 Narrative Chain: 94% (transición suave)`);
+      logger.info(`   💥 Arco Emocional: 92% (progresión natural)`);
+      logger.info(`   📱 Optimización Social: 95% (formato 9:16)`);
 
-      console.log(`\n📈 MÉTRICAS ESPERADAS:`);
-      console.log(`   👀 Engagement: +400% (arco emocional)`);
-      console.log(`   🔄 Shares: +350% (revelación dramática)`);
-      console.log(`   ⏰ Watch time: 95% (16s completos)`);
-      console.log(`   💬 Comments: +250% (call-to-action efectivo)`);
+      logger.info(`\n📈 MÉTRICAS ESPERADAS:`);
+      logger.info(`   👀 Engagement: +400% (arco emocional)`);
+      logger.info(`   🔄 Shares: +350% (revelación dramática)`);
+      logger.info(`   ⏰ Watch time: 95% (16s completos)`);
+      logger.info(`   💬 Comments: +250% (call-to-action efectivo)`);
 
       return finalResult;
 
     } catch (error) {
-      console.error(`❌ Error generando video:`, error.message);
+      logger.error(`❌ Error generando video:`, error.message);
       throw error;
     }
   }
@@ -292,11 +293,11 @@ async function main() {
     const metadataPath = `${generator.outputDir}/metadata-${Date.now()}.json`;
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
-    console.log(`\n📄 Metadata guardada: ${metadataPath}`);
-    console.log(`\n🎬 ¡Video Ana 16s listo para distribución!`);
+    logger.info(`\n📄 Metadata guardada: ${metadataPath}`);
+    logger.info(`\n🎬 ¡Video Ana 16s listo para distribución!`);
 
   } catch (error) {
-    console.error(`💥 Error fatal:`, error);
+    logger.error(`💥 Error fatal:`, error);
     process.exit(1);
   }
 }

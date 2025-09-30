@@ -1,4 +1,5 @@
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const ApiFootballClient = require('../services/apiFootball');
 
@@ -9,7 +10,7 @@ const apiFootball = new ApiFootballClient();
 router.get('/grid/:fixture_id', async (req, res) => {
   try {
     const fixture_id = req.params.fixture_id;
-    console.log(`🔍 [DEBUG] Obteniendo alineaciones para fixture ${fixture_id}`);
+    logger.info(`🔍 [DEBUG] Obteniendo alineaciones para fixture ${fixture_id}`);
 
     const result = await apiFootball.getFixtureLineups(fixture_id);
 
@@ -72,8 +73,8 @@ router.get('/grid/:fixture_id', async (req, res) => {
         debugData.teams.push(teamInfo);
       });
 
-      console.log('✅ [DEBUG] Datos procesados correctamente');
-      console.log('📊 [DEBUG] Resumen:', {
+      logger.info('✅ [DEBUG] Datos procesados correctamente');
+      logger.info('📊 [DEBUG] Resumen:', {
         teams: debugData.teams.map(t => ({
           name: t.team.name,
           formation: t.team.formation,
@@ -90,7 +91,7 @@ router.get('/grid/:fixture_id', async (req, res) => {
       });
 
     } else {
-      console.log('❌ [DEBUG] No se encontraron alineaciones');
+      logger.info('❌ [DEBUG] No se encontraron alineaciones');
       res.status(404).json({
         success: false,
         error: result.error || 'No se encontraron alineaciones',
@@ -99,7 +100,7 @@ router.get('/grid/:fixture_id', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ [DEBUG] Error:', error);
+    logger.error('❌ [DEBUG] Error:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -115,14 +116,14 @@ router.get('/matrix/:fixture_id', async (req, res) => {
     const result = await apiFootball.getFixtureLineups(fixture_id);
 
     if (result.success && result.data) {
-      console.log('\n🔍 ===== ANÁLISIS MATRIZ COORDENADAS API-SPORTS =====');
+      logger.info('\n🔍 ===== ANÁLISIS MATRIZ COORDENADAS API-SPORTS =====');
 
       result.data.forEach(teamData => {
         const teamName = teamData.team.name;
         const formation = teamData.formation;
 
-        console.log(`\n🏆 EQUIPO: ${teamName} (${formation})`);
-        console.log('=' .repeat(50));
+        logger.info(`\n🏆 EQUIPO: ${teamName} (${formation})`);
+        logger.info('=' .repeat(50));
 
         // Crear matriz
         const matrix = {};
@@ -144,21 +145,21 @@ router.get('/matrix/:fixture_id', async (req, res) => {
             if (!matrix[row]) matrix[row] = {};
             matrix[row][col] = `${player.number}.${player.name.split(' ')[0]}`;
 
-            console.log(`📍 ${player.name} (#${player.number}) -> Grid: ${grid} (Fila: ${row}, Col: ${col})`);
+            logger.info(`📍 ${player.name} (#${player.number}) -> Grid: ${grid} (Fila: ${row}, Col: ${col})`);
           }
         });
 
         // Mostrar matriz
-        console.log(`\n📊 MATRIZ ${maxRow}x${maxCol}:`);
-        console.log('─'.repeat(70));
+        logger.info(`\n📊 MATRIZ ${maxRow}x${maxCol}:`);
+        logger.info('─'.repeat(70));
 
         // Header de columnas
         let header = '   ';
         for (let col = 1; col <= maxCol; col++) {
           header += `Col${col}`.padEnd(12);
         }
-        console.log(header);
-        console.log('─'.repeat(70));
+        logger.info(header);
+        logger.info('─'.repeat(70));
 
         // Filas de la matriz
         for (let row = 1; row <= maxRow; row++) {
@@ -167,13 +168,13 @@ router.get('/matrix/:fixture_id', async (req, res) => {
             const cell = (matrix[row] && matrix[row][col]) ? matrix[row][col] : '---';
             rowStr += cell.padEnd(12);
           }
-          console.log(rowStr);
+          logger.info(rowStr);
         }
 
-        console.log('─'.repeat(70));
+        logger.info('─'.repeat(70));
       });
 
-      console.log('\n✅ Análisis completado');
+      logger.info('\n✅ Análisis completado');
 
       res.json({
         success: true,
@@ -189,7 +190,7 @@ router.get('/matrix/:fixture_id', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('❌ Error en matriz debug:', error);
+    logger.error('❌ Error en matriz debug:', error);
     res.status(500).json({
       success: false,
       error: error.message

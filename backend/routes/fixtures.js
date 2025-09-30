@@ -1,18 +1,45 @@
-// =================================================
-// RUTAS FIXTURES Y ALINEACIONES LA LIGA
-// =================================================
-// Endpoints para sincronización y consulta de fixtures con alineaciones
+/**
+ * @fileoverview Rutas API para fixtures y alineaciones de La Liga
+ * @module routes/fixtures
+ * @description Endpoints para sincronización y consulta de partidos con alineaciones.
+ * Integra con API-Sports para obtener datos en tiempo real.
+ *
+ * Características:
+ * - Sincronización de fixtures del día actual
+ * - Sincronización por rango de fechas
+ * - Consulta de fixtures locales (almacenados)
+ * - Sistema de error handling centralizado
+ *
+ * @requires express
+ * @requires ../services/fixturesSync
+ * @requires ../middleware/errorHandler
+ *
+ * @example
+ * // Sincronizar fixtures de hoy
+ * POST /api/fixtures/sync/today
+ *
+ * // Sincronizar rango de fechas
+ * POST /api/fixtures/sync/range
+ * Body: { from_date: "2025-09-01", to_date: "2025-09-30" }
+ *
+ * // Consultar fixtures locales
+ * GET /api/fixtures/local
+ * GET /api/fixtures/local/today
+ */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const FixturesSync = require('../services/fixturesSync');
+const { asyncHandler, ValidationError } = require('../middleware/errorHandler');
 
 const router = express.Router();
 
 // === SINCRONIZACIÓN DE FIXTURES ===
 
 // Sincronizar fixtures del día actual
-router.post('/sync/today', async (req, res) => {
-  try {
+router.post(
+  '/sync/today',
+  asyncHandler(async (req, res) => {
     const fixturesSync = new FixturesSync();
     const result = await fixturesSync.syncTodayFixtures();
 
@@ -36,24 +63,17 @@ router.post('/sync/today', async (req, res) => {
         }
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // Sincronizar fixtures de un rango de fechas
-router.post('/sync/range', async (req, res) => {
-  try {
+router.post(
+  '/sync/range',
+  asyncHandler(async (req, res) => {
     const { from_date, to_date } = req.body;
 
     if (!from_date || !to_date) {
-      return res.status(400).json({
-        success: false,
-        error: 'Se requieren from_date y to_date (formato: YYYY-MM-DD)'
-      });
+      throw new ValidationError('Se requieren from_date y to_date (formato: YYYY-MM-DD)');
     }
 
     const fixturesSync = new FixturesSync();
@@ -80,19 +100,15 @@ router.post('/sync/range', async (req, res) => {
         }
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // === CONSULTA DE FIXTURES ===
 
 // Obtener fixtures desde base de datos local
-router.get('/local', async (req, res) => {
-  try {
+router.get(
+  '/local',
+  asyncHandler(async (req, res) => {
     const date = req.query.date || null; // formato: YYYY-MM-DD
 
     const fixturesSync = new FixturesSync();
@@ -111,17 +127,13 @@ router.get('/local', async (req, res) => {
         error: result.error
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // Obtener fixtures de hoy desde base de datos local
-router.get('/local/today', async (req, res) => {
-  try {
+router.get(
+  '/local/today',
+  asyncHandler(async (req, res) => {
     const today = new Date().toISOString().split('T')[0];
 
     const fixturesSync = new FixturesSync();
@@ -140,13 +152,8 @@ router.get('/local/today', async (req, res) => {
         error: result.error
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  })
+);
 
 // === ALINEACIONES EN TIEMPO REAL ===
 
@@ -255,7 +262,7 @@ router.get('/lineups/date/:date', async (req, res) => {
           });
         }
       } catch (error) {
-        console.log(`⚠️ Error obteniendo alineaciones para fixture ${fixture.id}: ${error.message}`);
+        logger.info(`⚠️ Error obteniendo alineaciones para fixture ${fixture.id}: ${error.message}`);
       }
     }
 
@@ -355,7 +362,7 @@ router.get('/lineups/live', async (req, res) => {
           });
         }
       } catch (error) {
-        console.log(`⚠️ Error obteniendo alineaciones para fixture ${fixture.id}: ${error.message}`);
+        logger.info(`⚠️ Error obteniendo alineaciones para fixture ${fixture.id}: ${error.message}`);
       }
     }
 

@@ -6,7 +6,17 @@
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js",
-    "test": "node backend/routes/test.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:verbose": "jest --verbose",
+    "test:integration": "node backend/routes/test.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "quality": "npm run lint && npm run format:check && npm test",
+    "prepare": "husky",
     "db:init": "node database/init-database.js",
     "db:test": "node database/test-database.js",
     "db:test:quick": "node database/test-database.js --quick",
@@ -21,7 +31,10 @@
     "veo3:test-concat": "node scripts/veo3/concatenate-videos.js --test",
     "veo3:test-framework": "node scripts/veo3/test-viral-framework.js",
     "veo3:test-stats-card": "node scripts/veo3/test-stats-card-prompt.js",
-    "veo3:test-3segments": "node scripts/veo3/test-three-segments.js"
+    "veo3:test-3segments": "node scripts/veo3/test-three-segments.js",
+    "veo3:generate-demo": "node scripts/veo3/generate-demo-pedri-3segments.js",
+    "n8n:check-versions": "node scripts/n8n-version-check.js",
+    "n8n:version-daily": "node scripts/n8n-version-check.js"
   },
   "keywords": [
     "fantasy",
@@ -39,17 +52,66 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.1.0",
     "fluent-ffmpeg": "^2.1.3",
     "helmet": "^7.1.0",
     "jimp": "^1.6.0",
+    "joi": "^18.0.1",
     "morgan": "^1.10.0",
     "node-html-to-image": "^5.0.0",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.18.1",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
+    "lint-staged": "^16.2.3",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "backend/services/**/*.js",
+      "!backend/**/*.test.js"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "backend/routes/test.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 3,
+        "functions": 4,
+        "lines": 3,
+        "statements": 3
+      }
+    },
+    "testTimeout": 10000
   }
 }

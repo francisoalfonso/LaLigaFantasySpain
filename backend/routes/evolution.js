@@ -3,6 +3,8 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
+const { validate, schemas } = require('../middleware/validation');
 const FantasyEvolution = require('../services/fantasyEvolution');
 const ApiFootballClient = require('../services/apiFootball');
 
@@ -14,18 +16,11 @@ const apiFootball = new ApiFootballClient();
  * GET /api/evolution/player/:playerId
  * Obtener evolución de valor Fantasy de un jugador específico
  */
-router.get('/player/:playerId', async (req, res) => {
+router.get('/player/:playerId', validate(schemas.evolutionPlayer), async (req, res) => {
     try {
         const playerId = parseInt(req.params.playerId);
 
-        if (!playerId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Player ID es requerido'
-            });
-        }
-
-        console.log(`📈 Generando evolución Fantasy para jugador ${playerId}...`);
+        logger.info(`📈 Generando evolución Fantasy para jugador ${playerId}...`);
 
         // Obtener datos del jugador
         const playerResult = await apiFootball.getPlayerStats(playerId);
@@ -60,12 +55,12 @@ router.get('/player/:playerId', async (req, res) => {
             }
         };
 
-        // Generar evolución
-        const evolution = fantasyEvolution.generatePlayerEvolution(player);
+        // Generar evolución (ahora es async)
+        const evolution = await fantasyEvolution.generatePlayerEvolution(playerId);
 
         res.json({
             success: true,
-            message: `Evolución generada para ${player.name}`,
+            message: `Evolución generada para ${evolution.playerName}`,
             data: evolution,
             metadata: {
                 playerInfo: {
@@ -81,7 +76,7 @@ router.get('/player/:playerId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error generando evolución Fantasy:', error.message);
+        logger.error('❌ Error generando evolución Fantasy:', error.message);
         res.status(500).json({
             success: false,
             error: error.message,
@@ -106,7 +101,7 @@ router.get('/compare/:playerId1/:playerId2', async (req, res) => {
             });
         }
 
-        console.log(`🆚 Comparando evolución Fantasy: ${playerId1} vs ${playerId2}...`);
+        logger.info(`🆚 Comparando evolución Fantasy: ${playerId1} vs ${playerId2}...`);
 
         // Obtener datos de ambos jugadores en paralelo
         const [player1Result, player2Result] = await Promise.all([
@@ -146,9 +141,9 @@ router.get('/compare/:playerId1/:playerId2', async (req, res) => {
         const player1 = formatPlayer(player1Result.data);
         const player2 = formatPlayer(player2Result.data);
 
-        // Generar evoluciones
-        const evolution1 = fantasyEvolution.generatePlayerEvolution(player1);
-        const evolution2 = fantasyEvolution.generatePlayerEvolution(player2);
+        // Generar evoluciones (ahora es async)
+        const evolution1 = await fantasyEvolution.generatePlayerEvolution(playerId1);
+        const evolution2 = await fantasyEvolution.generatePlayerEvolution(playerId2);
 
         // Análisis comparativo
         const comparison = {
@@ -175,7 +170,7 @@ router.get('/compare/:playerId1/:playerId2', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error comparando evoluciones:', error.message);
+        logger.error('❌ Error comparando evoluciones:', error.message);
         res.status(500).json({
             success: false,
             error: error.message,
@@ -202,7 +197,7 @@ router.get('/top-risers', async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 10;
 
-        console.log(`📈 Obteniendo top ${limit} jugadores con mayor crecimiento...`);
+        logger.info(`📈 Obteniendo top ${limit} jugadores con mayor crecimiento...`);
 
         // Obtener muestra de jugadores (primeros 50 para el ejemplo)
         const playersResult = await apiFootball.getLaLigaPlayers(1);
@@ -219,16 +214,11 @@ router.get('/top-risers', async (req, res) => {
         const players = playersResult.data.slice(0, 20); // Limitar para performance
 
         for (const playerData of players) {
-            const player = {
-                id: playerData.id,
-                name: playerData.name,
-                team: playerData.team,
-                position: playerData.position,
-                stats: playerData.stats
-            };
-
-            const evolution = fantasyEvolution.generatePlayerEvolution(player);
-            evolutions.push(evolution);
+            // Generar evolución (ahora es async)
+            const evolution = await fantasyEvolution.generatePlayerEvolution(playerData.id);
+            if (evolution && !evolution.error) {
+                evolutions.push(evolution);
+            }
         }
 
         // Ordenar por mayor crecimiento porcentual
@@ -260,7 +250,7 @@ router.get('/top-risers', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error obteniendo top risers:', error.message);
+        logger.error('❌ Error obteniendo top risers:', error.message);
         res.status(500).json({
             success: false,
             error: error.message,
@@ -275,7 +265,7 @@ router.get('/top-risers', async (req, res) => {
  */
 router.get('/test', async (req, res) => {
     try {
-        console.log('🧪 Ejecutando test del FantasyEvolution...');
+        logger.info('🧪 Ejecutando test del FantasyEvolution...');
 
         // Test con jugador de ejemplo
         const testPlayer = {
@@ -296,13 +286,15 @@ router.get('/test', async (req, res) => {
             }
         };
 
-        const evolution = fantasyEvolution.generatePlayerEvolution(testPlayer);
+        // Test con Lewandowski (playerId: 521)
+        const testPlayerId = 521;
+        const evolution = await fantasyEvolution.generatePlayerEvolution(testPlayerId);
 
         res.json({
             success: true,
-            message: 'Test FantasyEvolution completado',
+            message: 'Test FantasyEvolution completado - DATOS REALES desde API-Sports',
             testData: {
-                inputPlayer: testPlayer,
+                testPlayerId: testPlayerId,
                 evolution: evolution
             },
             serviceStatus: {
@@ -313,7 +305,7 @@ router.get('/test', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('❌ Error en test FantasyEvolution:', error.message);
+        logger.error('❌ Error en test FantasyEvolution:', error.message);
         res.status(500).json({
             success: false,
             error: error.message,

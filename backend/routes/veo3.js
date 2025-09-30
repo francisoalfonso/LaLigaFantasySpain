@@ -1,4 +1,5 @@
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 
 // Importar servicios VEO3
@@ -6,12 +7,14 @@ const VEO3Client = require('../services/veo3/veo3Client');
 const PromptBuilder = require('../services/veo3/promptBuilder');
 const PlayerCardsOverlay = require('../services/veo3/playerCardsOverlay');
 const VideoConcatenator = require('../services/veo3/videoConcatenator');
+const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
 
 // Instanciar servicios
 const veo3Client = new VEO3Client();
 const promptBuilder = new PromptBuilder();
 const playerCards = new PlayerCardsOverlay();
 const concatenator = new VideoConcatenator();
+const viralBuilder = new ViralVideoBuilder();
 
 /**
  * @route GET /api/veo3/test
@@ -19,7 +22,7 @@ const concatenator = new VideoConcatenator();
  */
 router.get('/test', async (req, res) => {
     try {
-        console.log('[VEO3 Routes] Test de conectividad iniciado...');
+        logger.info('[VEO3 Routes] Test de conectividad iniciado...');
 
         const connected = await veo3Client.testConnection();
 
@@ -44,7 +47,7 @@ router.get('/test', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error en test:', error.message);
+        logger.error('[VEO3 Routes] Error en test:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error interno en test VEO3',
@@ -69,7 +72,7 @@ router.post('/generate-ana', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Generando video Ana tipo: ${type}`);
+        logger.info(`[VEO3 Routes] Generando video Ana tipo: ${type}`);
 
         let prompt;
         let videoData = { type };
@@ -83,7 +86,14 @@ router.post('/generate-ana', async (req, res) => {
                         message: 'playerName y price requeridos para tipo chollo'
                     });
                 }
-                prompt = promptBuilder.buildCholloPrompt(playerName, price, options);
+                // Pasar estadísticas y datos completos al prompt builder
+                const cholloOptions = {
+                    ...options,
+                    stats: req.body.stats || {},
+                    ratio: req.body.ratio,
+                    team: req.body.team || playerName.split(' ').pop() // fallback
+                };
+                prompt = promptBuilder.buildCholloPrompt(playerName, price, cholloOptions);
                 videoData.player = playerName;
                 videoData.price = price;
                 break;
@@ -173,7 +183,7 @@ router.post('/generate-ana', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error generando video Ana:', error.message);
+        logger.error('[VEO3 Routes] Error generando video Ana:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error generando video Ana',
@@ -198,7 +208,7 @@ router.get('/status/:taskId', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Consultando estado de ${taskId}`);
+        logger.info(`[VEO3 Routes] Consultando estado de ${taskId}`);
 
         const status = await veo3Client.getStatus(taskId);
 
@@ -216,7 +226,7 @@ router.get('/status/:taskId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error obteniendo estado:', error.message);
+        logger.error('[VEO3 Routes] Error obteniendo estado:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo estado del video',
@@ -234,7 +244,7 @@ router.get('/video-info/:taskId', async (req, res) => {
     try {
         const { taskId } = req.params;
 
-        console.log(`[VEO3 Routes] Obteniendo información de video para taskId: ${taskId}`);
+        logger.info(`[VEO3 Routes] Obteniendo información de video para taskId: ${taskId}`);
 
         // Obtener solo el estado sin intentar descargar
         const status = await veo3Client.getStatus(taskId);
@@ -265,7 +275,7 @@ router.get('/video-info/:taskId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error obteniendo información del video:', error.message);
+        logger.error('[VEO3 Routes] Error obteniendo información del video:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo información del video',
@@ -297,7 +307,7 @@ router.post('/add-player-card', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Agregando tarjeta de ${playerData.name} al video`);
+        logger.info(`[VEO3 Routes] Agregando tarjeta de ${playerData.name} al video`);
 
         const resultPath = await playerCards.addPlayerCardOverlay(videoPath, playerData, options);
 
@@ -313,7 +323,7 @@ router.post('/add-player-card', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error agregando player card:', error.message);
+        logger.error('[VEO3 Routes] Error agregando player card:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error agregando player card',
@@ -338,7 +348,7 @@ router.post('/concatenate', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Concatenando ${videoPaths.length} videos`);
+        logger.info(`[VEO3 Routes] Concatenando ${videoPaths.length} videos`);
 
         const resultPath = await concatenator.concatenateVideos(videoPaths, options);
 
@@ -354,7 +364,7 @@ router.post('/concatenate', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error concatenando videos:', error.message);
+        logger.error('[VEO3 Routes] Error concatenando videos:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error concatenando videos',
@@ -379,7 +389,7 @@ router.post('/generate-long-video', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Generando video largo tema "${theme}" con ${segmentCount} segmentos`);
+        logger.info(`[VEO3 Routes] Generando video largo tema "${theme}" con ${segmentCount} segmentos`);
 
         // Generar prompts basados en el tema
         let prompts = [];
@@ -433,7 +443,7 @@ router.post('/generate-long-video', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error generando video largo:', error.message);
+        logger.error('[VEO3 Routes] Error generando video largo:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error generando video largo',
@@ -458,12 +468,12 @@ router.post('/test-minimal-prompt', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] Test minimal prompt para máxima consistencia Ana`);
+        logger.info(`[VEO3 Routes] Test minimal prompt para máxima consistencia Ana`);
 
         // Prompt ULTRA-MINIMALISTA que fuerza usar la imagen exacta
         const minimalPrompt = `The person in the reference image speaking in Spanish: "${dialogue}". Exact appearance from reference image.`;
 
-        console.log(`[VEO3 Routes] Usando prompt minimal: ${minimalPrompt}`);
+        logger.info(`[VEO3 Routes] Usando prompt minimal: ${minimalPrompt}`);
 
         const video = await veo3Client.generateVideo(minimalPrompt, {
             duration: 8,
@@ -483,7 +493,7 @@ router.post('/test-minimal-prompt', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error en test minimal:', error.message);
+        logger.error('[VEO3 Routes] Error en test minimal:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error en test minimal',
@@ -534,7 +544,7 @@ router.get('/config', (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error obteniendo configuración:', error.message);
+        logger.error('[VEO3 Routes] Error obteniendo configuración:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo configuración',
@@ -559,7 +569,7 @@ router.post('/complete-workflow', async (req, res) => {
             });
         }
 
-        console.log(`[VEO3 Routes] ⚡ FLUJO COMPLETO iniciado - Tipo: ${dataType}`);
+        logger.info(`[VEO3 Routes] ⚡ FLUJO COMPLETO iniciado - Tipo: ${dataType}`);
 
         // PASO 1: Generar guiones basados en datos de API
         let scripts = [];
@@ -579,7 +589,7 @@ router.post('/complete-workflow', async (req, res) => {
                     });
                 }
 
-                console.log(`[VEO3 Routes] 📝 Generando guiones para ${apiData.players.length} chollos`);
+                logger.info(`[VEO3 Routes] 📝 Generando guiones para ${apiData.players.length} chollos`);
 
                 // Crear scripts personalizados para cada chollo
                 for (let i = 0; i < apiData.players.length; i++) {
@@ -648,17 +658,17 @@ router.post('/complete-workflow', async (req, res) => {
                 });
         }
 
-        console.log(`[VEO3 Routes] ✅ ${scripts.length} guiones generados`);
+        logger.info(`[VEO3 Routes] ✅ ${scripts.length} guiones generados`);
 
         // PASO 2: Generar videos VEO3 con VideoManager integrado
-        console.log(`[VEO3 Routes] 🎬 Iniciando generación de ${scripts.length} videos VEO3`);
+        logger.info(`[VEO3 Routes] 🎬 Iniciando generación de ${scripts.length} videos VEO3`);
 
         const videoResults = [];
         for (let i = 0; i < scripts.length; i++) {
             const script = scripts[i];
             const finalPrompt = script.prompt.replace('SCRIPT_PLACEHOLDER', script.dialogue);
 
-            console.log(`[VEO3 Routes] 🎥 Generando video ${i + 1}/${scripts.length}: ${script.id}`);
+            logger.info(`[VEO3 Routes] 🎥 Generando video ${i + 1}/${scripts.length}: ${script.id}`);
 
             try {
                 // CRÍTICO: Usar generateCompleteVideo que ya integra VideoManager
@@ -674,10 +684,10 @@ router.post('/complete-workflow', async (req, res) => {
                     status: 'completed'
                 });
 
-                console.log(`[VEO3 Routes] ✅ Video ${i + 1} completado: ${video.url}`);
+                logger.info(`[VEO3 Routes] ✅ Video ${i + 1} completado: ${video.url}`);
 
             } catch (error) {
-                console.error(`[VEO3 Routes] ❌ Error video ${i + 1}:`, error.message);
+                logger.error(`[VEO3 Routes] ❌ Error video ${i + 1}:`, error.message);
                 videoResults.push({
                     ...script,
                     video: null,
@@ -697,7 +707,7 @@ router.post('/complete-workflow', async (req, res) => {
         let concatenatedVideo = null;
 
         if (videoResults.filter(v => v.status === 'completed').length > 1) {
-            console.log(`[VEO3 Routes] 🔗 Concatenando videos...`);
+            logger.info(`[VEO3 Routes] 🔗 Concatenando videos...`);
 
             try {
                 const videoIds = videoResults
@@ -714,13 +724,13 @@ router.post('/complete-workflow', async (req, res) => {
                     });
 
                     finalVideoUrl = concatenatedVideo.publicUrl;
-                    console.log(`[VEO3 Routes] ✅ Videos concatenados: ${finalVideoUrl}`);
+                    logger.info(`[VEO3 Routes] ✅ Videos concatenados: ${finalVideoUrl}`);
                 } else {
                     // Solo un video exitoso
                     finalVideoUrl = videoResults.find(v => v.status === 'completed')?.video?.url;
                 }
             } catch (error) {
-                console.error(`[VEO3 Routes] ❌ Error concatenando:`, error.message);
+                logger.error(`[VEO3 Routes] ❌ Error concatenando:`, error.message);
                 // Fallback: usar primer video exitoso
                 finalVideoUrl = videoResults.find(v => v.status === 'completed')?.video?.url;
             }
@@ -740,7 +750,7 @@ router.post('/complete-workflow', async (req, res) => {
             apiDataIntegrity: JSON.stringify(apiData) === JSON.stringify(metadata.originalApiData)
         };
 
-        console.log(`[VEO3 Routes] ✅ FLUJO COMPLETO terminado - Video final: ${finalVideoUrl}`);
+        logger.info(`[VEO3 Routes] ✅ FLUJO COMPLETO terminado - Video final: ${finalVideoUrl}`);
 
         // RESPUESTA FINAL
         res.json({
@@ -770,7 +780,7 @@ router.post('/complete-workflow', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] ❌ Error en flujo completo:', error.message);
+        logger.error('[VEO3 Routes] ❌ Error en flujo completo:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error en flujo completo',
@@ -805,7 +815,7 @@ router.get('/health', async (req, res) => {
         try {
             health.veo3Api = await veo3Client.testConnection();
         } catch (error) {
-            console.error('[VEO3 Routes] Health check API falló:', error.message);
+            logger.error('[VEO3 Routes] Health check API falló:', error.message);
         }
 
         // Test Ana Image URL
@@ -815,7 +825,7 @@ router.get('/health', async (req, res) => {
                 const response = await axios.head(process.env.ANA_IMAGE_URL);
                 health.anaImageUrl = response.status === 200;
             } catch (error) {
-                console.error('[VEO3 Routes] Health check Ana image falló:', error.message);
+                logger.error('[VEO3 Routes] Health check Ana image falló:', error.message);
             }
         }
 
@@ -837,10 +847,76 @@ router.get('/health', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[VEO3 Routes] Error en health check:', error.message);
+        logger.error('[VEO3 Routes] Error en health check:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error en health check',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+/**
+ * @route POST /api/veo3/generate-viral
+ * @desc Generar video viral completo (Hook → Desarrollo → CTA) para Instagram
+ */
+router.post('/generate-viral', async (req, res) => {
+    try {
+        logger.info('[VEO3 Routes] Generando video viral...');
+
+        const {
+            playerName,
+            price,
+            ratio,
+            team,
+            stats
+        } = req.body;
+
+        // Validar datos requeridos
+        if (!playerName || !price || !ratio || !team) {
+            return res.status(400).json({
+                success: false,
+                message: 'Faltan datos requeridos: playerName, price, ratio, team'
+            });
+        }
+
+        // Generar video viral completo
+        const result = await viralBuilder.generateViralVideo({
+            playerName,
+            price,
+            ratio,
+            team,
+            stats: stats || {}
+        });
+
+        // Generar caption para Instagram
+        const caption = viralBuilder.generateInstagramCaption({
+            playerName,
+            price,
+            ratio,
+            team
+        });
+
+        res.json({
+            success: true,
+            message: 'Video viral generado exitosamente',
+            video: result,
+            caption,
+            instagram: {
+                ready: true,
+                format: '9:16 (Stories/Reels)',
+                duration: result.duration,
+                segments: result.segments
+            },
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        logger.error('[VEO3 Routes] Error generando video viral:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error generando video viral',
             error: error.message,
             timestamp: new Date().toISOString()
         });

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+package-lock.json
+
+# Build outputs
+dist
+build
+coverage
+
+# Logs
+logs
+*.log
+
+# Temporary files
+temp
+tmp
+output
+
+# Database
+*.db
+*.sqlite
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode
+.idea
+
+# System
+.DS_Store

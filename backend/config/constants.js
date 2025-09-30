@@ -1,5 +1,15 @@
-// Configuraciones y constantes para el proyecto Fantasy La Liga
-// ⚠️ TEMPORADA 2025-26 - NO CAMBIAR SIN CONFIRMAR ⚠️
+/**
+ * @fileoverview Configuraciones y constantes centralizadas para Fantasy La Liga 2025-26
+ * @module config/constants
+ * @description Contiene todas las configuraciones críticas del proyecto:
+ * - API-Sports (temporada 2025-26)
+ * - Sistema de puntos Fantasy oficial
+ * - Configuración OpenAI GPT-5 Mini
+ * - Límites y thresholds del sistema
+ *
+ * ⚠️ TEMPORADA 2025-26 - NO CAMBIAR SIN CONFIRMAR ⚠️
+ */
+
 module.exports = {
   // API-Sports La Liga TEMPORADA 2025-26
   API_SPORTS: {

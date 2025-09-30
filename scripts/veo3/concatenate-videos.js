@@ -7,6 +7,7 @@
 
 require('dotenv').config();
 const fs = require('fs');
+const logger = require('../../../../../../../utils/logger');
 const path = require('path');
 const VideoConcatenator = require('../../backend/services/veo3/videoConcatenator');
 const VEO3Client = require('../../backend/services/veo3/veo3Client');
@@ -27,7 +28,7 @@ class ConcatenationScript {
      */
     async concatenateExistingVideos(videoPaths, options = {}) {
         try {
-            console.log(`[ConcatenationScript] Concatenando ${videoPaths.length} videos existentes...`);
+            logger.info(`[ConcatenationScript] Concatenando ${videoPaths.length} videos existentes...`);
 
             // Validar que todos los videos existen
             for (const videoPath of videoPaths) {
@@ -40,14 +41,14 @@ class ConcatenationScript {
             const resultPath = await this.concatenator.concatenateVideos(videoPaths, options);
             const processingTime = Date.now() - startTime;
 
-            console.log(`[ConcatenationScript] ✅ Videos concatenados exitosamente`);
-            console.log(`[ConcatenationScript] Video final: ${resultPath}`);
-            console.log(`[ConcatenationScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
+            logger.info(`[ConcatenationScript] ✅ Videos concatenados exitosamente`);
+            logger.info(`[ConcatenationScript] Video final: ${resultPath}`);
+            logger.info(`[ConcatenationScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
 
             return resultPath;
 
         } catch (error) {
-            console.error(`[ConcatenationScript] Error concatenando videos:`, error.message);
+            logger.error(`[ConcatenationScript] Error concatenando videos:`, error.message);
             throw error;
         }
     }
@@ -60,14 +61,14 @@ class ConcatenationScript {
      */
     async createLongVideoAutomatic(theme, segmentCount = 3, options = {}) {
         try {
-            console.log(`[ConcatenationScript] Creando video largo "${theme}" con ${segmentCount} segmentos...`);
+            logger.info(`[ConcatenationScript] Creando video largo "${theme}" con ${segmentCount} segmentos...`);
 
             // Generar prompts basados en el tema
             const prompts = this.generateThemePrompts(theme, segmentCount);
 
-            console.log(`[ConcatenationScript] Prompts generados:`);
+            logger.info(`[ConcatenationScript] Prompts generados:`);
             prompts.forEach((prompt, i) => {
-                console.log(`  ${i + 1}. ${prompt.substring(0, 80)}...`);
+                logger.info(`  ${i + 1}. ${prompt.substring(0, 80)}...`);
             });
 
             const resultPath = await this.concatenator.createLongVideoFromPrompts(
@@ -76,13 +77,13 @@ class ConcatenationScript {
                 options
             );
 
-            console.log(`[ConcatenationScript] ✅ Video largo "${theme}" completado`);
-            console.log(`[ConcatenationScript] Video final: ${resultPath}`);
+            logger.info(`[ConcatenationScript] ✅ Video largo "${theme}" completado`);
+            logger.info(`[ConcatenationScript] Video final: ${resultPath}`);
 
             return resultPath;
 
         } catch (error) {
-            console.error(`[ConcatenationScript] Error creando video largo:`, error.message);
+            logger.error(`[ConcatenationScript] Error creando video largo:`, error.message);
             throw error;
         }
     }
@@ -181,7 +182,7 @@ class ConcatenationScript {
                 .map(item => item.path);
 
         } catch (error) {
-            console.error('[ConcatenationScript] Error buscando videos:', error.message);
+            logger.error('[ConcatenationScript] Error buscando videos:', error.message);
             return [];
         }
     }
@@ -191,13 +192,13 @@ class ConcatenationScript {
      */
     async runTest() {
         try {
-            console.log('[ConcatenationScript] 🧪 Ejecutando test de concatenación...');
+            logger.info('[ConcatenationScript] 🧪 Ejecutando test de concatenación...');
 
             // Buscar videos Ana existentes
             const anaVideos = this.findAnaVideos().slice(0, 2); // Tomar 2 más recientes
 
             if (anaVideos.length < 2) {
-                console.log('[ConcatenationScript] Insuficientes videos Ana. Generando videos para test...');
+                logger.info('[ConcatenationScript] Insuficientes videos Ana. Generando videos para test...');
 
                 // Generar 2 videos cortos para test
                 const testPrompts = [
@@ -211,7 +212,7 @@ class ConcatenationScript {
 
                 const videoPaths = [];
                 for (let i = 0; i < testPrompts.length; i++) {
-                    console.log(`[ConcatenationScript] Generando video test ${i + 1}/2...`);
+                    logger.info(`[ConcatenationScript] Generando video test ${i + 1}/2...`);
                     const video = await this.veo3Client.generateCompleteVideo(testPrompts[i]);
 
                     // Descargar video
@@ -224,25 +225,25 @@ class ConcatenationScript {
                     transition: { enabled: true, duration: 0.5 }
                 });
 
-                console.log('[ConcatenationScript] ✅ Test completado con videos generados');
+                logger.info('[ConcatenationScript] ✅ Test completado con videos generados');
                 return { success: true, outputVideo: resultPath, inputVideos: videoPaths };
             } else {
                 // Usar videos existentes
-                console.log(`[ConcatenationScript] Usando ${anaVideos.length} videos existentes...`);
+                logger.info(`[ConcatenationScript] Usando ${anaVideos.length} videos existentes...`);
                 anaVideos.forEach((video, i) => {
-                    console.log(`  ${i + 1}. ${path.basename(video)}`);
+                    logger.info(`  ${i + 1}. ${path.basename(video)}`);
                 });
 
                 const resultPath = await this.concatenateExistingVideos(anaVideos, {
                     transition: { enabled: true, duration: 0.5 }
                 });
 
-                console.log('[ConcatenationScript] ✅ Test completado con videos existentes');
+                logger.info('[ConcatenationScript] ✅ Test completado con videos existentes');
                 return { success: true, outputVideo: resultPath, inputVideos: anaVideos };
             }
 
         } catch (error) {
-            console.error('[ConcatenationScript] ❌ Test falló:', error.message);
+            logger.error('[ConcatenationScript] ❌ Test falló:', error.message);
             throw error;
         }
     }
@@ -253,19 +254,19 @@ class ConcatenationScript {
      */
     async runThemeDemo(theme = 'jornada') {
         try {
-            console.log(`[ConcatenationScript] 🎭 Ejecutando demo "${theme}"...`);
+            logger.info(`[ConcatenationScript] 🎭 Ejecutando demo "${theme}"...`);
 
             const resultPath = await this.createLongVideoAutomatic(theme, 3, {
                 transition: { enabled: true, duration: 0.5 }
             });
 
-            console.log(`[ConcatenationScript] ✅ Demo "${theme}" completado`);
-            console.log(`[ConcatenationScript] Video final: ${resultPath}`);
+            logger.info(`[ConcatenationScript] ✅ Demo "${theme}" completado`);
+            logger.info(`[ConcatenationScript] Video final: ${resultPath}`);
 
             return { success: true, theme, outputVideo: resultPath };
 
         } catch (error) {
-            console.error(`[ConcatenationScript] ❌ Demo "${theme}" falló:`, error.message);
+            logger.error(`[ConcatenationScript] ❌ Demo "${theme}" falló:`, error.message);
             throw error;
         }
     }
@@ -294,7 +295,7 @@ class ConcatenationScript {
             });
 
         } catch (error) {
-            console.error('[ConcatenationScript] Error descargando video:', error.message);
+            logger.error('[ConcatenationScript] Error descargando video:', error.message);
             throw error;
         }
     }
@@ -323,22 +324,22 @@ async function main() {
             await script.concatenateExistingVideos(videoArgs);
         } else {
             // Mostrar ayuda
-            console.log('🎬 Video Concatenator - Fantasy La Liga');
-            console.log('Uso:');
-            console.log('  --test                                    # Test básico');
-            console.log('  --theme [chollos|analysis|predictions|jornada]  # Demo temático');
-            console.log('  --concat video1.mp4 video2.mp4 [...]     # Concatenar videos específicos');
-            console.log('');
-            console.log('Ejemplos:');
-            console.log('  npm run veo3:test-concat                  # Test básico');
-            console.log('  node scripts/veo3/concatenate-videos.js --theme chollos');
+            logger.info('🎬 Video Concatenator - Fantasy La Liga');
+            logger.info('Uso:');
+            logger.info('  --test                                    # Test básico');
+            logger.info('  --theme [chollos|analysis|predictions|jornada]  # Demo temático');
+            logger.info('  --concat video1.mp4 video2.mp4 [...]     # Concatenar videos específicos');
+            logger.info('');
+            logger.info('Ejemplos:');
+            logger.info('  npm run veo3:test-concat                  # Test básico');
+            logger.info('  node scripts/veo3/concatenate-videos.js --theme chollos');
 
             // Test por defecto
             await script.runTest();
         }
 
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        logger.error('❌ Error:', error.message);
         process.exit(1);
     }
 }

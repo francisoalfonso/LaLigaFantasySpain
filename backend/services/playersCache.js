@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 // Sistema de Caché para Jugadores de La Liga
 // Optimizado para cargas masivas de datos de jugadores
 
@@ -15,7 +17,7 @@ class PlayersCache {
     // Limpieza automática cada 30 minutos
     setInterval(() => this.cleanup(), 30 * 60 * 1000);
 
-    console.log('⚽ PlayersCache inicializado - TTL: 1h, Players List TTL: 2h');
+    logger.info('⚽ PlayersCache inicializado - TTL: 1h, Players List TTL: 2h');
   }
 
   // Generar clave para filtros de jugadores
@@ -27,20 +29,20 @@ class PlayersCache {
   // Cache específico para lista completa de jugadores
   getAllPlayersList() {
     if (!this.playersListCache || !this.playersListTimestamp) {
-      console.log('🔍 Players List Cache MISS: No data');
+      logger.info('🔍 Players List Cache MISS: No data');
       return null;
     }
 
     // Verificar si ha expirado
     if (Date.now() - this.playersListTimestamp > this.PLAYERS_LIST_TTL) {
-      console.log(`⏰ Players List Cache EXPIRED (${Math.round((Date.now() - this.playersListTimestamp) / 1000 / 60)}min ago)`);
+      logger.info(`⏰ Players List Cache EXPIRED (${Math.round((Date.now() - this.playersListTimestamp) / 1000 / 60)}min ago)`);
       this.playersListCache = null;
       this.playersListTimestamp = null;
       return null;
     }
 
     const ageMinutes = Math.round((Date.now() - this.playersListTimestamp) / 1000 / 60);
-    console.log(`✅ Players List Cache HIT: ${this.playersListCache.length} players (${ageMinutes}min ago)`);
+    logger.info(`✅ Players List Cache HIT: ${this.playersListCache.length} players (${ageMinutes}min ago)`);
     return this.playersListCache;
   }
 
@@ -48,7 +50,7 @@ class PlayersCache {
   setAllPlayersList(players) {
     this.playersListCache = players;
     this.playersListTimestamp = Date.now();
-    console.log(`💾 Players List Cache SET: ${players.length} players cached`);
+    logger.info(`💾 Players List Cache SET: ${players.length} players cached`);
   }
 
   // Obtener datos del caché normal
@@ -56,19 +58,19 @@ class PlayersCache {
     const cached = this.cache.get(key);
 
     if (!cached) {
-      console.log(`🔍 Cache MISS: ${key}`);
+      logger.info(`🔍 Cache MISS: ${key}`);
       return null;
     }
 
     // Verificar si ha expirado
     if (Date.now() - cached.timestamp > this.TTL) {
-      console.log(`⏰ Cache EXPIRED: ${key}`);
+      logger.info(`⏰ Cache EXPIRED: ${key}`);
       this.cache.delete(key);
       return null;
     }
 
     const ageMinutes = Math.round((Date.now() - cached.timestamp) / 1000 / 60);
-    console.log(`✅ Cache HIT: ${key} (${ageMinutes}min ago)`);
+    logger.info(`✅ Cache HIT: ${key} (${ageMinutes}min ago)`);
     return cached.data;
   }
 
@@ -78,7 +80,7 @@ class PlayersCache {
     if (this.cache.size >= this.maxSize) {
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
-      console.log(`🧹 Cache evicted oldest: ${oldestKey}`);
+      logger.info(`🧹 Cache evicted oldest: ${oldestKey}`);
     }
 
     this.cache.set(key, {
@@ -86,7 +88,7 @@ class PlayersCache {
       timestamp: Date.now()
     });
 
-    console.log(`💾 Cache SET: ${key} (${this.cache.size}/${this.maxSize})`);
+    logger.info(`💾 Cache SET: ${key} (${this.cache.size}/${this.maxSize})`);
   }
 
   // Cache para jugadores individuales (detalles completos)
@@ -118,11 +120,11 @@ class PlayersCache {
       this.playersListCache = null;
       this.playersListTimestamp = null;
       cleaned++;
-      console.log('🧹 Players List Cache expired and cleared');
+      logger.info('🧹 Players List Cache expired and cleared');
     }
 
     if (cleaned > 0) {
-      console.log(`🧹 PlayersCache cleanup: ${cleaned} expired entries removed`);
+      logger.info(`🧹 PlayersCache cleanup: ${cleaned} expired entries removed`);
     }
   }
 
@@ -138,14 +140,14 @@ class PlayersCache {
 
     keysToDelete.forEach(key => {
       this.cache.delete(key);
-      console.log(`🗑️ Cache invalidated: ${key}`);
+      logger.info(`🗑️ Cache invalidated: ${key}`);
     });
 
     // Invalidar lista de jugadores si es necesario
     if (pattern === 'players' || pattern === 'all') {
       this.playersListCache = null;
       this.playersListTimestamp = null;
-      console.log('🗑️ Players List Cache invalidated');
+      logger.info('🗑️ Players List Cache invalidated');
     }
 
     return keysToDelete.length;
@@ -185,27 +187,27 @@ class PlayersCache {
     this.cache.clear();
     this.playersListCache = null;
     this.playersListTimestamp = null;
-    console.log(`🧽 PlayersCache cleared: ${size} filter entries + players list removed`);
+    logger.info(`🧽 PlayersCache cleared: ${size} filter entries + players list removed`);
   }
 
   // Precalentar caché con consultas comunes
   async warmup(apiClient) {
-    console.log('🔥 Warming up PlayersCache...');
+    logger.info('🔥 Warming up PlayersCache...');
 
     try {
       // Precargar lista completa de jugadores si no existe
       if (!this.getAllPlayersList()) {
-        console.log('📋 Precargando lista completa de jugadores...');
+        logger.info('📋 Precargando lista completa de jugadores...');
         const result = await apiClient.getAllLaLigaPlayers();
         if (result.success) {
           this.setAllPlayersList(result.data);
-          console.log(`✅ Lista de jugadores precargada: ${result.data.length} jugadores`);
+          logger.info(`✅ Lista de jugadores precargada: ${result.data.length} jugadores`);
         }
       }
 
-      console.log('✅ PlayersCache warmup completed');
+      logger.info('✅ PlayersCache warmup completed');
     } catch (error) {
-      console.log(`⚠️ PlayersCache warmup failed:`, error.message);
+      logger.info(`⚠️ PlayersCache warmup failed:`, error.message);
     }
   }
 

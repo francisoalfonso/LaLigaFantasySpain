@@ -7,6 +7,8 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
+const { asyncHandler, ValidationError, AppError } = require('../middleware/errorHandler');
 const router = express.Router();
 const N8nMcpServer = require('../services/n8nMcpServer');
 
@@ -16,137 +18,99 @@ let n8nMcp;
 try {
     n8nMcp = new N8nMcpServer();
 } catch (error) {
-    console.error('❌ Error inicializando N8n MCP Server:', error.message);
-    console.log('💡 Asegúrate de configurar .env.n8n con tu token de n8n');
+    logger.error('❌ Error inicializando N8n MCP Server:', error.message);
+    logger.info('💡 Asegúrate de configurar .env.n8n con tu token de n8n');
 }
 
 /**
  * GET /api/n8n-mcp/test
  * Test de conexión con la instancia n8n
  */
-router.get('/test', async (req, res) => {
-    try {
-        if (!n8nMcp) {
-            return res.status(500).json({
-                success: false,
-                error: 'MCP Server no inicializado. Verificar configuración.'
-            });
-        }
-
-        const result = await n8nMcp.testConnection();
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+router.get('/test', asyncHandler(async (req, res) => {
+    if (!n8nMcp) {
+        throw new AppError('MCP Server no inicializado. Verificar configuración .env.n8n', 503);
     }
-});
+
+    const result = await n8nMcp.testConnection();
+    res.json(result);
+}));
 
 /**
  * GET /api/n8n-mcp/workflows
  * Listar todos los workflows disponibles
  */
-router.get('/workflows', async (req, res) => {
-    try {
-        if (!n8nMcp) {
-            return res.status(500).json({
-                success: false,
-                error: 'MCP Server no inicializado'
-            });
-        }
-
-        const result = await n8nMcp.listWorkflows();
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+router.get('/workflows', asyncHandler(async (req, res) => {
+    if (!n8nMcp) {
+        throw new AppError('MCP Server no inicializado', 503);
     }
-});
+
+    const result = await n8nMcp.listWorkflows();
+    res.json(result);
+}));
 
 /**
  * POST /api/n8n-mcp/workflows/:id/execute
  * Ejecutar un workflow específico
+ * SEGURIDAD: Validación de input data
  */
-router.post('/workflows/:id/execute', async (req, res) => {
-    try {
-        if (!n8nMcp) {
-            return res.status(500).json({
-                success: false,
-                error: 'MCP Server no inicializado'
-            });
-        }
-
-        const { id } = req.params;
-        const inputData = req.body;
-
-        const result = await n8nMcp.executeWorkflow(id, inputData);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+router.post('/workflows/:id/execute', asyncHandler(async (req, res) => {
+    if (!n8nMcp) {
+        throw new AppError('MCP Server no inicializado', 503);
     }
-});
+
+    const { id } = req.params;
+    const inputData = req.body;
+
+    // Validación básica de input
+    if (!id || typeof id !== 'string') {
+        throw new ValidationError('ID de workflow inválido');
+    }
+
+    if (inputData && typeof inputData !== 'object') {
+        throw new ValidationError('Input data debe ser un objeto JSON válido');
+    }
+
+    const result = await n8nMcp.executeWorkflow(id, inputData);
+    res.json(result);
+}));
 
 /**
  * GET /api/n8n-mcp/executions/:id/status
  * Obtener estado de una ejecución
  */
-router.get('/executions/:id/status', async (req, res) => {
-    try {
-        if (!n8nMcp) {
-            return res.status(500).json({
-                success: false,
-                error: 'MCP Server no inicializado'
-            });
-        }
-
-        const { id } = req.params;
-        const result = await n8nMcp.getExecutionStatus(id);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+router.get('/executions/:id/status', asyncHandler(async (req, res) => {
+    if (!n8nMcp) {
+        throw new AppError('MCP Server no inicializado', 503);
     }
-});
+
+    const { id } = req.params;
+
+    if (!id || typeof id !== 'string') {
+        throw new ValidationError('ID de ejecución inválido');
+    }
+
+    const result = await n8nMcp.getExecutionStatus(id);
+    res.json(result);
+}));
 
 /**
  * POST /api/n8n-mcp/webhooks/create
  * Crear workflow con webhook para Claude Code
  */
-router.post('/webhooks/create', async (req, res) => {
-    try {
-        if (!n8nMcp) {
-            return res.status(500).json({
-                success: false,
-                error: 'MCP Server no inicializado'
-            });
-        }
-
-        const { name, claudeCodeEndpoint } = req.body;
-
-        if (!name) {
-            return res.status(400).json({
-                success: false,
-                error: 'Nombre del workflow es requerido'
-            });
-        }
-
-        const result = await n8nMcp.createWebhookWorkflow(name, claudeCodeEndpoint);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
+router.post('/webhooks/create', asyncHandler(async (req, res) => {
+    if (!n8nMcp) {
+        throw new AppError('MCP Server no inicializado', 503);
     }
-});
+
+    const { name, claudeCodeEndpoint } = req.body;
+
+    if (!name) {
+        throw new ValidationError('Nombre del workflow es requerido');
+    }
+
+    const result = await n8nMcp.createWebhookWorkflow(name, claudeCodeEndpoint);
+    res.json(result);
+}));
 
 /**
  * GET /api/n8n-mcp/tools

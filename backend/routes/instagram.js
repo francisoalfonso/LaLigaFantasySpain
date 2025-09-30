@@ -1,5 +1,6 @@
 // Rutas para integración con Instagram - @fantasy.laliga.pro
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 
 // Instagram Business API configuration
@@ -20,7 +21,7 @@ let contentQueue = [];
 // GET /api/instagram/test - Test conexión Instagram Business API
 router.get('/test', async (req, res) => {
   try {
-    console.log('🔄 Testing Instagram Business API connection...');
+    logger.info('🔄 Testing Instagram Business API connection...');
 
     const testResult = {
       success: true,
@@ -55,7 +56,7 @@ router.get('/test', async (req, res) => {
     res.json(testResult);
 
   } catch (error) {
-    console.error('❌ Instagram API test error:', error);
+    logger.error('❌ Instagram API test error:', error);
     res.status(500).json({
       success: false,
       message: 'Error testing Instagram API',
@@ -99,7 +100,7 @@ router.post('/stage-content', async (req, res) => {
 
     contentQueue.push(stagedContent);
 
-    console.log(`📝 Content staged for @fantasy.laliga.pro:`, {
+    logger.info(`📝 Content staged for @fantasy.laliga.pro:`, {
       id: stagedContent.id,
       title: stagedContent.title.substring(0, 50) + '...',
       type: stagedContent.meta_data.content_type
@@ -113,7 +114,7 @@ router.post('/stage-content', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error staging content:', error);
+    logger.error('❌ Error staging content:', error);
     res.status(500).json({
       success: false,
       message: 'Error staging content',
@@ -156,7 +157,7 @@ router.post('/approve-content/:id', async (req, res) => {
       contentQueue.splice(contentIndex, 1);
     }
 
-    console.log(`✅ Content approved for @fantasy.laliga.pro:`, {
+    logger.info(`✅ Content approved for @fantasy.laliga.pro:`, {
       id: content.id,
       title: content.title.substring(0, 50) + '...',
       schedule_for: schedule_for || 'immediate'
@@ -170,7 +171,7 @@ router.post('/approve-content/:id', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error approving content:', error);
+    logger.error('❌ Error approving content:', error);
     res.status(500).json({
       success: false,
       message: 'Error approving content',
@@ -218,7 +219,7 @@ router.get('/queue', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error getting queue:', error);
+    logger.error('❌ Error getting queue:', error);
     res.status(500).json({
       success: false,
       message: 'Error getting content queue',
@@ -232,7 +233,7 @@ router.post('/generate-content', async (req, res) => {
   try {
     const { type = 'chollo', data } = req.body;
 
-    console.log('🤖 Generating Instagram content...', { type });
+    logger.info('🤖 Generating Instagram content...', { type });
 
     let generatedContent;
 
@@ -279,7 +280,7 @@ router.post('/generate-content', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error generating content:', error);
+    logger.error('❌ Error generating content:', error);
     res.status(500).json({
       success: false,
       message: 'Error generating content',

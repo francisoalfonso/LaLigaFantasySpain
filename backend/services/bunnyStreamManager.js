@@ -4,6 +4,7 @@
  */
 
 const axios = require('axios');
+const logger = require('../utils/logger');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -19,9 +20,9 @@ class BunnyStreamManager {
         this.metadataFile = path.join(__dirname, '../../output/videos/bunny_metadata.json');
 
         if (!this.apiKey || !this.libraryId) {
-            console.warn('⚠️ BunnyStreamManager: API Key o Library ID no configurados');
+            logger.warn('⚠️ BunnyStreamManager: API Key o Library ID no configurados');
         } else {
-            console.log('🐰 BunnyStreamManager inicializado');
+            logger.info('🐰 BunnyStreamManager inicializado');
             this.initializeStorage();
         }
     }
@@ -41,9 +42,9 @@ class BunnyStreamManager {
                 await fs.writeFile(this.metadataFile, JSON.stringify({ videos: [] }, null, 2));
             }
 
-            console.log('🐰 BunnyStreamManager: Storage inicializado');
+            logger.info('🐰 BunnyStreamManager: Storage inicializado');
         } catch (error) {
-            console.error('❌ BunnyStreamManager: Error inicializando storage:', error.message);
+            logger.error('❌ BunnyStreamManager: Error inicializando storage:', error.message);
         }
     }
 
@@ -69,7 +70,7 @@ class BunnyStreamManager {
      */
     async uploadFromFile(filePath, metadata = {}) {
         try {
-            console.log(`[BunnyStream] Subiendo archivo local: ${filePath}`);
+            logger.info(`[BunnyStream] Subiendo archivo local: ${filePath}`);
 
             // Crear video en biblioteca
             const createResponse = await axios.post(`${this.baseUrl}/library/${this.libraryId}/videos`, {
@@ -81,7 +82,7 @@ class BunnyStreamManager {
             });
 
             const videoId = createResponse.data.guid;
-            console.log(`[BunnyStream] Video creado con ID: ${videoId}`);
+            logger.info(`[BunnyStream] Video creado con ID: ${videoId}`);
 
             // Leer archivo
             const fileBuffer = await fs.readFile(filePath);
@@ -105,7 +106,7 @@ class BunnyStreamManager {
                 throw new Error(`Upload falló: ${uploadResponse.status}`);
             }
 
-            console.log(`[BunnyStream] Archivo subido, esperando procesamiento...`);
+            logger.info(`[BunnyStream] Archivo subido, esperando procesamiento...`);
 
             // Esperar procesamiento
             const processedVideo = await this.waitForProcessing(videoId);
@@ -133,11 +134,11 @@ class BunnyStreamManager {
             // Guardar metadata local
             await this.saveLocalMetadata(videoData);
 
-            console.log(`[BunnyStream] ✅ Archivo subido exitosamente: ${videoData.directUrl}`);
+            logger.info(`[BunnyStream] ✅ Archivo subido exitosamente: ${videoData.directUrl}`);
             return videoData;
 
         } catch (error) {
-            console.error(`[BunnyStream] ❌ Error subiendo archivo:`, error.message);
+            logger.error(`[BunnyStream] ❌ Error subiendo archivo:`, error.message);
             throw new Error(`Upload desde archivo falló: ${error.message}`);
         }
     }
@@ -147,7 +148,7 @@ class BunnyStreamManager {
      */
     async uploadFromVeo3Url(veo3Url, metadata = {}) {
         try {
-            console.log('🐰 Subiendo video VEO3 a Bunny.net:', veo3Url);
+            logger.info('🐰 Subiendo video VEO3 a Bunny.net:', veo3Url);
 
             // Paso 1: Crear video en Bunny.net (NO especificar isPublic al crear)
             const createResponse = await axios.post(`${this.baseUrl}/library/${this.libraryId}/videos`, {
@@ -161,7 +162,7 @@ class BunnyStreamManager {
             });
 
             const videoId = createResponse.data.guid;
-            console.log('🐰 Video creado en Bunny.net:', videoId);
+            logger.info('🐰 Video creado en Bunny.net:', videoId);
 
             // Paso 2: Upload desde URL externa
             const uploadResponse = await axios.post(
@@ -180,13 +181,13 @@ class BunnyStreamManager {
                 }
             );
 
-            console.log('🐰 Upload iniciado desde VEO3 URL');
+            logger.info('🐰 Upload iniciado desde VEO3 URL');
 
             // Paso 3: Esperar a que se complete el processing
             const videoInfo = await this.waitForProcessing(videoId);
 
             // Paso 3.5: Hacer el video público automáticamente
-            console.log('🔓 Haciendo video público automáticamente...');
+            logger.info('🔓 Haciendo video público automáticamente...');
             await this.makeVideoPublic(videoId);
 
             // Paso 4: Generar URLs de acceso
@@ -213,13 +214,13 @@ class BunnyStreamManager {
             // Paso 5: Guardar metadata localmente
             await this.saveLocalMetadata(bunnyVideoData);
 
-            console.log('✅ Video subido exitosamente a Bunny.net:', bunnyVideoData.directUrl);
+            logger.info('✅ Video subido exitosamente a Bunny.net:', bunnyVideoData.directUrl);
             return bunnyVideoData;
 
         } catch (error) {
-            console.error('❌ Error subiendo a Bunny.net:', error.message);
+            logger.error('❌ Error subiendo a Bunny.net:', error.message);
             if (error.response?.data) {
-                console.error('❌ Bunny.net error details:', error.response.data);
+                logger.error('❌ Bunny.net error details:', error.response.data);
             }
             throw new Error(`Fallo upload Bunny.net: ${error.message}`);
         }
@@ -232,7 +233,7 @@ class BunnyStreamManager {
         const startTime = Date.now();
         let attempts = 0;
 
-        console.log(`🐰 Esperando processing de video ${videoId}...`);
+        logger.info(`🐰 Esperando processing de video ${videoId}...`);
 
         while (Date.now() - startTime < maxWaitTime) {
             attempts++;
@@ -251,16 +252,16 @@ class BunnyStreamManager {
 
                 // Estados: 0=Uploading, 1=Processing, 2=Ready, 3=Failed, 4=AwaitingUpload, 5=AwaitingProcessing
                 if (videoInfo.status === 2) {
-                    console.log(`✅ Video processing completado en ${attempts} intentos (${Date.now() - startTime}ms)`);
+                    logger.info(`✅ Video processing completado en ${attempts} intentos (${Date.now() - startTime}ms)`);
                     return videoInfo;
                 } else if (videoInfo.status === 3) {
                     throw new Error(`Video processing falló: ${videoInfo.statusMessage}`);
                 }
 
-                console.log(`🐰 Video aún procesando... estado: ${videoInfo.status} (intento ${attempts})`);
+                logger.info(`🐰 Video aún procesando... estado: ${videoInfo.status} (intento ${attempts})`);
 
             } catch (error) {
-                console.error(`❌ Error verificando estado:`, error.message);
+                logger.error(`❌ Error verificando estado:`, error.message);
                 throw error;
             }
 
@@ -292,7 +293,7 @@ class BunnyStreamManager {
             return response.data;
 
         } catch (error) {
-            console.error('❌ Error obteniendo analytics:', error.message);
+            logger.error('❌ Error obteniendo analytics:', error.message);
             return null;
         }
     }
@@ -314,7 +315,7 @@ class BunnyStreamManager {
             return response.data;
 
         } catch (error) {
-            console.error('❌ Error listando videos:', error.message);
+            logger.error('❌ Error listando videos:', error.message);
             return { items: [], totalItems: 0 };
         }
     }
@@ -336,7 +337,7 @@ class BunnyStreamManager {
             return response.data;
 
         } catch (error) {
-            console.error('❌ Error obteniendo info de video:', error.message);
+            logger.error('❌ Error obteniendo info de video:', error.message);
             return null;
         }
     }
@@ -346,7 +347,7 @@ class BunnyStreamManager {
      */
     async makeVideoPublic(videoId) {
         try {
-            console.log(`🔓 Verificando configuración de biblioteca para acceso público...`);
+            logger.info(`🔓 Verificando configuración de biblioteca para acceso público...`);
 
             // Obtener configuración actual de la biblioteca
             const libraryResponse = await axios.get(
@@ -359,11 +360,11 @@ class BunnyStreamManager {
             );
 
             const library = libraryResponse.data;
-            console.log(`📚 Biblioteca configurada - AllowDirectAccess: ${library.AllowDirectPlay}`);
+            logger.info(`📚 Biblioteca configurada - AllowDirectAccess: ${library.AllowDirectPlay}`);
 
             // Si la biblioteca no permite acceso directo, intentar configurarla
             if (!library.AllowDirectPlay) {
-                console.log('🔧 Configurando biblioteca para acceso público...');
+                logger.info('🔧 Configurando biblioteca para acceso público...');
 
                 try {
                     // Usar PUT para actualizar configuración de biblioteca
@@ -385,9 +386,9 @@ class BunnyStreamManager {
                             }
                         }
                     );
-                    console.log('✅ Biblioteca configurada para acceso público con PUT');
+                    logger.info('✅ Biblioteca configurada para acceso público con PUT');
                 } catch (configError) {
-                    console.warn('⚠️ No se pudo configurar biblioteca automáticamente:', configError.message);
+                    logger.warn('⚠️ No se pudo configurar biblioteca automáticamente:', configError.message);
 
                     // Intentar con solo AllowDirectPlay si el error persiste
                     try {
@@ -401,9 +402,9 @@ class BunnyStreamManager {
                                 }
                             }
                         );
-                        console.log('✅ Biblioteca configurada con PATCH simple');
+                        logger.info('✅ Biblioteca configurada con PATCH simple');
                     } catch (patchError) {
-                        console.warn('⚠️ PATCH también falló:', patchError.message);
+                        logger.warn('⚠️ PATCH también falló:', patchError.message);
                     }
                 }
             }
@@ -414,13 +415,13 @@ class BunnyStreamManager {
                 throw new Error('Video no encontrado');
             }
 
-            console.log(`🔓 Video ${videoId} está listo - CDN URL: ${this.cdnUrl}/${videoId}/playlist.m3u8`);
+            logger.info(`🔓 Video ${videoId} está listo - CDN URL: ${this.cdnUrl}/${videoId}/playlist.m3u8`);
             return true;
 
         } catch (error) {
-            console.error('❌ Error en makeVideoPublic:', error.message);
+            logger.error('❌ Error en makeVideoPublic:', error.message);
             if (error.response?.data) {
-                console.error('❌ Bunny.net error details:', error.response.data);
+                logger.error('❌ Bunny.net error details:', error.response.data);
             }
             return false;
         }
@@ -443,11 +444,11 @@ class BunnyStreamManager {
             // Remover de metadata local
             await this.removeVideoMetadata(videoId);
 
-            console.log(`🗑️ Video eliminado: ${videoId}`);
+            logger.info(`🗑️ Video eliminado: ${videoId}`);
             return true;
 
         } catch (error) {
-            console.error('❌ Error eliminando video:', error.message);
+            logger.error('❌ Error eliminando video:', error.message);
             return false;
         }
     }
@@ -470,7 +471,7 @@ class BunnyStreamManager {
             await fs.writeFile(this.metadataFile, JSON.stringify(metadata, null, 2));
 
         } catch (error) {
-            console.error('❌ Error guardando metadata:', error.message);
+            logger.error('❌ Error guardando metadata:', error.message);
         }
     }
 
@@ -484,7 +485,7 @@ class BunnyStreamManager {
             await fs.writeFile(this.metadataFile, JSON.stringify(metadata, null, 2));
 
         } catch (error) {
-            console.error('❌ Error removiendo metadata:', error.message);
+            logger.error('❌ Error removiendo metadata:', error.message);
         }
     }
 
@@ -496,7 +497,7 @@ class BunnyStreamManager {
             const data = await fs.readFile(this.metadataFile, 'utf8');
             return JSON.parse(data);
         } catch (error) {
-            console.warn('⚠️ Error leyendo metadata, creando nuevo archivo');
+            logger.warn('⚠️ Error leyendo metadata, creando nuevo archivo');
             return { videos: [] };
         }
     }
@@ -530,7 +531,7 @@ class BunnyStreamManager {
             return videos;
 
         } catch (error) {
-            console.error('❌ Error obteniendo videos locales:', error.message);
+            logger.error('❌ Error obteniendo videos locales:', error.message);
             return [];
         }
     }

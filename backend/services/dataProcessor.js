@@ -1,37 +1,73 @@
-// Procesador de datos Fantasy - Calcula puntos según sistema oficial La Liga Fantasy
-const { FANTASY_POINTS, POSITIONS } = require('../config/constants');
+/**
+ * @fileoverview Procesador de datos Fantasy La Liga - Motor de cálculo de puntos
+ * @module services/dataProcessor
+ * @description Implementa el sistema oficial de puntos Fantasy La Liga 2025-26
+ * Calcula puntos según reglas oficiales por posición (GK, DEF, MID, FWD)
+ */
 
+const { FANTASY_POINTS, POSITIONS } = require('../config/constants');
+const logger = require('../utils/logger');
+
+/**
+ * Clase principal para procesamiento de datos Fantasy
+ * @class FantasyDataProcessor
+ */
 class FantasyDataProcessor {
+  /**
+   * Constructor del procesador Fantasy
+   * Inicializa configuración de puntos y posiciones desde constants
+   */
   constructor() {
     this.points = FANTASY_POINTS;
     this.positions = POSITIONS;
   }
 
-  // Calcular puntos Fantasy para un jugador en un partido
+  /**
+   * Calcular puntos Fantasy para un jugador en un partido específico
+   * @param {Object} playerStats - Estadísticas del jugador en el partido
+   * @param {number} playerStats.minutes_played - Minutos jugados
+   * @param {number} playerStats.goals - Goles anotados
+   * @param {number} playerStats.assists - Asistencias
+   * @param {number} [playerStats.penalties_saved] - Penaltis parados (solo GK)
+   * @param {boolean} [playerStats.clean_sheet] - Portería a cero (GK/DEF)
+   * @param {number} [playerStats.goals_conceded] - Goles encajados (GK/DEF)
+   * @param {number} [playerStats.yellow_cards] - Tarjetas amarillas
+   * @param {number} [playerStats.red_cards] - Tarjetas rojas
+   * @param {string|number} playerPosition - Posición del jugador (ID o código)
+   * @returns {number} Total de puntos Fantasy calculados
+   * @example
+   * const points = processor.calculatePlayerPoints({
+   *   minutes_played: 90,
+   *   goals: 2,
+   *   assists: 1,
+   *   yellow_cards: 0
+   * }, 'FWD');
+   * // Returns: 2 (partido) + 8 (2 goles delantero) + 3 (asistencia) = 13 pts
+   */
   calculatePlayerPoints(playerStats, playerPosition) {
     let totalPoints = 0;
     const position = this.getPlayerPosition(playerPosition);
 
-    console.log(`📊 Calculando puntos para jugador (${position}):`, playerStats);
+    logger.info(`📊 Calculando puntos para jugador (${position}):`, playerStats);
 
     // Puntos base por jugar
     if (playerStats.minutes_played > 0) {
       totalPoints += this.points.MATCH_PLAYED;
-      console.log(`  ✅ Partido jugado: +${this.points.MATCH_PLAYED} pts`);
+      logger.info(`  ✅ Partido jugado: +${this.points.MATCH_PLAYED} pts`);
     }
 
     // Puntos por goles (depende de la posición)
     if (playerStats.goals > 0) {
       const goalPoints = playerStats.goals * this.points.GOALS[position];
       totalPoints += goalPoints;
-      console.log(`  ⚽ ${playerStats.goals} gol(es): +${goalPoints} pts`);
+      logger.info(`  ⚽ ${playerStats.goals} gol(es): +${goalPoints} pts`);
     }
 
     // Puntos por asistencias
     if (playerStats.assists > 0) {
       const assistPoints = playerStats.assists * this.points.ASSIST;
       totalPoints += assistPoints;
-      console.log(`  🎯 ${playerStats.assists} asistencia(s): +${assistPoints} pts`);
+      logger.info(`  🎯 ${playerStats.assists} asistencia(s): +${assistPoints} pts`);
     }
 
     // Puntos específicos para porteros
@@ -40,20 +76,20 @@ class FantasyDataProcessor {
       if (playerStats.penalties_saved > 0) {
         const penaltyPoints = playerStats.penalties_saved * this.points.PENALTY_SAVED;
         totalPoints += penaltyPoints;
-        console.log(`  🥅 ${playerStats.penalties_saved} penalti(s) parado(s): +${penaltyPoints} pts`);
+        logger.info(`  🥅 ${playerStats.penalties_saved} penalti(s) parado(s): +${penaltyPoints} pts`);
       }
 
       // Portería a cero
       if (playerStats.clean_sheet === true) {
         totalPoints += this.points.CLEAN_SHEET_GK;
-        console.log(`  🛡️ Portería a cero: +${this.points.CLEAN_SHEET_GK} pts`);
+        logger.info(`  🛡️ Portería a cero: +${this.points.CLEAN_SHEET_GK} pts`);
       }
 
       // Goles encajados
       if (playerStats.goals_conceded > 0) {
         const concededPoints = playerStats.goals_conceded * this.points.GOAL_CONCEDED_GK;
         totalPoints += concededPoints;
-        console.log(`  ⚠️ ${playerStats.goals_conceded} gol(es) encajado(s): ${concededPoints} pts`);
+        logger.info(`  ⚠️ ${playerStats.goals_conceded} gol(es) encajado(s): ${concededPoints} pts`);
       }
     }
 
@@ -62,14 +98,14 @@ class FantasyDataProcessor {
       // Portería a cero
       if (playerStats.clean_sheet === true) {
         totalPoints += this.points.CLEAN_SHEET_DEF;
-        console.log(`  🛡️ Portería a cero: +${this.points.CLEAN_SHEET_DEF} pts`);
+        logger.info(`  🛡️ Portería a cero: +${this.points.CLEAN_SHEET_DEF} pts`);
       }
 
       // Goles encajados (cada 2 goles = -1 punto)
       if (playerStats.goals_conceded > 0) {
         const concededPoints = Math.floor(playerStats.goals_conceded / 2) * -1;
         totalPoints += concededPoints;
-        console.log(`  ⚠️ ${playerStats.goals_conceded} gol(es) encajado(s): ${concededPoints} pts`);
+        logger.info(`  ⚠️ ${playerStats.goals_conceded} gol(es) encajado(s): ${concededPoints} pts`);
       }
     }
 
@@ -77,16 +113,16 @@ class FantasyDataProcessor {
     if (playerStats.yellow_cards > 0) {
       const yellowPoints = playerStats.yellow_cards * this.points.YELLOW_CARD;
       totalPoints += yellowPoints;
-      console.log(`  🟨 ${playerStats.yellow_cards} tarjeta(s) amarilla(s): ${yellowPoints} pts`);
+      logger.info(`  🟨 ${playerStats.yellow_cards} tarjeta(s) amarilla(s): ${yellowPoints} pts`);
     }
 
     if (playerStats.red_cards > 0) {
       const redPoints = playerStats.red_cards * this.points.RED_CARD;
       totalPoints += redPoints;
-      console.log(`  🟥 ${playerStats.red_cards} tarjeta(s) roja(s): ${redPoints} pts`);
+      logger.info(`  🟥 ${playerStats.red_cards} tarjeta(s) roja(s): ${redPoints} pts`);
     }
 
-    console.log(`  📈 TOTAL: ${totalPoints} puntos`);
+    logger.info(`  📈 TOTAL: ${totalPoints} puntos`);
     return totalPoints;
   }
 

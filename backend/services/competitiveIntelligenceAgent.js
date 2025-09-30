@@ -2,6 +2,7 @@
 // Monitorea automáticamente la competencia y genera contenido reactivo
 
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 class CompetitiveIntelligenceAgent {
   constructor() {
@@ -57,7 +58,7 @@ class CompetitiveIntelligenceAgent {
 
   // Iniciar monitoreo automático
   async startMonitoring() {
-    console.log('🔍 Iniciando Agente Investigador de Competencia...');
+    logger.info('🔍 Iniciando Agente Investigador de Competencia...');
     this.isMonitoring = true;
 
     // Ejecutar análisis cada 5 minutos
@@ -73,7 +74,7 @@ class CompetitiveIntelligenceAgent {
 
   // Ejecutar análisis completo de todas las plataformas
   async runFullAnalysis() {
-    console.log('📊 Ejecutando análisis completo de competencia...');
+    logger.info('📊 Ejecutando análisis completo de competencia...');
 
     try {
       const results = await Promise.all([
@@ -89,14 +90,14 @@ class CompetitiveIntelligenceAgent {
       return analysis;
 
     } catch (error) {
-      console.error('❌ Error en análisis competencia:', error);
+      logger.error('❌ Error en análisis competencia:', error);
       return null;
     }
   }
 
   // Analizar contenido YouTube competidores
   async analyzeYouTube() {
-    console.log('🎥 Analizando YouTube...');
+    logger.info('🎥 Analizando YouTube...');
 
     const viralVideos = [];
 
@@ -118,7 +119,7 @@ class CompetitiveIntelligenceAgent {
         })));
 
       } catch (error) {
-        console.log(`⚠️ Error analizando ${competitor} en YouTube:`, error.message);
+        logger.info(`⚠️ Error analizando ${competitor} en YouTube:`, error.message);
       }
     }
 
@@ -132,7 +133,7 @@ class CompetitiveIntelligenceAgent {
 
   // Analizar TikTok competidores
   async analyzeTikTok() {
-    console.log('📱 Analizando TikTok...');
+    logger.info('📱 Analizando TikTok...');
 
     // Implementación similar a YouTube pero adaptada a TikTok
     const viralTikToks = [];
@@ -150,7 +151,7 @@ class CompetitiveIntelligenceAgent {
 
   // Analizar Twitter trends
   async analyzeTwitter() {
-    console.log('🐦 Analizando Twitter...');
+    logger.info('🐦 Analizando Twitter...');
 
     try {
       // Obtener trending topics relacionados con fútbol
@@ -167,14 +168,14 @@ class CompetitiveIntelligenceAgent {
       };
 
     } catch (error) {
-      console.log('⚠️ Error analizando Twitter:', error.message);
+      logger.info('⚠️ Error analizando Twitter:', error.message);
       return { platform: 'twitter', trends: [], viralTweets: [], emergingTopics: [] };
     }
   }
 
   // Analizar Instagram competidores
   async analyzeInstagram() {
-    console.log('📸 Analizando Instagram...');
+    logger.info('📸 Analizando Instagram...');
 
     // Implementación similar adaptada a Instagram
     return {
@@ -187,7 +188,7 @@ class CompetitiveIntelligenceAgent {
 
   // Generar triggers automáticos para contenido
   async generateContentTriggers(analysis) {
-    console.log('⚡ Generando triggers de contenido...');
+    logger.info('⚡ Generando triggers de contenido...');
 
     const triggers = [];
 
@@ -295,10 +296,10 @@ class CompetitiveIntelligenceAgent {
   async notifyContentTeam(triggers) {
     if (triggers.length === 0) return;
 
-    console.log(`🚨 ${triggers.length} nuevos triggers generados:`);
+    logger.info(`🚨 ${triggers.length} nuevos triggers generados:`);
 
     triggers.forEach(trigger => {
-      console.log(`  ${trigger.type} - ${trigger.priority} - Reporter: ${trigger.target_reporter}`);
+      logger.info(`  ${trigger.type} - ${trigger.priority} - Reporter: ${trigger.target_reporter}`);
     });
 
     // Aquí se integraría con Slack, Discord, o sistema de notificaciones
@@ -453,7 +454,7 @@ class CompetitiveIntelligenceAgent {
 
   // Método para parar el monitoreo
   stopMonitoring() {
-    console.log('⏹️ Parando Agente Investigador de Competencia...');
+    logger.info('⏹️ Parando Agente Investigador de Competencia...');
     this.isMonitoring = false;
   }
 

@@ -3,6 +3,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../../utils/logger');
 
 class GuideConsultationSystem {
   constructor() {
@@ -17,7 +18,7 @@ class GuideConsultationSystem {
 
   // Consulta obligatoria antes de cualquier producción
   async mandatoryConsultation(agentType, projectId) {
-    console.log(`🔍 Consulta obligatoria iniciada - Agent: ${agentType}, Project: ${projectId}`);
+    logger.info(`🔍 Consulta obligatoria iniciada - Agent: ${agentType}, Project: ${projectId}`);
 
     const requiredGuides = this.mandatoryGuides[agentType];
     if (!requiredGuides) {
@@ -47,7 +48,7 @@ class GuideConsultationSystem {
     // Almacenar consulta
     this.consultationCache.set(`${agentType}_${projectId}`, consultationRecord);
 
-    console.log(`✅ Consulta completada - ${consultationRecord.guidesConsulted.length} guías revisadas`);
+    logger.info(`✅ Consulta completada - ${consultationRecord.guidesConsulted.length} guías revisadas`);
     return consultationRecord;
   }
 
@@ -57,7 +58,7 @@ class GuideConsultationSystem {
       const guidePath = path.join(this.guideBasePath, guideName);
       const guideContent = await fs.readFile(guidePath, 'utf8');
 
-      console.log(`📖 Consultando guía: ${guideName} para ${agentType}`);
+      logger.info(`📖 Consultando guía: ${guideName} para ${agentType}`);
 
       // Extraer secciones relevantes según el tipo de agente
       const relevantSections = this.extractRelevantSections(guideContent, agentType);
@@ -72,7 +73,7 @@ class GuideConsultationSystem {
       };
 
     } catch (error) {
-      console.error(`❌ Error consultando guía ${guideName}:`, error.message);
+      logger.error(`❌ Error consultando guía ${guideName}:`, error.message);
       throw new Error(`No se pudo consultar la guía ${guideName}: ${error.message}`);
     }
   }
@@ -220,13 +221,13 @@ class GuideConsultationSystem {
       throw new Error(`❌ Consulta de guía expirada para ${agentType}. Se requiere nueva consulta (${hoursDiff.toFixed(1)}h antigua)`);
     }
 
-    console.log(`✅ Consulta válida para ${agentType} - Proyecto ${projectId}`);
+    logger.info(`✅ Consulta válida para ${agentType} - Proyecto ${projectId}`);
     return consultation;
   }
 
   // Aplicar checklist específico del agente
   async applyChecklist(agentType, productionData) {
-    console.log(`📋 Aplicando checklist para ${agentType}`);
+    logger.info(`📋 Aplicando checklist para ${agentType}`);
 
     const checklistResults = {
       agentType,
@@ -247,7 +248,7 @@ class GuideConsultationSystem {
         break;
     }
 
-    console.log(`📊 Checklist ${agentType}: ${checklistResults.passed}/${checklistResults.checks.length} passed`);
+    logger.info(`📊 Checklist ${agentType}: ${checklistResults.passed}/${checklistResults.checks.length} passed`);
     return checklistResults;
   }
 
@@ -415,7 +416,7 @@ class GuideConsultationSystem {
     }
 
     if (cleaned > 0) {
-      console.log(`🧹 Limpiadas ${cleaned} consultas expiradas`);
+      logger.info(`🧹 Limpiadas ${cleaned} consultas expiradas`);
     }
 
     return cleaned;

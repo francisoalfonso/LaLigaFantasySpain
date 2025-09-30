@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 // Predictor de Valor Fantasy La Liga
 // Sistema de predicción inteligente basado en múltiples factores
 
@@ -27,13 +29,13 @@ class PredictorValor {
     this.historicalCache = new Map();
     this.HISTORICAL_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 horas
 
-    console.log('🔮 PredictorValor inicializado - Sistema de predicción inteligente');
+    logger.info('🔮 PredictorValor inicializado - Sistema de predicción inteligente');
   }
 
   // Predecir valor de un jugador para la próxima jornada
   async predictPlayerValue(player, nextFixture = null) {
     try {
-      console.log(`🎯 Analizando predicción para ${player.name}...`);
+      logger.info(`🎯 Analizando predicción para ${player.name}...`);
 
       // 1. Análisis rendimiento reciente
       const recentPerformance = this.analyzeRecentPerformance(player);
@@ -63,7 +65,7 @@ class PredictorValor {
       return prediction;
 
     } catch (error) {
-      console.error(`❌ Error prediciendo valor para ${player.name}:`, error.message);
+      logger.error(`❌ Error prediciendo valor para ${player.name}:`, error.message);
       return this.getDefaultPrediction(player);
     }
   }
@@ -168,7 +170,7 @@ class PredictorValor {
       };
 
     } catch (error) {
-      console.error('Error analizando dificultad rival:', error.message);
+      logger.error('Error analizando dificultad rival:', error.message);
       return { score: 0, factors: ['❌ Error analizando rival'] };
     }
   }
@@ -226,11 +228,11 @@ class PredictorValor {
       const cached = this.historicalCache.get(cacheKey);
 
       if (cached && Date.now() - cached.timestamp < this.HISTORICAL_CACHE_TTL) {
-        console.log(`⚡ Cache HIT: Historial ${player.name} vs ${opponent.name}`);
+        logger.info(`⚡ Cache HIT: Historial ${player.name} vs ${opponent.name}`);
         return cached.data;
       }
 
-      console.log(`📚 Analizando historial de ${player.name} vs ${opponent.name}...`);
+      logger.info(`📚 Analizando historial de ${player.name} vs ${opponent.name}...`);
 
       // OPTIMIZACIÓN: Solo buscar 1-2 temporadas más recientes para acelerar
       const historyResult = await this.apiFootball.getPlayerVsTeamHistory(
@@ -279,7 +281,7 @@ class PredictorValor {
       return result;
 
     } catch (error) {
-      console.error(`Error analizando historial vs rival:`, error.message);
+      logger.error(`Error analizando historial vs rival:`, error.message);
       return {
         score: 0,
         factors: ['📚 Error obteniendo historial vs rival']
@@ -470,7 +472,7 @@ class PredictorValor {
 
   // Predecir valores para lista de jugadores
   async predictMultiplePlayers(players, nextFixtures = {}) {
-    console.log(`🔮 Iniciando predicción para ${players.length} jugadores...`);
+    logger.info(`🔮 Iniciando predicción para ${players.length} jugadores...`);
 
     const predictions = [];
 
@@ -484,12 +486,12 @@ class PredictorValor {
         await this.sleep(100);
 
       } catch (error) {
-        console.error(`Error prediciendo ${player.name}:`, error.message);
+        logger.error(`Error prediciendo ${player.name}:`, error.message);
         predictions.push(this.getDefaultPrediction(player));
       }
     }
 
-    console.log(`✅ Predicciones completadas: ${predictions.length} jugadores`);
+    logger.info(`✅ Predicciones completadas: ${predictions.length} jugadores`);
     return predictions;
   }
 
@@ -657,7 +659,7 @@ class PredictorValor {
   clearHistoricalCache() {
     const size = this.historicalCache.size;
     this.historicalCache.clear();
-    console.log(`🗑️ Cache histórico limpiado: ${size} entradas eliminadas`);
+    logger.info(`🗑️ Cache histórico limpiado: ${size} entradas eliminadas`);
   }
 
   // Estadísticas del cache

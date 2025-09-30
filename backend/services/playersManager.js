@@ -2,6 +2,7 @@
 // Maneja carga, filtrado y cache de todos los jugadores de La Liga
 
 const ApiFootballClient = require('./apiFootball');
+const logger = require('../utils/logger');
 const PlayersCache = require('./playersCache');
 
 class PlayersManager {
@@ -9,7 +10,7 @@ class PlayersManager {
     this.apiClient = new ApiFootballClient();
     this.cache = new PlayersCache();
 
-    console.log('⚽ PlayersManager inicializado');
+    logger.info('⚽ PlayersManager inicializado');
   }
 
   // Obtener todos los jugadores con cache inteligente
@@ -28,7 +29,7 @@ class PlayersManager {
     }
 
     // Si no hay cache o está desactivado, obtener de API
-    console.log('📡 Obteniendo jugadores desde API (cache miss)...');
+    logger.info('📡 Obteniendo jugadores desde API (cache miss)...');
 
     try {
       const result = await this.apiClient.getAllLaLigaPlayers();
@@ -52,7 +53,7 @@ class PlayersManager {
         };
       }
     } catch (error) {
-      console.error('❌ Error obteniendo jugadores:', error.message);
+      logger.error('❌ Error obteniendo jugadores:', error.message);
       return {
         success: false,
         error: error.message,
@@ -189,7 +190,7 @@ class PlayersManager {
 
       return result;
     } catch (error) {
-      console.error(`❌ Error obteniendo detalles del jugador ${playerId}:`, error.message);
+      logger.error(`❌ Error obteniendo detalles del jugador ${playerId}:`, error.message);
       return {
         success: false,
         error: error.message
@@ -224,7 +225,7 @@ class PlayersManager {
 
   // Forzar actualización desde API
   async forceRefresh() {
-    console.log('🔄 Forzando actualización de jugadores desde API...');
+    logger.info('🔄 Forzando actualización de jugadores desde API...');
     this.cache.invalidate('all');
     return await this.getAllPlayers(false);
   }

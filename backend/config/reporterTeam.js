@@ -1,5 +1,31 @@
-// Configuración del Equipo de Reporteros Fantasy La Liga
-// Inspirado en el modelo Odazón - Team uniformado con especialidades
+/**
+ * @fileoverview Configuración del Equipo de Reporteros Virtuales IA
+ * @module config/reporterTeam
+ * @description Define el equipo completo de 4 reporteros virtuales para Fantasy La Liga:
+ * - Ana Martínez: Analista táctica principal
+ * - Carlos González: Especialista en estadísticas
+ * - Lucía Rodríguez: Fútbol femenino y cantera
+ * - Pablo Martín: Especialista Gen Z y contenido viral
+ *
+ * Inspirado en el modelo DAZN con uniformes profesionales consistentes.
+ *
+ * @constant {Object} REPORTER_TEAM - Configuración completa del equipo
+ * @property {Object} brand - Identidad visual de la marca
+ * @property {Object} reporters - Perfiles de los 4 reporteros
+ * @property {Object} schedules - Calendario de contenido por reportero
+ * @property {Object} content_types - Tipos de contenido asignados
+ *
+ * @example
+ * const { REPORTER_TEAM, TEAM_FUNCTIONS } = require('./config/reporterTeam');
+ *
+ * // Seleccionar reportero automáticamente
+ * const reporter = TEAM_FUNCTIONS.selectReporterForContent('tactical_analysis', new Date());
+ * // Returns: 'ana_martinez'
+ *
+ * // Obtener configuración para avatar IA
+ * const config = TEAM_FUNCTIONS.getAvatarConfig('ana_martinez');
+ * // Returns: { voice, appearance, personality }
+ */
 
 const REPORTER_TEAM = {
   brand: {

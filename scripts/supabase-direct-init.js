@@ -6,6 +6,7 @@
  */
 
 const { Client } = require('pg');
+const logger = require('../../../../../../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
@@ -25,54 +26,54 @@ const connectionConfig = {
 };
 
 async function initializeDatabase() {
-    console.log('🚀 Fantasy La Liga Database Direct Initialization');
-    console.log(`📡 Connecting to: ${connectionConfig.host}:${connectionConfig.port}`);
+    logger.info('🚀 Fantasy La Liga Database Direct Initialization');
+    logger.info(`📡 Connecting to: ${connectionConfig.host}:${connectionConfig.port}`);
 
     const client = new Client(connectionConfig);
 
     try {
         // Connect to database
-        console.log('🔌 Connecting to PostgreSQL...');
+        logger.info('🔌 Connecting to PostgreSQL...');
         await client.connect();
-        console.log('✅ Connected to database');
+        logger.info('✅ Connected to database');
 
         // Read schema file
         const schemaPath = path.join(__dirname, '..', 'database', 'supabase-schema.sql');
-        console.log(`📖 Reading schema from: ${schemaPath}`);
+        logger.info(`📖 Reading schema from: ${schemaPath}`);
 
         if (!fs.existsSync(schemaPath)) {
             throw new Error(`Schema file not found: ${schemaPath}`);
         }
 
         const sqlSchema = fs.readFileSync(schemaPath, 'utf8');
-        console.log(`✅ Schema file loaded (${sqlSchema.length} characters)`);
+        logger.info(`✅ Schema file loaded (${sqlSchema.length} characters)`);
 
         // Execute schema
-        console.log('⚙️ Executing SQL schema...');
+        logger.info('⚙️ Executing SQL schema...');
 
         try {
             await client.query(sqlSchema);
-            console.log('✅ Schema executed successfully');
+            logger.info('✅ Schema executed successfully');
         } catch (error) {
-            console.error('❌ Schema execution error:', error.message);
+            logger.error('❌ Schema execution error:', error.message);
 
             // Try executing in smaller chunks
-            console.log('🔄 Attempting to execute in smaller chunks...');
+            logger.info('🔄 Attempting to execute in smaller chunks...');
             await executeInChunks(client, sqlSchema);
         }
 
         // Verify database structure
-        console.log('\n🔍 Verifying database structure...');
+        logger.info('\n🔍 Verifying database structure...');
         await verifyDatabaseStructure(client);
 
-        console.log('\n🎉 Database initialization completed successfully!');
+        logger.info('\n🎉 Database initialization completed successfully!');
 
     } catch (error) {
-        console.error('❌ Database initialization failed:', error.message);
+        logger.error('❌ Database initialization failed:', error.message);
         throw error;
     } finally {
         await client.end();
-        console.log('🔌 Database connection closed');
+        logger.info('🔌 Database connection closed');
     }
 }
 
@@ -83,7 +84,7 @@ async function executeInChunks(client, sqlSchema) {
     let successCount = 0;
     let errorCount = 0;
 
-    console.log(`📝 Executing ${chunks.length} SQL chunks...`);
+    logger.info(`📝 Executing ${chunks.length} SQL chunks...`);
 
     for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i].trim();
@@ -93,22 +94,22 @@ async function executeInChunks(client, sqlSchema) {
         }
 
         try {
-            console.log(`  Processing chunk ${i + 1}/${chunks.length}...`);
+            logger.info(`  Processing chunk ${i + 1}/${chunks.length}...`);
             await client.query(chunk);
             successCount++;
         } catch (error) {
             // Some errors are expected (like "already exists")
             if (error.message.includes('already exists') ||
                 error.message.includes('does not exist')) {
-                console.log(`  ⚠️ Expected: ${error.message.split('\n')[0]}`);
+                logger.info(`  ⚠️ Expected: ${error.message.split('\n')[0]}`);
             } else {
-                console.error(`  ❌ Error in chunk ${i + 1}: ${error.message.split('\n')[0]}`);
+                logger.error(`  ❌ Error in chunk ${i + 1}: ${error.message.split('\n')[0]}`);
                 errorCount++;
             }
         }
     }
 
-    console.log(`📊 Chunk execution results: ${successCount} success, ${errorCount} errors`);
+    logger.info(`📊 Chunk execution results: ${successCount} success, ${errorCount} errors`);
 }
 
 async function verifyDatabaseStructure(client) {
@@ -121,35 +122,35 @@ async function verifyDatabaseStructure(client) {
             ORDER BY table_name
         `);
 
-        console.log('📋 Created tables:');
+        logger.info('📋 Created tables:');
         let tableCount = 0;
         let viewCount = 0;
 
         tablesResult.rows.forEach(row => {
             if (row.table_type === 'BASE TABLE') {
-                console.log(`  📄 ${row.table_name}`);
+                logger.info(`  📄 ${row.table_name}`);
                 tableCount++;
             } else if (row.table_type === 'VIEW') {
-                console.log(`  👁️ ${row.table_name} (view)`);
+                logger.info(`  👁️ ${row.table_name} (view)`);
                 viewCount++;
             }
         });
 
-        console.log(`\n📊 Database summary:`);
-        console.log(`  📄 Tables: ${tableCount}`);
-        console.log(`  👁️ Views: ${viewCount}`);
+        logger.info(`\n📊 Database summary:`);
+        logger.info(`  📄 Tables: ${tableCount}`);
+        logger.info(`  👁️ Views: ${viewCount}`);
 
         // Check core tables and get record counts
         const coreTables = ['teams', 'players', 'matches', 'content_plans', 'users'];
 
-        console.log('\n🔍 Core table verification:');
+        logger.info('\n🔍 Core table verification:');
         for (const tableName of coreTables) {
             try {
                 const countResult = await client.query(`SELECT COUNT(*) as count FROM ${tableName}`);
                 const count = parseInt(countResult.rows[0].count);
-                console.log(`  ✅ ${tableName}: ${count} records`);
+                logger.info(`  ✅ ${tableName}: ${count} records`);
             } catch (error) {
-                console.log(`  ❌ ${tableName}: ${error.message.split('\n')[0]}`);
+                logger.info(`  ❌ ${tableName}: ${error.message.split('\n')[0]}`);
             }
         }
 
@@ -161,7 +162,7 @@ async function verifyDatabaseStructure(client) {
             ORDER BY indexname
         `);
 
-        console.log(`\n📈 Indexes created: ${indexResult.rows.length}`);
+        logger.info(`\n📈 Indexes created: ${indexResult.rows.length}`);
 
         // Check functions
         const functionResult = await client.query(`
@@ -171,10 +172,10 @@ async function verifyDatabaseStructure(client) {
             ORDER BY proname
         `);
 
-        console.log(`⚙️ Functions created: ${functionResult.rows.length}`);
+        logger.info(`⚙️ Functions created: ${functionResult.rows.length}`);
 
     } catch (error) {
-        console.error('❌ Verification error:', error.message);
+        logger.error('❌ Verification error:', error.message);
     }
 }
 
@@ -183,10 +184,10 @@ async function checkDependencies() {
     try {
         require('pg');
     } catch (error) {
-        console.log('📦 Installing required dependency: pg');
+        logger.info('📦 Installing required dependency: pg');
         const { execSync } = require('child_process');
         execSync('npm install pg', { stdio: 'inherit' });
-        console.log('✅ Dependency installed');
+        logger.info('✅ Dependency installed');
     }
 }
 
@@ -196,10 +197,10 @@ if (require.main === module) {
         try {
             await checkDependencies();
             await initializeDatabase();
-            console.log('\n🏁 Initialization completed successfully');
+            logger.info('\n🏁 Initialization completed successfully');
             process.exit(0);
         } catch (error) {
-            console.error('\n💥 Initialization failed:', error.message);
+            logger.error('\n💥 Initialization failed:', error.message);
             process.exit(1);
         }
     })();

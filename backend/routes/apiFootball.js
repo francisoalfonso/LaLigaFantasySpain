@@ -1,5 +1,6 @@
 // Rutas para API-Sports - La Liga Fantasy Dashboard
 const express = require('express');
+const logger = require('../utils/logger');
 const ApiFootballClient = require('../services/apiFootball');
 const DataProcessor = require('../services/dataProcessor');
 const PlayersManager = require('../services/playersManager');
@@ -101,7 +102,7 @@ router.get('/laliga/players', async (req, res) => {
 
     // Si pide todos los jugadores (sin filtros específicos)
     if (pageParam === 'all' && !position && !status && !search && !team_id) {
-      console.log('📋 Solicitando TODOS los jugadores de La Liga con cache...');
+      logger.info('📋 Solicitando TODOS los jugadores de La Liga con cache...');
       const result = await playersManager.getAllPlayers(useCache);
 
       if (result.success) {
@@ -123,7 +124,7 @@ router.get('/laliga/players', async (req, res) => {
       }
     } else if (pageParam === 'all' || position || status || search || team_id || sortBy) {
       // Jugadores con filtros - usar sistema de filtros con cache
-      console.log('🔍 Solicitando jugadores filtrados con cache...');
+      logger.info('🔍 Solicitando jugadores filtrados con cache...');
       const filters = {
         team: team_id,
         position,
@@ -178,7 +179,7 @@ router.get('/laliga/players', async (req, res) => {
       }
     }
   } catch (error) {
-    console.error('❌ Error en endpoint de jugadores:', error.message);
+    logger.error('❌ Error en endpoint de jugadores:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -284,7 +285,7 @@ router.get('/laliga/player/:id/details', async (req, res) => {
     const season = req.query.season || null;
     const useCache = req.query.cache !== 'false'; // Por defecto usa cache
 
-    console.log(`🎯 Solicitando detalles completos del jugador ${player_id} con cache...`);
+    logger.info(`🎯 Solicitando detalles completos del jugador ${player_id} con cache...`);
 
     const result = await playersManager.getPlayerDetails(player_id);
 
@@ -316,7 +317,7 @@ router.get('/laliga/player/:id/details', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error(`❌ Error en detalles del jugador ${req.params.id}:`, error.message);
+    logger.error(`❌ Error en detalles del jugador ${req.params.id}:`, error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -709,7 +710,7 @@ router.post('/cache/players/clear', async (req, res) => {
 // Forzar actualización del cache desde API
 router.post('/cache/players/refresh', async (req, res) => {
   try {
-    console.log('🔄 Forzando actualización del cache de jugadores...');
+    logger.info('🔄 Forzando actualización del cache de jugadores...');
     const result = await playersManager.forceRefresh();
 
     res.json({
@@ -732,7 +733,7 @@ router.post('/cache/players/refresh', async (req, res) => {
 // Precalentar cache de jugadores
 router.post('/cache/players/warmup', async (req, res) => {
   try {
-    console.log('🔥 Precalentando cache de jugadores...');
+    logger.info('🔥 Precalentando cache de jugadores...');
     await playersManager.warmupCache();
 
     res.json({

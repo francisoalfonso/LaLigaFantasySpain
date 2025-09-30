@@ -1,5 +1,6 @@
 // Rutas de testing para validación del sistema API-Sports
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
@@ -39,7 +40,7 @@ router.post('/fantasy-points', (req, res) => {
   try {
     const { player_stats, position } = req.body;
 
-    console.log(`📊 Calculando puntos para jugador (${position}):`, player_stats);
+    logger.info(`📊 Calculando puntos para jugador (${position}):`, player_stats);
 
     if (!player_stats || !position) {
       return res.status(400).json({
@@ -59,7 +60,7 @@ router.post('/fantasy-points', (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error calculando puntos Fantasy:', error);
+    logger.error('❌ Error calculando puntos Fantasy:', error);
     res.status(500).json({
       success: false,
       error: error.message
@@ -77,7 +78,7 @@ router.get('/samples', async (req, res) => {
       message: 'Samples no disponibles - usando API-Sports en tiempo real'
     });
   } catch (error) {
-    console.error('❌ Error obteniendo samples:', error);
+    logger.error('❌ Error obteniendo samples:', error);
     res.status(500).json({
       success: false,
       error: error.message

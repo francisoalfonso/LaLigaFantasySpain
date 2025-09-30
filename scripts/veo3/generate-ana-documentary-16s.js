@@ -4,6 +4,7 @@
 // Estilo: Análisis táctico profesional estilo documental
 
 const path = require('path');
+const logger = require('../../../../../../../utils/logger');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const VEO3Client = require('../../backend/services/veo3/veo3Client');
@@ -13,7 +14,7 @@ class AnaDocumentaryGenerator {
     this.veo3Client = new VEO3Client();
     this.outputDir = './output/veo3/ana-documentary';
 
-    console.log('🎬 AnaDocumentaryGenerator - Estilo Documental Profesional');
+    logger.info('🎬 AnaDocumentaryGenerator - Estilo Documental Profesional');
   }
 
   // SEGMENTO 1: Professional Setup (8s) - Estilo BBC Sports
@@ -83,22 +84,22 @@ class AnaDocumentaryGenerator {
   }
 
   async generateDocumentaryVideo() {
-    console.log('🎬 GENERANDO VIDEO DOCUMENTARY DEEP-DIVE 16s');
-    console.log('==========================================');
-    console.log('📊 Características:');
-    console.log('   🎯 Estilo: Documentary BBC Sports');
-    console.log('   🎭 Tono: Serio, profesional, autoridad');
-    console.log('   📈 Contenido: Análisis con datos duros');
-    console.log('   🎵 Audio: Medido, pensativo, experto');
-    console.log('   🎥 Visual: Profesional, estático, datos');
-    console.log('');
+    logger.info('🎬 GENERANDO VIDEO DOCUMENTARY DEEP-DIVE 16s');
+    logger.info('==========================================');
+    logger.info('📊 Características:');
+    logger.info('   🎯 Estilo: Documentary BBC Sports');
+    logger.info('   🎭 Tono: Serio, profesional, autoridad');
+    logger.info('   📈 Contenido: Análisis con datos duros');
+    logger.info('   🎵 Audio: Medido, pensativo, experto');
+    logger.info('   🎥 Visual: Profesional, estático, datos');
+    logger.info('');
 
     try {
       // SEGMENTO 1: Professional Setup
-      console.log('📋 SEGMENTO 1: PROFESSIONAL SETUP (8s)');
+      logger.info('📋 SEGMENTO 1: PROFESSIONAL SETUP (8s)');
       const segment1Prompt = this.generateSegment1Prompt();
 
-      console.log(`🎬 Generando segmento documental 1/2...`);
+      logger.info(`🎬 Generando segmento documental 1/2...`);
       const segment1Result = await this.veo3Client.generateVideo(segment1Prompt.prompt, {
         model: 'veo3_fast',
         aspectRatio: '9:16',
@@ -106,16 +107,16 @@ class AnaDocumentaryGenerator {
       });
 
       const taskId1 = segment1Result.data.taskId;
-      console.log(`✅ Segmento 1 iniciado: ${taskId1}`);
+      logger.info(`✅ Segmento 1 iniciado: ${taskId1}`);
 
       const completedSegment1 = await this.veo3Client.waitForCompletion(taskId1);
-      console.log(`✅ Segmento 1 completado`);
+      logger.info(`✅ Segmento 1 completado`);
 
       // SEGMENTO 2: Data Deep-Dive
-      console.log('📋 SEGMENTO 2: DATA DEEP-DIVE (8s)');
+      logger.info('📋 SEGMENTO 2: DATA DEEP-DIVE (8s)');
       const segment2Prompt = this.generateSegment2Prompt('frame_placeholder');
 
-      console.log(`🎬 Generando segmento documental 2/2...`);
+      logger.info(`🎬 Generando segmento documental 2/2...`);
       const segment2Result = await this.veo3Client.generateVideo(segment2Prompt.prompt, {
         model: 'veo3_fast',
         aspectRatio: '9:16',
@@ -123,19 +124,19 @@ class AnaDocumentaryGenerator {
       });
 
       const taskId2 = segment2Result.data.taskId;
-      console.log(`✅ Segmento 2 iniciado: ${taskId2}`);
+      logger.info(`✅ Segmento 2 iniciado: ${taskId2}`);
 
       const completedSegment2 = await this.veo3Client.waitForCompletion(taskId2);
-      console.log(`✅ Segmento 2 completado`);
+      logger.info(`✅ Segmento 2 completado`);
 
-      console.log('');
-      console.log('🎉 ¡VIDEO DOCUMENTARY 16s COMPLETADO!');
-      console.log('===================================');
-      console.log('📺 Estilo: Professional Documentary Deep-Dive');
-      console.log('🎯 Público: Audiencia seria, análisis deportivo profesional');
-      console.log('📊 Fortalezas: Credibilidad, datos duros, autoridad');
-      console.log('🎵 Audio: Medido, profesional, expertise');
-      console.log('');
+      logger.info('');
+      logger.info('🎉 ¡VIDEO DOCUMENTARY 16s COMPLETADO!');
+      logger.info('===================================');
+      logger.info('📺 Estilo: Professional Documentary Deep-Dive');
+      logger.info('🎯 Público: Audiencia seria, análisis deportivo profesional');
+      logger.info('📊 Fortalezas: Credibilidad, datos duros, autoridad');
+      logger.info('🎵 Audio: Medido, profesional, expertise');
+      logger.info('');
 
       return {
         success: true,
@@ -155,7 +156,7 @@ class AnaDocumentaryGenerator {
       };
 
     } catch (error) {
-      console.error('❌ Error generando video documentary:', error.message);
+      logger.error('❌ Error generando video documentary:', error.message);
       throw error;
     }
   }
@@ -168,7 +169,7 @@ async function main() {
   try {
     await generator.generateDocumentaryVideo();
   } catch (error) {
-    console.error('💥 Error fatal:', error.message);
+    logger.error('💥 Error fatal:', error.message);
     process.exit(1);
   }
 }

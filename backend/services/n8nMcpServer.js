@@ -7,7 +7,9 @@
  */
 
 const axios = require('axios');
-require('dotenv').config({ path: '.env.n8n' });
+const logger = require('../utils/logger');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.n8n') });
 
 class N8nMcpServer {
     constructor() {
@@ -23,31 +25,37 @@ class N8nMcpServer {
         this.axiosInstance = axios.create({
             baseURL: this.baseUrl,
             headers: {
-                'Authorization': `Bearer ${this.apiToken}`,
+                'X-N8N-API-KEY': this.apiToken,
                 'Content-Type': 'application/json'
-            }
+            },
+            timeout: 30000, // 30 segundos timeout
+            validateStatus: (status) => status < 500 // No lanzar error en 4xx
         });
 
-        console.log(`🚀 N8n MCP Server inicializado con base URL: ${this.baseUrl}`);
+        logger.info(`🚀 N8n MCP Server inicializado con base URL: ${this.baseUrl}`);
     }
 
     /**
      * Configuración oficial del MCP Server según documentación n8n
+     * SEGURIDAD: No expone el API token, solo la estructura de configuración
      */
     getMcpServerConfig() {
+        const path = require('path');
+        const serverPath = path.resolve(__dirname, 'n8nMcpServer.js');
+
         return {
             "mcpServers": {
                 "n8n": {
                     "command": "node",
-                    "args": [
-                        "/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/n8nMcpServer.js"
-                    ],
+                    "args": [serverPath],
                     "env": {
-                        "N8N_API_TOKEN": this.apiToken,
-                        "N8N_BASE_URL": this.baseUrl
+                        "N8N_API_TOKEN": "<YOUR_N8N_API_TOKEN>",  // Usuario debe reemplazar
+                        "N8N_BASE_URL": this.baseUrl || "<YOUR_N8N_BASE_URL>"
                     }
                 }
-            }
+            },
+            "_security_note": "Reemplazar <YOUR_N8N_API_TOKEN> con tu token real de n8n",
+            "_config_file": "Guardar en tu archivo de configuración Claude Code MCP"
         };
     }
 
@@ -70,7 +78,7 @@ class N8nMcpServer {
                 }))
             };
         } catch (error) {
-            console.error('Error listando workflows:', error.message);
+            logger.error('Error listando workflows:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -93,7 +101,7 @@ class N8nMcpServer {
                 data: response.data.data
             };
         } catch (error) {
-            console.error(`Error ejecutando workflow ${workflowId}:`, error.message);
+            logger.error(`Error ejecutando workflow ${workflowId}:`, error.message);
             return {
                 success: false,
                 error: error.message
@@ -112,7 +120,7 @@ class N8nMcpServer {
                 execution: response.data.data
             };
         } catch (error) {
-            console.error(`Error obteniendo estado de ejecución ${executionId}:`, error.message);
+            logger.error(`Error obteniendo estado de ejecución ${executionId}:`, error.message);
             return {
                 success: false,
                 error: error.message
@@ -207,7 +215,7 @@ class N8nMcpServer {
                 webhookUrl: `${this.baseUrl}/webhook/${workflowData.nodes[0].parameters.path}`
             };
         } catch (error) {
-            console.error('Error creando workflow webhook:', error.message);
+            logger.error('Error creando workflow webhook:', error.message);
             return {
                 success: false,
                 error: error.message
@@ -325,15 +333,15 @@ module.exports = N8nMcpServer;
 
 // Si se ejecuta directamente, inicializar el servidor MCP
 if (require.main === module) {
-    console.log('🔧 Iniciando N8n MCP Server...');
+    logger.info('🔧 Iniciando N8n MCP Server...');
 
     const server = new N8nMcpServer();
 
     // Test de conexión inicial
     server.testConnection().then(result => {
-        console.log('Test de conexión:', result);
+        logger.info('Test de conexión:', result);
     });
 
-    console.log('📋 Herramientas MCP disponibles:', server.getMcpTools().map(tool => tool.name));
-    console.log('⚙️  Configuración MCP para Claude Code:', JSON.stringify(server.getMcpServerConfig(), null, 2));
+    logger.info('📋 Herramientas MCP disponibles:', server.getMcpTools().map(tool => tool.name));
+    logger.info('⚙️  Configuración MCP para Claude Code:', JSON.stringify(server.getMcpServerConfig(), null, 2));
 }

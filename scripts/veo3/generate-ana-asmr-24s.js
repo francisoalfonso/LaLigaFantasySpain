@@ -4,6 +4,7 @@
 // Estilo completamente diferente: Relajante, susurrado, íntimo
 
 const fs = require('fs');
+const logger = require('../../../../../../../utils/logger');
 
 class AnaASMR24sGenerator {
   constructor() {
@@ -122,10 +123,10 @@ class AnaASMR24sGenerator {
   }
 
   async generateVideoSegment(promptConfig, segmentNumber) {
-    console.log(`🎧 Generando Segmento ASMR ${segmentNumber}/3...`);
-    console.log(`📝 Estilo: ${promptConfig.metadata.style}`);
-    console.log(`🎵 Audio: ${promptConfig.audioDesign.style}`);
-    console.log(`🎥 Composición: ${promptConfig.cinematography.composition}`);
+    logger.info(`🎧 Generando Segmento ASMR ${segmentNumber}/3...`);
+    logger.info(`📝 Estilo: ${promptConfig.metadata.style}`);
+    logger.info(`🎵 Audio: ${promptConfig.audioDesign.style}`);
+    logger.info(`🎥 Composición: ${promptConfig.cinematography.composition}`);
 
     const simulatedVideoGeneration = {
       status: 'generating_ASMR',
@@ -140,14 +141,14 @@ class AnaASMR24sGenerator {
       }
     };
 
-    console.log(`⏳ Generando video ASMR especializado...`);
-    console.log(`📊 Task ID: ${simulatedVideoGeneration.taskId}`);
+    logger.info(`⏳ Generando video ASMR especializado...`);
+    logger.info(`📊 Task ID: ${simulatedVideoGeneration.taskId}`);
 
     await this.simulateASMRProgress(segmentNumber);
 
     const videoUrl = `https://veo3-output.kie.ai/videos/ASMR/${simulatedVideoGeneration.taskId}.mp4`;
 
-    console.log(`✅ Segmento ASMR ${segmentNumber} generado: ${videoUrl}`);
+    logger.info(`✅ Segmento ASMR ${segmentNumber} generado: ${videoUrl}`);
 
     return {
       videoUrl,
@@ -169,33 +170,33 @@ class AnaASMR24sGenerator {
     ];
 
     for (let i = 0; i < steps.length; i++) {
-      console.log(`   🎧 ${i + 1}/5: ${steps[i]}`);
+      logger.info(`   🎧 ${i + 1}/5: ${steps[i]}`);
       await new Promise(resolve => setTimeout(resolve, 1200));
     }
   }
 
   async extractLastFrame(videoUrl) {
-    console.log(`🎞️ Extrayendo frame para continuidad ASMR...`);
+    logger.info(`🎞️ Extrayendo frame para continuidad ASMR...`);
     const lastFrameUrl = videoUrl.replace('.mp4', '_last_frame.jpg');
-    console.log(`📸 Frame ASMR extraído: ${lastFrameUrl}`);
+    logger.info(`📸 Frame ASMR extraído: ${lastFrameUrl}`);
     return lastFrameUrl;
   }
 
   async concatenateASMRSegments(segment1Url, segment2Url, segment3Url) {
-    console.log(`🔗 Concatenando segmentos ASMR para video 24s...`);
+    logger.info(`🔗 Concatenando segmentos ASMR para video 24s...`);
 
     const finalVideoUrl = `${this.outputDir}/ana-ASMR-deportivo-24s-${Date.now()}.mp4`;
 
-    console.log(`   🎧 Segmento 1 (Intro): ${segment1Url}`);
-    console.log(`   🎧 Segmento 2 (Análisis): ${segment2Url}`);
-    console.log(`   🎧 Segmento 3 (Conclusión): ${segment3Url}`);
-    console.log(`   🎵 Aplicando transiciones ASMR suaves...`);
-    console.log(`   🔇 Masterizando audio continuo ASMR...`);
-    console.log(`   ⬆️ Optimizando para experiencia relajante...`);
+    logger.info(`   🎧 Segmento 1 (Intro): ${segment1Url}`);
+    logger.info(`   🎧 Segmento 2 (Análisis): ${segment2Url}`);
+    logger.info(`   🎧 Segmento 3 (Conclusión): ${segment3Url}`);
+    logger.info(`   🎵 Aplicando transiciones ASMR suaves...`);
+    logger.info(`   🔇 Masterizando audio continuo ASMR...`);
+    logger.info(`   ⬆️ Optimizando para experiencia relajante...`);
 
     await new Promise(resolve => setTimeout(resolve, 4000));
 
-    console.log(`✅ Video ASMR 24s completado: ${finalVideoUrl}`);
+    logger.info(`✅ Video ASMR 24s completado: ${finalVideoUrl}`);
 
     return {
       finalVideoUrl,
@@ -219,90 +220,90 @@ class AnaASMR24sGenerator {
   }
 
   async generateComplete24sASMR() {
-    console.log(`🎧 INICIANDO GENERACIÓN ANA ASMR DEPORTIVO 24 SEGUNDOS`);
-    console.log(`📊 Estilo: ASMR Sports Analysis - Completamente diferente al anterior`);
-    console.log(`🎯 Público: Amantes del ASMR + Fantasy La Liga`);
-    console.log(`⚙️ Optimización: Ultra-sensible, relajante, íntimo`);
-    console.log(`\n`);
+    logger.info(`🎧 INICIANDO GENERACIÓN ANA ASMR DEPORTIVO 24 SEGUNDOS`);
+    logger.info(`📊 Estilo: ASMR Sports Analysis - Completamente diferente al anterior`);
+    logger.info(`🎯 Público: Amantes del ASMR + Fantasy La Liga`);
+    logger.info(`⚙️ Optimización: Ultra-sensible, relajante, íntimo`);
+    logger.info(`\n`);
 
     try {
       // FASE 1: Segmento Introducción ASMR
-      console.log(`📋 FASE 1: INTRODUCCIÓN ASMR (8s)`);
+      logger.info(`📋 FASE 1: INTRODUCCIÓN ASMR (8s)`);
       const segment1Prompt = this.generateSegment1Prompt();
       const segment1Result = await this.generateVideoSegment(segment1Prompt, 1);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 2: Frame extraction
-      console.log(`📋 FASE 2: CONTINUIDAD ASMR`);
+      logger.info(`📋 FASE 2: CONTINUIDAD ASMR`);
       const lastFrame1 = await this.extractLastFrame(segment1Result.videoUrl);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 3: Segmento Análisis Táctil
-      console.log(`📋 FASE 3: ANÁLISIS TÁCTIL ASMR (8s)`);
+      logger.info(`📋 FASE 3: ANÁLISIS TÁCTIL ASMR (8s)`);
       const segment2Prompt = this.generateSegment2Prompt(lastFrame1);
       const segment2Result = await this.generateVideoSegment(segment2Prompt, 2);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 4: Frame extraction 2
-      console.log(`📋 FASE 4: CONTINUIDAD ANÁLISIS`);
+      logger.info(`📋 FASE 4: CONTINUIDAD ANÁLISIS`);
       const lastFrame2 = await this.extractLastFrame(segment2Result.videoUrl);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 5: Segmento Conclusión Peaceful
-      console.log(`📋 FASE 5: CONCLUSIÓN PEACEFUL (8s)`);
+      logger.info(`📋 FASE 5: CONCLUSIÓN PEACEFUL (8s)`);
       const segment3Prompt = this.generateSegment3Prompt(lastFrame2);
       const segment3Result = await this.generateVideoSegment(segment3Prompt, 3);
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // FASE 6: Concatenación ASMR final
-      console.log(`📋 FASE 6: MASTERIZACIÓN ASMR FINAL`);
+      logger.info(`📋 FASE 6: MASTERIZACIÓN ASMR FINAL`);
       const finalResult = await this.concatenateASMRSegments(
         segment1Result.videoUrl,
         segment2Result.videoUrl,
         segment3Result.videoUrl
       );
 
-      console.log(`\n`);
+      logger.info(`\n`);
 
       // RESULTADO FINAL ASMR
-      console.log(`🎧 ¡VIDEO ASMR 24s COMPLETADO!`);
-      console.log(`=====================================`);
-      console.log(`📺 Video final: ${finalResult.finalVideoUrl}`);
-      console.log(`⏱️ Duración: ${finalResult.duration}`);
-      console.log(`🎧 Estilo: ${finalResult.style}`);
-      console.log(`📐 Formato: ${finalResult.format}`);
-      console.log(`🎵 Audio: ${finalResult.audioQuality}`);
-      console.log(`📊 Calidad: ${finalResult.quality}`);
-      console.log(`💾 Tamaño: ${finalResult.fileSize}`);
-      console.log(`🎯 Audiencia: ${finalResult.targetAudience}`);
-      console.log(`⏰ Mejor momento: ${finalResult.bestTimeToWatch}`);
+      logger.info(`🎧 ¡VIDEO ASMR 24s COMPLETADO!`);
+      logger.info(`=====================================`);
+      logger.info(`📺 Video final: ${finalResult.finalVideoUrl}`);
+      logger.info(`⏱️ Duración: ${finalResult.duration}`);
+      logger.info(`🎧 Estilo: ${finalResult.style}`);
+      logger.info(`📐 Formato: ${finalResult.format}`);
+      logger.info(`🎵 Audio: ${finalResult.audioQuality}`);
+      logger.info(`📊 Calidad: ${finalResult.quality}`);
+      logger.info(`💾 Tamaño: ${finalResult.fileSize}`);
+      logger.info(`🎯 Audiencia: ${finalResult.targetAudience}`);
+      logger.info(`⏰ Mejor momento: ${finalResult.bestTimeToWatch}`);
 
-      console.log(`\n🛠️ Técnicas ASMR aplicadas:`);
-      finalResult.techniques.forEach(tech => console.log(`   ✅ ${tech}`));
+      logger.info(`\n🛠️ Técnicas ASMR aplicadas:`);
+      finalResult.techniques.forEach(tech => logger.info(`   ✅ ${tech}`));
 
-      console.log(`\n🎯 ANÁLISIS ASMR ESPECÍFICO:`);
-      console.log(`   🎧 Calidad ASMR: 97% (ultra-sensible)`);
-      console.log(`   😴 Factor relajación: 95% (muy efectivo)`);
-      console.log(`   🎵 Audio susurros ES: 96% (perfecto)`);
-      console.log(`   👂 Triggers táctiles: 93% (papel, movimientos)`);
-      console.log(`   🕯️ Ambiente íntimo: 94% (muy acogedor)`);
+      logger.info(`\n🎯 ANÁLISIS ASMR ESPECÍFICO:`);
+      logger.info(`   🎧 Calidad ASMR: 97% (ultra-sensible)`);
+      logger.info(`   😴 Factor relajación: 95% (muy efectivo)`);
+      logger.info(`   🎵 Audio susurros ES: 96% (perfecto)`);
+      logger.info(`   👂 Triggers táctiles: 93% (papel, movimientos)`);
+      logger.info(`   🕯️ Ambiente íntimo: 94% (muy acogedor)`);
 
-      console.log(`\n📈 MÉTRICAS ASMR ESPERADAS:`);
-      console.log(`   😴 Relajación: 96% usuarios`);
-      console.log(`   ⏰ Watch completo: 88% (contenido tranquilo)`);
-      console.log(`   🔄 Re-watching: +180% (uso antes dormir)`);
-      console.log(`   💬 Comments: 'me relajo mucho', 'perfecto para dormir'`);
-      console.log(`   ❤️ Likes: +250% (nicho ASMR + Fantasy)`);
+      logger.info(`\n📈 MÉTRICAS ASMR ESPERADAS:`);
+      logger.info(`   😴 Relajación: 96% usuarios`);
+      logger.info(`   ⏰ Watch completo: 88% (contenido tranquilo)`);
+      logger.info(`   🔄 Re-watching: +180% (uso antes dormir)`);
+      logger.info(`   💬 Comments: 'me relajo mucho', 'perfecto para dormir'`);
+      logger.info(`   ❤️ Likes: +250% (nicho ASMR + Fantasy)`);
 
       return finalResult;
 
     } catch (error) {
-      console.error(`❌ Error generando video ASMR:`, error.message);
+      logger.error(`❌ Error generando video ASMR:`, error.message);
       throw error;
     }
   }
@@ -338,11 +339,11 @@ async function main() {
     const metadataPath = `${generator.outputDir}/asmr-metadata-${Date.now()}.json`;
     fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
 
-    console.log(`\n📄 Metadata ASMR guardada: ${metadataPath}`);
-    console.log(`\n🎧 ¡Video Ana ASMR 24s listo para relajación!`);
+    logger.info(`\n📄 Metadata ASMR guardada: ${metadataPath}`);
+    logger.info(`\n🎧 ¡Video Ana ASMR 24s listo para relajación!`);
 
   } catch (error) {
-    console.error(`💥 Error fatal ASMR:`, error);
+    logger.error(`💥 Error fatal ASMR:`, error);
     process.exit(1);
   }
 }

@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const logger = require('../utils/logger');
 const axios = require('axios');
 const BunnyStreamManager = require('../services/bunnyStreamManager');
 
@@ -16,7 +17,7 @@ const bunnyStream = new BunnyStreamManager();
  */
 router.get('/test', async (req, res) => {
     try {
-        console.log('[Bunny Routes] Test de conectividad iniciado...');
+        logger.info('[Bunny Routes] Test de conectividad iniciado...');
 
         const result = await bunnyStream.testConnection();
 
@@ -41,7 +42,7 @@ router.get('/test', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('[Bunny Routes] Error en test:', error.message);
+        logger.error('[Bunny Routes] Error en test:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error interno en test Bunny.net',
@@ -66,7 +67,7 @@ router.post('/upload-from-veo3', async (req, res) => {
             });
         }
 
-        console.log('[Bunny Routes] Subiendo video desde VEO3:', veo3Url);
+        logger.info('[Bunny Routes] Subiendo video desde VEO3:', veo3Url);
 
         const videoData = await bunnyStream.uploadFromVeo3Url(veo3Url, {
             title: title || `Fantasy Video ${Date.now()}`,
@@ -81,7 +82,7 @@ router.post('/upload-from-veo3', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error subiendo video:', error.message);
+        logger.error('[Bunny Routes] Error subiendo video:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error subiendo video a Bunny.net',
@@ -105,7 +106,7 @@ router.get('/videos', async (req, res) => {
             source = 'local' // 'local' o 'bunny'
         } = req.query;
 
-        console.log(`[Bunny Routes] Listando videos (source: ${source})`);
+        logger.info(`[Bunny Routes] Listando videos (source: ${source})`);
 
         let videos;
 
@@ -168,7 +169,7 @@ router.get('/videos', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error listando videos:', error.message);
+        logger.error('[Bunny Routes] Error listando videos:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo lista de videos',
@@ -187,7 +188,7 @@ router.get('/videos/:videoId', async (req, res) => {
         const { videoId } = req.params;
         const { source = 'bunny' } = req.query;
 
-        console.log(`[Bunny Routes] Obteniendo info de video: ${videoId}`);
+        logger.info(`[Bunny Routes] Obteniendo info de video: ${videoId}`);
 
         let videoInfo;
 
@@ -212,7 +213,7 @@ router.get('/videos/:videoId', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error obteniendo video:', error.message);
+        logger.error('[Bunny Routes] Error obteniendo video:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo información del video',
@@ -231,7 +232,7 @@ router.get('/videos/:videoId/analytics', async (req, res) => {
         const { videoId } = req.params;
         const { dateFrom, dateTo } = req.query;
 
-        console.log(`[Bunny Routes] Obteniendo analytics de video: ${videoId}`);
+        logger.info(`[Bunny Routes] Obteniendo analytics de video: ${videoId}`);
 
         const analytics = await bunnyStream.getVideoAnalytics(videoId, dateFrom, dateTo);
 
@@ -249,7 +250,7 @@ router.get('/videos/:videoId/analytics', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error obteniendo analytics:', error.message);
+        logger.error('[Bunny Routes] Error obteniendo analytics:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo analytics del video',
@@ -267,7 +268,7 @@ router.delete('/videos/:videoId', async (req, res) => {
     try {
         const { videoId } = req.params;
 
-        console.log(`[Bunny Routes] Eliminando video: ${videoId}`);
+        logger.info(`[Bunny Routes] Eliminando video: ${videoId}`);
 
         const success = await bunnyStream.deleteVideo(videoId);
 
@@ -285,7 +286,7 @@ router.delete('/videos/:videoId', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('[Bunny Routes] Error eliminando video:', error.message);
+        logger.error('[Bunny Routes] Error eliminando video:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error eliminando video',
@@ -309,7 +310,7 @@ router.get('/videos/:videoId/embed', async (req, res) => {
             controls = true
         } = req.query;
 
-        console.log(`[Bunny Routes] Generando embed para video: ${videoId}`);
+        logger.info(`[Bunny Routes] Generando embed para video: ${videoId}`);
 
         const embedCode = bunnyStream.generateEmbedCode(videoId, {
             width,
@@ -329,7 +330,7 @@ router.get('/videos/:videoId/embed', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error generando embed:', error.message);
+        logger.error('[Bunny Routes] Error generando embed:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error generando código de embed',
@@ -346,7 +347,7 @@ router.get('/videos/:videoId/embed', async (req, res) => {
 router.post('/videos/:videoId/make-public', async (req, res) => {
     try {
         const { videoId } = req.params;
-        console.log(`[Bunny Routes] Haciendo público el video: ${videoId}`);
+        logger.info(`[Bunny Routes] Haciendo público el video: ${videoId}`);
 
         const result = await bunnyStream.makeVideoPublic(videoId);
 
@@ -366,7 +367,7 @@ router.post('/videos/:videoId/make-public', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('[Bunny Routes] Error haciendo video público:', error.message);
+        logger.error('[Bunny Routes] Error haciendo video público:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error interno del servidor',
@@ -385,7 +386,7 @@ router.get('/videos/:videoId/stream', async (req, res) => {
         const { videoId } = req.params;
         const { quality = '720p' } = req.query;
 
-        console.log(`[Bunny Routes] Redirigiendo a streaming directo: ${videoId} (${quality})`);
+        logger.info(`[Bunny Routes] Redirigiendo a streaming directo: ${videoId} (${quality})`);
 
         // Usar playlist.m3u8 para streaming adaptativo o URL directa del CDN
         const streamUrl = `${bunnyStream.cdnUrl}/${videoId}/playlist.m3u8`;
@@ -402,13 +403,13 @@ router.get('/videos/:videoId/stream', async (req, res) => {
                 }
             });
 
-            console.log(`[Bunny Routes] ✅ Video accesible, redirigiendo a: ${streamUrl}`);
+            logger.info(`[Bunny Routes] ✅ Video accesible, redirigiendo a: ${streamUrl}`);
 
             // Redirigir directamente al CDN de Bunny.net
             res.redirect(302, streamUrl);
 
         } catch (headError) {
-            console.log(`[Bunny Routes] Playlist no accesible, intentando video directo: ${directVideoUrl}`);
+            logger.info(`[Bunny Routes] Playlist no accesible, intentando video directo: ${directVideoUrl}`);
 
             // Intentar con video directo
             try {
@@ -419,11 +420,11 @@ router.get('/videos/:videoId/stream', async (req, res) => {
                     }
                 });
 
-                console.log(`[Bunny Routes] ✅ Video directo accesible, redirigiendo`);
+                logger.info(`[Bunny Routes] ✅ Video directo accesible, redirigiendo`);
                 res.redirect(302, directVideoUrl);
 
             } catch (directError) {
-                console.error(`[Bunny Routes] ❌ Video no accesible en CDN:`, directError.message);
+                logger.error(`[Bunny Routes] ❌ Video no accesible en CDN:`, directError.message);
 
                 res.status(404).json({
                     success: false,
@@ -439,7 +440,7 @@ router.get('/videos/:videoId/stream', async (req, res) => {
         }
 
     } catch (error) {
-        console.error('[Bunny Routes] Error en streaming redirect:', error.message);
+        logger.error('[Bunny Routes] Error en streaming redirect:', error.message);
 
         res.status(500).json({
             success: false,
@@ -456,7 +457,7 @@ router.get('/videos/:videoId/stream', async (req, res) => {
  */
 router.get('/dashboard', async (req, res) => {
     try {
-        console.log('[Bunny Routes] Obteniendo datos completos del dashboard');
+        logger.info('[Bunny Routes] Obteniendo datos completos del dashboard');
 
         const [localVideos, bunnyVideos, analytics] = await Promise.all([
             bunnyStream.getLocalVideos({ limit: 10 }),
@@ -494,7 +495,7 @@ router.get('/dashboard', async (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error obteniendo dashboard:', error.message);
+        logger.error('[Bunny Routes] Error obteniendo dashboard:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo datos del dashboard',
@@ -530,7 +531,7 @@ router.get('/config', (req, res) => {
         });
 
     } catch (error) {
-        console.error('[Bunny Routes] Error obteniendo configuración:', error.message);
+        logger.error('[Bunny Routes] Error obteniendo configuración:', error.message);
         res.status(500).json({
             success: false,
             message: 'Error obteniendo configuración',

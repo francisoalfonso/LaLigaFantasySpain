@@ -6,6 +6,7 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const logger = require('../../../../../../utils/logger');
 const path = require('path');
 
 // Load environment variables
@@ -15,7 +16,7 @@ const SUPABASE_URL = process.env.SUPABASE_PROJECT_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error('❌ Error: Missing Supabase credentials');
+    logger.error('❌ Error: Missing Supabase credentials');
     process.exit(1);
 }
 
@@ -28,14 +29,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 });
 
 async function verifyDatabase() {
-    console.log('🔍 Fantasy La Liga Database Verification');
-    console.log('==========================================\n');
+    logger.info('🔍 Fantasy La Liga Database Verification');
+    logger.info('==========================================\n');
 
     let allTestsPassed = true;
 
     try {
         // Test 1: Core Tables
-        console.log('📊 Testing Core Tables...');
+        logger.info('📊 Testing Core Tables...');
         const coreTables = [
             'teams', 'players', 'matches', 'player_stats', 'fantasy_points',
             'content_plans', 'social_posts', 'workflows', 'api_requests',
@@ -50,22 +51,22 @@ async function verifyDatabase() {
                     .select('*', { count: 'exact', head: true });
 
                 if (error) {
-                    console.log(`  ❌ ${tableName}: ${error.message}`);
+                    logger.info(`  ❌ ${tableName}: ${error.message}`);
                     tableResults[tableName] = { exists: false, count: 0, error: error.message };
                     allTestsPassed = false;
                 } else {
-                    console.log(`  ✅ ${tableName}: ${count || 0} records`);
+                    logger.info(`  ✅ ${tableName}: ${count || 0} records`);
                     tableResults[tableName] = { exists: true, count: count || 0 };
                 }
             } catch (err) {
-                console.log(`  ❌ ${tableName}: ${err.message}`);
+                logger.info(`  ❌ ${tableName}: ${err.message}`);
                 tableResults[tableName] = { exists: false, count: 0, error: err.message };
                 allTestsPassed = false;
             }
         }
 
         // Test 2: Initial Data
-        console.log('\n🎯 Testing Initial Data...');
+        logger.info('\n🎯 Testing Initial Data...');
 
         // Check if teams are seeded
         const { data: teams, error: teamsError } = await supabase
@@ -74,12 +75,12 @@ async function verifyDatabase() {
             .limit(5);
 
         if (teamsError || !teams || teams.length === 0) {
-            console.log('  ❌ Teams not properly seeded');
+            logger.info('  ❌ Teams not properly seeded');
             allTestsPassed = false;
         } else {
-            console.log(`  ✅ Teams seeded: ${teams.length} sample teams found`);
+            logger.info(`  ✅ Teams seeded: ${teams.length} sample teams found`);
             teams.forEach(team => {
-                console.log(`    - ${team.name} (${team.short_name})`);
+                logger.info(`    - ${team.name} (${team.short_name})`);
             });
         }
 
@@ -90,13 +91,13 @@ async function verifyDatabase() {
             .limit(3);
 
         if (contentError || !contentPlans || contentPlans.length === 0) {
-            console.log('  ⚠️ No sample content plans found (may be normal)');
+            logger.info('  ⚠️ No sample content plans found (may be normal)');
         } else {
-            console.log(`  ✅ Content plans seeded: ${contentPlans.length} samples`);
+            logger.info(`  ✅ Content plans seeded: ${contentPlans.length} samples`);
         }
 
         // Test 3: Database Functions
-        console.log('\n⚙️ Testing Database Functions...');
+        logger.info('\n⚙️ Testing Database Functions...');
 
         try {
             // Test the fantasy points calculation function
@@ -111,19 +112,19 @@ async function verifyDatabase() {
                 });
 
             if (functionError) {
-                console.log('  ❌ calculate_fantasy_points function: Not working');
-                console.log(`    Error: ${functionError.message}`);
+                logger.info('  ❌ calculate_fantasy_points function: Not working');
+                logger.info(`    Error: ${functionError.message}`);
                 allTestsPassed = false;
             } else {
-                console.log(`  ✅ calculate_fantasy_points function: Returns ${functionTest} points`);
+                logger.info(`  ✅ calculate_fantasy_points function: Returns ${functionTest} points`);
             }
         } catch (err) {
-            console.log('  ❌ Function test failed:', err.message);
+            logger.info('  ❌ Function test failed:', err.message);
             allTestsPassed = false;
         }
 
         // Test 4: Views
-        console.log('\n👁️ Testing Database Views...');
+        logger.info('\n👁️ Testing Database Views...');
 
         const views = [
             'current_gameweek_performance',
@@ -139,19 +140,19 @@ async function verifyDatabase() {
                     .limit(1);
 
                 if (error) {
-                    console.log(`  ❌ ${viewName}: ${error.message}`);
+                    logger.info(`  ❌ ${viewName}: ${error.message}`);
                     allTestsPassed = false;
                 } else {
-                    console.log(`  ✅ ${viewName}: View accessible`);
+                    logger.info(`  ✅ ${viewName}: View accessible`);
                 }
             } catch (err) {
-                console.log(`  ❌ ${viewName}: ${err.message}`);
+                logger.info(`  ❌ ${viewName}: ${err.message}`);
                 allTestsPassed = false;
             }
         }
 
         // Test 5: Row Level Security
-        console.log('\n🔒 Testing Row Level Security...');
+        logger.info('\n🔒 Testing Row Level Security...');
 
         // Check if RLS is enabled on sensitive tables
         const rlsTables = ['users', 'user_teams', 'transfers'];
@@ -166,55 +167,55 @@ async function verifyDatabase() {
                     .limit(1);
 
                 if (error && (error.message.includes('RLS') || error.message.includes('policy'))) {
-                    console.log(`  ✅ ${tableName}: RLS properly enabled`);
+                    logger.info(`  ✅ ${tableName}: RLS properly enabled`);
                 } else {
-                    console.log(`  ⚠️ ${tableName}: RLS may not be properly configured`);
+                    logger.info(`  ⚠️ ${tableName}: RLS may not be properly configured`);
                 }
             } catch (err) {
-                console.log(`  ⚠️ ${tableName}: Could not test RLS`);
+                logger.info(`  ⚠️ ${tableName}: Could not test RLS`);
             }
         }
 
         // Summary
-        console.log('\n🏁 Verification Summary');
-        console.log('======================');
+        logger.info('\n🏁 Verification Summary');
+        logger.info('======================');
 
         const tableCount = Object.keys(tableResults).length;
         const successfulTables = Object.values(tableResults).filter(r => r.exists).length;
 
-        console.log(`📊 Tables: ${successfulTables}/${tableCount} successful`);
+        logger.info(`📊 Tables: ${successfulTables}/${tableCount} successful`);
 
         if (allTestsPassed) {
-            console.log('🎉 Database verification PASSED!');
-            console.log('✅ Your Fantasy La Liga database is ready for use');
+            logger.info('🎉 Database verification PASSED!');
+            logger.info('✅ Your Fantasy La Liga database is ready for use');
 
-            console.log('\n🚀 Next Steps:');
-            console.log('1. Start the backend server: npm run dev');
-            console.log('2. Test API endpoints: http://localhost:3000/api/test/ping');
-            console.log('3. Import La Liga data: Call /api/laliga endpoints');
-            console.log('4. Setup n8n workflows for automation');
+            logger.info('\n🚀 Next Steps:');
+            logger.info('1. Start the backend server: npm run dev');
+            logger.info('2. Test API endpoints: http://localhost:3000/api/test/ping');
+            logger.info('3. Import La Liga data: Call /api/laliga endpoints');
+            logger.info('4. Setup n8n workflows for automation');
         } else {
-            console.log('⚠️ Database verification found issues');
-            console.log('❌ Please review the errors above and re-run the schema');
+            logger.info('⚠️ Database verification found issues');
+            logger.info('❌ Please review the errors above and re-run the schema');
 
-            console.log('\n🔧 Troubleshooting:');
-            console.log('1. Ensure you executed the complete schema in Supabase SQL Editor');
-            console.log('2. Check for any SQL execution errors in Supabase logs');
-            console.log('3. Verify your service role key has proper permissions');
+            logger.info('\n🔧 Troubleshooting:');
+            logger.info('1. Ensure you executed the complete schema in Supabase SQL Editor');
+            logger.info('2. Check for any SQL execution errors in Supabase logs');
+            logger.info('3. Verify your service role key has proper permissions');
         }
 
         // Detailed table status
-        console.log('\n📋 Detailed Table Status:');
+        logger.info('\n📋 Detailed Table Status:');
         Object.entries(tableResults).forEach(([table, result]) => {
             if (result.exists) {
-                console.log(`  ✅ ${table}: ${result.count} records`);
+                logger.info(`  ✅ ${table}: ${result.count} records`);
             } else {
-                console.log(`  ❌ ${table}: ${result.error || 'Not found'}`);
+                logger.info(`  ❌ ${table}: ${result.error || 'Not found'}`);
             }
         });
 
     } catch (error) {
-        console.error('💥 Verification failed:', error.message);
+        logger.error('💥 Verification failed:', error.message);
         allTestsPassed = false;
     }
 
@@ -228,7 +229,7 @@ if (require.main === module) {
             process.exit(success ? 0 : 1);
         })
         .catch((error) => {
-            console.error('💥 Verification script failed:', error.message);
+            logger.error('💥 Verification script failed:', error.message);
             process.exit(1);
         });
 }

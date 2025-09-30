@@ -4,10 +4,11 @@
  */
 
 const StatsCardPromptBuilder = require('../../backend/services/veo3/statsCardPromptBuilder');
+const logger = require('../../../../../../../utils/logger');
 
-console.log('='.repeat(80));
-console.log('📊 TEST STATS CARD PROMPT BUILDER - VEO3 Segmento Gráficos');
-console.log('='.repeat(80));
+logger.info('='.repeat(80));
+logger.info('📊 TEST STATS CARD PROMPT BUILDER - VEO3 Segmento Gráficos');
+logger.info('='.repeat(80));
 
 const builder = new StatsCardPromptBuilder();
 
@@ -29,33 +30,33 @@ const pedriData = {
 };
 
 // Test 1: Validar datos del jugador
-console.log('\n📋 TEST 1: Validación de datos de jugador');
-console.log('-'.repeat(80));
+logger.info('\n📋 TEST 1: Validación de datos de jugador');
+logger.info('-'.repeat(80));
 const validation = builder.validatePlayerData(pedriData);
-console.log(`✅ Datos válidos: ${validation.valid}`);
+logger.info(`✅ Datos válidos: ${validation.valid}`);
 if (validation.errors.length > 0) {
-    console.log(`❌ Errores: ${validation.errors.join(', ')}`);
+    logger.info(`❌ Errores: ${validation.errors.join(', ')}`);
 }
 if (validation.warnings.length > 0) {
-    console.log(`⚠️  Warnings: ${validation.warnings.join(', ')}`);
+    logger.info(`⚠️  Warnings: ${validation.warnings.join(', ')}`);
 }
 
 // Test 2: Generar prompt básico
-console.log('\n🎨 TEST 2: Generación de prompt stats card básico');
-console.log('-'.repeat(80));
+logger.info('\n🎨 TEST 2: Generación de prompt stats card básico');
+logger.info('-'.repeat(80));
 const basicCard = builder.buildStatsCardPrompt(pedriData, {
     style: 'fantasy_premium',
     emphasizeStats: ['price', 'goals', 'valueRatio']
 });
 
-console.log('Prompt generado:');
-console.log(basicCard.prompt);
-console.log(`\nLongitud: ${basicCard.prompt.length} caracteres`);
-console.log(`Metadata:`, JSON.stringify(basicCard.metadata, null, 2));
+logger.info('Prompt generado:');
+logger.info(basicCard.prompt);
+logger.info(`\nLongitud: ${basicCard.prompt.length} caracteres`);
+logger.info(`Metadata:`, JSON.stringify(basicCard.metadata, null, 2));
 
 // Test 3: Probar diferentes estilos visuales
-console.log('\n🎭 TEST 3: Diferentes estilos visuales');
-console.log('-'.repeat(80));
+logger.info('\n🎭 TEST 3: Diferentes estilos visuales');
+logger.info('-'.repeat(80));
 
 const styles = ['nba_modern', 'bleacher_report', 'espn_clean', 'fantasy_premium'];
 styles.forEach(style => {
@@ -64,14 +65,14 @@ styles.forEach(style => {
         emphasizeStats: ['price', 'goals'],
         duration: 6
     });
-    console.log(`\n${style.toUpperCase()}:`);
-    console.log(`Prompt (primeros 150 chars): ${card.prompt.substring(0, 150)}...`);
-    console.log(`Complejidad visual: ${card.metadata.visualComplexity}`);
+    logger.info(`\n${style.toUpperCase()}:`);
+    logger.info(`Prompt (primeros 150 chars): ${card.prompt.substring(0, 150)}...`);
+    logger.info(`Complejidad visual: ${card.metadata.visualComplexity}`);
 });
 
 // Test 4: Generar segmento chollo completo
-console.log('\n💎 TEST 4: Segmento chollo con stats card');
-console.log('-'.repeat(80));
+logger.info('\n💎 TEST 4: Segmento chollo con stats card');
+logger.info('-'.repeat(80));
 
 const cholloContext = {
     reason: 'Precio bajo para centrocampista Barcelona',
@@ -83,19 +84,19 @@ const cholloSegment = builder.buildCholloStatsSegment(pedriData, cholloContext, 
     duration: 6
 });
 
-console.log('SEGMENTO CHOLLO STATS:');
-console.log(cholloSegment.prompt);
-console.log(`\nContexto chollo:`, JSON.stringify(cholloSegment.cholloContext, null, 2));
+logger.info('SEGMENTO CHOLLO STATS:');
+logger.info(cholloSegment.prompt);
+logger.info(`\nContexto chollo:`, JSON.stringify(cholloSegment.cholloContext, null, 2));
 
 // Test 5: Text overlays para post-producción
-console.log('\n📝 TEST 5: Text overlays generados (para FFmpeg)');
-console.log('-'.repeat(80));
+logger.info('\n📝 TEST 5: Text overlays generados (para FFmpeg)');
+logger.info('-'.repeat(80));
 
-console.log('Text overlays:', JSON.stringify(basicCard.textOverlays, null, 2));
+logger.info('Text overlays:', JSON.stringify(basicCard.textOverlays, null, 2));
 
 // Test 6: Comparar stats diferentes jugadores
-console.log('\n⚖️  TEST 6: Stats cards para diferentes tipos de jugadores');
-console.log('-'.repeat(80));
+logger.info('\n⚖️  TEST 6: Stats cards para diferentes tipos de jugadores');
+logger.info('-'.repeat(80));
 
 const players = [
     {
@@ -146,14 +147,14 @@ players.forEach(player => {
         duration: 6
     });
 
-    console.log(`\n${player.name} (${player.type}):`);
-    console.log(`Stats mostradas: ${card.metadata.statsShown.join(', ')}`);
-    console.log(`Complejidad: ${card.metadata.visualComplexity}`);
+    logger.info(`\n${player.name} (${player.type}):`);
+    logger.info(`Stats mostradas: ${card.metadata.statsShown.join(', ')}`);
+    logger.info(`Complejidad: ${card.metadata.visualComplexity}`);
 });
 
 // Test 7: Estructura 3-segmentos completa
-console.log('\n🎬 TEST 7: Estructura 3-segmentos para video completo');
-console.log('-'.repeat(80));
+logger.info('\n🎬 TEST 7: Estructura 3-segmentos para video completo');
+logger.info('-'.repeat(80));
 
 const videoStructure = {
     segment1_ana_intro: {
@@ -173,32 +174,32 @@ const videoStructure = {
     }
 };
 
-console.log('ESTRUCTURA 3-SEGMENTOS:');
+logger.info('ESTRUCTURA 3-SEGMENTOS:');
 Object.keys(videoStructure).forEach((segmentKey, index) => {
     const segment = videoStructure[segmentKey];
-    console.log(`\n${index + 1}. ${segmentKey} (${segment.duration}s)`);
-    console.log(`   Contenido: ${segment.content}`);
+    logger.info(`\n${index + 1}. ${segmentKey} (${segment.duration}s)`);
+    logger.info(`   Contenido: ${segment.content}`);
     if (segment.dialogue) {
-        console.log(`   Diálogo: ${segment.dialogue}`);
+        logger.info(`   Diálogo: ${segment.dialogue}`);
     }
     if (segment.prompt) {
-        console.log(`   Prompt: ${segment.prompt.substring(0, 100)}...`);
+        logger.info(`   Prompt: ${segment.prompt.substring(0, 100)}...`);
     }
 });
 
 const totalDuration = Object.values(videoStructure).reduce((sum, seg) => sum + seg.duration, 0);
-console.log(`\n✅ Duración total video: ${totalDuration} segundos`);
-console.log('✅ Formato ideal para Instagram Reels/TikTok: <20s ✅');
+logger.info(`\n✅ Duración total video: ${totalDuration} segundos`);
+logger.info('✅ Formato ideal para Instagram Reels/TikTok: <20s ✅');
 
 // Resumen final
-console.log('\n' + '='.repeat(80));
-console.log('📊 RESUMEN FINAL');
-console.log('='.repeat(80));
-console.log('✅ StatsCardPromptBuilder implementado correctamente');
-console.log('✅ 4 estilos visuales disponibles (NBA, Bleacher Report, ESPN, Fantasy Premium)');
-console.log('✅ Generación de prompts VEO3 optimizada (<500 chars)');
-console.log('✅ Text overlays para post-producción FFmpeg');
-console.log('✅ Validación de datos de jugadores');
-console.log('✅ Estructura 3-segmentos lista para concatenación');
-console.log('✅ Segmentos optimizados para videos <20s (Instagram/TikTok)');
-console.log('\n🎬 Sistema listo para generar videos con stats cards impactantes\n');
+logger.info('\n' + '='.repeat(80));
+logger.info('📊 RESUMEN FINAL');
+logger.info('='.repeat(80));
+logger.info('✅ StatsCardPromptBuilder implementado correctamente');
+logger.info('✅ 4 estilos visuales disponibles (NBA, Bleacher Report, ESPN, Fantasy Premium)');
+logger.info('✅ Generación de prompts VEO3 optimizada (<500 chars)');
+logger.info('✅ Text overlays para post-producción FFmpeg');
+logger.info('✅ Validación de datos de jugadores');
+logger.info('✅ Estructura 3-segmentos lista para concatenación');
+logger.info('✅ Segmentos optimizados para videos <20s (Instagram/TikTok)');
+logger.info('\n🎬 Sistema listo para generar videos con stats cards impactantes\n');

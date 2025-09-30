@@ -5,6 +5,7 @@
 // Procesa fotos de jugadores La Liga con naming optimizado y descarga automática
 
 const fs = require('fs');
+const logger = require('../../../../../../utils/logger');
 const path = require('path');
 const { execSync } = require('child_process');
 const https = require('https');
@@ -37,12 +38,12 @@ class PlayerPhotoProcessor {
       execSync('cwebp -version', { stdio: 'ignore' });
       return true;
     } catch (error) {
-      console.log('⚠️ WebP no disponible. Instalando...');
+      logger.info('⚠️ WebP no disponible. Instalando...');
       try {
         execSync('brew install webp', { stdio: 'inherit' });
         return true;
       } catch (installError) {
-        console.error('❌ No se pudo instalar WebP. Instálalo manualmente: brew install webp');
+        logger.error('❌ No se pudo instalar WebP. Instálalo manualmente: brew install webp');
         return false;
       }
     }
@@ -96,17 +97,17 @@ class PlayerPhotoProcessor {
           .replace(/^-|-$/g, '')
       : `player-${playerId}`;
 
-    console.log(`🔄 Procesando: ${inputFile} → Player ID: ${playerId} (${nameSlug})`);
+    logger.info(`🔄 Procesando: ${inputFile} → Player ID: ${playerId} (${nameSlug})`);
 
     // Crear foto principal (512px)
     const mainOutput = path.join(this.outputDir, `${playerId}-${nameSlug}-photo.webp`);
     try {
       execSync(`cwebp -q 85 -resize 512 512 "${inputPath}" -o "${mainOutput}"`, { stdio: 'ignore' });
       results.push({ size: 'main', file: mainOutput, status: 'success' });
-      console.log(`  ✅ Principal: ${playerId}-${nameSlug}-photo.webp`);
+      logger.info(`  ✅ Principal: ${playerId}-${nameSlug}-photo.webp`);
     } catch (error) {
       results.push({ size: 'main', file: mainOutput, status: 'error', error: error.message });
-      console.log(`  ❌ Error en principal: ${error.message}`);
+      logger.info(`  ❌ Error en principal: ${error.message}`);
     }
 
     // Crear diferentes tamaños
@@ -117,10 +118,10 @@ class PlayerPhotoProcessor {
       try {
         execSync(`cwebp -q 85 -resize ${pixels} ${pixels} "${inputPath}" -o "${sizeOutput}"`, { stdio: 'ignore' });
         results.push({ size: sizeName, file: sizeOutput, status: 'success' });
-        console.log(`  ✅ ${sizeName} (${pixels}px): ${playerId}-${nameSlug}-photo-${sizeName}.webp`);
+        logger.info(`  ✅ ${sizeName} (${pixels}px): ${playerId}-${nameSlug}-photo-${sizeName}.webp`);
       } catch (error) {
         results.push({ size: sizeName, file: sizeOutput, status: 'error', error: error.message });
-        console.log(`  ❌ Error en ${sizeName}: ${error.message}`);
+        logger.info(`  ❌ Error en ${sizeName}: ${error.message}`);
       }
     }
 
@@ -129,7 +130,7 @@ class PlayerPhotoProcessor {
 
   // Procesar fotos desde directorio local
   async processLocalPhotos() {
-    console.log('🚀 Procesando fotos locales de jugadores...');
+    logger.info('🚀 Procesando fotos locales de jugadores...');
 
     if (!fs.existsSync(this.inputDir)) {
       throw new Error(`Directorio no encontrado: ${this.inputDir}`);
@@ -138,14 +139,14 @@ class PlayerPhotoProcessor {
     const photoFiles = fs.readdirSync(this.inputDir)
       .filter(file => /\.(png|jpg|jpeg|webp)$/i.test(file));
 
-    console.log(`🔍 ${photoFiles.length} fotos encontradas`);
+    logger.info(`🔍 ${photoFiles.length} fotos encontradas`);
 
     for (const file of photoFiles) {
       try {
         // Extraer player ID del nombre del archivo
         const playerId = file.match(/^(\d+)/)?.[1];
         if (!playerId) {
-          console.log(`⚠️ No se pudo extraer player ID de: ${file}`);
+          logger.info(`⚠️ No se pudo extraer player ID de: ${file}`);
           continue;
         }
 
@@ -154,7 +155,7 @@ class PlayerPhotoProcessor {
         this.stats.processed++;
 
       } catch (error) {
-        console.log(`❌ Error procesando ${file}: ${error.message}`);
+        logger.info(`❌ Error procesando ${file}: ${error.message}`);
         this.errors.push({ file, error: error.message });
         this.stats.errors++;
       }
@@ -163,7 +164,7 @@ class PlayerPhotoProcessor {
 
   // Descargar fotos automáticamente desde API-Sports
   async downloadPhotosFromAPI() {
-    console.log('🌐 Descargando fotos desde API-Sports...');
+    logger.info('🌐 Descargando fotos desde API-Sports...');
 
     try {
       // Obtener lista de jugadores desde la API local
@@ -191,7 +192,7 @@ class PlayerPhotoProcessor {
               return;
             }
 
-            console.log(`🔍 Descargando fotos para ${response.data.length} jugadores...`);
+            logger.info(`🔍 Descargando fotos para ${response.data.length} jugadores...`);
 
             // Crear directorio temporal para descargas
             const tempDir = path.join(this.inputDir, 'temp-downloads');
@@ -213,11 +214,11 @@ class PlayerPhotoProcessor {
                       const filepath = path.join(tempDir, filename);
 
                       await this.downloadImage(player.photo, filepath);
-                      console.log(`📥 Descargado: ${player.name} (${player.id})`);
+                      logger.info(`📥 Descargado: ${player.name} (${player.id})`);
                       downloadCount++;
                       this.stats.downloaded++;
                     } catch (error) {
-                      console.log(`⚠️ Error descargando ${player.name}: ${error.message}`);
+                      logger.info(`⚠️ Error descargando ${player.name}: ${error.message}`);
                     }
                   }
                 })
@@ -229,7 +230,7 @@ class PlayerPhotoProcessor {
               }
             }
 
-            console.log(`✅ ${downloadCount} fotos descargadas en ${tempDir}`);
+            logger.info(`✅ ${downloadCount} fotos descargadas en ${tempDir}`);
 
             // Procesar las fotos descargadas
             const originalInputDir = this.inputDir;
@@ -251,24 +252,24 @@ class PlayerPhotoProcessor {
 
   // Mostrar resumen del procesamiento
   printSummary() {
-    console.log('\n📊 RESUMEN DEL PROCESAMIENTO DE FOTOS');
-    console.log('=====================================');
-    console.log(`📥 Fotos descargadas: ${this.stats.downloaded}`);
-    console.log(`✅ Jugadores procesados: ${this.stats.processed}`);
-    console.log(`❌ Errores: ${this.stats.errors}`);
+    logger.info('\n📊 RESUMEN DEL PROCESAMIENTO DE FOTOS');
+    logger.info('=====================================');
+    logger.info(`📥 Fotos descargadas: ${this.stats.downloaded}`);
+    logger.info(`✅ Jugadores procesados: ${this.stats.processed}`);
+    logger.info(`❌ Errores: ${this.stats.errors}`);
 
     if (this.processedPlayers.length > 0) {
-      console.log('\n🎉 FOTOS GENERADAS:');
+      logger.info('\n🎉 FOTOS GENERADAS:');
       this.processedPlayers.slice(0, 10).forEach(({ originalFile, playerId, results }) => {
-        console.log(`\n📄 ${originalFile} → Player ID: ${playerId}`);
+        logger.info(`\n📄 ${originalFile} → Player ID: ${playerId}`);
         results.forEach(result => {
           const status = result.status === 'success' ? '✅' : '❌';
-          console.log(`  ${status} ${result.size}: ${path.basename(result.file)}`);
+          logger.info(`  ${status} ${result.size}: ${path.basename(result.file)}`);
         });
       });
 
       if (this.processedPlayers.length > 10) {
-        console.log(`\n... y ${this.processedPlayers.length - 10} jugadores más`);
+        logger.info(`\n... y ${this.processedPlayers.length - 10} jugadores más`);
       }
     }
 
@@ -276,15 +277,15 @@ class PlayerPhotoProcessor {
       return acc + player.results.filter(r => r.status === 'success').length;
     }, 0);
 
-    console.log(`\n🎯 Total de fotos generadas: ${totalPhotos}`);
-    console.log('📁 Ubicación: frontend/assets/logos/players/');
+    logger.info(`\n🎯 Total de fotos generadas: ${totalPhotos}`);
+    logger.info('📁 Ubicación: frontend/assets/logos/players/');
   }
 
   // Función principal
   async processAll(autoDownload = false) {
-    console.log('🚀 Iniciando procesamiento de fotos de jugadores...');
-    console.log(`📁 Input: ${this.inputDir}`);
-    console.log(`📁 Output: ${this.outputDir}`);
+    logger.info('🚀 Iniciando procesamiento de fotos de jugadores...');
+    logger.info(`📁 Input: ${this.inputDir}`);
+    logger.info(`📁 Output: ${this.outputDir}`);
 
     // Verificar WebP
     if (!this.checkWebPSupport()) {
@@ -294,7 +295,7 @@ class PlayerPhotoProcessor {
     // Crear directorio de salida si no existe
     if (!fs.existsSync(this.outputDir)) {
       fs.mkdirSync(this.outputDir, { recursive: true });
-      console.log(`📁 Directorio creado: ${this.outputDir}`);
+      logger.info(`📁 Directorio creado: ${this.outputDir}`);
     }
 
     try {
@@ -306,7 +307,7 @@ class PlayerPhotoProcessor {
 
       this.printSummary();
     } catch (error) {
-      console.error(`❌ Error en procesamiento: ${error.message}`);
+      logger.error(`❌ Error en procesamiento: ${error.message}`);
       throw error;
     }
   }
@@ -319,23 +320,23 @@ async function main() {
   const outputDir = args[1] || './frontend/assets/logos/players';
   const autoDownload = args.includes('--download');
 
-  console.log('📸 PROCESADOR DE FOTOS JUGADORES LA LIGA 2025/26');
-  console.log('===============================================');
+  logger.info('📸 PROCESADOR DE FOTOS JUGADORES LA LIGA 2025/26');
+  logger.info('===============================================');
 
   try {
     const processor = new PlayerPhotoProcessor(inputDir, outputDir);
     await processor.processAll(autoDownload);
 
-    console.log('\n🏆 PROCESAMIENTO COMPLETADO');
-    console.log('===========================');
-    console.log('📁 Las fotos están listas para usar en la aplicación');
+    logger.info('\n🏆 PROCESAMIENTO COMPLETADO');
+    logger.info('===========================');
+    logger.info('📁 Las fotos están listas para usar en la aplicación');
 
     if (autoDownload) {
-      console.log('🌐 Las fotos se descargaron automáticamente desde API-Sports');
+      logger.info('🌐 Las fotos se descargaron automáticamente desde API-Sports');
     }
 
   } catch (error) {
-    console.error(`❌ Error fatal: ${error.message}`);
+    logger.error(`❌ Error fatal: ${error.message}`);
     process.exit(1);
   }
 }

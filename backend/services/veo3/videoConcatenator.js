@@ -1,4 +1,5 @@
 const ffmpeg = require('fluent-ffmpeg');
+const logger = require('../../utils/logger');
 const path = require('path');
 const fs = require('fs');
 
@@ -53,7 +54,7 @@ class VideoConcatenator {
      */
     async concatenateVideos(videoPaths, options = {}) {
         try {
-            console.log(`[VideoConcatenator] Concatenando ${videoPaths.length} videos...`);
+            logger.info(`[VideoConcatenator] Concatenando ${videoPaths.length} videos...`);
 
             // Validar que todos los videos existen
             for (const videoPath of videoPaths) {
@@ -75,7 +76,7 @@ class VideoConcatenator {
             }
 
         } catch (error) {
-            console.error('[VideoConcatenator] Error concatenando videos:', error.message);
+            logger.error('[VideoConcatenator] Error concatenando videos:', error.message);
             throw error;
         }
     }
@@ -89,7 +90,7 @@ class VideoConcatenator {
      */
     async concatenateSimple(videoPaths, outputPath, config) {
         return new Promise((resolve, reject) => {
-            console.log('[VideoConcatenator] Concatenación simple...');
+            logger.info('[VideoConcatenator] Concatenación simple...');
 
             const command = ffmpeg();
 
@@ -100,19 +101,19 @@ class VideoConcatenator {
 
             command
                 .on('start', (commandLine) => {
-                    console.log(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                    logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
                 })
                 .on('progress', (progress) => {
                     if (progress.percent) {
-                        console.log(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
+                        logger.info(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
                     }
                 })
                 .on('end', () => {
-                    console.log(`[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`);
+                    logger.info(`[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`);
                     resolve(outputPath);
                 })
                 .on('error', (error) => {
-                    console.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                    logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
                     reject(error);
                 })
                 .mergeToFile(outputPath, this.tempDir);
@@ -128,7 +129,7 @@ class VideoConcatenator {
      */
     async concatenateWithTransitions(videoPaths, outputPath, config) {
         return new Promise((resolve, reject) => {
-            console.log('[VideoConcatenator] Concatenación con transiciones...');
+            logger.info('[VideoConcatenator] Concatenación con transiciones...');
 
             const command = ffmpeg();
 
@@ -150,19 +151,19 @@ class VideoConcatenator {
                 .size(config.video.resolution)
                 .format('mp4')
                 .on('start', (commandLine) => {
-                    console.log(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                    logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
                 })
                 .on('progress', (progress) => {
                     if (progress.percent) {
-                        console.log(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
+                        logger.info(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
                     }
                 })
                 .on('end', () => {
-                    console.log(`[VideoConcatenator] ✅ Concatenación con transiciones completada: ${outputPath}`);
+                    logger.info(`[VideoConcatenator] ✅ Concatenación con transiciones completada: ${outputPath}`);
                     resolve(outputPath);
                 })
                 .on('error', (error) => {
-                    console.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                    logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
                     reject(error);
                 })
                 .save(outputPath);
@@ -216,7 +217,7 @@ class VideoConcatenator {
      */
     async createLongVideoFromPrompts(prompts, veo3Client, options = {}) {
         try {
-            console.log(`[VideoConcatenator] Creando video largo con ${prompts.length} segmentos...`);
+            logger.info(`[VideoConcatenator] Creando video largo con ${prompts.length} segmentos...`);
 
             const videoPaths = [];
             const startTime = Date.now();
@@ -224,7 +225,7 @@ class VideoConcatenator {
             // Generar cada segmento individualmente
             for (let i = 0; i < prompts.length; i++) {
                 const prompt = prompts[i];
-                console.log(`[VideoConcatenator] Generando segmento ${i + 1}/${prompts.length}...`);
+                logger.info(`[VideoConcatenator] Generando segmento ${i + 1}/${prompts.length}...`);
 
                 try {
                     const video = await veo3Client.generateCompleteVideo(prompt, options.veo3Options);
@@ -234,10 +235,10 @@ class VideoConcatenator {
                     await this.downloadVideo(video.url, segmentPath);
                     videoPaths.push(segmentPath);
 
-                    console.log(`[VideoConcatenator] Segmento ${i + 1} completado: ${segmentPath}`);
+                    logger.info(`[VideoConcatenator] Segmento ${i + 1} completado: ${segmentPath}`);
 
                 } catch (error) {
-                    console.error(`[VideoConcatenator] Error en segmento ${i + 1}:`, error.message);
+                    logger.error(`[VideoConcatenator] Error en segmento ${i + 1}:`, error.message);
                     // Continuar con los demás segmentos
                 }
             }
@@ -246,7 +247,7 @@ class VideoConcatenator {
                 throw new Error('No se pudo generar ningún segmento');
             }
 
-            console.log(`[VideoConcatenator] ${videoPaths.length} segmentos generados. Concatenando...`);
+            logger.info(`[VideoConcatenator] ${videoPaths.length} segmentos generados. Concatenando...`);
 
             // Concatenar todos los segmentos
             const finalPath = await this.concatenateVideos(videoPaths, options);
@@ -259,8 +260,8 @@ class VideoConcatenator {
                 }
             });
 
-            console.log(`[VideoConcatenator] ✅ Video largo completado: ${finalPath}`);
-            console.log(`[VideoConcatenator] Tiempo total: ${(totalTime / 1000).toFixed(2)}s`);
+            logger.info(`[VideoConcatenator] ✅ Video largo completado: ${finalPath}`);
+            logger.info(`[VideoConcatenator] Tiempo total: ${(totalTime / 1000).toFixed(2)}s`);
 
             // Log de la operación
             this.logConcatenation({
@@ -274,7 +275,7 @@ class VideoConcatenator {
             return finalPath;
 
         } catch (error) {
-            console.error('[VideoConcatenator] Error creando video largo:', error.message);
+            logger.error('[VideoConcatenator] Error creando video largo:', error.message);
             throw error;
         }
     }
@@ -303,7 +304,7 @@ class VideoConcatenator {
             });
 
         } catch (error) {
-            console.error('[VideoConcatenator] Error descargando video:', error.message);
+            logger.error('[VideoConcatenator] Error descargando video:', error.message);
             throw error;
         }
     }
@@ -315,7 +316,7 @@ class VideoConcatenator {
      */
     async runTest(testVideoPaths = null) {
         try {
-            console.log('[VideoConcatenator] 🧪 Ejecutando test de concatenación...');
+            logger.info('[VideoConcatenator] 🧪 Ejecutando test de concatenación...');
 
             let videosToConcat = testVideoPaths;
 
@@ -330,7 +331,7 @@ class VideoConcatenator {
                 videosToConcat = anaVideos;
             }
 
-            console.log(`[VideoConcatenator] Concatenando ${videosToConcat.length} videos de test...`);
+            logger.info(`[VideoConcatenator] Concatenando ${videosToConcat.length} videos de test...`);
 
             const startTime = Date.now();
             const resultPath = await this.concatenateVideos(videosToConcat, {
@@ -338,9 +339,9 @@ class VideoConcatenator {
             });
             const processingTime = Date.now() - startTime;
 
-            console.log('[VideoConcatenator] ✅ Test completado exitosamente');
-            console.log(`[VideoConcatenator] Video concatenado: ${resultPath}`);
-            console.log(`[VideoConcatenator] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
+            logger.info('[VideoConcatenator] ✅ Test completado exitosamente');
+            logger.info(`[VideoConcatenator] Video concatenado: ${resultPath}`);
+            logger.info(`[VideoConcatenator] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
 
             return {
                 success: true,
@@ -350,7 +351,7 @@ class VideoConcatenator {
             };
 
         } catch (error) {
-            console.error('[VideoConcatenator] ❌ Test falló:', error.message);
+            logger.error('[VideoConcatenator] ❌ Test falló:', error.message);
             throw error;
         }
     }
@@ -371,7 +372,7 @@ class VideoConcatenator {
                 .filter(filePath => fs.existsSync(filePath));
 
         } catch (error) {
-            console.error('[VideoConcatenator] Error buscando videos Ana:', error.message);
+            logger.error('[VideoConcatenator] Error buscando videos Ana:', error.message);
             return [];
         }
     }

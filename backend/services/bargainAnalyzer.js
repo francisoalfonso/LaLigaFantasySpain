@@ -1,11 +1,32 @@
-// Analizador de Chollos Fantasy - Identifica jugadores baratos con alta probabilidad de puntos
+/**
+ * @fileoverview Analizador de Chollos Fantasy - Sistema predictivo de valor
+ * @module services/bargainAnalyzer
+ * @description Motor de análisis avanzado que identifica jugadores infravalorados
+ * con alta probabilidad de obtener puntos Fantasy. Utiliza:
+ * - Análisis de rendimiento histórico
+ * - Evaluación de forma actual (últimos 5 partidos)
+ * - Dificultad de próximos rivales
+ * - Ratio puntos/precio optimizado
+ * - Sistema de caché inteligente
+ */
+
 const ApiFootballClient = require('./apiFootball');
+const logger = require('../utils/logger');
 const FantasyDataProcessor = require('./dataProcessor');
 const BargainCache = require('./bargainCache');
 const FixtureAnalyzer = require('./fixtureAnalyzer');
 const { THRESHOLDS } = require('../config/constants');
 
+/**
+ * Clase principal del sistema de análisis de chollos
+ * @class BargainAnalyzer
+ * @description Implementa algoritmos de análisis de valor para Fantasy La Liga
+ */
 class BargainAnalyzer {
+  /**
+   * Constructor del analizador de chollos
+   * Inicializa clientes API, procesadores de datos y configuración
+   */
   constructor() {
     this.apiClient = new ApiFootballClient();
     this.dataProcessor = new FantasyDataProcessor();
@@ -25,7 +46,7 @@ class BargainAnalyzer {
 
   // Obtener todos los jugadores de La Liga con sus estadísticas
   async getAllPlayersWithStats() {
-    console.log('🔄 Obteniendo TODOS los jugadores de La Liga (base completa)...');
+    logger.info('🔄 Obteniendo TODOS los jugadores de La Liga (base completa)...');
 
     const allPlayers = [];
     let page = 1;
@@ -42,10 +63,10 @@ class BargainAnalyzer {
           // Capturar total disponible de la primera página
           if (page === 1 && result.pagination) {
             totalAvailable = result.pagination.total * 20; // Aproximado
-            console.log(`📊 Base de datos: ~${totalAvailable} jugadores disponibles en ${result.pagination.total} páginas`);
+            logger.info(`📊 Base de datos: ~${totalAvailable} jugadores disponibles en ${result.pagination.total} páginas`);
           }
 
-          console.log(`📄 Página ${page}/${result.pagination?.total || '?'}: ${result.data.length} jugadores obtenidos`);
+          logger.info(`📄 Página ${page}/${result.pagination?.total || '?'}: ${result.data.length} jugadores obtenidos`);
 
           // Verificar si hay más páginas
           hasMorePages = result.pagination && page < result.pagination.total;
@@ -55,13 +76,13 @@ class BargainAnalyzer {
         }
       }
 
-      console.log(`✅ ANÁLISIS EXPANDIDO: ${allPlayers.length} jugadores obtenidos de La Liga 25-26`);
-      console.log(`📈 Mejora: ${allPlayers.length > 200 ? '+' + (allPlayers.length - 200) : '0'} jugadores adicionales vs anterior`);
+      logger.info(`✅ ANÁLISIS EXPANDIDO: ${allPlayers.length} jugadores obtenidos de La Liga 25-26`);
+      logger.info(`📈 Mejora: ${allPlayers.length > 200 ? '+' + (allPlayers.length - 200) : '0'} jugadores adicionales vs anterior`);
 
       return allPlayers;
 
     } catch (error) {
-      console.error('❌ Error obteniendo jugadores:', error.message);
+      logger.error('❌ Error obteniendo jugadores:', error.message);
       throw error;
     }
   }
@@ -248,7 +269,7 @@ class BargainAnalyzer {
 
   // Identificar chollos de la jornada
   async identifyBargains(limit = 10, options = {}) {
-    console.log('🔍 Analizando chollos de la jornada...');
+    logger.info('🔍 Analizando chollos de la jornada...');
 
     // Generar clave de caché basada en parámetros
     const cacheKey = this.cache.generateCacheKey({ limit, ...options });
@@ -256,7 +277,7 @@ class BargainAnalyzer {
     // Intentar obtener del caché primero
     const cachedResult = this.cache.get(cacheKey);
     if (cachedResult) {
-      console.log(`⚡ Devolviendo resultado desde caché (${cachedResult.data.length} chollos)`);
+      logger.info(`⚡ Devolviendo resultado desde caché (${cachedResult.data.length} chollos)`);
       return cachedResult;
     }
 
@@ -275,7 +296,7 @@ class BargainAnalyzer {
         return games >= this.config.MIN_GAMES && minutes >= this.config.MIN_MINUTES;
       });
 
-      console.log(`✅ Jugadores elegibles: ${eligiblePlayers.length}`);
+      logger.info(`✅ Jugadores elegibles: ${eligiblePlayers.length}`);
 
       // Calcular valor para cada jugador
       const playersWithValue = eligiblePlayers.map(player => {
@@ -312,7 +333,7 @@ class BargainAnalyzer {
                 (currentGames === existingGames && currentMinutes > existingMinutes) ||
                 (currentGames === existingGames && currentMinutes === existingMinutes && player.valueRatio > existing.valueRatio)) {
               uniquePlayers[player.id] = player;
-              console.log(`🔄 Duplicado resuelto: ${player.name} - Manteniendo ${player.team?.name} (${currentGames} partidos, ${currentMinutes} min) sobre ${existing.team?.name} (${existingGames} partidos, ${existingMinutes} min)`);
+              logger.info(`🔄 Duplicado resuelto: ${player.name} - Manteniendo ${player.team?.name} (${currentGames} partidos, ${currentMinutes} min) sobre ${existing.team?.name} (${existingGames} partidos, ${existingMinutes} min)`);
             }
           }
         }
@@ -322,7 +343,7 @@ class BargainAnalyzer {
         .sort((a, b) => b.valueRatio - a.valueRatio)
         .slice(0, limit);
 
-      console.log(`🎯 Chollos identificados: ${bargains.length}`);
+      logger.info(`🎯 Chollos identificados: ${bargains.length}`);
 
       return {
         success: true,
@@ -364,12 +385,12 @@ class BargainAnalyzer {
 
       // Guardar resultado en caché antes de devolverlo
       this.cache.set(cacheKey, result);
-      console.log(`💾 Resultado guardado en caché: ${bargains.length} chollos`);
+      logger.info(`💾 Resultado guardado en caché: ${bargains.length} chollos`);
 
       return result;
 
     } catch (error) {
-      console.error('❌ Error analizando chollos:', error.message);
+      logger.error('❌ Error analizando chollos:', error.message);
       return {
         success: false,
         error: error.message,

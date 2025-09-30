@@ -1,3 +1,5 @@
+const logger = require('../utils/logger');
+
 // Planificador Inteligente de Actualización de Caché para Chollos Fantasy
 
 class CacheRefreshScheduler {
@@ -20,7 +22,7 @@ class CacheRefreshScheduler {
       NIGHTLY_REFRESH: 360       // 6 horas (durante madrugada)
     };
 
-    console.log('📅 CacheRefreshScheduler inicializado - Gestión automática de actualización');
+    logger.info('📅 CacheRefreshScheduler inicializado - Gestión automática de actualización');
   }
 
   // Determinar el contexto actual de La Liga
@@ -53,7 +55,7 @@ class CacheRefreshScheduler {
     const context = this.getCurrentContext();
     const interval = this.schedules[context];
 
-    console.log(`⏰ Contexto actual: ${context} - Próxima actualización en ${interval} minutos`);
+    logger.info(`⏰ Contexto actual: ${context} - Próxima actualización en ${interval} minutos`);
     return interval;
   }
 
@@ -72,11 +74,11 @@ class CacheRefreshScheduler {
       }, intervalMs);
 
       const nextUpdate = new Date(Date.now() + intervalMs);
-      console.log(`⏲️  Próxima actualización automática: ${nextUpdate.toLocaleString('es-ES')}`);
+      logger.info(`⏲️  Próxima actualización automática: ${nextUpdate.toLocaleString('es-ES')}`);
     };
 
     scheduleNext();
-    console.log('🔄 Actualización automática de caché iniciada');
+    logger.info('🔄 Actualización automática de caché iniciada');
   }
 
   // Detener actualización automática
@@ -84,14 +86,14 @@ class CacheRefreshScheduler {
     if (this.refreshTimer) {
       clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
-      console.log('⏹️ Actualización automática detenida');
+      logger.info('⏹️ Actualización automática detenida');
     }
   }
 
   // Realizar actualización de caché
   async performRefresh() {
     if (this.isRefreshing) {
-      console.log('⚠️ Actualización ya en progreso, omitiendo...');
+      logger.info('⚠️ Actualización ya en progreso, omitiendo...');
       return;
     }
 
@@ -99,7 +101,7 @@ class CacheRefreshScheduler {
       this.isRefreshing = true;
       const context = this.getCurrentContext();
 
-      console.log(`🔄 Iniciando actualización automática de caché (contexto: ${context})...`);
+      logger.info(`🔄 Iniciando actualización automática de caché (contexto: ${context})...`);
 
       // Limpiar caché actual para forzar actualización
       this.bargainAnalyzer.cache.clear();
@@ -107,10 +109,10 @@ class CacheRefreshScheduler {
       // Precalentar con consultas comunes
       await this.warmupCache();
 
-      console.log('✅ Actualización automática completada');
+      logger.info('✅ Actualización automática completada');
 
     } catch (error) {
-      console.error('❌ Error en actualización automática:', error.message);
+      logger.error('❌ Error en actualización automática:', error.message);
     } finally {
       this.isRefreshing = false;
     }
@@ -118,7 +120,7 @@ class CacheRefreshScheduler {
 
   // Precalentar caché con consultas frecuentes
   async warmupCache() {
-    console.log('🔥 Precalentando caché con consultas comunes...');
+    logger.info('🔥 Precalentando caché con consultas comunes...');
 
     const commonQueries = [
       { limit: 20 },                    // Query por defecto frontend
@@ -132,22 +134,22 @@ class CacheRefreshScheduler {
     for (const query of commonQueries) {
       try {
         await this.bargainAnalyzer.identifyBargains(query.limit || 20, query);
-        console.log(`💾 Precargado: ${JSON.stringify(query)}`);
+        logger.info(`💾 Precargado: ${JSON.stringify(query)}`);
 
         // Rate limiting para no saturar API
         await this.sleep(1000);
 
       } catch (error) {
-        console.log(`⚠️ Error precargando ${JSON.stringify(query)}:`, error.message);
+        logger.info(`⚠️ Error precargando ${JSON.stringify(query)}:`, error.message);
       }
     }
 
-    console.log('🔥 Precalentamiento completado');
+    logger.info('🔥 Precalentamiento completado');
   }
 
   // Actualización manual forzada
   async forceRefresh() {
-    console.log('🚀 Actualización manual forzada iniciada...');
+    logger.info('🚀 Actualización manual forzada iniciada...');
     await this.performRefresh();
   }
 
@@ -174,7 +176,7 @@ class CacheRefreshScheduler {
   // Configurar horarios personalizados (para testing)
   setCustomSchedule(schedules) {
     this.schedules = { ...this.schedules, ...schedules };
-    console.log('⚙️ Horarios personalizados configurados:', schedules);
+    logger.info('⚙️ Horarios personalizados configurados:', schedules);
   }
 }
 

@@ -1,6 +1,31 @@
-// ⚠️ CONFIGURACIÓN TEMPORADA 2025-26 - LA LIGA ⚠️
-// Este archivo contiene la configuración definitiva de la temporada actual
-// NO MODIFICAR sin confirmación oficial de La Liga
+/**
+ * @fileoverview Configuración oficial de La Liga Temporada 2025-26
+ * @module config/season2025-26
+ * @description Contiene toda la información oficial de la temporada actual:
+ * - Información temporal (fechas inicio/fin)
+ * - Equipos oficiales (20 equipos: 17 continuos + 3 promovidos)
+ * - Equipos relegados (Valladolid, Las Palmas, Leganés)
+ * - Validación de datos para asegurar consistencia
+ * - Recordatorios para Claude Code sobre configuración correcta
+ *
+ * ⚠️ CRÍTICO: NO MODIFICAR sin confirmación oficial de La Liga
+ *
+ * @constant {Object} SEASON_INFO - Información oficial de la temporada
+ * @constant {Object} TEAMS - Equipos oficiales 2025-26
+ * @constant {Object} VALIDATION - Reglas de validación de datos
+ * @constant {Object} REMINDERS - Recordatorios rápidos para desarrollo
+ *
+ * @example
+ * const { SEASON_INFO, VALIDATION } = require('./config/season2025-26');
+ *
+ * // Verificar temporada correcta
+ * console.log(SEASON_INFO.API_SPORTS_ID); // 2025
+ *
+ * // Validar equipos en datos
+ * if (VALIDATION.SHOULD_NOT_EXIST.includes(teamName)) {
+ *   throw new Error('Equipo relegado - no debe existir');
+ * }
+ */
 
 module.exports = {
   // INFORMACIÓN OFICIAL DE LA TEMPORADA

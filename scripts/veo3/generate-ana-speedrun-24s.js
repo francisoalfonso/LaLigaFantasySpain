@@ -4,6 +4,7 @@
 // Estilo: Análisis rápido estilo TikTok con energía alta
 
 const path = require('path');
+const logger = require('../../../../../../../utils/logger');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 const VEO3Client = require('../../backend/services/veo3/veo3Client');
@@ -13,7 +14,7 @@ class AnaSpeedRunGenerator {
     this.veo3Client = new VEO3Client();
     this.outputDir = './output/veo3/ana-speedrun';
 
-    console.log('⚡ AnaSpeedRunGenerator - Estilo Speed Run Dinámico');
+    logger.info('⚡ AnaSpeedRunGenerator - Estilo Speed Run Dinámico');
   }
 
   // SEGMENTO 1: Rapid-Fire Intro (8s) - Energía alta, setup rápido
@@ -117,22 +118,22 @@ class AnaSpeedRunGenerator {
   }
 
   async generateSpeedRunVideo() {
-    console.log('⚡ GENERANDO VIDEO SPEED RUN ANALYSIS 24s');
-    console.log('========================================');
-    console.log('📊 Características:');
-    console.log('   🎯 Estilo: Speed Run TikTok Style');
-    console.log('   🎭 Tono: Dinámico, energético, atractivo');
-    console.log('   📈 Contenido: Máximo valor en mínimo tiempo');
-    console.log('   🎵 Audio: Rápido, punchy, engaging');
-    console.log('   🎥 Visual: Dinámico, quick-cuts, energético');
-    console.log('');
+    logger.info('⚡ GENERANDO VIDEO SPEED RUN ANALYSIS 24s');
+    logger.info('========================================');
+    logger.info('📊 Características:');
+    logger.info('   🎯 Estilo: Speed Run TikTok Style');
+    logger.info('   🎭 Tono: Dinámico, energético, atractivo');
+    logger.info('   📈 Contenido: Máximo valor en mínimo tiempo');
+    logger.info('   🎵 Audio: Rápido, punchy, engaging');
+    logger.info('   🎥 Visual: Dinámico, quick-cuts, energético');
+    logger.info('');
 
     try {
       // SEGMENTO 1: Rapid-Fire Intro
-      console.log('📋 SEGMENTO 1: RAPID-FIRE INTRO (8s)');
+      logger.info('📋 SEGMENTO 1: RAPID-FIRE INTRO (8s)');
       const segment1Prompt = this.generateSegment1Prompt();
 
-      console.log(`⚡ Generando segmento speed run 1/3...`);
+      logger.info(`⚡ Generando segmento speed run 1/3...`);
       const segment1Result = await this.veo3Client.generateVideo(segment1Prompt.prompt, {
         model: 'veo3_fast',
         aspectRatio: '9:16',
@@ -140,15 +141,15 @@ class AnaSpeedRunGenerator {
       });
 
       const taskId1 = segment1Result.data.taskId;
-      console.log(`✅ Segmento 1 iniciado: ${taskId1}`);
+      logger.info(`✅ Segmento 1 iniciado: ${taskId1}`);
 
       const completedSegment1 = await this.veo3Client.waitForCompletion(taskId1);
 
       // SEGMENTO 2: Rapid Analysis
-      console.log('📋 SEGMENTO 2: RAPID ANALYSIS (8s)');
+      logger.info('📋 SEGMENTO 2: RAPID ANALYSIS (8s)');
       const segment2Prompt = this.generateSegment2Prompt('frame_placeholder');
 
-      console.log(`⚡ Generando segmento speed run 2/3...`);
+      logger.info(`⚡ Generando segmento speed run 2/3...`);
       const segment2Result = await this.veo3Client.generateVideo(segment2Prompt.prompt, {
         model: 'veo3_fast',
         aspectRatio: '9:16',
@@ -159,10 +160,10 @@ class AnaSpeedRunGenerator {
       const completedSegment2 = await this.veo3Client.waitForCompletion(taskId2);
 
       // SEGMENTO 3: Explosive Conclusion
-      console.log('📋 SEGMENTO 3: EXPLOSIVE CONCLUSION (8s)');
+      logger.info('📋 SEGMENTO 3: EXPLOSIVE CONCLUSION (8s)');
       const segment3Prompt = this.generateSegment3Prompt('frame_placeholder');
 
-      console.log(`⚡ Generando segmento speed run 3/3...`);
+      logger.info(`⚡ Generando segmento speed run 3/3...`);
       const segment3Result = await this.veo3Client.generateVideo(segment3Prompt.prompt, {
         model: 'veo3_fast',
         aspectRatio: '9:16',
@@ -172,14 +173,14 @@ class AnaSpeedRunGenerator {
       const taskId3 = segment3Result.data.taskId;
       const completedSegment3 = await this.veo3Client.waitForCompletion(taskId3);
 
-      console.log('');
-      console.log('⚡ ¡VIDEO SPEED RUN 24s COMPLETADO!');
-      console.log('=================================');
-      console.log('📺 Estilo: High-Energy Speed Run Analysis');
-      console.log('🎯 Público: Gen Z, TikTok audience, quick consumption');
-      console.log('📊 Fortalezas: Engagement máximo, viral potential');
-      console.log('🎵 Audio: Rápido, punchy, adictivo');
-      console.log('');
+      logger.info('');
+      logger.info('⚡ ¡VIDEO SPEED RUN 24s COMPLETADO!');
+      logger.info('=================================');
+      logger.info('📺 Estilo: High-Energy Speed Run Analysis');
+      logger.info('🎯 Público: Gen Z, TikTok audience, quick consumption');
+      logger.info('📊 Fortalezas: Engagement máximo, viral potential');
+      logger.info('🎵 Audio: Rápido, punchy, adictivo');
+      logger.info('');
 
       return {
         success: true,
@@ -200,7 +201,7 @@ class AnaSpeedRunGenerator {
       };
 
     } catch (error) {
-      console.error('❌ Error generando video speed run:', error.message);
+      logger.error('❌ Error generando video speed run:', error.message);
       throw error;
     }
   }
@@ -213,7 +214,7 @@ async function main() {
   try {
     await generator.generateSpeedRunVideo();
   } catch (error) {
-    console.error('💥 Error fatal:', error.message);
+    logger.error('💥 Error fatal:', error.message);
     process.exit(1);
   }
 }

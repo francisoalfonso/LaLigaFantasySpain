@@ -12,9 +12,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **VOICE LOCALE**: `es-ES` (Español de España, NO mexicano)
 - **CHARACTER BIBLE**: Nunca modificar el `ANA_CHARACTER_BIBLE`
 
-### 🗣️ **NORMA #2 - AUDIO ESPAÑOL DE ESPAÑA**
-- Configuración: `voice.locale: 'es-ES'`
-- Prompt debe especificar: "SPANISH FROM SPAIN (not Mexican)"
+### 🗣️ **NORMA #2 - AUDIO ESPAÑOL DE ESPAÑA (CRÍTICA)**
+**TODOS los prompts DEBEN incluir "SPANISH FROM SPAIN (not Mexican Spanish)" para evitar acento mexicano.**
+
+- Configuración API: `voice.locale: 'es-ES'`
+- **Prompt texto**: OBLIGATORIO incluir `"SPANISH FROM SPAIN (not Mexican Spanish)"` en TODOS los prompts
 - Verificar que no suene con acento mexicano
 
 ### 📝 **APLICACIÓN EN CÓDIGO:**
@@ -22,28 +24,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 // VEO3Client - SEED SIEMPRE FIJO
 seed: this.characterSeed, // NO usar options.seed
 
-// Voice configuration
+// Voice configuration API (NO SUFICIENTE SOLO)
 voice: {
-    locale: 'es-ES',
+    locale: 'es-ES',  // ⚠️ ESTO SOLO NO BASTA
     gender: 'female',
     style: 'professional'
 }
+
+// PromptBuilder - OBLIGATORIO en texto del prompt
+// ✅ CORRECTO:
+const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
+
+// ❌ INCORRECTO (usará acento mexicano):
+const prompt = `The person in the reference image speaking in Spanish: "${dialogue}". Exact appearance from reference image.`;
 ```
 
-### 🔧 **SOLUCIÓN PROMPT MINIMALISTA**
-**Si Ana sigue cambiando con prompts complejos, usar endpoint especial:**
+### 🔧 **FIX CRÍTICO APLICADO (30 Sept 2025)**
+**Problema detectado**: VEO3 generaba videos con acento mexicano porque el método `buildPrompt()` base no incluía "SPANISH FROM SPAIN".
 
-```bash
-# Endpoint para máxima fidelidad a imagen
-POST /api/veo3/test-minimal-prompt
-{
-  "dialogue": "Texto que debe decir Ana"
-}
-```
+**Solución**: Modificados `promptBuilder.js` líneas 142 y 377:
+- ✅ `buildPrompt()` base ahora incluye "SPANISH FROM SPAIN (not Mexican Spanish)"
+- ✅ `simplifyPrompt()` fallback ahora incluye "SPANISH FROM SPAIN (not Mexican Spanish)"
+- ✅ Todos los métodos (chollo, analysis, breaking, prediction) heredan el fix
 
-**Prompt generado**: `"The person in the reference image speaking in Spanish: '[dialogue]'. Exact appearance from reference image."`
-
-**⚠️ Este prompt FUERZA que VEO3 use EXACTAMENTE la persona de la imagen de referencia.**
+**Video referencia que funcionó correctamente**: `ana-chollo-pere-milla-real-20250929-233140.mp4`
 
 ### 🎬 **FRAMEWORK VIRAL INTEGRADO** ⭐ NUEVO
 **PromptBuilder.js ahora incluye Framework Viral Comprobado (1,350M visitas)**

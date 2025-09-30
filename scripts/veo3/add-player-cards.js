@@ -7,6 +7,7 @@
 
 require('dotenv').config();
 const fs = require('fs');
+const logger = require('../../../../../../../utils/logger');
 const path = require('path');
 const PlayerCardsOverlay = require('../../backend/services/veo3/playerCardsOverlay');
 
@@ -24,7 +25,7 @@ class PlayerCardsScript {
      */
     async addSinglePlayerCard(videoPath, playerData, options = {}) {
         try {
-            console.log(`[PlayerCardsScript] Agregando tarjeta de ${playerData.name}...`);
+            logger.info(`[PlayerCardsScript] Agregando tarjeta de ${playerData.name}...`);
 
             if (!fs.existsSync(videoPath)) {
                 throw new Error(`Video no encontrado: ${videoPath}`);
@@ -34,9 +35,9 @@ class PlayerCardsScript {
             const resultPath = await this.overlaySystem.addPlayerCardOverlay(videoPath, playerData, options);
             const processingTime = Date.now() - startTime;
 
-            console.log(`[PlayerCardsScript] ✅ Tarjeta agregada exitosamente`);
-            console.log(`[PlayerCardsScript] Video final: ${resultPath}`);
-            console.log(`[PlayerCardsScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
+            logger.info(`[PlayerCardsScript] ✅ Tarjeta agregada exitosamente`);
+            logger.info(`[PlayerCardsScript] Video final: ${resultPath}`);
+            logger.info(`[PlayerCardsScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
 
             // Log de la operación
             this.overlaySystem.logOperation({
@@ -51,7 +52,7 @@ class PlayerCardsScript {
             return resultPath;
 
         } catch (error) {
-            console.error(`[PlayerCardsScript] Error agregando tarjeta:`, error.message);
+            logger.error(`[PlayerCardsScript] Error agregando tarjeta:`, error.message);
             throw error;
         }
     }
@@ -64,7 +65,7 @@ class PlayerCardsScript {
      */
     async addMultiplePlayerCards(videoPath, playersData, options = {}) {
         try {
-            console.log(`[PlayerCardsScript] Agregando ${playersData.length} tarjetas...`);
+            logger.info(`[PlayerCardsScript] Agregando ${playersData.length} tarjetas...`);
 
             if (!fs.existsSync(videoPath)) {
                 throw new Error(`Video no encontrado: ${videoPath}`);
@@ -74,9 +75,9 @@ class PlayerCardsScript {
             const resultPath = await this.overlaySystem.addMultiplePlayerCards(videoPath, playersData, options);
             const processingTime = Date.now() - startTime;
 
-            console.log(`[PlayerCardsScript] ✅ ${playersData.length} tarjetas agregadas exitosamente`);
-            console.log(`[PlayerCardsScript] Video final: ${resultPath}`);
-            console.log(`[PlayerCardsScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
+            logger.info(`[PlayerCardsScript] ✅ ${playersData.length} tarjetas agregadas exitosamente`);
+            logger.info(`[PlayerCardsScript] Video final: ${resultPath}`);
+            logger.info(`[PlayerCardsScript] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
 
             // Log de la operación
             this.overlaySystem.logOperation({
@@ -91,7 +92,7 @@ class PlayerCardsScript {
             return resultPath;
 
         } catch (error) {
-            console.error(`[PlayerCardsScript] Error agregando múltiples tarjetas:`, error.message);
+            logger.error(`[PlayerCardsScript] Error agregando múltiples tarjetas:`, error.message);
             throw error;
         }
     }
@@ -140,7 +141,7 @@ class PlayerCardsScript {
             return files.length > 0 ? files[0].path : null;
 
         } catch (error) {
-            console.error('[PlayerCardsScript] Error buscando videos:', error.message);
+            logger.error('[PlayerCardsScript] Error buscando videos:', error.message);
             return null;
         }
     }
@@ -150,18 +151,18 @@ class PlayerCardsScript {
      */
     async runTest() {
         try {
-            console.log('[PlayerCardsScript] 🧪 Ejecutando test de player cards...');
+            logger.info('[PlayerCardsScript] 🧪 Ejecutando test de player cards...');
 
             // Buscar último video Ana
             const latestVideo = this.findLatestAnaVideo();
             if (!latestVideo) {
-                console.log('[PlayerCardsScript] No se encontraron videos Ana. Generando uno para test...');
+                logger.info('[PlayerCardsScript] No se encontraron videos Ana. Generando uno para test...');
 
                 // Aquí podrías generar un video Ana para test
                 throw new Error('No hay videos Ana disponibles para test. Ejecuta primero: npm run veo3:test-ana');
             }
 
-            console.log(`[PlayerCardsScript] Usando video: ${path.basename(latestVideo)}`);
+            logger.info(`[PlayerCardsScript] Usando video: ${path.basename(latestVideo)}`);
 
             // Datos de test
             const testPlayerData = this.createPlayerCardData('Pedri', 8.5, {
@@ -174,8 +175,8 @@ class PlayerCardsScript {
             // Agregar tarjeta
             const resultPath = await this.addSinglePlayerCard(latestVideo, testPlayerData);
 
-            console.log('[PlayerCardsScript] ✅ Test completado exitosamente');
-            console.log(`[PlayerCardsScript] Video con tarjeta: ${resultPath}`);
+            logger.info('[PlayerCardsScript] ✅ Test completado exitosamente');
+            logger.info(`[PlayerCardsScript] Video con tarjeta: ${resultPath}`);
 
             return {
                 success: true,
@@ -185,7 +186,7 @@ class PlayerCardsScript {
             };
 
         } catch (error) {
-            console.error('[PlayerCardsScript] ❌ Test falló:', error.message);
+            logger.error('[PlayerCardsScript] ❌ Test falló:', error.message);
             throw error;
         }
     }
@@ -195,7 +196,7 @@ class PlayerCardsScript {
      */
     async runMultiDemo() {
         try {
-            console.log('[PlayerCardsScript] 🎭 Ejecutando demo múltiples jugadores...');
+            logger.info('[PlayerCardsScript] 🎭 Ejecutando demo múltiples jugadores...');
 
             const latestVideo = this.findLatestAnaVideo();
             if (!latestVideo) {
@@ -226,8 +227,8 @@ class PlayerCardsScript {
 
             const resultPath = await this.addMultiplePlayerCards(latestVideo, playersData);
 
-            console.log('[PlayerCardsScript] ✅ Demo múltiples jugadores completado');
-            console.log(`[PlayerCardsScript] Video con múltiples tarjetas: ${resultPath}`);
+            logger.info('[PlayerCardsScript] ✅ Demo múltiples jugadores completado');
+            logger.info(`[PlayerCardsScript] Video con múltiples tarjetas: ${resultPath}`);
 
             return {
                 success: true,
@@ -237,7 +238,7 @@ class PlayerCardsScript {
             };
 
         } catch (error) {
-            console.error('[PlayerCardsScript] ❌ Demo falló:', error.message);
+            logger.error('[PlayerCardsScript] ❌ Demo falló:', error.message);
             throw error;
         }
     }
@@ -273,22 +274,22 @@ async function main() {
             await script.addSinglePlayerCard(videoPath, playerData);
         } else {
             // Mostrar ayuda
-            console.log('🎬 Player Cards Overlay - Fantasy La Liga');
-            console.log('Uso:');
-            console.log('  --test                                    # Test básico');
-            console.log('  --multi-demo                              # Demo múltiples jugadores');
-            console.log('  --add --video "path" --player "Nombre" --price 8.5');
-            console.log('');
-            console.log('Ejemplos:');
-            console.log('  npm run veo3:test-cards                   # Test básico');
-            console.log('  node scripts/veo3/add-player-cards.js --multi-demo');
+            logger.info('🎬 Player Cards Overlay - Fantasy La Liga');
+            logger.info('Uso:');
+            logger.info('  --test                                    # Test básico');
+            logger.info('  --multi-demo                              # Demo múltiples jugadores');
+            logger.info('  --add --video "path" --player "Nombre" --price 8.5');
+            logger.info('');
+            logger.info('Ejemplos:');
+            logger.info('  npm run veo3:test-cards                   # Test básico');
+            logger.info('  node scripts/veo3/add-player-cards.js --multi-demo');
 
             // Test por defecto
             await script.runTest();
         }
 
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        logger.error('❌ Error:', error.message);
         process.exit(1);
     }
 }

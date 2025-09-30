@@ -1,11 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ## 🚨 NORMAS CRÍTICAS VEO3 - ANA REAL
 
 ### ⭐ **NORMA #1 - CONSISTENCIA DE ANA (CRÍTICA)**
-**Ana debe ser SIEMPRE la misma persona en todos los videos. NUNCA debe cambiar.**
+
+**Ana debe ser SIEMPRE la misma persona en todos los videos. NUNCA debe
+cambiar.**
 
 - **SEED FIJO**: `ANA_CHARACTER_SEED=30001` (NUNCA CAMBIAR)
 - **IMAGEN FIJA**: `ANA_IMAGE_URL` debe apuntar siempre a la misma imagen
@@ -13,13 +16,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **CHARACTER BIBLE**: Nunca modificar el `ANA_CHARACTER_BIBLE`
 
 ### 🗣️ **NORMA #2 - AUDIO ESPAÑOL DE ESPAÑA (CRÍTICA)**
-**TODOS los prompts DEBEN incluir "SPANISH FROM SPAIN (not Mexican Spanish)" para evitar acento mexicano.**
+
+**TODOS los prompts DEBEN incluir "SPANISH FROM SPAIN (not Mexican Spanish)"
+para evitar acento mexicano.**
 
 - Configuración API: `voice.locale: 'es-ES'`
-- **Prompt texto**: OBLIGATORIO incluir `"SPANISH FROM SPAIN (not Mexican Spanish)"` en TODOS los prompts
+- **Prompt texto**: OBLIGATORIO incluir
+  `"SPANISH FROM SPAIN (not Mexican Spanish)"` en TODOS los prompts
 - Verificar que no suene con acento mexicano
 
 ### 📝 **APLICACIÓN EN CÓDIGO:**
+
 ```javascript
 // VEO3Client - SEED SIEMPRE FIJO
 seed: this.characterSeed, // NO usar options.seed
@@ -40,26 +47,35 @@ const prompt = `The person in the reference image speaking in Spanish: "${dialog
 ```
 
 ### 🔧 **FIX CRÍTICO APLICADO (30 Sept 2025)**
-**Problema detectado**: VEO3 generaba videos con acento mexicano porque el método `buildPrompt()` base no incluía "SPANISH FROM SPAIN".
+
+**Problema detectado**: VEO3 generaba videos con acento mexicano porque el
+método `buildPrompt()` base no incluía "SPANISH FROM SPAIN".
 
 **Solución**: Modificados `promptBuilder.js` líneas 142 y 377:
-- ✅ `buildPrompt()` base ahora incluye "SPANISH FROM SPAIN (not Mexican Spanish)"
-- ✅ `simplifyPrompt()` fallback ahora incluye "SPANISH FROM SPAIN (not Mexican Spanish)"
+
+- ✅ `buildPrompt()` base ahora incluye "SPANISH FROM SPAIN (not Mexican
+  Spanish)"
+- ✅ `simplifyPrompt()` fallback ahora incluye "SPANISH FROM SPAIN (not Mexican
+  Spanish)"
 - ✅ Todos los métodos (chollo, analysis, breaking, prediction) heredan el fix
 
-**Video referencia que funcionó correctamente**: `ana-chollo-pere-milla-real-20250929-233140.mp4`
+**Video referencia que funcionó correctamente**:
+`ana-chollo-pere-milla-real-20250929-233140.mp4`
 
 ### 🎬 **FRAMEWORK VIRAL INTEGRADO** ⭐ NUEVO
+
 **PromptBuilder.js ahora incluye Framework Viral Comprobado (1,350M visitas)**
 
-- ✅ **4 arcos emocionales** predefinidos: chollo, prediccion, breaking, analisis
-- ✅ **Estructura 7 elementos**: hook → contexto → conflicto → inflexión → resolución → moraleja → CTA
+- ✅ **4 arcos emocionales** predefinidos: chollo, prediccion, breaking,
+  analisis
+- ✅ **Estructura 7 elementos**: hook → contexto → conflicto → inflexión →
+  resolución → moraleja → CTA
 - ✅ **Validación convergencia 70/30**: General emocional + Nicho Fantasy
 - ✅ **Metadata viral automática**: Duración, emociones, validaciones
 - ✅ **Compatibilidad backward**: Métodos legacy siguen funcionando
 
-**Documentación completa**: `docs/VEO3_FRAMEWORK_VIRAL_USO.md`
-**Testing**: `npm run veo3:test-framework`
+**Documentación completa**: `docs/VEO3_FRAMEWORK_VIRAL_USO.md` **Testing**:
+`npm run veo3:test-framework`
 
 ## 🚀 PRÓXIMA TAREA PRIORITARIA
 
@@ -67,19 +83,24 @@ const prompt = `The person in the reference image speaking in Spanish: "${dialog
 
 ### 🚨 Fix Sistema Evolución de Valor - CRÍTICO
 
-**CONTEXTO**: ✅ **ANÁLISIS HISTORIAL VS RIVAL COMPLETADO** - El sistema de evolución de valor está generando **38 jornadas de datos FICTICIOS** cuando solo llevamos pocas jornadas reales.
+**CONTEXTO**: ✅ **ANÁLISIS HISTORIAL VS RIVAL COMPLETADO** - El sistema de
+evolución de valor está generando **38 jornadas de datos FICTICIOS** cuando solo
+llevamos pocas jornadas reales.
 
 **PROBLEMA CRÍTICO**:
+
 - Sistema muestra jornada 38 cuando solo llevamos ~3-5 jornadas reales
 - Todos los datos (precios, rating, puntos) son completamente simulados
 - Fecha inicio incorrecta: usa agosto 2024 en lugar de inicio real temporada
 
 **ARCHIVOS A MODIFICAR**:
+
 - `backend/services/fantasyEvolution.js` - **REESCRITURA COMPLETA necesaria**
 - `backend/routes/evolution.js` - Validación entrada datos reales
 - Frontend - Gráficos adaptados para pocos puntos de datos
 
 **OBJETIVO**: Mostrar evolución real con jornada actual correcta:
+
 ```
 {
   "currentGameweek": 3-5,  // NO 38
@@ -89,13 +110,17 @@ const prompt = `The person in the reference image speaking in Spanish: "${dialog
 }
 ```
 
-**PLAN**: Ver archivo `NEXT_TASK.md` para análisis completo y plan de implementación detallado.
+**PLAN**: Ver archivo `NEXT_TASK.md` para análisis completo y plan de
+implementación detallado.
 
 ---
 
 ## Project Overview
 
-**Fantasy La Liga Dashboard** - Dashboard de validación para un influencer virtual automatizado de Instagram que publicará contenido sobre La Liga Fantasy de fútbol. Este proyecto utiliza API-Sports para obtener datos reales de La Liga y está preparado para integración con avatares AI de HeyGen.
+**Fantasy La Liga Dashboard** - Dashboard de validación para un influencer
+virtual automatizado de Instagram que publicará contenido sobre La Liga Fantasy
+de fútbol. Este proyecto utiliza API-Sports para obtener datos reales de La Liga
+y está preparado para integración con avatares AI de HeyGen.
 
 ## Development Commands
 
@@ -109,8 +134,19 @@ npm run dev
 # Iniciar servidor en producción
 npm start
 
-# Ejecutar tests (runs test routes)
-npm test
+# Ejecutar tests
+npm test                # Run Jest tests
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage report
+npm run test:verbose    # Run tests with verbose output
+npm run test:integration # Run integration tests
+
+# Code Quality
+npm run lint            # Run ESLint
+npm run lint:fix        # Run ESLint with auto-fix
+npm run format          # Format code with Prettier
+npm run format:check    # Check code formatting
+npm run quality         # Run all quality checks (lint + format + test)
 
 # Base de datos (Supabase PostgreSQL)
 npm run db:init         # Inicializar schema completo de la base de datos
@@ -118,13 +154,27 @@ npm run db:test         # Test completo de conexión y funcionalidad
 npm run db:test:quick   # Test rápido de conexión básica
 npm run db:migrate      # Alias para db:init
 
+# VEO3 Video Generation
+npm run veo3:generate-ana        # Generar video Ana Real
+npm run veo3:add-player-card     # Agregar tarjeta jugador a video
+npm run veo3:concatenate         # Concatenar múltiples videos
+npm run veo3:monitor             # Monitor video generation status
+npm run veo3:test-all            # Run all VEO3 tests
+npm run veo3:test-ana            # Test Ana video generation
+npm run veo3:test-cards          # Test player cards overlay
+npm run veo3:test-concat         # Test video concatenation
+npm run veo3:test-framework      # Test viral framework
+npm run veo3:test-stats-card     # Test stats card prompts
+npm run veo3:test-3segments      # Test 3-segment video generation
+npm run veo3:generate-demo       # Generate demo video
+
+# n8n Integration
+npm run n8n:check-versions       # Check n8n workflow versions
+npm run n8n:version-daily        # Daily version check
+
 # Test API connectivity
 curl http://localhost:3000/health
 curl http://localhost:3000/api/info
-
-# Code Quality (No lint/typecheck - manual review only)
-# Note: Project uses vanilla JS with manual code review
-# Check recent changes with: git status && git diff
 
 # Development Debugging Commands
 curl http://localhost:3000/api/test/ping                    # Basic server health
@@ -140,28 +190,51 @@ curl http://localhost:3000/api/content-ai/test             # AI content generati
 curl http://localhost:3000/api/evolution/test              # ⚠️ Evolution system test (shows broken data)
 curl http://localhost:3000/api/veo3/health                 # VEO3 system health check
 curl http://localhost:3000/api/veo3/config                 # VEO3 configuration details
+curl http://localhost:3000/api/bunny-stream/test           # Bunny.net Stream test
+curl http://localhost:3000/api/predictions/test            # Predictions system test
 ```
 
-**Note**: This project uses vanilla JavaScript (no TypeScript), no ESLint/Prettier, and no build process. Frontend uses CDN dependencies (Alpine.js, Tailwind) served directly. Code quality is maintained through manual review and comprehensive testing infrastructure.
+**Note**: This project uses vanilla JavaScript with ESLint + Prettier + Jest for
+code quality. Frontend uses CDN dependencies (Alpine.js, Tailwind) served
+directly with no build process required.
 
 ## Tech Stack
 
 ### Backend Dependencies
+
 - **express**: ^4.18.2 - Main web framework
 - **axios**: ^1.12.2 - HTTP client for API calls
 - **cors**: ^2.8.5 - Cross-origin resource sharing
 - **helmet**: ^7.1.0 - Security middleware
 - **morgan**: ^1.10.0 - HTTP request logger
+- **express-rate-limit**: ^8.1.0 - Rate limiting middleware
 - **@supabase/supabase-js**: ^2.57.4 - Database client
 - **pg**: ^8.16.3 - PostgreSQL client
 - **dotenv**: ^16.3.1 - Environment variable management
 - **jimp**: ^1.6.0 - Image processing and manipulation
 - **node-html-to-image**: ^5.0.0 - HTML to image conversion for dynamic content
+- **fluent-ffmpeg**: ^2.1.3 - Video processing and concatenation
+- **@bunnynet/stream**: ^0.1.0 - Bunny.net video hosting integration
+- **joi**: ^18.0.1 - Schema validation
+- **winston**: ^3.18.1 - Logging framework
+- **winston-daily-rotate-file**: ^5.0.0 - Daily log rotation
+- **swagger-jsdoc**: ^6.2.8 - Swagger documentation generator
+- **swagger-ui-express**: ^5.0.1 - Swagger UI integration
 
 ### Development Dependencies
+
 - **nodemon**: ^3.0.1 - Development server with auto-reload
+- **jest**: ^30.2.0 - Testing framework
+- **supertest**: ^7.1.4 - HTTP testing library
+- **eslint**: ^9.36.0 - JavaScript linter
+- **eslint-config-prettier**: ^10.1.8 - ESLint + Prettier integration
+- **eslint-plugin-prettier**: ^5.5.4 - Prettier as ESLint plugin
+- **prettier**: ^3.6.2 - Code formatter
+- **husky**: ^9.1.7 - Git hooks
+- **lint-staged**: ^16.2.3 - Run linters on staged files
 
 ### Frontend (CDN-based)
+
 - **Alpine.js**: Frontend reactivity framework
 - **Tailwind CSS**: Utility-first CSS framework
 - **Vanilla JavaScript**: No build process required
@@ -169,18 +242,26 @@ curl http://localhost:3000/api/veo3/config                 # VEO3 configuration 
 ## Critical Development Notes
 
 ### Working with API-Sports Data
-- **ALWAYS check the current season**: API-Sports uses 2025 for the 2025-26 season
-- **Rate limiting**: 75k requests/day on Ultra plan - use existing cache mechanisms
+
+- **ALWAYS check the current season**: API-Sports uses 2025 for the 2025-26
+  season
+- **Rate limiting**: 75k requests/day on Ultra plan - use existing cache
+  mechanisms
 - **Error handling**: All API calls use try/catch with detailed logging
-- **Testing first**: Always run `curl http://localhost:3000/api/laliga/test` before data work
-- **Season validation**: If date conflicts arise, always use season 2025 for API calls
+- **Testing first**: Always run `curl http://localhost:3000/api/laliga/test`
+  before data work
+- **Season validation**: If date conflicts arise, always use season 2025 for API
+  calls
 
 ### Database Operations
-- **Required setup**: Must have `.env.supabase` configured before database operations
+
+- **Required setup**: Must have `.env.supabase` configured before database
+  operations
 - **Initialization**: Run `npm run db:init` after any schema changes
 - **Testing**: Use `npm run db:test:quick` for connectivity verification
 
 ### Development Workflow
+
 1. Start server: `npm run dev` (uses nodemon for auto-reload)
 2. Test API connectivity: `curl http://localhost:3000/api/test/ping`
 3. Verify database: `npm run db:test:quick`
@@ -257,12 +338,14 @@ Fantasy la liga/
 ## API Endpoints
 
 ### Testing
+
 - `GET /api/test/ping` - Test básico del servidor
 - `GET /api/test/config` - Verificar configuración
 - `GET /api/test/full-workflow` - Test completo del flujo
 - `POST /api/test/fantasy-points` - Test calculadora de puntos
 
 ### API-Sports/API-Football Integration
+
 - `GET /api/laliga/test` - Prueba de conexión API-Sports
 - `GET /api/laliga/laliga/info` - Información de La Liga
 - `GET /api/laliga/laliga/teams` - Equipos de La Liga
@@ -271,13 +354,17 @@ Fantasy la liga/
 - `POST /api/laliga/laliga/fantasy-points` - Calcular puntos Fantasy
 
 ### Chollos de la Jornada (Sistema Predictivo)
+
 - `GET /api/bargains/test` - Test del analizador de chollos
 - `GET /api/bargains/top` - Mejores chollos de la jornada
-- `GET /api/bargains/position/:position` - Chollos por posición (GK, DEF, MID, FWD)
+- `GET /api/bargains/position/:position` - Chollos por posición (GK, DEF, MID,
+  FWD)
 - `GET /api/bargains/compare/:id1/:id2` - Comparar valor de dos jugadores
-- `POST /api/bargains/analysis` - Análisis personalizado con parámetros avanzados
+- `POST /api/bargains/analysis` - Análisis personalizado con parámetros
+  avanzados
 
 ### Weather Integration (AEMET API - Phase 2)
+
 - `GET /api/weather/test` - Test conexión AEMET (Agencia Estatal Meteorología)
 - `GET /api/weather/stadiums` - Lista estadios La Liga con coordenadas GPS
 - `GET /api/weather/stadium/:teamId` - Clima actual estadio específico
@@ -285,6 +372,7 @@ Fantasy la liga/
 - `POST /api/weather/avatar-config` - Configuración avatar según clima
 
 ### Instagram Content Automation
+
 - `GET /api/images/test` - Test generador imágenes dinámicas
 - `POST /api/images/generate` - Generar imagen personalizada para Instagram
 - `GET /api/instagram/test` - Test integración Instagram API
@@ -292,12 +380,16 @@ Fantasy la liga/
 - `GET /api/content-ai/test` - Test generación contenido IA personalizado
 
 ### Player Evolution System (⚠️ CRITICAL - Currently Broken)
-- `GET /api/evolution/player/:id` - Evolución valor jugador (genera datos ficticios)
-- `GET /api/evolution/test` - Test sistema evolución (muestra jornada 38 ficticia)
+
+- `GET /api/evolution/player/:id` - Evolución valor jugador (genera datos
+  ficticios)
+- `GET /api/evolution/test` - Test sistema evolución (muestra jornada 38
+  ficticia)
 
 ## Configuration
 
 ### Environment Variables (.env)
+
 ```bash
 # API-Sports (La Liga Real Data)
 API_FOOTBALL_KEY=your_api_sports_key_here
@@ -329,7 +421,8 @@ PROJECT_DOMAIN=laligafantasyspain.com
 
 ### Database Configuration (.env.supabase)
 
-El proyecto utiliza Supabase PostgreSQL como base de datos principal. Crear archivo `.env.supabase`:
+El proyecto utiliza Supabase PostgreSQL como base de datos principal. Crear
+archivo `.env.supabase`:
 
 ```bash
 # Supabase Configuration
@@ -348,8 +441,10 @@ DATABASE_URL=postgresql://postgres:[password]@db.tu-proyecto.supabase.co:5432/po
 ### 🏆 TEMPORADA ACTUAL: 2025-26
 
 **CONFIGURACIÓN DEFINITIVA (NO CAMBIAR):**
+
 - **Temporada**: 2025-26 (95ª temporada de La Liga)
-- **API-Sports Season ID**: `2025` (confirmado - API usa 2025 para temporada 2025-26)
+- **API-Sports Season ID**: `2025` (confirmado - API usa 2025 para temporada
+  2025-26)
 - **Configuración**: `SEASON_2025_26: 2025` en `backend/config/constants.js`
 - **Fechas**: 15 Agosto 2025 - 24 Mayo 2026
 - **Campeón defensor**: Barcelona (28º título)
@@ -357,16 +452,19 @@ DATABASE_URL=postgresql://postgres:[password]@db.tu-proyecto.supabase.co:5432/po
 ### 🏟️ EQUIPOS OFICIALES 2025-26 (20 EQUIPOS)
 
 **ASCENSOS (3 nuevos equipos):**
+
 - ✅ **Levante** (ID: 539) - Promovido primero
 - ✅ **Elche** (ID: 797) - Promovido último día
 - ✅ **Real Oviedo** (ID: 718) - Ganó playoff ascenso
 
 **DESCENSOS 2024-25 (equipos que YA NO ESTÁN):**
+
 - ❌ **Valladolid** - Relegado
 - ❌ **Las Palmas** - Relegado
 - ❌ **Leganés** - Relegado
 
-**IMPORTANTE**: Si aparecen Valladolid, Las Palmas o Leganés en datos, ES ERROR de configuración.
+**IMPORTANTE**: Si aparecen Valladolid, Las Palmas o Leganés en datos, ES ERROR
+de configuración.
 
 ### 🔧 CONFIGURACIÓN TÉCNICA
 
@@ -378,15 +476,19 @@ DATABASE_URL=postgresql://postgres:[password]@db.tu-proyecto.supabase.co:5432/po
 ### ⚠️ RECORDATORIO PARA CLAUDE CODE ⚠️
 
 **CADA VEZ QUE INICIES O TE RECARGUES:**
+
 1. **TEMPORADA**: Siempre 2025-26
 2. **API-Sports Season**: Siempre 2025
 3. **Equipos**: Siempre 20 (con Levante, Elche, Oviedo)
 4. **NO incluir**: Valladolid, Las Palmas, Leganés
+
 - **API-Sports Plan**: Ultra ($29/mes) - 75,000 requests/día
 - **Sistema de puntos Fantasy**: Implementado según reglas oficiales
 - **Server Config**: PORT=3000, HOST=localhost (configurable via env vars)
-- **Weather Integration**: 20 stadiums with GPS coordinates (stadiumsWeatherConfig.js)
-- **Database**: Supabase PostgreSQL con schema completo (database/supabase-schema.sql)
+- **Weather Integration**: 20 stadiums with GPS coordinates
+  (stadiumsWeatherConfig.js)
+- **Database**: Supabase PostgreSQL con schema completo
+  (database/supabase-schema.sql)
 - **AI Content Generation**: GPT-5 Mini para avatares ($0.29/mes)
 
 ## Fantasy Points System
@@ -394,23 +496,27 @@ DATABASE_URL=postgresql://postgres:[password]@db.tu-proyecto.supabase.co:5432/po
 Sistema oficial de La Liga Fantasy implementado en `dataProcessor.js`:
 
 **Todas las posiciones:**
+
 - Partido jugado: +2 pts
 - Asistencia: +3 pts
 - Tarjeta amarilla: -1 pt
 - Tarjeta roja: -3 pts
 
 **Goles (por posición):**
+
 - Portero: +10 pts
 - Defensa: +6 pts
 - Centrocampista: +5 pts
 - Delantero: +4 pts
 
 **Específico porteros:**
+
 - Portería a cero: +4 pts
 - Penalti parado: +5 pts
 - Gol encajado: -1 pt
 
 **Específico defensas:**
+
 - Portería a cero: +4 pts
 - Cada 2 goles encajados: -1 pt
 
@@ -419,7 +525,8 @@ Sistema oficial de La Liga Fantasy implementado en `dataProcessor.js`:
 1. **API-Sports** → Datos en tiempo real de La Liga (75k requests/día)
 2. **apiFootball.js** → Cliente API con rate limiting implementado
 3. **dataProcessor.js** → Calcula puntos Fantasy según sistema oficial
-4. **Supabase PostgreSQL** → Almacenamiento persistente (teams, players, matches, stats)
+4. **Supabase PostgreSQL** → Almacenamiento persistente (teams, players,
+   matches, stats)
 5. **Dashboard** → Visualiza datos y insights
 6. **Futuro**: teamContentManager.js → HeyGen → Instagram
 
@@ -455,10 +562,10 @@ npm run db:test:quick
 1. **Crear proyecto en Supabase**: [https://supabase.com](https://supabase.com)
 2. **Obtener credenciales**: Project URL y Service Role Key
 3. **Configurar `.env.supabase`**:
-   ```bash
-   SUPABASE_PROJECT_URL=https://tu-proyecto.supabase.co
-   SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui
-   ```
+    ```bash
+    SUPABASE_PROJECT_URL=https://tu-proyecto.supabase.co
+    SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key_aqui
+    ```
 4. **Ejecutar inicialización**: `npm run db:init`
 
 ### Architecture Notes
@@ -473,7 +580,8 @@ npm run db:test:quick
 
 ### Funcionalidad Principal
 
-El `BargainAnalyzer` identifica jugadores con alto potencial de puntos Fantasy a precios bajos usando algoritmos de análisis de valor.
+El `BargainAnalyzer` identifica jugadores con alto potencial de puntos Fantasy a
+precios bajos usando algoritmos de análisis de valor.
 
 ### Criterios de Análisis
 
@@ -519,6 +627,7 @@ curl -X POST "/api/bargains/analysis" \
 ### Integración Frontend
 
 La página `/bargains` incluye:
+
 - **Filtros dinámicos** por posición, precio, ratio
 - **Tarjetas interactivas** con análisis detallado
 - **Estadísticas en tiempo real** y recomendaciones IA
@@ -538,64 +647,141 @@ La página `/bargains` incluye:
 - **Logging**: Morgan middleware for HTTP requests, custom logging for debugging
 - **Static Files**: Frontend served from backend/server.js at root path
 - **Health Checks**: `/health` and `/api/info` endpoints for monitoring
-- **Database**: Supabase PostgreSQL integration with @supabase/supabase-js client
-- **Dependencies**: Core dependencies include axios, cors, express, helmet, morgan, pg, dotenv
+- **Database**: Supabase PostgreSQL integration with @supabase/supabase-js
+  client
+- **Dependencies**: Core dependencies include axios, cors, express, helmet,
+  morgan, pg, dotenv
 
 ## Core Architecture Patterns
 
 ### Service Layer Architecture
-- **ApiFootballClient** (`backend/services/apiFootball.js`): Centralized API-Sports client with rate limiting
-- **BargainAnalyzer** (`backend/services/bargainAnalyzer.js`): Complex algorithm for identifying undervalued players
-- **DataProcessor** (`backend/services/dataProcessor.js`): Fantasy points calculation engine following official La Liga rules
-- **Cache Management**: Multi-layer caching with BargainCache, PlayersCache for performance optimization
+
+- **ApiFootballClient** (`backend/services/apiFootball.js`): Centralized
+  API-Sports client with rate limiting
+- **BargainAnalyzer** (`backend/services/bargainAnalyzer.js`): Complex algorithm
+  for identifying undervalued players
+- **DataProcessor** (`backend/services/dataProcessor.js`): Fantasy points
+  calculation engine following official La Liga rules
+- **Cache Management**: Multi-layer caching with BargainCache, PlayersCache for
+  performance optimization
 - **Weather Integration**: AEMET API integration for stadium weather data
 
 ### Route Organization
+
 - Routes are modular and feature-based (not RESTful resources)
-- Each route module handles a specific domain: `/api/laliga/*`, `/api/bargains/*`, `/api/weather/*`
+- Each route module handles a specific domain: `/api/laliga/*`,
+  `/api/bargains/*`, `/api/weather/*`
 - Frontend routes served directly from Express server at root level
 - All API routes prefixed with `/api/` for clear separation
 
 ### Data Flow Architecture
+
 1. **API-Sports Data Ingestion**: Rate-limited requests (75k/day Ultra plan)
-2. **Processing Pipeline**: Raw data → DataProcessor → Fantasy points calculation
+2. **Processing Pipeline**: Raw data → DataProcessor → Fantasy points
+   calculation
 3. **Caching Strategy**: Redis-like caching with BargainCache and PlayersCache
 4. **Frontend Consumption**: Direct API calls from HTML pages using Alpine.js
 
 ### Key System Components
+
 - **FixtureAnalyzer**: Analyzes match difficulty and fixture congestion
-- **PredictorValor**: AI-driven player value prediction system (✅ Historial vs rival analysis completed)
+- **PredictorValor**: AI-driven player value prediction system (✅ Historial vs
+  rival analysis completed)
 - **PlayersManager**: Centralized player data management and synchronization
 - **ContentGenerator**: Automated content creation for social media integration
-- **ImageGenerator**: Dynamic Instagram image generation from HTML templates with Jimp processing
-- **FantasyEvolution**: Player value evolution tracking (⚠️ **CRITICAL** - currently showing fictitious data)
+- **ImageGenerator**: Dynamic Instagram image generation from HTML templates
+  with Jimp processing
+- **FantasyEvolution**: Player value evolution tracking (⚠️ **CRITICAL** -
+  currently showing fictitious data)
+- **VEO3Client**: Video generation system with Ana character consistency (KIE.ai
+  API)
+- **PromptBuilder**: Viral-optimized prompt generation for video content
+- **BunnyStreamManager**: Professional video hosting with Bunny.net CDN
+- **Logger (Winston)**: Centralized logging system with daily rotation
 
 ## Code Architecture Guidelines
 
 ### Adding New Features
+
 1. **Check NEXT_TASK.md first**: Prioritize pending tasks before new features
-2. **Always use existing patterns**: Check similar functionality in existing routes/services
-3. **Rate limiting awareness**: New API-Sports calls must respect the 75k/day limit
-4. **Error handling**: Follow the try/catch + detailed logging pattern seen in all services
-5. **Testing routes**: Every new feature should have a corresponding `/test` endpoint
-6. **Database changes**: Update both schema and init-database.js when adding tables
-7. **Manual code review**: No automated linting - maintain quality through careful review
+2. **Always use existing patterns**: Check similar functionality in existing
+   routes/services
+3. **Rate limiting awareness**: New API-Sports calls must respect the 75k/day
+   limit
+4. **Error handling**: Follow the try/catch + detailed logging pattern seen in
+   all services
+5. **Testing routes**: Every new feature should have a corresponding `/test`
+   endpoint
+6. **Database changes**: Update both schema and init-database.js when adding
+   tables
+7. **Code quality**: Use ESLint + Prettier + Jest for maintaining code standards
+8. **Logging**: Use Winston logger instead of console.log (except for critical
+   startup errors)
+9. **Rate limiting**: Apply appropriate rate limiters from
+   middleware/rateLimiter.js
+10. **Validation**: Use Joi for input validation on all API endpoints
 
 ### Service Layer Patterns
-- **Client initialization**: All external APIs use centralized client pattern (see apiFootball.js)
-- **Cache integration**: Use existing BargainCache/PlayersCache patterns for performance
-- **Data transformation**: Process raw API data through dataProcessor.js before storage
-- **Modular routes**: Each domain gets its own route file (apiFootball.js, bargains.js, etc.)
+
+- **Client initialization**: All external APIs use centralized client pattern
+  (see apiFootball.js)
+- **Cache integration**: Use existing BargainCache/PlayersCache patterns for
+  performance
+- **Data transformation**: Process raw API data through dataProcessor.js before
+  storage
+- **Modular routes**: Each domain gets its own route file (apiFootball.js,
+  bargains.js, etc.)
+
+### Middleware Architecture
+
+The project uses professional middleware patterns for security, logging, and
+rate limiting:
+
+- **Security Middleware** (`backend/middleware/`):
+    - `errorHandler.js`: Centralized error handling with proper HTTP status
+      codes
+    - `rateLimiter.js`: Multiple rate limiters for different endpoint types
+    - `validation.js`: Joi-based input validation middleware
+
+- **Rate Limiters Available**:
+    - `generalLimiter`: 100 req/15min - General API endpoints
+    - `heavyOperationsLimiter`: 20 req/15min - Database/heavy operations
+    - `apiSportsLimiter`: 50 req/15min - API-Sports calls
+    - `imageGenerationLimiter`: 10 req/15min - Image generation
+    - `veo3Limiter`: 5 req/15min - VEO3 video generation
+    - `publicLimiter`: 200 req/15min - Public endpoints
+
+- **Logging System** (`backend/utils/logger.js`):
+    - Winston-based centralized logging
+    - Daily log rotation with compression
+    - Separate files for errors, combined logs, and exceptions
+    - Log levels: error, warn, info, http, debug
+    - Structured logging with timestamps and metadata
+
+### Environment Validation
+
+The project includes automatic environment validation on startup:
+
+- **Config validation** (`backend/config/envValidator.js`):
+    - Validates all required environment variables before server starts
+    - Prevents server startup if critical config is missing
+    - Clear error messages for missing or invalid configuration
+    - Separate validation for different services (API-Sports, Supabase, VEO3,
+      etc.)
 
 ### Frontend Integration
-- **Alpine.js**: All frontend reactivity uses Alpine.js, avoid vanilla DOM manipulation
+
+- **Alpine.js**: All frontend reactivity uses Alpine.js, avoid vanilla DOM
+  manipulation
 - **API calls**: Frontend makes direct calls to `/api/*` endpoints
-- **Static serving**: All frontend files served from `backend/server.js` static middleware
+- **Static serving**: All frontend files served from `backend/server.js` static
+  middleware
 - **No build process**: Frontend is vanilla HTML/CSS/JS with CDN dependencies
 
 ## Testing Strategy
 
 Antes de proceder con avatar IA:
+
 1. Validar calidad y completitud de datos API-Sports
 2. Verificar cálculos de puntos Fantasy
 3. Evaluar insights automáticos generados por competitiveIntelligenceAgent
@@ -604,11 +790,13 @@ Antes de proceder con avatar IA:
 
 ## 👥 Equipo de Reporteros Virtuales (reporterTeam.js)
 
-El proyecto incluye un equipo profesional de 4 reporteros virtuales especializados, cada uno con personalidades únicas y especialidades específicas.
+El proyecto incluye un equipo profesional de 4 reporteros virtuales
+especializados, cada uno con personalidades únicas y especialidades específicas.
 
 ### 🎯 Equipo Principal
 
 #### 1. **Ana Martínez** ("Ana Fantasy") - Analista Táctica Principal
+
 - **Especialidades**: Análisis táctico, preview partidos, post-match analysis
 - **Personalidad**: Profesional cercana, energía media-alta
 - **Avatar**: Femenino, 28 años, estilo profesional deportivo
@@ -616,13 +804,16 @@ El proyecto incluye un equipo profesional de 4 reporteros virtuales especializad
 - **Tono de voz**: Confiable experta, español neutro
 
 #### 2. **Carlos González** ("Carlos Stats") - Especialista en Estadísticas
-- **Especialidades**: Estadísticas jugadores, consejos Fantasy, alineaciones optimales
+
+- **Especialidades**: Estadísticas jugadores, consejos Fantasy, alineaciones
+  optimales
 - **Personalidad**: Dinámico entusiasta, energía alta
 - **Avatar**: Masculino, 32 años, deportivo moderno
 - **Calendario**: Lunes, miércoles, viernes
 - **Tono de voz**: Entusiasta experto, velocidad media-rápida
 
 #### 3. **Lucía Rodríguez** ("Lucía Femenina") - Fútbol Femenino y Cantera
+
 - **Especialidades**: Liga femenina, jugadores emergentes, cantera La Liga
 - **Personalidad**: Fresca moderna, energía alta
 - **Avatar**: Femenino, 26 años, moderno deportivo
@@ -630,7 +821,9 @@ El proyecto incluye un equipo profesional de 4 reporteros virtuales especializad
 - **Tono de voz**: Moderna inspiradora
 
 #### 4. **Pablo Martín** ("Pablo GenZ") - Especialista Gen Z
-- **Especialidades**: Fantasy hacks, jugadores sorpresa, memes fútbol, trends TikTok
+
+- **Especialidades**: Fantasy hacks, jugadores sorpresa, memes fútbol, trends
+  TikTok
 - **Personalidad**: Joven conectado, energía muy alta
 - **Avatar**: Masculino, 19 años, estilo joven profesional casual
 - **Calendario**: Jueves, viernes, domingo
@@ -639,6 +832,7 @@ El proyecto incluye un equipo profesional de 4 reporteros virtuales especializad
 ### ⚙️ Sistema de Distribución de Contenido
 
 **Rotación Diaria Automática**:
+
 - **Lunes**: Carlos (stats inicio semana)
 - **Martes**: Ana (análisis táctico)
 - **Miércoles**: Lucía (liga femenina + cantera)
@@ -648,6 +842,7 @@ El proyecto incluye un equipo profesional de 4 reporteros virtuales especializad
 - **Domingo**: Pablo + Lucía (reacciones Gen Z + resumen femenina)
 
 **Especialistas por Plataforma**:
+
 - **YouTube análisis profundo**: Ana Martínez
 - **TikTok contenido viral**: Pablo GenZ
 - **Instagram infografías**: Carlos González
@@ -656,21 +851,26 @@ El proyecto incluye un equipo profesional de 4 reporteros virtuales especializad
 ### 🎨 Identidad Visual Uniforme
 
 **Inspirado en modelo DAZN**:
+
 - **Uniforme**: Polo azul profesional (#0066cc) con logo en pecho izquierdo
 - **Estudio**: Setup deportivo profesional con overlays estadísticas
-- **Colores**: Azul deportivo (#0066cc), blanco (#ffffff), rojo accento (#ff3333)
+- **Colores**: Azul deportivo (#0066cc), blanco (#ffffff), rojo accento
+  (#ff3333)
 
 ### 🔧 Funciones Técnicas
 
 **Asignación Automática**: `selectReporterForContent(contentType, date)`
-**Configuración Avatar**: `getAvatarConfig(reporterId)`
-**Scripts Personalizados**: `generatePersonalizedScript(reporterId, contentData)`
+**Configuración Avatar**: `getAvatarConfig(reporterId)` **Scripts
+Personalizados**: `generatePersonalizedScript(reporterId, contentData)`
 
 ### 📊 Casos de Uso
 
 ```javascript
 // Ejemplo asignación automática
-const reporter = TEAM_FUNCTIONS.selectReporterForContent('tactical_analysis', new Date());
+const reporter = TEAM_FUNCTIONS.selectReporterForContent(
+    'tactical_analysis',
+    new Date()
+);
 // Resultado: 'ana_martinez'
 
 // Configuración avatar personalizada
@@ -680,11 +880,13 @@ const avatarConfig = TEAM_FUNCTIONS.getAvatarConfig('pablo_teen');
 
 ## 🤖 GPT-5 Mini - Generación de Contenido IA
 
-Este proyecto utiliza **GPT-5 Mini** como modelo principal para la generación de contenido de avatares IA.
+Este proyecto utiliza **GPT-5 Mini** como modelo principal para la generación de
+contenido de avatares IA.
 
 ### ✅ Modelo Seleccionado: GPT-5 Mini
 
 **Razones de la selección:**
+
 - **Precio**: $0.25/1M input, $2.00/1M output ($0.29/mes estimado)
 - **Calidad**: 80% del rendimiento de GPT-5 completo
 - **Contexto**: 272K tokens input, 128K output
@@ -693,16 +895,17 @@ Este proyecto utiliza **GPT-5 Mini** como modelo principal para la generación d
 
 ### 📊 Comparativa con Otros Modelos
 
-| Modelo | Coste Mensual | Calidad | Seleccionado |
-|--------|---------------|---------|-------------|
-| GPT-4o mini | $0.11 | ⭐⭐⭐⭐ | ❌ |
-| **GPT-5 mini** | **$0.29** | **⭐⭐⭐⭐⭐** | **✅** |
-| o4-mini | $0.28 | ⭐⭐⭐⭐ | ❌ |
-| GPT-4o | $3.57 | ⭐⭐⭐⭐⭐ | ❌ Caro |
+| Modelo         | Coste Mensual | Calidad        | Seleccionado |
+| -------------- | ------------- | -------------- | ------------ |
+| GPT-4o mini    | $0.11         | ⭐⭐⭐⭐       | ❌           |
+| **GPT-5 mini** | **$0.29**     | **⭐⭐⭐⭐⭐** | **✅**       |
+| o4-mini        | $0.28         | ⭐⭐⭐⭐       | ❌           |
+| GPT-4o         | $3.57         | ⭐⭐⭐⭐⭐     | ❌ Caro      |
 
 ### 🎯 Funcionalidades Implementadas
 
 #### **Endpoints Disponibles:**
+
 - `GET /api/ai/test` - Test de conexión GPT-5 Mini
 - `POST /api/ai/player-analysis` - Análisis de jugadores para avatar
 - `POST /api/ai/matchday-prediction` - Predicciones de jornada
@@ -711,6 +914,7 @@ Este proyecto utiliza **GPT-5 Mini** como modelo principal para la generación d
 - `GET /api/ai/stats` - Estadísticas de uso y costes
 
 #### **Tipos de Contenido:**
+
 1. **Análisis de jugadores** (150-200 palabras)
 2. **Predicciones de jornada** (300-400 palabras)
 3. **Posts redes sociales** (50-100 palabras)
@@ -778,6 +982,7 @@ curl -X POST "/api/ai/social-post" \
 ### 🎯 Integración con HeyGen
 
 El contenido generado está optimizado para:
+
 - **Avatares IA**: Tono profesional pero cercano
 - **Duración**: Textos de 30-60 segundos de lectura
 - **Contexto**: Integración con datos clima y estadísticas
@@ -792,11 +997,13 @@ El contenido generado está optimizado para:
 
 ## n8n MCP Integration (Oficial)
 
-Este proyecto incluye integración oficial con n8n usando Model Context Protocol (MCP) para automatización de workflows.
+Este proyecto incluye integración oficial con n8n usando Model Context Protocol
+(MCP) para automatización de workflows.
 
 ### Configuración n8n MCP
 
 1. **Variables de entorno**: Crear `.env.n8n` con tu configuración:
+
 ```bash
 N8N_API_TOKEN=tu_token_n8n_aqui
 N8N_BASE_URL=https://tu-instancia.n8n.cloud
@@ -805,14 +1012,17 @@ N8N_MCP_HOST=localhost
 ```
 
 2. **Configuración Claude Code**: Agregar a tu configuración MCP:
+
 ```json
 {
-  "mcpServers": {
-    "n8n-fantasy-laliga": {
-      "command": "node",
-      "args": ["/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/n8nMcpServer.js"]
+    "mcpServers": {
+        "n8n-fantasy-laliga": {
+            "command": "node",
+            "args": [
+                "/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/n8nMcpServer.js"
+            ]
+        }
     }
-  }
 }
 ```
 
@@ -845,6 +1055,7 @@ N8N_MCP_HOST=localhost
 ### Workflow Fantasy La Liga
 
 Workflow automático incluido para:
+
 - Procesamiento datos Fantasy La Liga
 - Cálculo puntos automático
 - Integración con API-Sports
@@ -852,11 +1063,13 @@ Workflow automático incluido para:
 
 ## 🎨 Sistema de Generación de Imágenes Dinámicas (imageGenerator.js)
 
-El proyecto incluye un sistema avanzado de generación automática de imágenes para contenido de Instagram utilizando plantillas HTML y procesamiento con Jimp.
+El proyecto incluye un sistema avanzado de generación automática de imágenes
+para contenido de Instagram utilizando plantillas HTML y procesamiento con Jimp.
 
 ### 🔧 Arquitectura Técnica
 
 **Tecnologías Utilizadas**:
+
 - **node-html-to-image**: Conversión HTML a imagen
 - **Jimp**: Procesamiento y optimización de imágenes
 - **Plantillas HTML**: Templates dinámicos con datos reales
@@ -899,23 +1112,28 @@ curl -X POST http://localhost:3000/api/images/generate \
 
 ## 🎬 Sistema de Videos VEO3 - Ana Real (Implementado)
 
-El proyecto incluye un sistema completo de generación de videos usando VEO3 (kie.ai) con Ana Martínez como reportera virtual.
+El proyecto incluye un sistema completo de generación de videos usando VEO3
+(kie.ai) con Ana Martínez como reportera virtual.
 
 ### 🚀 Funcionalidades Implementadas
 
 #### **Generación de Videos Ana Real**
-- **Videos de chollos**: Ana revela jugadores baratos con alta probabilidad de puntos
+
+- **Videos de chollos**: Ana revela jugadores baratos con alta probabilidad de
+  puntos
 - **Análisis de jugadores**: Análisis táctico profesional con estadísticas
 - **Predicciones de jornada**: Preview y predicciones para próximos partidos
 - **Videos personalizados**: Prompts custom para cualquier contenido
 
 #### **Player Cards Overlay**
+
 - **Tarjetas dinámicas**: Overlay de información de jugadores sobre videos
 - **Múltiples jugadores**: Sistema para agregar varias tarjetas en secuencia
 - **Diseño profesional**: Tarjetas con estadísticas, precios y ratings
 - **Timing configurable**: Control preciso de cuándo aparecen/desaparecen
 
 #### **Concatenación de Videos**
+
 - **Videos largos**: Combinar múltiples segmentos de 8s en videos >24s
 - **Transiciones suaves**: Crossfade entre segmentos para continuidad perfecta
 - **Generación automática**: Crear videos largos a partir de prompts temáticos
@@ -924,11 +1142,13 @@ El proyecto incluye un sistema completo de generación de videos usando VEO3 (ki
 ### 🎯 Ana Real - Character Consistency
 
 **Ana Character Bible** (NUNCA CAMBIAR):
+
 ```
 A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. Confident posture, natural hand gestures for emphasis, professional broadcaster energy.
 ```
 
 **Configuración Técnica**:
+
 - **Modelo**: veo3_fast (más estable)
 - **Imagen referencia**: GitHub URL para consistencia perfecta
 - **Seed**: 30001 (fijo para Ana)
@@ -976,6 +1196,7 @@ POST /api/veo3/generate-long-video  # Generar video largo automático
 ### 💡 Casos de Uso Principales
 
 #### **1. Video Chollo Individual**
+
 ```bash
 # Generar video de chollo para Pedri
 curl -X POST http://localhost:3000/api/veo3/generate-ana \
@@ -984,12 +1205,14 @@ curl -X POST http://localhost:3000/api/veo3/generate-ana \
 ```
 
 #### **2. Análisis Táctico de Jugador**
+
 ```bash
 # Script command line
 node scripts/veo3/generate-ana-video.js --analysis --player "Lewandowski" --price 10.5
 ```
 
 #### **3. Video Largo Multi-Segmento**
+
 ```bash
 # Video largo tema "chollos" con 3 segmentos
 curl -X POST http://localhost:3000/api/veo3/generate-long-video \
@@ -998,6 +1221,7 @@ curl -X POST http://localhost:3000/api/veo3/generate-long-video \
 ```
 
 #### **4. Player Card Overlay**
+
 ```bash
 # Agregar tarjeta de jugador a video existente
 npm run veo3:add-player-card --video "ana-chollo-pedri.mp4" --player "Pedri" --price 8.5
@@ -1033,10 +1257,14 @@ VEO3_MONTHLY_LIMIT=500.00
 
 ### 🎭 Arcos Emocionales Implementados
 
-- **Chollo Revelation**: (susurro conspirativo) → (tensión) → (revelación explosiva) → (urgencia)
-- **Data Confidence**: (confianza analítica) → (construcción convicción) → (conclusión autoritaria)
-- **Breaking News**: (alerta urgente) → (construcción urgencia) → (anuncio explosivo) → (acción inmediata)
-- **Professional Analysis**: (autoridad profesional) → (insight construcción) → (realización explosiva)
+- **Chollo Revelation**: (susurro conspirativo) → (tensión) → (revelación
+  explosiva) → (urgencia)
+- **Data Confidence**: (confianza analítica) → (construcción convicción) →
+  (conclusión autoritaria)
+- **Breaking News**: (alerta urgente) → (construcción urgencia) → (anuncio
+  explosivo) → (acción inmediata)
+- **Professional Analysis**: (autoridad profesional) → (insight construcción) →
+  (realización explosiva)
 
 ### 🔍 Estructura de Archivos VEO3
 
@@ -1097,11 +1325,132 @@ npm run veo3:test-concat
 npm run veo3:test-all
 ```
 
-El sistema VEO3 está completamente integrado y listo para producción de contenido automatizado con Ana Real.
+El sistema VEO3 está completamente integrado y listo para producción de
+contenido automatizado con Ana Real.
+
+## 📹 Sistema Bunny.net Stream - Video Hosting Profesional (Implementado)
+
+El proyecto incluye integración completa con Bunny.net Stream para hosting
+profesional de videos generados.
+
+### 🚀 Funcionalidades Implementadas
+
+#### **Upload y Gestión de Videos**
+
+- **Upload directo**: Subida de videos locales a Bunny.net
+- **Gestión de biblioteca**: CRUD completo de videos
+- **Metadata tracking**: Tags, títulos, descripciones personalizadas
+- **CDN global**: Distribución rápida mediante CDN de Bunny.net
+- **Control de acceso**: Private/public video control
+
+#### **Reproducción Optimizada**
+
+- **URLs de reproducción**: Generación automática de URLs optimizadas
+- **Múltiples resoluciones**: Adaptive bitrate streaming
+- **Thumbnails automáticos**: Generación de previews
+- **Analytics integrado**: Tracking de reproducciones y engagement
+
+### 🔧 API Endpoints Bunny Stream
+
+```bash
+# Sistema de salud y configuración
+GET  /api/bunny-stream/health          # Health check sistema
+GET  /api/bunny-stream/test            # Test conectividad API
+GET  /api/bunny-stream/library-info    # Info biblioteca de videos
+
+# Gestión de videos
+POST /api/bunny-stream/upload          # Subir video a Bunny.net
+GET  /api/bunny-stream/videos          # Listar todos los videos
+GET  /api/bunny-stream/video/:videoId  # Obtener info de video específico
+DELETE /api/bunny-stream/video/:videoId # Eliminar video
+PUT  /api/bunny-stream/video/:videoId  # Actualizar metadata
+
+# Reproducción
+GET  /api/bunny-stream/play/:videoId   # Obtener URL de reproducción
+GET  /api/bunny-stream/embed/:videoId  # Código de embed HTML
+```
+
+### ⚙️ Variables de Entorno Bunny.net
+
+```bash
+# Bunny.net Stream Configuration
+BUNNY_STREAM_API_KEY=tu_bunny_stream_api_key_aqui
+BUNNY_STREAM_LIBRARY_ID=tu_library_id_aqui
+BUNNY_STREAM_CDN_URL=https://vz-xxxxx.b-cdn.net
+```
+
+### 💡 Casos de Uso Principales
+
+#### **1. Upload Video VEO3 a Bunny.net**
+
+```bash
+# Subir video generado por VEO3
+curl -X POST http://localhost:3000/api/bunny-stream/upload \
+  -H "Content-Type: application/json" \
+  -d '{
+    "videoPath": "/output/veo3/ana-chollo-pedri.mp4",
+    "title": "Chollo: Pedri a 8.5M",
+    "collection": "chollos"
+  }'
+```
+
+#### **2. Listar Videos Disponibles**
+
+```bash
+# Obtener lista de todos los videos
+curl http://localhost:3000/api/bunny-stream/videos
+```
+
+#### **3. Obtener URL de Reproducción**
+
+```bash
+# URL optimizada para reproducir video
+curl http://localhost:3000/api/bunny-stream/play/video-guid-here
+```
+
+### 📊 Integración con Workflow de Contenido
+
+1. **VEO3 genera video** → Ana Real presenta contenido
+2. **Upload automático a Bunny.net** → Video disponible en CDN global
+3. **Obtener URL de reproducción** → Para compartir en redes sociales
+4. **Analytics tracking** → Monitorear engagement y reproducciones
+
+### 💰 Economía del Sistema
+
+- **Almacenamiento**: $0.005/GB/mes
+- **Streaming**: $0.005/GB de tráfico
+- **Plan recomendado**: Pay-as-you-go desde $1/mes
+- **CDN global**: Incluido en todos los planes
+- **Sin límite de videos**: Paga solo por uso real
+
+### ⚠️ Consideraciones Importantes
+
+1. **Upload asíncrono**: Videos grandes pueden tardar en procesarse
+2. **Transcoding automático**: Bunny.net genera múltiples resoluciones
+3. **Retention policy**: Configurar política de retención de videos antiguos
+4. **Backup local**: Mantener copia local de videos críticos
+5. **Monitoring**: Revisar uso mensual para optimizar costos
+
+### 🚨 Testing y Validación
+
+```bash
+# Health check completo
+curl http://localhost:3000/api/bunny-stream/health
+
+# Test conectividad API
+curl http://localhost:3000/api/bunny-stream/test
+
+# Info de biblioteca
+curl http://localhost:3000/api/bunny-stream/library-info
+```
+
+El sistema Bunny.net Stream está completamente integrado para hosting
+profesional de videos generados por VEO3.
 
 ## Future Phases
 
 ### **Fase 2: Sistema Predictivo y Análisis Avanzado** (2-4 semanas)
+
 - **Chollos de la jornada**: Jugadores baratos con alta probabilidad de puntos
 - **Predictor de puntos**: IA que estima puntuación próxima jornada
 - **Análisis de rivales**: Dificultad del enfrentamiento por equipo
@@ -1110,6 +1459,7 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 - **Optimizador de plantilla**: Análisis automático y mejoras sugeridas
 
 ### **Fase 3: Sistema de Alertas y Notificaciones** (1-2 meses)
+
 - **Webhook integrations**: Notificaciones push en tiempo real
 - **Suscripciones a jugadores**: Seguimiento personalizado de rendimiento
 - **Alertas de mercado**: Subidas/bajadas importantes de precio
@@ -1117,6 +1467,7 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 - **Alertas de lesiones**: Información médica relevante para Fantasy
 
 ### **Fase 4: IA Conversacional y Mentoría** (2-3 meses)
+
 - **Avatar HeyGen Fantasy Coach**: Consultor virtual personalizado
 - **Tutorial interactivo**: Onboarding gamificado para nuevos usuarios
 - **Tips personalizados**: Consejos basados en historial del usuario
@@ -1124,6 +1475,7 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 - **Explicación de decisiones**: Por qué la IA recomienda X jugador
 
 ### **Fase 5: Bienestar y Comunidad** (3-4 meses)
+
 - **Herramientas de bienestar**: Límites de tiempo y pausas mindfulness
 - **Comunidad positiva**: Enfoque en diversión vs competencia tóxica
 - **Sistema de logros**: Gamificación saludable del progreso
@@ -1131,6 +1483,7 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 - **Análisis de comportamiento**: Detección de patrones problemáticos
 
 ### **Fase 6: Integración Completa y Automatización** (4-6 meses)
+
 - **teamContentManager**: Gestión automática de contenido
 - **Integración completa HeyGen**: Avatar IA para redes sociales
 - **Automatización Instagram API**: Workflows n8n para posts automáticos
@@ -1138,6 +1491,7 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 - **API pública**: Permitir integraciones de terceros
 
 ### **Fase 7: Expansión Multi-Liga** (6+ meses)
+
 - **Premier League**: Integración con Fantasy Premier League
 - **Champions League**: Fantasy para competiciones europeas
 - **Mercado de fichajes**: Análisis y predicciones de traspasos
@@ -1149,50 +1503,83 @@ El sistema VEO3 está completamente integrado y listo para producción de conten
 ## Critical Development Instructions
 
 ### Core Development Principles
-- **Modification over Creation**: Always prefer editing existing files to creating new ones
+
+- **Modification over Creation**: Always prefer editing existing files to
+  creating new ones
 - **Minimal Scope**: Do exactly what's asked, nothing more, nothing less
-- **No Proactive Documentation**: Never create .md or README files unless explicitly requested
-- **Follow Existing Patterns**: Study similar functionality before implementing new features
+- **No Proactive Documentation**: Never create .md or README files unless
+  explicitly requested
+- **Follow Existing Patterns**: Study similar functionality before implementing
+  new features
 
 ### Fantasy La Liga Specific Rules
-- **Season Consistency**: Always use 2025 for API-Sports calls (represents 2025-26 season)
-- **Team Validation**: Verify 20 teams total, must include Levante, Elche, Real Oviedo (promoted)
-- **Team Exclusions**: Never include Valladolid, Las Palmas, or Leganés (relegated)
-- **API Rate Limiting**: Respect 75k requests/day limit with existing cache mechanisms
-- **Error Handling**: Follow try/catch + detailed logging pattern seen throughout codebase
-- **Spanish Comments**: All code comments should be in Spanish to match existing codebase
+
+- **Season Consistency**: Always use 2025 for API-Sports calls (represents
+  2025-26 season)
+- **Team Validation**: Verify 20 teams total, must include Levante, Elche, Real
+  Oviedo (promoted)
+- **Team Exclusions**: Never include Valladolid, Las Palmas, or Leganés
+  (relegated)
+- **API Rate Limiting**: Respect 75k requests/day limit with existing cache
+  mechanisms
+- **Error Handling**: Follow try/catch + detailed logging pattern seen
+  throughout codebase
+- **Spanish Comments**: All code comments should be in Spanish to match existing
+  codebase
 
 ### Database Operations
-- **Required Setup**: `.env.supabase` must be configured before any database operations
-- **Schema Changes**: Always update both supabase-schema.sql and init-database.js for database modifications
-- **Testing First**: Always run `npm run db:test:quick` before database operations
+
+- **Required Setup**: `.env.supabase` must be configured before any database
+  operations
+- **Schema Changes**: Always update both supabase-schema.sql and
+  init-database.js for database modifications
+- **Testing First**: Always run `npm run db:test:quick` before database
+  operations
 
 ### API Integration Patterns
-- **Service Layer**: Use centralized client pattern (see apiFootball.js) for external APIs
+
+- **Service Layer**: Use centralized client pattern (see apiFootball.js) for
+  external APIs
 - **Cache Integration**: Leverage existing BargainCache/PlayersCache patterns
-- **Data Processing**: Always process raw API data through dataProcessor.js before storage
-- **Testing Endpoints**: Every new feature requires a corresponding `/test` endpoint
+- **Data Processing**: Always process raw API data through dataProcessor.js
+  before storage
+- **Testing Endpoints**: Every new feature requires a corresponding `/test`
+  endpoint
 
 ### Frontend Development
-- **Alpine.js Only**: All frontend reactivity uses Alpine.js, avoid vanilla DOM manipulation
-- **CDN Dependencies**: Frontend uses CDN dependencies (Alpine.js, Tailwind) served directly
+
+- **Alpine.js Only**: All frontend reactivity uses Alpine.js, avoid vanilla DOM
+  manipulation
+- **CDN Dependencies**: Frontend uses CDN dependencies (Alpine.js, Tailwind)
+  served directly
 - **No Build Process**: Frontend is vanilla HTML/CSS/JS with CDN dependencies
 - **API Calls**: Frontend makes direct calls to `/api/*` endpoints
 
 ### Error Handling Standards
-- **Consistent Pattern**: All services use try/catch with detailed console.log statements
-- **Graceful Degradation**: Always provide fallback responses when external services fail
-- **Rate Limit Awareness**: Implement delays between API calls (see apiFootball.js patterns)
-- **User-Friendly Messages**: Error responses should be informative but not expose internal details
+
+- **Consistent Pattern**: All services use try/catch with detailed console.log
+  statements
+- **Graceful Degradation**: Always provide fallback responses when external
+  services fail
+- **Rate Limit Awareness**: Implement delays between API calls (see
+  apiFootball.js patterns)
+- **User-Friendly Messages**: Error responses should be informative but not
+  expose internal details
 
 ### Security Practices
+
 - **Environment Variables**: Never commit API keys or sensitive data to git
-- **CORS Configuration**: Properly configured for development and production environments
+- **CORS Configuration**: Properly configured for development and production
+  environments
 - **Helmet Middleware**: Security headers are properly configured in server.js
 - **Input Validation**: Validate all user inputs and API parameters
 
 ### Testing Requirements
-- **Before Implementation**: Always test existing functionality with `/api/*/test` endpoints before changes
-- **New Features**: Every new route or service must have corresponding test endpoint
+
+- **Before Implementation**: Always test existing functionality with
+  `/api/*/test` endpoints before changes
+- **New Features**: Every new route or service must have corresponding test
+  endpoint
 - **Database Testing**: Use `npm run db:test:quick` before database operations
-- **API Connectivity**: Test API-Sports connection with `curl http://localhost:3000/api/laliga/test` before data operations
+- **API Connectivity**: Test API-Sports connection with
+  `curl http://localhost:3000/api/laliga/test` before data operations

@@ -1,0 +1,28 @@
+{
+  "name": "frontend-public",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@types/node": "^24.6.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "autoprefixer": "^10.4.21",
+    "clsx": "^2.1.1",
+    "eslint": "^9.36.0",
+    "eslint-config-next": "^15.5.4",
+    "next": "^15.5.4",
+    "postcss": "^8.5.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.9.2"
+  }
+}

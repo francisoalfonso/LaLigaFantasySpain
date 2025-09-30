@@ -259,10 +259,28 @@
 
             <!-- Fantasy Value Evolution Section -->
             <div x-show="showSection === 'evolution'" class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <i class="fas fa-chart-line mr-3 text-indigo-600"></i>
-                    Evolución de Valor Fantasy - Temporada 2025-26
-                </h2>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-chart-line mr-3 text-indigo-600"></i>
+                        Evolución de Valor Fantasy - Temporada 2025-26
+                    </h2>
+                    <!-- Real Data Badge -->
+                    <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Datos Reales API-Sports
+                    </span>
+                </div>
+
+                <!-- Info Alert about Real Data -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-500 mr-3 mt-0.5"></i>
+                        <div class="text-sm text-blue-700">
+                            <p class="font-semibold mb-1">Evolución basada en partidos reales</p>
+                            <p>Los datos mostrados corresponden únicamente a los partidos disputados en la temporada actual (no datos simulados). A medida que avance la temporada, el gráfico incluirá más puntos de datos.</p>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Loading State for Evolution -->
                 <div x-show="loadingEvolution" class="text-center py-8">
@@ -309,12 +327,17 @@
                         </div>
                     </div>
 
-                    <!-- Chart Container -->
+                    <!-- Chart Container - Optimized for fewer data points -->
                     <div class="bg-gray-50 rounded-lg p-4 mb-6">
                         <h3 class="font-semibold text-gray-700 mb-4">Gráfica de Evolución</h3>
-                        <div class="relative">
-                            <canvas id="evolutionChart" width="400" height="200"></canvas>
+                        <!-- Chart responsive container with max-width constraint for better UX -->
+                        <div class="relative mx-auto" style="max-width: 600px;">
+                            <canvas id="evolutionChart" width="400" height="250"></canvas>
                         </div>
+                        <p class="text-xs text-gray-500 text-center mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Mostrando evolución basada en partidos jugados reales (Temporada 2025-26)
+                        </p>
                     </div>
 
                     <!-- Recent Performance Table -->

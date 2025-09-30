@@ -8,12 +8,121 @@ const {
 } = require('../../config/veo3/anaCharacter');
 
 /**
+ * Tipos de emociones por elemento de estructura viral
+ * Basado en Framework Viral Comprobado (1,350M visitas)
+ */
+const EMOCIONES_POR_ELEMENTO = {
+    hook: {
+        chollo: 'conspiratorial_whisper',
+        prediccion: 'professional_authority',
+        breaking: 'urgent_alert_max_energy',
+        analisis: 'confident_expert'
+    },
+    contexto: {
+        chollo: 'building_tension',
+        prediccion: 'analytical_calm',
+        breaking: 'rising_urgency',
+        analisis: 'establishing_credibility'
+    },
+    conflicto: {
+        chollo: 'implicit_tension',
+        prediccion: 'data_confrontation',
+        breaking: 'crisis_building',
+        analisis: 'problem_identification'
+    },
+    inflexion: {
+        chollo: 'explosive_revelation',
+        prediccion: 'eureka_moment',
+        breaking: 'breaking_news_announcement',
+        analisis: 'key_insight_discovery'
+    },
+    resolucion: {
+        chollo: 'explosive_excitement',
+        prediccion: 'confident_conclusion',
+        breaking: 'impact_explanation',
+        analisis: 'solution_presentation'
+    },
+    moraleja: {
+        chollo: 'knowing_wisdom',
+        prediccion: 'expert_advice',
+        breaking: 'urgent_warning',
+        analisis: 'professional_takeaway'
+    },
+    cta: {
+        chollo: 'urgent_call_to_action',
+        prediccion: 'expert_recommendation',
+        breaking: 'immediate_action_required',
+        analisis: 'informed_suggestion'
+    }
+};
+
+/**
+ * Arcos emocionales completos por tipo de contenido
+ */
+const ARCOS_EMOCIONALES = {
+    chollo: {
+        nombre: 'Chollo Revelation',
+        duracion: '10-12s',
+        secuencia: [
+            { elemento: 'hook', emocion: 'conspiratorial_whisper', tiempo: '0-2s' },
+            { elemento: 'contexto', emocion: 'building_tension', tiempo: '2-4s' },
+            { elemento: 'conflicto', emocion: 'implicit_tension', tiempo: '4-5s' },
+            { elemento: 'inflexion', emocion: 'explosive_revelation', tiempo: '5-7s' },
+            { elemento: 'resolucion', emocion: 'explosive_excitement', tiempo: '7-9s' },
+            { elemento: 'moraleja', emocion: 'knowing_wisdom', tiempo: '9-10s' },
+            { elemento: 'cta', emocion: 'urgent_call_to_action', tiempo: '10-12s' }
+        ]
+    },
+    prediccion: {
+        nombre: 'Data Confidence',
+        duracion: '12-15s',
+        secuencia: [
+            { elemento: 'hook', emocion: 'professional_authority', tiempo: '0-2s' },
+            { elemento: 'contexto', emocion: 'analytical_calm', tiempo: '2-5s' },
+            { elemento: 'conflicto', emocion: 'data_confrontation', tiempo: '5-7s' },
+            { elemento: 'inflexion', emocion: 'eureka_moment', tiempo: '7-9s' },
+            { elemento: 'resolucion', emocion: 'confident_conclusion', tiempo: '9-12s' },
+            { elemento: 'moraleja', emocion: 'expert_advice', tiempo: '12-13s' },
+            { elemento: 'cta', emocion: 'expert_recommendation', tiempo: '13-15s' }
+        ]
+    },
+    breaking: {
+        nombre: 'Breaking News',
+        duracion: '8-10s',
+        secuencia: [
+            { elemento: 'hook', emocion: 'urgent_alert_max_energy', tiempo: '0-1s' },
+            { elemento: 'contexto', emocion: 'rising_urgency', tiempo: '1-3s' },
+            { elemento: 'inflexion', emocion: 'breaking_news_announcement', tiempo: '3-5s' },
+            { elemento: 'resolucion', emocion: 'impact_explanation', tiempo: '5-7s' },
+            { elemento: 'moraleja', emocion: 'urgent_warning', tiempo: '7-8s' },
+            { elemento: 'cta', emocion: 'immediate_action_required', tiempo: '8-10s' }
+        ]
+    },
+    analisis: {
+        nombre: 'Professional Analysis',
+        duracion: '12-15s',
+        secuencia: [
+            { elemento: 'hook', emocion: 'confident_expert', tiempo: '0-2s' },
+            { elemento: 'contexto', emocion: 'establishing_credibility', tiempo: '2-4s' },
+            { elemento: 'conflicto', emocion: 'problem_identification', tiempo: '4-6s' },
+            { elemento: 'inflexion', emocion: 'key_insight_discovery', tiempo: '6-9s' },
+            { elemento: 'resolucion', emocion: 'solution_presentation', tiempo: '9-12s' },
+            { elemento: 'moraleja', emocion: 'professional_takeaway', tiempo: '12-13s' },
+            { elemento: 'cta', emocion: 'informed_suggestion', tiempo: '13-15s' }
+        ]
+    }
+};
+
+/**
  * Constructor de prompts optimizados para Ana Real
  * Genera prompts siguiendo las mejores prácticas de VEO3
+ * Integrado con Framework Viral Comprobado
  */
 class PromptBuilder {
     constructor() {
         this.maxLength = 500; // Límite recomendado VEO3
+        this.emocionesPorElemento = EMOCIONES_POR_ELEMENTO;
+        this.arcosEmocionales = ARCOS_EMOCIONALES;
     }
 
     /**
@@ -34,20 +143,89 @@ class PromptBuilder {
     }
 
     /**
-     * Prompt para revelación de chollo
+     * Construir prompt con estructura viral completa
+     * @param {string} type - Tipo de contenido (chollo, prediccion, breaking, analisis)
+     * @param {object} data - Datos del contenido
+     * @param {object} options - Opciones adicionales
+     * @returns {object} - Prompt estructurado con arco emocional
+     */
+    buildViralStructuredPrompt(type, data, options = {}) {
+        const arco = this.arcosEmocionales[type];
+        if (!arco) {
+            throw new Error(`Tipo de contenido no válido: ${type}`);
+        }
+
+        // Construir diálogo completo con estructura viral
+        const dialogueParts = {
+            hook: data.hook || '',
+            contexto: data.contexto || '',
+            conflicto: data.conflicto || '',
+            inflexion: data.inflexion || '',
+            resolucion: data.resolucion || '',
+            moraleja: data.moraleja || '',
+            cta: data.cta || ''
+        };
+
+        // Combinar todo el diálogo
+        const fullDialogue = Object.values(dialogueParts)
+            .filter(part => part.length > 0)
+            .join(' ');
+
+        console.log(`[PromptBuilder] Prompt viral ${type} construido: ${arco.nombre} (${arco.duracion})`);
+        console.log(`[PromptBuilder] Arco emocional: ${arco.secuencia.length} elementos`);
+
+        return {
+            prompt: this.buildPrompt({ dialogue: fullDialogue }),
+            arcoEmocional: arco,
+            dialogueParts,
+            metadata: {
+                type,
+                duracionEstimada: arco.duracion,
+                elementosEstructura: arco.secuencia.length
+            }
+        };
+    }
+
+    /**
+     * Obtener emoción recomendada para elemento y tipo
+     * @param {string} elemento - Elemento de estructura (hook, contexto, etc)
+     * @param {string} type - Tipo de contenido
+     * @returns {string} - Emoción recomendada
+     */
+    getEmotionForElement(elemento, type) {
+        return this.emocionesPorElemento[elemento]?.[type] || 'neutral';
+    }
+
+    /**
+     * Obtener arco emocional completo para tipo de contenido
+     * @param {string} type - Tipo de contenido
+     * @returns {object} - Arco emocional completo
+     */
+    getEmotionalArc(type) {
+        return this.arcosEmocionales[type] || null;
+    }
+
+    /**
+     * Prompt para revelación de chollo (con estructura viral)
      * @param {string} playerName - Nombre del jugador
      * @param {number} price - Precio del jugador
      * @param {object} options - Opciones adicionales
      * @returns {string} - Prompt optimizado para chollo
      */
     buildCholloPrompt(playerName, price, options = {}) {
+        // Si se proporciona estructura completa, usar método viral
+        if (options.useViralStructure && options.structuredData) {
+            return this.buildViralStructuredPrompt('chollo', options.structuredData, options);
+        }
+
+        // Diálogo simple (legacy)
         const dialogue = options.dialogue || `¡Misters! He descubierto algo sobre ${playerName}... ¡A ${price}€ es INCREÍBLE! ¡Preparaos para el chollo del SIGLO!`;
 
         return this.buildPrompt({ dialogue });
     }
 
     /**
-     * Prompt para análisis de jugador
+     * Prompt para análisis de jugador (con estructura viral)
      * @param {string} playerName - Nombre del jugador
      * @param {number} price - Precio del jugador
      * @param {object} stats - Estadísticas del jugador
@@ -55,31 +233,49 @@ class PromptBuilder {
      * @returns {string} - Prompt optimizado para análisis
      */
     buildAnalysisPrompt(playerName, price, stats = {}, options = {}) {
+        // Si se proporciona estructura completa, usar método viral
+        if (options.useViralStructure && options.structuredData) {
+            return this.buildViralStructuredPrompt('analisis', options.structuredData, options);
+        }
+
+        // Diálogo simple (legacy)
         const dialogue = options.dialogue || `${playerName}... los números son ESPECTACULARES! ${price}€ por este nivel... ¡Es MATEMÁTICA pura!`;
 
         return this.buildPrompt({ dialogue });
     }
 
     /**
-     * Prompt para noticias urgentes/breaking news
+     * Prompt para noticias urgentes/breaking news (con estructura viral)
      * @param {string} news - Noticia urgente
      * @param {object} options - Opciones adicionales
      * @returns {string} - Prompt optimizado para breaking news
      */
     buildBreakingNewsPrompt(news, options = {}) {
+        // Si se proporciona estructura completa, usar método viral
+        if (options.useViralStructure && options.structuredData) {
+            return this.buildViralStructuredPrompt('breaking', options.structuredData, options);
+        }
+
+        // Diálogo simple (legacy)
         const dialogue = options.dialogue || `¡ATENCIÓN Misters! Acaba de confirmarse... ¡${news}! ¡Actualizad vuestros equipos YA!`;
 
         return this.buildPrompt({ dialogue });
     }
 
     /**
-     * Prompt para predicciones de jornada
+     * Prompt para predicciones de jornada (con estructura viral)
      * @param {number} gameweek - Número de jornada
      * @param {string} prediction - Predicción principal
      * @param {object} options - Opciones adicionales
      * @returns {string} - Prompt optimizado para predicciones
      */
     buildPredictionPrompt(gameweek, prediction, options = {}) {
+        // Si se proporciona estructura completa, usar método viral
+        if (options.useViralStructure && options.structuredData) {
+            return this.buildViralStructuredPrompt('prediccion', options.structuredData, options);
+        }
+
+        // Diálogo simple (legacy)
         const dialogue = options.dialogue || `Para la jornada ${gameweek}... mi análisis indica que ¡${prediction}! Seguid mis consejos.`;
 
         return this.buildPrompt({ dialogue });
@@ -171,6 +367,89 @@ class PromptBuilder {
 
         return validation;
     }
+
+    /**
+     * Validar convergencia viral del contenido
+     * @param {string} dialogue - Diálogo completo
+     * @param {object} options - Opciones de validación
+     * @returns {object} - Resultado de validación de convergencia
+     */
+    validateViralConvergence(dialogue, options = {}) {
+        const validation = {
+            valid: true,
+            convergenceRatio: { general: 0, niche: 0 },
+            warnings: [],
+            errors: []
+        };
+
+        // Keywords generales emocionales (70% esperado)
+        const generalKeywords = [
+            'secreto', 'descubrir', 'increíble', 'espectacular', 'mira',
+            'sorpresa', 'nadie', 'todos', 'ahora', 'urgente',
+            'atención', 'misters', 'preparaos', 'explosivo'
+        ];
+
+        // Keywords nicho Fantasy La Liga (30% esperado)
+        const nicheKeywords = [
+            '€', 'precio', 'puntos', 'fantasy', 'chollo', 'jornada',
+            'gol', 'asistencia', 'rating', 'equipo', 'fichaje',
+            'stats', 'probabilidad', 'valor'
+        ];
+
+        const words = dialogue.toLowerCase().split(/\s+/);
+        let generalCount = 0;
+        let nicheCount = 0;
+
+        words.forEach(word => {
+            if (generalKeywords.some(kw => word.includes(kw))) generalCount++;
+            if (nicheKeywords.some(kw => word.includes(kw))) nicheCount++;
+        });
+
+        const totalKeywords = generalCount + nicheCount;
+        if (totalKeywords > 0) {
+            validation.convergenceRatio.general = Math.round((generalCount / totalKeywords) * 100);
+            validation.convergenceRatio.niche = Math.round((nicheCount / totalKeywords) * 100);
+        }
+
+        // Validar ratio 70/30 (con margen +/- 10%)
+        if (validation.convergenceRatio.general < 60) {
+            validation.warnings.push(`Ratio general bajo: ${validation.convergenceRatio.general}% (esperado: 70%)`);
+        }
+        if (validation.convergenceRatio.niche < 20) {
+            validation.warnings.push(`Ratio nicho bajo: ${validation.convergenceRatio.niche}% (esperado: 30%)`);
+        }
+
+        console.log(`[PromptBuilder] Convergencia viral: ${validation.convergenceRatio.general}% general / ${validation.convergenceRatio.niche}% nicho`);
+
+        return validation;
+    }
+
+    /**
+     * Generar metadata completa para video viral
+     * @param {string} type - Tipo de contenido
+     * @param {string} dialogue - Diálogo completo
+     * @returns {object} - Metadata completa
+     */
+    generateViralMetadata(type, dialogue) {
+        const arco = this.arcosEmocionales[type];
+        const convergence = this.validateViralConvergence(dialogue);
+
+        return {
+            contentType: type,
+            emotionalArc: arco?.nombre || 'Unknown',
+            estimatedDuration: arco?.duracion || 'N/A',
+            structureElements: arco?.secuencia.length || 0,
+            convergenceRatio: convergence.convergenceRatio,
+            dialogueLength: dialogue.length,
+            wordsCount: dialogue.split(/\s+/).length,
+            validations: {
+                convergence: convergence.warnings.length === 0,
+                arcComplete: arco !== null
+            }
+        };
+    }
 }
 
 module.exports = PromptBuilder;
+module.exports.EMOCIONES_POR_ELEMENTO = EMOCIONES_POR_ELEMENTO;
+module.exports.ARCOS_EMOCIONALES = ARCOS_EMOCIONALES;

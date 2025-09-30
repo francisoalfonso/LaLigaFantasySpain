@@ -45,6 +45,18 @@ POST /api/veo3/test-minimal-prompt
 
 **⚠️ Este prompt FUERZA que VEO3 use EXACTAMENTE la persona de la imagen de referencia.**
 
+### 🎬 **FRAMEWORK VIRAL INTEGRADO** ⭐ NUEVO
+**PromptBuilder.js ahora incluye Framework Viral Comprobado (1,350M visitas)**
+
+- ✅ **4 arcos emocionales** predefinidos: chollo, prediccion, breaking, analisis
+- ✅ **Estructura 7 elementos**: hook → contexto → conflicto → inflexión → resolución → moraleja → CTA
+- ✅ **Validación convergencia 70/30**: General emocional + Nicho Fantasy
+- ✅ **Metadata viral automática**: Duración, emociones, validaciones
+- ✅ **Compatibilidad backward**: Métodos legacy siguen funcionando
+
+**Documentación completa**: `docs/VEO3_FRAMEWORK_VIRAL_USO.md`
+**Testing**: `npm run veo3:test-framework`
+
 ## 🚀 PRÓXIMA TAREA PRIORITARIA
 
 **Al retomar el proyecto, comenzar inmediatamente con:**

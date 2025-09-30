@@ -18,7 +18,8 @@
     "veo3:test-all": "npm run veo3:test-ana && npm run veo3:test-cards && npm run veo3:test-concat",
     "veo3:test-ana": "node scripts/veo3/generate-ana-video.js --test",
     "veo3:test-cards": "node scripts/veo3/add-player-cards.js --test",
-    "veo3:test-concat": "node scripts/veo3/concatenate-videos.js --test"
+    "veo3:test-concat": "node scripts/veo3/concatenate-videos.js --test",
+    "veo3:test-framework": "node scripts/veo3/test-viral-framework.js"
   },
   "keywords": [
     "fantasy",

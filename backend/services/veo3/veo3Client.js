@@ -2,13 +2,15 @@ const axios = require('axios');
 const logger = require('../../utils/logger');
 const videoManager = require('../videoManager');
 const BunnyStreamManager = require('../bunnyStreamManager');
+const characterRefs = require('../../config/characterReferences');
 
-// Ana Character Bible - NUNCA CAMBIAR PARA MANTENER CONSISTENCIA
-const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. Confident posture, natural hand gestures for emphasis, professional broadcaster energy";
+// Ana Character Bible - MANTENER PARA BACKWARD COMPATIBILITY
+const ANA_CHARACTER_BIBLE =
+    'A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. Confident posture, natural hand gestures for emphasis, professional broadcaster energy';
 
 /**
  * Cliente para la API VEO3 de KIE.ai
- * Genera videos de Ana Real con consistencia perfecta
+ * Genera videos con múltiples reporters y contextos visuales
  */
 class VEO3Client {
     constructor() {
@@ -25,12 +27,22 @@ class VEO3Client {
         // Inicializar Bunny.net Stream Manager
         this.bunnyStream = new BunnyStreamManager();
 
+        // Referencias de personajes (nuevo sistema)
+        this.characterReferences = {
+            ana: characterRefs.ANA_REFERENCES,
+            carlos: characterRefs.CARLOS_REFERENCES,
+            lucia: characterRefs.LUCIA_REFERENCES,
+            pablo: characterRefs.PABLO_REFERENCES
+        };
+
         if (!this.apiKey) {
             throw new Error('KIE_AI_API_KEY no encontrada en variables de entorno');
         }
 
         if (!this.anaImageUrl) {
-            throw new Error('ANA_IMAGE_URL no encontrada en variables de entorno');
+            logger.warn(
+                '[VEO3Client] ANA_IMAGE_URL no encontrada, usando sistema multi-referencia'
+            );
         }
     }
 
@@ -63,11 +75,13 @@ class VEO3Client {
             };
 
             logger.info(`[VEO3Client] Generando video con prompt: ${prompt.substring(0, 100)}...`);
-            logger.info(`[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`);
+            logger.info(
+                `[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`
+            );
 
             const response = await axios.post(`${this.baseUrl}/generate`, params, {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 timeout: 30000 // 30 segundos para request inicial
@@ -81,7 +95,6 @@ class VEO3Client {
 
             logger.info(`[VEO3Client] Video iniciado, taskId: ${result.data.taskId}`);
             return result;
-
         } catch (error) {
             logger.error('[VEO3Client] Error generando video:', error.message);
 
@@ -107,14 +120,13 @@ class VEO3Client {
         try {
             const response = await axios.get(`${this.baseUrl}/record-info?taskId=${taskId}`, {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 timeout: 15000
             });
 
             return response.data;
-
         } catch (error) {
             logger.error(`[VEO3Client] Error obteniendo estado ${taskId}:`, error.message);
             throw error;
@@ -141,7 +153,9 @@ class VEO3Client {
 
                 // Video completado exitosamente
                 if (status.data?.successFlag === 1) {
-                    logger.info(`[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`);
+                    logger.info(
+                        `[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`
+                    );
 
                     const veo3Url = status.data.response.resultUrls[0];
                     logger.info(`[VEO3Client] Descargando video de VEO3: ${veo3Url}`);
@@ -161,7 +175,9 @@ class VEO3Client {
                             seeds: status.data.response.seeds
                         });
 
-                        logger.info(`[VEO3Client] Video subido exitosamente a Bunny.net: ${bunnyData.directUrl}`);
+                        logger.info(
+                            `[VEO3Client] Video subido exitosamente a Bunny.net: ${bunnyData.directUrl}`
+                        );
 
                         return {
                             taskId,
@@ -178,9 +194,10 @@ class VEO3Client {
                             platform: 'bunny',
                             videoId: bunnyData.id // ID de Bunny.net para futuras referencias
                         };
-
                     } catch (bunnyError) {
-                        logger.error(`[VEO3Client] Error subiendo a Bunny.net: ${bunnyError.message}`);
+                        logger.error(
+                            `[VEO3Client] Error subiendo a Bunny.net: ${bunnyError.message}`
+                        );
 
                         // Fallback: Intentar descarga local como antes
                         try {
@@ -194,7 +211,9 @@ class VEO3Client {
                                 service: 'veo3'
                             });
 
-                            logger.info(`[VEO3Client] Video almacenado localmente como fallback: ${videoData.publicUrl}`);
+                            logger.info(
+                                `[VEO3Client] Video almacenado localmente como fallback: ${videoData.publicUrl}`
+                            );
 
                             return {
                                 taskId,
@@ -209,9 +228,10 @@ class VEO3Client {
                                 videoId: videoData.id,
                                 bunnyError: bunnyError.message
                             };
-
                         } catch (localError) {
-                            logger.error(`[VEO3Client] Ambos fallback fallaron: ${localError.message}`);
+                            logger.error(
+                                `[VEO3Client] Ambos fallback fallaron: ${localError.message}`
+                            );
 
                             // Último fallback: URL original (lo que teníamos antes)
                             logger.warn('[VEO3Client] Usando URL original como último recurso');
@@ -234,13 +254,15 @@ class VEO3Client {
                 if (status.data?.successFlag >= 2) {
                     const errorMsg = status.data.errorMessage || 'Error desconocido en generación';
                     logger.error(`[VEO3Client] Video ${taskId} falló: ${errorMsg}`);
-                    logger.error(`[VEO3Client] Status completo:`, JSON.stringify(status.data, null, 2));
+                    logger.error(
+                        `[VEO3Client] Status completo:`,
+                        JSON.stringify(status.data, null, 2)
+                    );
                     throw new Error(`Generación falló: ${errorMsg}`);
                 }
 
                 // Aún procesando (successFlag: 0)
                 logger.info(`[VEO3Client] Video ${taskId} aún procesando... (intento ${attempts})`);
-
             } catch (error) {
                 logger.error(`[VEO3Client] Error comprobando estado:`, error.message);
                 throw error;
@@ -270,9 +292,10 @@ class VEO3Client {
             // Esperar completar
             const video = await this.waitForCompletion(initResult.data.taskId);
 
-            logger.info(`[VEO3Client] Video completo: ${video.url} (${video.duration}s, $${video.cost})`);
+            logger.info(
+                `[VEO3Client] Video completo: ${video.url} (${video.duration}s, $${video.cost})`
+            );
             return video;
-
         } catch (error) {
             logger.error('[VEO3Client] Error generación completa:', error.message);
             throw error;
@@ -323,7 +346,9 @@ class VEO3Client {
             // Generar videos en paralelo (limitado por API)
             for (let i = 0; i < prompts.length; i++) {
                 const prompt = prompts[i];
-                logger.info(`[VEO3Client] Generando video ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`);
+                logger.info(
+                    `[VEO3Client] Generando video ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`
+                );
 
                 const video = await this.generateCompleteVideo(prompt, options);
                 videos.push(video);
@@ -355,7 +380,6 @@ class VEO3Client {
                 totalVideos: videos.length,
                 finalUrl: concatenatedVideo.publicUrl
             };
-
         } catch (error) {
             logger.error('[VEO3Client] Error generando videos múltiples:', error.message);
             throw error;
@@ -397,12 +421,11 @@ class VEO3Client {
                     logger.info(`[VEO3Client] ✅ Video descargado: ${outputPath}`);
                     resolve();
                 });
-                writer.on('error', (error) => {
+                writer.on('error', error => {
                     logger.error(`[VEO3Client] ❌ Error descargando video:`, error.message);
                     reject(error);
                 });
             });
-
         } catch (error) {
             logger.error('[VEO3Client] Error en downloadVideo:', error.message);
             throw error;
@@ -437,7 +460,6 @@ class VEO3Client {
                     progress: 50
                 };
             }
-
         } catch (error) {
             logger.error(`[VEO3Client] Error en getTaskStatus:`, error.message);
             throw error;
@@ -462,11 +484,120 @@ class VEO3Client {
                 logger.info('[VEO3Client] ❌ Conexión API falló');
                 return false;
             }
-
         } catch (error) {
             logger.error('[VEO3Client] ❌ Error testando conexión:', error.message);
             return false;
         }
+    }
+
+    /**
+     * NUEVO: Generar video con contexto visual (multi-referencia)
+     * @param {string} reporter - 'ana', 'carlos', 'lucia', 'pablo'
+     * @param {string} contentType - 'chollo_viral', 'analisis_tactica', etc.
+     * @param {string} prompt - Prompt del video
+     * @param {object} options - Opciones adicionales
+     * @returns {Promise<object>} - Resultado de generación
+     */
+    async generateVideoWithContext(reporter, contentType, prompt, options = {}) {
+        try {
+            logger.info(`[VEO3Client] Generando video contextual: ${reporter} - ${contentType}`);
+
+            // Obtener contexto de producción
+            const context = characterRefs.getProductionContext(contentType);
+
+            // Obtener referencias del reporter
+            const reporterRefs = this.characterReferences[reporter.toLowerCase()];
+            if (!reporterRefs) {
+                throw new Error(`Reporter no encontrado: ${reporter}`);
+            }
+
+            // Seleccionar imágenes según contexto
+            const contextImages = this.selectContextImages(reporterRefs, context);
+
+            // Obtener seed del reporter
+            const reporterSeed = reporterRefs.seed;
+
+            logger.info(`[VEO3Client] Usando ${contextImages.length} imágenes de referencia`);
+            logger.info(
+                `[VEO3Client] Contexto: ${context.environment}, outfit: ${context.outfit}, mood: ${context.mood}`
+            );
+
+            // Generar video con referencias múltiples
+            return await this.generateVideo(prompt, {
+                imageUrls: contextImages,
+                seed: reporterSeed,
+                referenceImageWeight: options.referenceImageWeight || 0.9,
+                ...options
+            });
+        } catch (error) {
+            logger.error('[VEO3Client] Error generando video contextual:', error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * Seleccionar imágenes de referencia según contexto
+     * @param {object} reporterRefs - Referencias del reporter
+     * @param {object} context - Contexto de producción
+     * @returns {Array<string>} - URLs de imágenes
+     */
+    selectContextImages(reporterRefs, context) {
+        const images = [];
+
+        // SIEMPRE incluir imagen base frontal (cara principal)
+        images.push(reporterRefs.base.main);
+
+        // Agregar outfit específico si existe
+        const outfitKey = context.outfit;
+        if (outfitKey && reporterRefs.outfits[outfitKey]) {
+            images.push(reporterRefs.outfits[outfitKey]);
+        }
+
+        // Agregar ambiente específico si existe
+        const envKey = context.environment;
+        if (envKey && reporterRefs.environments[envKey]) {
+            images.push(reporterRefs.environments[envKey]);
+        }
+
+        return images;
+    }
+
+    /**
+     * Construir prompt completo con contexto cinematográfico
+     * @param {string} reporter - Nombre del reporter
+     * @param {string} contentType - Tipo de contenido
+     * @param {string} dialogue - Diálogo a decir
+     * @param {string} behavior - Descripción comportamiento
+     * @param {string} cinematography - Descripción cámara
+     * @returns {string} - Prompt completo
+     */
+    buildContextualPrompt(reporter, contentType, dialogue, behavior = '', cinematography = '') {
+        const reporterRefs = this.characterReferences[reporter.toLowerCase()];
+        const context = characterRefs.getProductionContext(contentType);
+
+        // Character Bible del reporter
+        const characterBible = reporterRefs.characterBible;
+
+        // Descripciones de mood y cámara
+        const lighting = characterRefs.getLightingDescription(context.mood);
+        const cameraMovement = characterRefs.getCameraDescription(context.cameraStyle);
+
+        // Construir prompt completo
+        return `
+            ${characterBible}
+
+            Speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}"
+
+            ${behavior ? `BEHAVIOR: ${behavior}` : ''}
+
+            CINEMATOGRAPHY: ${cinematography || cameraMovement}
+
+            LIGHTING: ${lighting}
+
+            Exact facial features from reference images.
+            Natural hand gestures for emphasis.
+            Direct eye contact with camera.
+        `.trim();
     }
 }
 

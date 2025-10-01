@@ -43,7 +43,10 @@ class ViralVideoBuilder {
             // SEGMENTO 1: HOOK (8s) - Susurro conspirativo
             // ====================================
             logger.info('[ViralVideoBuilder] Generando segmento 1: HOOK conspirativo...');
-            const hookDialogue = `Pssst... Misters, venid que os cuento un secreto... He encontrado un ${stats.position || 'jugador'} del ${team} por €${price}M que está rindiendo como uno de €15M...`;
+
+            // 🔴 FIX HOOK: Mejorado para mayor impacto viral
+            // Cambios: Más específico, más intriga, mejor valor percibido
+            const hookDialogue = `Pssst... Misters... ¿Sabéis quién está fichando todo el mundo esta jornada? Un ${stats.position || 'jugador'} del ${team} por solo €${price}M... y está dando más puntos que jugadores de €12M o más...`;
 
             const hookPrompt = this.promptBuilder.buildPrompt({
                 dialogue: hookDialogue,
@@ -204,18 +207,36 @@ class ViralVideoBuilder {
      * @returns {string} - Caption optimizado con hashtags
      */
     generateInstagramCaption(playerData) {
-        const { playerName, price, ratio, team } = playerData;
+        const { playerName, price, ratio, team, stats = {} } = playerData;
 
-        return `🔥 ¡CHOLLO DETECTADO, MISTERS! 🔥
+        // 🔴 FIX CAPTION: Mejorado para mejor engagement
+        // Cambios:
+        // - Hook más fuerte y específico
+        // - Datos más relevantes (puntos, no solo ratio)
+        // - CTA más urgente con FOMO
+        // - Hashtags más específicos y trending
 
-${playerName} (${team})
-💰 VM: €${price}M
-📊 Ratio Valor: ${ratio}x
-⚡ IMPRESCINDIBLE para tu plantilla
+        const totalPoints = stats.totalPoints || Math.floor(stats.rating * 10) || 0;
+        const estimatedPoints = Math.floor(totalPoints * 1.2); // Proyección
 
-Un ${team} a este precio... ¿Fichamos ya? 👇
+        return `🚨 ALERTA CHOLLO - JORNADA ${stats.gameweek || 'ACTUAL'} 🚨
 
-#FantasyLaLiga #Chollos #Misters #${team.replace(/\s+/g, '')} #${playerName.replace(/\s+/g, '')} #LaLiga #Fantasy #Fichajes`;
+${playerName} - ${team}
+💰 Solo €${price}M (Ratio ${ratio}x)
+⚡ ${totalPoints} pts acumulados
+📈 Proyección: ${estimatedPoints}+ pts
+${stats.goals > 0 ? `⚽ ${stats.goals} goles` : ''}${stats.assists > 0 ? ` + ${stats.assists} asistencias` : ''}
+
+¿Por qué es IMPRESCINDIBLE?
+✅ Precio infravaluado
+✅ Buen calendario
+✅ En racha
+
+⏰ Ficha ANTES de que suba de precio
+
+¿Le metes en tu plantilla? 👇
+
+#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #${team.replace(/\s+/g, '')} #Jornada${stats.gameweek || ''} #Fichajes #CholloDelDia`;
     }
 
     /**

@@ -283,6 +283,12 @@ router.post('/preview-viral', async (req, res) => {
                 }
             }
 
+            // Generar scripts mock que se enviarían a VEO3
+            const stats = playerData.stats || {};
+            const hookDialogue = `Pssst... Misters, venid que os cuento un secreto... He encontrado un ${stats.position || 'jugador'} del ${playerData.team} por €${playerData.price}M que está rindiendo como uno de €15M...`;
+            const developmentDialogue = `${playerData.playerName}. Ratio valor ${playerData.ratio}x. ${stats.goals || 0} goles, ${stats.assists || 0} asistencias en ${stats.games || 0} partidos. Rating ${stats.rating || 0}. Y lo mejor... buen calendario próximos partidos.`;
+            const ctaDialogue = `¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!`;
+
             const mockVideoResult = {
                 videoPath: `./output/veo3/viral/${videoFileName}`,
                 duration: '~24s',
@@ -293,7 +299,13 @@ router.post('/preview-viral', async (req, res) => {
                     price: playerData.price,
                     ratio: playerData.ratio,
                     team: playerData.team,
-                    generatedAt: new Date().toISOString()
+                    stats: stats,
+                    generatedAt: new Date().toISOString(),
+                    segments: [
+                        { type: 'hook', dialogue: hookDialogue },
+                        { type: 'development', dialogue: developmentDialogue },
+                        { type: 'cta', dialogue: ctaDialogue }
+                    ]
                 }
             };
 

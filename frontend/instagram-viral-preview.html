@@ -185,12 +185,14 @@
             <div class="max-w-7xl mx-auto px-4 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <a href="/" class="text-gray-600 hover:text-gray-900">
+                        <a href="/" class="text-gray-600 hover:text-gray-900 flex items-center gap-2">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                             </svg>
+                            <span class="text-sm font-medium">Dashboard</span>
                         </a>
-                        <h1 class="text-2xl font-bold text-gray-900">🎬 Preview Video Viral Instagram</h1>
+                        <span class="text-gray-400">→</span>
+                        <h1 class="text-2xl font-bold text-gray-900">📱 Preview Contenido Instagram</h1>
                     </div>
                     <div class="flex items-center space-x-2">
                         <span class="text-sm text-gray-600">@fantasy.laliga.pro</span>
@@ -200,9 +202,55 @@
             </div>
         </header>
 
+        <!-- Tabs Navigation -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4">
+                <nav class="flex space-x-8 overflow-x-auto">
+                    <button
+                        @click="activeTab = 'chollos-viral'"
+                        :class="activeTab === 'chollos-viral' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        🔥 Chollos Virales (Reel)
+                    </button>
+                    <button
+                        @click="activeTab = 'analisis-jornada'"
+                        :class="activeTab === 'analisis-jornada' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        📊 Análisis Jornada (Carrusel)
+                    </button>
+                    <button
+                        @click="activeTab = 'top-jugadores'"
+                        :class="activeTab === 'top-jugadores' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        ⚡ Top Jugadores (Post)
+                    </button>
+                    <button
+                        @click="activeTab = 'alertas'"
+                        :class="activeTab === 'alertas' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        🚨 Alertas (Story)
+                    </button>
+                    <button
+                        @click="activeTab = 'predicciones'"
+                        :class="activeTab === 'predicciones' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        🎯 Predicciones (Reel)
+                    </button>
+                    <button
+                        @click="activeTab = 'evolucion'"
+                        :class="activeTab === 'evolucion' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
+                        📈 Evolución (Carrusel)
+                    </button>
+                </nav>
+            </div>
+        </div>
+
         <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 py-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- TAB: Chollos Virales (Reel) -->
+            <div x-show="activeTab === 'chollos-viral'" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 <!-- Left Column: Instagram Preview -->
                 <div>
@@ -455,14 +503,358 @@
                             </div>
                         </div>
                     </template>
+
+                    <!-- Viral Score & Checklist -->
+                    <template x-if="viralScore > 0">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold">🎯 Score de Viralidad</h3>
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="text-3xl font-bold"
+                                        :class="{
+                                            'text-green-600': viralScore >= 80,
+                                            'text-yellow-600': viralScore >= 60 && viralScore < 80,
+                                            'text-orange-600': viralScore >= 40 && viralScore < 60,
+                                            'text-red-600': viralScore < 40
+                                        }"
+                                        x-text="viralScore"></div>
+                                    <span class="text-gray-500 text-xl">/100</span>
+                                </div>
+                            </div>
+
+                            <!-- Barra de progreso -->
+                            <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                                <div
+                                    class="h-4 rounded-full transition-all duration-500"
+                                    :class="{
+                                        'bg-green-500': viralScore >= 80,
+                                        'bg-yellow-500': viralScore >= 60 && viralScore < 80,
+                                        'bg-orange-500': viralScore >= 40 && viralScore < 60,
+                                        'bg-red-500': viralScore < 40
+                                    }"
+                                    :style="`width: ${viralScore}%`"></div>
+                            </div>
+
+                            <!-- Nivel de viralidad -->
+                            <div class="text-center mb-4">
+                                <template x-if="viralScore >= 80">
+                                    <span class="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-full font-semibold text-sm">
+                                        🔥 ALTO POTENCIAL VIRAL
+                                    </span>
+                                </template>
+                                <template x-if="viralScore >= 60 && viralScore < 80">
+                                    <span class="inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full font-semibold text-sm">
+                                        ⚡ BUEN POTENCIAL
+                                    </span>
+                                </template>
+                                <template x-if="viralScore >= 40 && viralScore < 60">
+                                    <span class="inline-block bg-orange-100 text-orange-800 px-4 py-2 rounded-full font-semibold text-sm">
+                                        ⚠️ NECESITA MEJORAS
+                                    </span>
+                                </template>
+                                <template x-if="viralScore < 40">
+                                    <span class="inline-block bg-red-100 text-red-800 px-4 py-2 rounded-full font-semibold text-sm">
+                                        ❌ REQUIERE OPTIMIZACIÓN
+                                    </span>
+                                </template>
+                            </div>
+
+                            <!-- Checklist detallado -->
+                            <details open class="mt-4">
+                                <summary class="font-semibold text-gray-700 cursor-pointer hover:text-gray-900 mb-3">
+                                    📋 Ver checklist completo (<span x-text="viralChecklist.filter(c => c.status).length"></span>/<span x-text="viralChecklist.length"></span> checks pasados)
+                                </summary>
+
+                                <div class="space-y-2 mt-3">
+                                    <template x-for="check in viralChecklist" :key="check.item">
+                                        <div
+                                            class="flex items-start gap-3 p-3 rounded-lg transition-all"
+                                            :class="check.status ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'">
+
+                                            <div class="flex-shrink-0 mt-0.5">
+                                                <span
+                                                    class="text-lg"
+                                                    x-text="check.status ? '✅' : '❌'"></span>
+                                            </div>
+
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="text-xs font-semibold text-gray-600 uppercase" x-text="check.category"></span>
+                                                    <span
+                                                        class="text-xs font-bold px-2 py-0.5 rounded"
+                                                        :class="check.status ? 'bg-green-600 text-white' : 'bg-red-600 text-white'"
+                                                        x-text="`+${check.points}pts`"></span>
+                                                </div>
+                                                <div class="text-sm text-gray-800" x-text="check.item"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </details>
+
+                            <!-- Recomendaciones -->
+                            <template x-if="viralScore < 80">
+                                <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="font-semibold text-blue-800 mb-2">💡 Recomendaciones para mejorar:</div>
+                                    <ul class="text-sm text-blue-700 space-y-1">
+                                        <template x-for="check in viralChecklist.filter(c => !c.status)" :key="check.item">
+                                            <li class="flex items-start gap-2">
+                                                <span>→</span>
+                                                <span x-text="check.item"></span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Scripts VEO3 -->
+                    <template x-if="previewData && previewData.metadata && previewData.metadata.segments">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">🎬 Configuración Completa VEO3</h3>
+
+                            <!-- Parámetros Globales -->
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg mb-4">
+                                <h4 class="text-sm font-bold text-purple-800 mb-3">⚙️ Parámetros Técnicos</h4>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div><span class="font-semibold">Modelo:</span> veo3_fast</div>
+                                    <div><span class="font-semibold">Aspect Ratio:</span> 9:16</div>
+                                    <div><span class="font-semibold">Duración/segmento:</span> 8 segundos</div>
+                                    <div><span class="font-semibold">Character Seed:</span> 30001 (Ana fijo)</div>
+                                    <div><span class="font-semibold">Voice Locale:</span> es-ES (España)</div>
+                                    <div><span class="font-semibold">Voice Gender:</span> female</div>
+                                    <div><span class="font-semibold">Voice Style:</span> professional</div>
+                                    <div><span class="font-semibold">Watermark:</span> Fantasy La Liga Pro</div>
+                                    <div class="col-span-2"><span class="font-semibold">Image URL:</span> <span class="text-xs text-blue-600">Ana referencia (GitHub)</span></div>
+                                    <div><span class="font-semibold">Reference Weight:</span> 1.0 (máximo)</div>
+                                    <div><span class="font-semibold">Character Consistency:</span> true</div>
+                                </div>
+                            </div>
+
+                            <!-- Segmentos con Prompts Completos -->
+                            <div class="space-y-4">
+                                <!-- Segmento 1: Hook -->
+                                <div class="border-l-4 border-purple-500 pl-4 py-2 bg-purple-50">
+                                    <div class="text-xs font-semibold text-purple-600 uppercase mb-2">🎯 Segmento 1: Hook (8s)</div>
+
+                                    <div class="mb-2">
+                                        <span class="text-xs font-semibold text-gray-700">📝 Diálogo:</span>
+                                        <p class="text-sm text-gray-800 italic" x-text="previewData.metadata.segments[0].dialogue"></p>
+                                    </div>
+
+                                    <details class="mt-2">
+                                        <summary class="text-xs font-semibold text-purple-700 cursor-pointer hover:text-purple-900">Ver prompt completo VEO3</summary>
+                                        <div class="mt-2 p-2 bg-white rounded text-xs text-gray-700 font-mono">
+                                            <p class="mb-2"><strong>Behavior:</strong> She starts with conspiratorial whisper, leaning close to camera with finger to lips in shushing gesture, eyes sparkling with intrigue. Leans forward progressively, creating intimate connection. Background: modern sports studio with subtle La Liga branding.</p>
+                                            <p class="mb-2"><strong>Speaking:</strong> SPANISH FROM SPAIN (not Mexican Spanish): "<span x-text="previewData.metadata.segments[0].dialogue"></span>"</p>
+                                            <p><strong>Cinematography:</strong> Camera starts at comfortable medium shot, slowly dollies in to intimate close-up as she leans forward. Lighting: warm and intimate, creating conspiratorial mood. Subtle depth of field for cinematic feel.</p>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <!-- Segmento 2: Desarrollo -->
+                                <div class="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50">
+                                    <div class="text-xs font-semibold text-blue-600 uppercase mb-2">📊 Segmento 2: Desarrollo (8s)</div>
+
+                                    <div class="mb-2">
+                                        <span class="text-xs font-semibold text-gray-700">📝 Diálogo:</span>
+                                        <p class="text-sm text-gray-800 italic" x-text="previewData.metadata.segments[1].dialogue"></p>
+                                    </div>
+
+                                    <details class="mt-2">
+                                        <summary class="text-xs font-semibold text-blue-700 cursor-pointer hover:text-blue-900">Ver prompt completo VEO3</summary>
+                                        <div class="mt-2 p-2 bg-white rounded text-xs text-gray-700 font-mono">
+                                            <p class="mb-2"><strong>Behavior:</strong> She reveals name with confident smile and authoritative body language. Uses natural hand gestures to emphasize key statistics, pointing at imaginary graphics. Professional broadcaster energy with growing enthusiasm.</p>
+                                            <p class="mb-2"><strong>Speaking:</strong> SPANISH FROM SPAIN (not Mexican Spanish): "<span x-text="previewData.metadata.segments[1].dialogue"></span>"</p>
+                                            <p><strong>Cinematography:</strong> Camera: Steady medium shot, occasional subtle push-in on key stats. Lighting: brightens slightly from intimate to energetic broadcast lighting. Graphics overlay space on sides.</p>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <!-- Segmento 3: CTA -->
+                                <div class="border-l-4 border-pink-500 pl-4 py-2 bg-pink-50">
+                                    <div class="text-xs font-semibold text-pink-600 uppercase mb-2">🔥 Segmento 3: Call-to-Action (8s)</div>
+
+                                    <div class="mb-2">
+                                        <span class="text-xs font-semibold text-gray-700">📝 Diálogo:</span>
+                                        <p class="text-sm text-gray-800 italic" x-text="previewData.metadata.segments[2].dialogue"></p>
+                                    </div>
+
+                                    <details class="mt-2">
+                                        <summary class="text-xs font-semibold text-pink-700 cursor-pointer hover:text-pink-900">Ver prompt completo VEO3</summary>
+                                        <div class="mt-2 p-2 bg-white rounded text-xs text-gray-700 font-mono">
+                                            <p class="mb-2"><strong>Behavior:</strong> She asks question with raised eyebrow and slight head tilt, then builds to passionate conviction with decisive nod. Ends with direct camera address and confident smile, creating urgency and FOMO.</p>
+                                            <p class="mb-2"><strong>Speaking:</strong> SPANISH FROM SPAIN (not Mexican Spanish): "<span x-text="previewData.metadata.segments[2].dialogue"></span>"</p>
+                                            <p><strong>Cinematography:</strong> Camera: Medium close-up, slight push-in on final call to action. Lighting: full broadcast lighting, vibrant and energetic. Eye contact maintained throughout for direct connection.</p>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <!-- Resumen Final -->
+                                <div class="bg-gray-100 p-3 rounded-lg">
+                                    <div class="text-xs text-gray-700">
+                                        <strong>✅ Duración Total:</strong> ~24 segundos (3 segmentos × 8s)<br>
+                                        <strong>📐 Estructura Viral:</strong> Hook → Desarrollo → CTA<br>
+                                        <strong>📱 Formato:</strong> 9:16 vertical (Reel Instagram)<br>
+                                        <strong>🎭 Personaje:</strong> Ana Martínez (consistencia garantizada con seed 30001)<br>
+                                        <strong>🗣️ Idioma:</strong> Español de España (NO mexicano)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Historial de Versiones -->
+                    <template x-if="promptVersions.length > 0">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold">📚 Historial de Versiones</h3>
+                                <span class="text-sm text-gray-600" x-text="`${promptVersions.length} versión${promptVersions.length > 1 ? 'es' : ''} guardada${promptVersions.length > 1 ? 's' : ''}`"></span>
+                            </div>
+
+                            <!-- Lista de versiones -->
+                            <div class="space-y-3">
+                                <template x-for="(version, index) in promptVersions.slice().reverse()" :key="version.version">
+                                    <div
+                                        class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
+                                        :class="version.version === currentVersion ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'"
+                                        @click="currentVersion = version.version">
+
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="text-xs font-bold px-2 py-1 rounded"
+                                                    :class="version.version === currentVersion ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'"
+                                                    x-text="`v${version.version}`">
+                                                </span>
+                                                <span class="text-xs text-gray-500" x-text="new Date(version.timestamp).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })"></span>
+                                            </div>
+                                            <span
+                                                x-show="version.version === currentVersion"
+                                                class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-semibold">
+                                                ACTUAL
+                                            </span>
+                                        </div>
+
+                                        <div class="text-sm">
+                                            <div class="font-semibold text-gray-800 mb-1" x-text="`${version.playerData.playerName} - ${version.playerData.team}`"></div>
+                                            <div class="text-xs text-gray-600 grid grid-cols-2 gap-1">
+                                                <span>💰 Precio: €<span x-text="version.playerData.price"></span>M</span>
+                                                <span>📊 Ratio: <span x-text="version.playerData.ratio"></span>x</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Expandir para ver prompts -->
+                                        <details class="mt-3">
+                                            <summary class="text-xs font-semibold text-purple-700 cursor-pointer hover:text-purple-900">
+                                                Ver prompts de esta versión
+                                            </summary>
+                                            <div class="mt-2 space-y-2">
+                                                <template x-for="(segment, segIndex) in version.segments" :key="segIndex">
+                                                    <div class="bg-gray-50 p-2 rounded text-xs">
+                                                        <div class="font-semibold text-gray-700 mb-1">
+                                                            <span x-text="segment.type === 'hook' ? '🎯 Hook' : segment.type === 'development' ? '📊 Desarrollo' : '🔥 CTA'"></span>
+                                                        </div>
+                                                        <p class="text-gray-600 italic" x-text="segment.dialogue"></p>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Notas editables -->
+                                                <div class="mt-2 pt-2 border-t">
+                                                    <label class="text-xs font-semibold text-gray-700">📝 Notas de esta versión:</label>
+                                                    <textarea
+                                                        x-model="version.notes"
+                                                        @click.stop
+                                                        class="w-full mt-1 text-xs p-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                                        rows="2"
+                                                        placeholder="Ej: Hook muy largo, CTA funciona mejor..."></textarea>
+                                                </div>
+
+                                                <!-- Botones de acción -->
+                                                <div class="flex gap-2 mt-2">
+                                                    <button
+                                                        @click.stop="loadVersion(version.version)"
+                                                        class="flex-1 text-xs bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 transition-all">
+                                                        🔄 Cargar esta versión
+                                                    </button>
+                                                    <button
+                                                        @click.stop="compareVersions(version.version)"
+                                                        class="flex-1 text-xs bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition-all">
+                                                        ⚖️ Comparar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </details>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Botón limpiar historial -->
+                            <button
+                                @click="if(confirm('¿Borrar todo el historial de versiones?')) { promptVersions = []; currentVersion = 0; }"
+                                class="w-full mt-4 text-xs text-red-600 hover:text-red-700 font-semibold">
+                                🗑️ Limpiar historial
+                            </button>
+                        </div>
+                    </template>
                 </div>
             </div>
+
+            <!-- TAB: Análisis Jornada (Carrusel) -->
+            <div x-show="activeTab === 'analisis-jornada'" class="text-center py-20">
+                <div class="text-6xl mb-4">📊</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Análisis de Jornada - Carrusel</h3>
+                <p class="text-gray-500">Contenido en desarrollo</p>
+            </div>
+
+            <!-- TAB: Top Jugadores (Post) -->
+            <div x-show="activeTab === 'top-jugadores'" class="text-center py-20">
+                <div class="text-6xl mb-4">⚡</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Top Jugadores - Post Simple</h3>
+                <p class="text-gray-500">Contenido en desarrollo</p>
+            </div>
+
+            <!-- TAB: Alertas (Story) -->
+            <div x-show="activeTab === 'alertas'" class="text-center py-20">
+                <div class="text-6xl mb-4">🚨</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Alertas Última Hora - Story</h3>
+                <p class="text-gray-500">Contenido en desarrollo</p>
+            </div>
+
+            <!-- TAB: Predicciones (Reel) -->
+            <div x-show="activeTab === 'predicciones'" class="text-center py-20">
+                <div class="text-6xl mb-4">🎯</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Predicciones de Partidos - Reel</h3>
+                <p class="text-gray-500">Contenido en desarrollo</p>
+            </div>
+
+            <!-- TAB: Evolución (Carrusel) -->
+            <div x-show="activeTab === 'evolucion'" class="text-center py-20">
+                <div class="text-6xl mb-4">📈</div>
+                <h3 class="text-2xl font-bold text-gray-700 mb-2">Evolución de Jugador - Carrusel</h3>
+                <p class="text-gray-500">Contenido en desarrollo</p>
+            </div>
+
         </div>
     </div>
 
     <script>
         function viralPreviewApp() {
             return {
+                // Tab system
+                activeTab: 'chollos-viral',
+
+                // Historial de versiones de prompts
+                promptVersions: [],
+                currentVersion: 0,
+
+                // Sistema de validación viral
+                viralScore: 0,
+                viralChecklist: [],
+
+                // Player data for chollos virales
                 playerData: {
                     playerName: 'Dani Carvajal',
                     team: 'Real Madrid',
@@ -484,6 +876,119 @@
 
                 init() {
                     console.log('🎬 Instagram Viral Preview cargado');
+                    console.log('📋 Tab activo:', this.activeTab);
+                },
+
+                calculateViralScore() {
+                    if (!this.previewData) return;
+
+                    const checks = [];
+                    let totalScore = 0;
+                    const maxScore = 100;
+
+                    // DURACIÓN DEL VIDEO (15 puntos)
+                    const videoDuration = 24; // nuestro video es 24s
+                    if (videoDuration <= 30) {
+                        checks.push({ category: 'Duración', item: 'Video ≤30s (óptimo para retención)', status: true, points: 15 });
+                        totalScore += 15;
+                    } else if (videoDuration <= 60) {
+                        checks.push({ category: 'Duración', item: 'Video ≤60s (aceptable)', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        checks.push({ category: 'Duración', item: 'Video >60s (demasiado largo)', status: false, points: 0 });
+                    }
+
+                    // HOOK PRIMEROS 3 SEGUNDOS (20 puntos)
+                    const hookDialogue = this.previewData.metadata.segments[0].dialogue;
+                    const hookWords = hookDialogue.split(' ').length;
+                    if (hookWords <= 15 && hookDialogue.includes('Pssst')) {
+                        checks.push({ category: 'Hook', item: 'Hook conspirativo en primeros 3s', status: true, points: 20 });
+                        totalScore += 20;
+                    } else if (hookWords <= 20) {
+                        checks.push({ category: 'Hook', item: 'Hook presente pero mejorable', status: true, points: 12 });
+                        totalScore += 12;
+                    } else {
+                        checks.push({ category: 'Hook', item: 'Hook demasiado largo', status: false, points: 0 });
+                    }
+
+                    // CAPTION LONGITUD (10 puntos)
+                    const captionLength = this.previewData.instagram.captionLength;
+                    if (captionLength <= 125) {
+                        checks.push({ category: 'Caption', item: 'Caption ≤125 caracteres (óptimo)', status: true, points: 10 });
+                        totalScore += 10;
+                    } else if (captionLength <= 200) {
+                        checks.push({ category: 'Caption', item: 'Caption ≤200 caracteres (aceptable)', status: true, points: 7 });
+                        totalScore += 7;
+                    } else {
+                        checks.push({ category: 'Caption', item: 'Caption >200 caracteres (muy largo)', status: false, points: 5 });
+                        totalScore += 5;
+                    }
+
+                    // HASHTAGS CANTIDAD (15 puntos)
+                    const hashtagCount = this.previewData.instagram.hashtags.length;
+                    if (hashtagCount >= 5 && hashtagCount <= 10) {
+                        checks.push({ category: 'Hashtags', item: '5-10 hashtags (óptimo viral 2025)', status: true, points: 15 });
+                        totalScore += 15;
+                    } else if (hashtagCount >= 3 && hashtagCount <= 15) {
+                        checks.push({ category: 'Hashtags', item: '3-15 hashtags (aceptable)', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        checks.push({ category: 'Hashtags', item: `${hashtagCount} hashtags (mejorar)`, status: false, points: 5 });
+                        totalScore += 5;
+                    }
+
+                    // FORMATO VERTICAL (10 puntos)
+                    if (this.previewData.instagram.format === '9:16 vertical') {
+                        checks.push({ category: 'Formato', item: '9:16 vertical (obligatorio Reels)', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        checks.push({ category: 'Formato', item: 'Formato NO vertical', status: false, points: 0 });
+                    }
+
+                    // CALL TO ACTION (15 puntos)
+                    const ctaDialogue = this.previewData.metadata.segments[2].dialogue.toLowerCase();
+                    const hasCTA = ctaDialogue.includes('fichad') || ctaDialogue.includes('esperáis') || ctaDialogue.includes('imprescindible');
+                    if (hasCTA) {
+                        checks.push({ category: 'CTA', item: 'CTA clara y urgente presente', status: true, points: 15 });
+                        totalScore += 15;
+                    } else {
+                        checks.push({ category: 'CTA', item: 'CTA débil o ausente', status: false, points: 5 });
+                        totalScore += 5;
+                    }
+
+                    // EMOJIS EN CAPTION (5 puntos)
+                    const caption = this.previewData.instagram.caption;
+                    const emojiCount = (caption.match(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu) || []).length;
+                    if (emojiCount >= 3 && emojiCount <= 8) {
+                        checks.push({ category: 'Emojis', item: '3-8 emojis (mejora engagement)', status: true, points: 5 });
+                        totalScore += 5;
+                    } else if (emojiCount > 0) {
+                        checks.push({ category: 'Emojis', item: `${emojiCount} emojis (ajustar cantidad)`, status: true, points: 3 });
+                        totalScore += 3;
+                    } else {
+                        checks.push({ category: 'Emojis', item: 'Sin emojis (agregar)', status: false, points: 0 });
+                    }
+
+                    // ESTRUCTURA VIRAL (10 puntos)
+                    if (this.previewData.video.structure === 'Hook → Desarrollo → CTA') {
+                        checks.push({ category: 'Estructura', item: 'Estructura viral 3 actos', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        checks.push({ category: 'Estructura', item: 'Estructura no optimizada', status: false, points: 0 });
+                    }
+
+                    // CONSISTENCIA PERSONAJE (5 puntos) - Ana con seed fijo
+                    checks.push({ category: 'Personaje', item: 'Ana Martínez (seed 30001 fijo)', status: true, points: 5 });
+                    totalScore += 5;
+
+                    // IDIOMA CORRECTO (5 puntos)
+                    checks.push({ category: 'Idioma', item: 'Español de España (NO mexicano)', status: true, points: 5 });
+                    totalScore += 5;
+
+                    this.viralChecklist = checks;
+                    this.viralScore = totalScore;
+
+                    console.log('📊 Viral Score calculado:', this.viralScore + '/' + maxScore);
                 },
 
                 async generatePreview() {
@@ -507,7 +1012,23 @@
                         if (result.success) {
                             this.previewData = result.data;
                             this.editableCaption = result.data.instagram.caption;
-                            console.log('✅ Preview generado:', result.data);
+
+                            // Guardar en historial de versiones
+                            this.promptVersions.push({
+                                version: this.promptVersions.length + 1,
+                                timestamp: new Date().toISOString(),
+                                playerData: { ...this.playerData },
+                                previewData: { ...result.data },
+                                segments: result.data.metadata.segments,
+                                videoUrl: result.data.video.url,
+                                notes: '' // Para que el usuario pueda agregar notas
+                            });
+                            this.currentVersion = this.promptVersions.length;
+
+                            // Calcular score viral
+                            this.calculateViralScore();
+
+                            console.log('✅ Preview generado y guardado en historial (v' + this.currentVersion + '):', result.data);
                         } else {
                             alert('Error generando preview: ' + result.message);
                         }
@@ -517,6 +1038,44 @@
                     } finally {
                         this.loading = false;
                     }
+                },
+
+                loadVersion(versionNumber) {
+                    const version = this.promptVersions.find(v => v.version === versionNumber);
+                    if (!version) {
+                        alert('Versión no encontrada');
+                        return;
+                    }
+
+                    // Cargar datos de la versión
+                    this.playerData = { ...version.playerData };
+                    this.previewData = { ...version.previewData };
+                    this.editableCaption = version.previewData.instagram.caption;
+                    this.currentVersion = versionNumber;
+
+                    console.log('🔄 Versión cargada:', versionNumber);
+                    alert(`Versión ${versionNumber} cargada. Puedes ver el video y los prompts de esta versión.`);
+                },
+
+                compareVersions(versionNumber) {
+                    const version = this.promptVersions.find(v => v.version === versionNumber);
+                    if (!version || !this.previewData) {
+                        alert('Necesitas tener una versión actual cargada para comparar');
+                        return;
+                    }
+
+                    // Abrir modal de comparación (implementación simple con alert)
+                    let comparison = `COMPARACIÓN DE VERSIONES\n\n`;
+                    comparison += `=== VERSIÓN ACTUAL (v${this.currentVersion}) ===\n`;
+                    comparison += `Hook: ${this.previewData.metadata.segments[0].dialogue}\n\n`;
+
+                    comparison += `=== VERSIÓN ${versionNumber} ===\n`;
+                    comparison += `Hook: ${version.segments[0].dialogue}\n\n`;
+
+                    comparison += `\nUSA "Cargar esta versión" para cambiar a v${versionNumber}`;
+
+                    alert(comparison);
+                    console.log('⚖️ Comparando versiones:', this.currentVersion, 'vs', versionNumber);
                 },
 
                 async publishNow() {

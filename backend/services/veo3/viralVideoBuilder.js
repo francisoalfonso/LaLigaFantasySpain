@@ -33,15 +33,9 @@ class ViralVideoBuilder {
      * @param {object} options - Opciones de personalización
      * @returns {Promise<object>} - Video viral generado y metadatos
      */
-    async generateViralVideo(playerData, options = {}) {
+    async generateViralVideo(playerData) {
         try {
-            const {
-                playerName,
-                price,
-                ratio,
-                team,
-                stats = {}
-            } = playerData;
+            const { playerName, price, ratio, team, stats = {} } = playerData;
 
             logger.info(`[ViralVideoBuilder] Generando video viral para ${playerName}...`);
 
@@ -164,12 +158,15 @@ class ViralVideoBuilder {
                     generatedAt: new Date().toISOString(),
                     segments: [
                         { type: 'hook', taskId: segment1.taskId, dialogue: hookDialogue },
-                        { type: 'development', taskId: segment2.taskId, dialogue: developmentDialogue },
+                        {
+                            type: 'development',
+                            taskId: segment2.taskId,
+                            dialogue: developmentDialogue
+                        },
                         { type: 'cta', taskId: segment3.taskId, dialogue: ctaDialogue }
                     ]
                 }
             };
-
         } catch (error) {
             logger.error('[ViralVideoBuilder] Error generando video viral:', error.message);
             throw error;
@@ -219,6 +216,78 @@ ${playerName} (${team})
 Un ${team} a este precio... ¿Fichamos ya? 👇
 
 #FantasyLaLiga #Chollos #Misters #${team.replace(/\s+/g, '')} #${playerName.replace(/\s+/g, '')} #LaLiga #Fantasy #Fichajes`;
+    }
+
+    /**
+     * Obtener datos de preview completos para Instagram
+     * @param {object} videoResult - Resultado de generateViralVideo()
+     * @param {object} playerData - Datos originales del jugador
+     * @returns {object} - Datos completos para preview
+     */
+    getPreviewData(videoResult, playerData) {
+        const caption = this.generateInstagramCaption(playerData);
+
+        // Determinar la URL correcta basada en la ruta del archivo
+        let videoUrl;
+        if (videoResult.videoPath.includes('/viral/')) {
+            videoUrl = `/output/veo3/viral/${path.basename(videoResult.videoPath)}`;
+        } else {
+            videoUrl = `/output/veo3/${path.basename(videoResult.videoPath)}`;
+        }
+
+        return {
+            video: {
+                path: videoResult.videoPath,
+                url: videoUrl,
+                duration: videoResult.duration,
+                segments: videoResult.segments,
+                structure: videoResult.structure
+            },
+            instagram: {
+                caption,
+                captionLength: caption.length,
+                hashtags: this.extractHashtags(caption),
+                estimatedReach: this.estimateReach(playerData),
+                bestTimeToPost: '18:00-21:00',
+                platform: 'instagram',
+                format: '9:16 vertical'
+            },
+            player: {
+                name: playerData.playerName,
+                team: playerData.team,
+                price: playerData.price,
+                ratio: playerData.ratio,
+                stats: playerData.stats || {}
+            },
+            metadata: videoResult.metadata,
+            generatedAt: new Date().toISOString(),
+            status: 'ready_to_publish'
+        };
+    }
+
+    /**
+     * Extraer hashtags del caption
+     * @param {string} caption - Caption de Instagram
+     * @returns {array} - Array de hashtags
+     */
+    extractHashtags(caption) {
+        const hashtagRegex = /#[\wÀ-ÿ]+/g;
+        return caption.match(hashtagRegex) || [];
+    }
+
+    /**
+     * Estimar alcance del post
+     * @param {object} playerData - Datos del jugador
+     * @returns {number} - Alcance estimado
+     */
+    estimateReach(playerData) {
+        // Estimación basada en ratio de valor y popularidad del equipo
+        const baseReach = 500;
+        const ratioMultiplier = playerData.ratio > 2 ? 1.5 : 1.0;
+        const bigTeams = ['Barcelona', 'Real Madrid', 'Atlético Madrid'];
+        const teamMultiplier = bigTeams.includes(playerData.team) ? 1.3 : 1.0;
+
+        return Math.floor(baseReach * ratioMultiplier * teamMultiplier);
     }
 }
 

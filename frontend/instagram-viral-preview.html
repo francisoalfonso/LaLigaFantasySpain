@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Video Viral Instagram - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Instagram mockup styles */
+        .instagram-phone {
+            max-width: 375px;
+            background: #000;
+            border-radius: 30px;
+            padding: 20px 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .instagram-screen {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .instagram-header {
+            background: rgba(0,0,0,0.9);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .instagram-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #e1306c;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+
+        .instagram-video-container {
+            position: relative;
+            aspect-ratio: 9/16;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .instagram-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .instagram-caption-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 60px 16px 20px;
+            color: white;
+        }
+
+        .instagram-caption-text {
+            font-size: 14px;
+            line-height: 18px;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+
+        .instagram-actions {
+            position: absolute;
+            right: 12px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .instagram-action-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .instagram-action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .hashtag {
+            color: #3b82f6;
+            cursor: pointer;
+        }
+
+        .metadata-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .timeline-step {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: -20px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-step:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            background: white;
+        }
+
+        .timeline-dot.completed {
+            background: #3b82f6;
+        }
+
+        .video-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        .editable-caption {
+            min-height: 150px;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div x-data="viralPreviewApp()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="/" class="text-gray-600 hover:text-gray-900">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                        </a>
+                        <h1 class="text-2xl font-bold text-gray-900">🎬 Preview Video Viral Instagram</h1>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-600">@fantasy.laliga.pro</span>
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- Left Column: Instagram Preview -->
+                <div>
+                    <h2 class="text-xl font-bold mb-4">📱 Vista Previa Instagram</h2>
+
+                    <div class="flex justify-center">
+                        <div class="instagram-phone">
+                            <div class="instagram-screen">
+                                <div class="instagram-video-container">
+                                    <!-- Instagram Header -->
+                                    <div class="instagram-header">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="instagram-avatar"></div>
+                                            <span class="text-white font-semibold text-sm">fantasy.laliga.pro</span>
+                                        </div>
+                                        <button class="text-white">⋮</button>
+                                    </div>
+
+                                    <!-- Video Player or Placeholder -->
+                                    <template x-if="!loading && !previewData">
+                                        <div class="video-placeholder w-full h-full">
+                                            <div>
+                                                <div class="text-4xl mb-4">🎬</div>
+                                                <div>Selecciona jugador para ver preview</div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="loading">
+                                        <div class="video-placeholder w-full h-full pulse">
+                                            <div>
+                                                <div class="text-4xl mb-4">⏳</div>
+                                                <div>Generando preview...</div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template x-if="!loading && previewData">
+                                        <div class="w-full h-full relative" x-data="{ muted: true, isPlaying: true }">
+                                            <video
+                                                x-ref="videoPlayer"
+                                                class="instagram-video"
+                                                :src="previewData.video.url"
+                                                @loadeddata="console.log('✅ Video cargado:', previewData.video.url)"
+                                                @error="console.error('❌ Error cargando video:', previewData.video.url)"
+                                                :muted="muted"
+                                                loop
+                                                playsinline
+                                                autoplay>
+                                            </video>
+
+                                            <!-- Controles discretos estilo Instagram -->
+                                            <div class="absolute bottom-4 right-4 flex flex-col gap-2 z-20">
+                                                <!-- Botón Play/Pause -->
+                                                <button
+                                                    @click="isPlaying = !isPlaying; isPlaying ? $refs.videoPlayer.play() : $refs.videoPlayer.pause()"
+                                                    class="bg-black bg-opacity-70 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all"
+                                                    title="Reproducir/Pausar">
+                                                    <span x-show="isPlaying" class="text-xl">⏸️</span>
+                                                    <span x-show="!isPlaying" class="text-xl">▶️</span>
+                                                </button>
+
+                                                <!-- Botón Reiniciar -->
+                                                <button
+                                                    @click="$refs.videoPlayer.currentTime = 0; $refs.videoPlayer.play(); isPlaying = true"
+                                                    class="bg-black bg-opacity-70 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all"
+                                                    title="Reiniciar video">
+                                                    <span class="text-xl">🔄</span>
+                                                </button>
+
+                                                <!-- Botón Audio -->
+                                                <button
+                                                    @click="muted = !muted; $refs.videoPlayer.muted = muted"
+                                                    class="bg-black bg-opacity-70 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-opacity-90 transition-all"
+                                                    title="Activar/Desactivar audio">
+                                                    <span x-show="muted" class="text-xl">🔇</span>
+                                                    <span x-show="!muted" class="text-xl">🔊</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <!-- Instagram Actions (Like, Comment, Share) -->
+                                    <div class="instagram-actions">
+                                        <div class="instagram-action-btn">❤️</div>
+                                        <div class="instagram-action-btn">💬</div>
+                                        <div class="instagram-action-btn">📤</div>
+                                    </div>
+
+                                    <!-- Caption Overlay -->
+                                    <template x-if="previewData && previewData.instagram">
+                                        <div class="instagram-caption-overlay">
+                                            <div class="instagram-caption-text" x-html="formatCaption(previewData.instagram.caption)"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video Info -->
+                    <template x-if="previewData">
+                        <div class="mt-6 bg-white rounded-lg shadow-sm p-4">
+                            <div class="grid grid-cols-3 gap-4 text-center">
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600" x-text="previewData.video.duration"></div>
+                                    <div class="text-xs text-gray-600">Duración</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600" x-text="previewData.video.segments"></div>
+                                    <div class="text-xs text-gray-600">Segmentos</div>
+                                </div>
+                                <div>
+                                    <div class="text-2xl font-bold text-purple-600" x-text="previewData.instagram.hashtags.length"></div>
+                                    <div class="text-xs text-gray-600">Hashtags</div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Right Column: Controls & Metadata -->
+                <div class="space-y-6">
+                    <!-- Player Selection -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <h3 class="text-lg font-bold mb-4">🎯 Seleccionar Jugador</h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre Jugador</label>
+                                <input
+                                    type="text"
+                                    x-model="playerData.playerName"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    placeholder="Ej: Dani Carvajal">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Equipo</label>
+                                    <input
+                                        type="text"
+                                        x-model="playerData.team"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="Real Madrid">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Precio (M€)</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        x-model="playerData.price"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                        placeholder="5.0">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ratio Valor</label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    x-model="playerData.ratio"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                    placeholder="3.37">
+                            </div>
+
+                            <button
+                                @click="generatePreview()"
+                                :disabled="loading || !playerData.playerName || !playerData.price"
+                                class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                                <span x-show="!loading">🎬 Generar Preview</span>
+                                <span x-show="loading" class="pulse">⏳ Generando...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Caption Editor -->
+                    <template x-if="previewData">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">✏️ Editar Caption</h3>
+
+                            <textarea
+                                x-model="editableCaption"
+                                class="editable-caption w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                                rows="8"></textarea>
+
+                            <div class="mt-2 flex items-center justify-between text-xs text-gray-600">
+                                <span x-text="`${editableCaption.length} caracteres`"></span>
+                                <span x-text="`${(editableCaption.match(/#/g) || []).length} hashtags`"></span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Metadata -->
+                    <template x-if="previewData">
+                        <div class="bg-white rounded-lg shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">📊 Metadata Viral</h3>
+
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Alcance Estimado:</span>
+                                    <span class="font-bold text-purple-600" x-text="`${previewData.instagram.estimatedReach} personas`"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Mejor Hora:</span>
+                                    <span class="font-bold text-purple-600" x-text="previewData.instagram.bestTimeToPost"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Formato:</span>
+                                    <span class="font-bold text-purple-600" x-text="previewData.instagram.format"></span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Estructura:</span>
+                                    <span class="font-bold text-purple-600" x-text="previewData.video.structure"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Publish Actions -->
+                    <template x-if="previewData">
+                        <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg shadow-lg p-6 text-white">
+                            <h3 class="text-lg font-bold mb-4">🚀 Publicar en Instagram</h3>
+
+                            <div class="space-y-3">
+                                <button
+                                    @click="publishNow()"
+                                    :disabled="publishing"
+                                    class="w-full bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                                    <span x-show="!publishing">📤 Publicar Ahora</span>
+                                    <span x-show="publishing" class="pulse">⏳ Publicando...</span>
+                                </button>
+
+                                <button
+                                    @click="schedulePost()"
+                                    class="w-full bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-800 transition-all">
+                                    📅 Programar Publicación
+                                </button>
+
+                                <button
+                                    @click="regenerateVideo()"
+                                    class="w-full bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-all">
+                                    🔄 Regenerar Video
+                                </button>
+                            </div>
+
+                            <div x-show="publishSuccess" class="mt-4 bg-green-500 text-white px-4 py-3 rounded-lg">
+                                ✅ Video publicado exitosamente!
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function viralPreviewApp() {
+            return {
+                playerData: {
+                    playerName: 'Dani Carvajal',
+                    team: 'Real Madrid',
+                    price: 5.0,
+                    ratio: 3.37,
+                    stats: {
+                        goals: 1,
+                        assists: 2,
+                        games: 5,
+                        rating: 7.2,
+                        position: 'Defensa'
+                    }
+                },
+                previewData: null,
+                editableCaption: '',
+                loading: false,
+                publishing: false,
+                publishSuccess: false,
+
+                init() {
+                    console.log('🎬 Instagram Viral Preview cargado');
+                },
+
+                async generatePreview() {
+                    this.loading = true;
+                    this.publishSuccess = false;
+
+                    try {
+                        console.log('🎬 Generando preview para:', this.playerData.playerName);
+
+                        const response = await fetch('/api/instagram/preview-viral', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                playerData: this.playerData,
+                                generateVideo: false // Modo rápido con mock
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.previewData = result.data;
+                            this.editableCaption = result.data.instagram.caption;
+                            console.log('✅ Preview generado:', result.data);
+                        } else {
+                            alert('Error generando preview: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error:', error);
+                        alert('Error generando preview');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async publishNow() {
+                    if (!confirm('¿Publicar video ahora en Instagram?')) return;
+
+                    this.publishing = true;
+
+                    try {
+                        // Actualizar caption editado
+                        this.previewData.instagram.caption = this.editableCaption;
+
+                        const response = await fetch('/api/instagram/publish-viral', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                previewData: this.previewData
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.publishSuccess = true;
+                            console.log('✅ Video publicado:', result.data);
+                            setTimeout(() => {
+                                window.location.href = '/staging';
+                            }, 2000);
+                        } else {
+                            alert('Error publicando: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error:', error);
+                        alert('Error publicando video');
+                    } finally {
+                        this.publishing = false;
+                    }
+                },
+
+                async schedulePost() {
+                    const time = prompt('¿A qué hora programar? (HH:MM)', '18:00');
+                    if (!time) return;
+
+                    const scheduleFor = new Date();
+                    const [hours, minutes] = time.split(':');
+                    scheduleFor.setHours(hours, minutes, 0, 0);
+
+                    this.publishing = true;
+
+                    try {
+                        this.previewData.instagram.caption = this.editableCaption;
+
+                        const response = await fetch('/api/instagram/publish-viral', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                previewData: this.previewData,
+                                scheduleFor: scheduleFor.toISOString()
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert(`✅ Video programado para ${time}`);
+                            window.location.href = '/staging';
+                        } else {
+                            alert('Error programando: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error:', error);
+                        alert('Error programando video');
+                    } finally {
+                        this.publishing = false;
+                    }
+                },
+
+                async regenerateVideo() {
+                    if (!confirm('¿Regenerar video viral? (Puede tomar 15-20 minutos)')) return;
+
+                    this.loading = true;
+
+                    try {
+                        const response = await fetch('/api/instagram/preview-viral', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                playerData: this.playerData,
+                                generateVideo: true // Generar video real
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.previewData = result.data;
+                            this.editableCaption = result.data.instagram.caption;
+                            alert('✅ Video viral generado exitosamente');
+                        } else {
+                            alert('Error regenerando: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error:', error);
+                        alert('Error regenerando video');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                formatCaption(caption) {
+                    if (!caption) return '';
+                    return caption
+                        .replace(/(#[\wÀ-ÿ]+)/g, '<span class="hashtag">$1</span>')
+                        .replace(/\n/g, '<br>');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

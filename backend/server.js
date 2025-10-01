@@ -25,8 +25,7 @@ const {
     heavyOperationsLimiter,
     apiSportsLimiter,
     imageGenerationLimiter,
-    veo3Limiter,
-    publicLimiter
+    veo3Limiter
 } = require('./middleware/rateLimiter');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -45,7 +44,7 @@ const bargainsRoutes = require('./routes/bargains');
 const predictionsRoutes = require('./routes/predictions');
 const contentAIRoutes = require('./routes/contentAI');
 const evolutionRoutes = require('./routes/evolution');
-// const instagramRoutes = require('./routes/instagram'); // Temporalmente deshabilitado por error sintáctico
+const instagramRoutes = require('./routes/instagram');
 const imageGeneratorRoutes = require('./routes/imageGenerator');
 const veo3Routes = require('./routes/veo3');
 const videosRoutes = require('./routes/videos');
@@ -60,18 +59,22 @@ const PORT = SERVER.PORT;
 const HOST = SERVER.HOST;
 
 // Middlewares de seguridad
-app.use(helmet({
-  contentSecurityPolicy: false, // Deshabilitado para desarrollo
-}));
+app.use(
+    helmet({
+        contentSecurityPolicy: false // Deshabilitado para desarrollo
+    })
+);
 
 // Middleware de logging
 app.use(morgan('combined'));
 
 // CORS configurado para desarrollo
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  credentials: true
-}));
+app.use(
+    cors({
+        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        credentials: true
+    })
+);
 
 // Parser de JSON
 app.use(express.json({ limit: '10mb' }));
@@ -149,81 +152,91 @@ app.use('/api/database', databaseRoutes);
 app.use('/api/videos', videosRoutes);
 app.use('/api/bunny', bunnyStreamRoutes);
 app.use('/api/content-preview', contentPreviewRoutes);
-// app.use('/api/instagram', instagramRoutes); // Temporalmente deshabilitado
+app.use('/api/instagram', instagramRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // Ruta para vista de alineaciones en tiempo real
 app.get('/lineups-live', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/lineups-live.html'));
+    res.sendFile(path.join(__dirname, '../frontend/lineups-live.html'));
 });
 
 // Ruta para debug de grid de coordenadas
 app.get('/grid-debug', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/grid-debug.html'));
+    res.sendFile(path.join(__dirname, '../frontend/grid-debug.html'));
 });
 
 // Ruta para chollos de la jornada
 app.get('/bargains', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/bargains.html'));
+    res.sendFile(path.join(__dirname, '../frontend/bargains.html'));
 });
 
 // Ruta para vista detallada de jugador
 app.get('/player/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/player-detail.html'));
+    res.sendFile(path.join(__dirname, '../frontend/player-detail.html'));
 });
 
 // Ruta para agenda de jugadores
 app.get('/players', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
+    res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
 });
 
 // Ruta alternativa para agenda de jugadores
 app.get('/players-agenda', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
+    res.sendFile(path.join(__dirname, '../frontend/players-agenda.html'));
 });
 
 // Ruta para matriz de planificación de contenido
 app.get('/content-strategy-matrix', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
 });
 
 // Ruta alternativa más corta
 app.get('/content-matrix', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-strategy-matrix.html'));
 });
 
 // Ruta para staging/validación de contenido
 app.get('/content-staging', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
 });
 
 // Ruta alternativa más corta
 app.get('/staging', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-staging.html'));
 });
 
 // Ruta para dashboard de videos
 app.get('/video-dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
+    res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
 });
 
 // Ruta alternativa más corta
 app.get('/videos', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
+    res.sendFile(path.join(__dirname, '../frontend/video-dashboard.html'));
 });
 
 // Ruta para pipeline de contenido viral (nuevo)
 app.get('/content-pipeline', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
 });
 
 // Ruta alternativa más corta
 app.get('/pipeline', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
+    res.sendFile(path.join(__dirname, '../frontend/content-pipeline.html'));
+});
+
+// Ruta para preview de videos virales Instagram
+app.get('/instagram-viral-preview', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/instagram-viral-preview.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/viral-preview', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/instagram-viral-preview.html'));
 });
 
 /**
@@ -257,23 +270,23 @@ app.get('/health', (req, res) => {
 
 // Ruta para información de la API
 app.get('/api/info', (req, res) => {
-  res.json({
-    name: 'Fantasy La Liga Dashboard API',
-    version: require('../package.json').version,
-    description: 'API para datos reales La Liga con API-Sports',
-    endpoints: {
-      health: '/health',
-      test: '/api/test/*',
-      laliga: '/api/laliga/*',
-      bargains: '/api/bargains/*',
-      n8n_mcp: '/api/n8n-mcp/*',
-      weather: '/api/weather/*',
-      database: '/api/database/*',
-      sync: '/api/sync/*'
-    },
-    api_sports_configured: !!process.env.API_FOOTBALL_KEY,
-    plan: 'Ultra - 75,000 requests/día'
-  });
+    res.json({
+        name: 'Fantasy La Liga Dashboard API',
+        version: require('../package.json').version,
+        description: 'API para datos reales La Liga con API-Sports',
+        endpoints: {
+            health: '/health',
+            test: '/api/test/*',
+            laliga: '/api/laliga/*',
+            bargains: '/api/bargains/*',
+            n8n_mcp: '/api/n8n-mcp/*',
+            weather: '/api/weather/*',
+            database: '/api/database/*',
+            sync: '/api/sync/*'
+        },
+        api_sports_configured: !!process.env.API_FOOTBALL_KEY,
+        plan: 'Ultra - 75,000 requests/día'
+    });
 });
 
 // Manejo de errores 404 - debe ir después de todas las rutas
@@ -324,13 +337,13 @@ app.listen(PORT, HOST, () => {
 
 // Manejo graceful de cierre
 process.on('SIGTERM', () => {
-  logger.info('🛑 Señal SIGTERM recibida - Cerrando servidor gracefully...');
-  process.exit(0);
+    logger.info('🛑 Señal SIGTERM recibida - Cerrando servidor gracefully...');
+    process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  logger.info('🛑 Señal SIGINT recibida - Cerrando servidor gracefully...');
-  process.exit(0);
+    logger.info('🛑 Señal SIGINT recibida - Cerrando servidor gracefully...');
+    process.exit(0);
 });
 
 module.exports = app;

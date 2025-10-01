@@ -171,6 +171,14 @@ Un sistema completo donde:
 - Caption Instagram generator
 - Fix waitForCompletion
 - Commit y push GitHub
+- **✨ Sistema Preview Viral Instagram (COMPLETADO 1-Oct-2025)**
+    - Frontend `instagram-viral-preview.html`
+    - Endpoint `POST /api/instagram/preview-viral`
+    - Endpoint `POST /api/instagram/publish-viral`
+    - Método `viralVideoBuilder.getPreviewData()`
+    - Player de video + caption editable
+    - Botones publicar/programar integrados
+    - Rutas en server.js
 
 ### ⏳ En Progreso
 
@@ -178,11 +186,42 @@ Un sistema completo donde:
 
 ### 🔜 Pendiente
 
-- Integración Instagram (PRÓXIMA TAREA)
-- Todo lo demás de la lista
+- Testing en vivo con servidor corriendo
+- Generación de video real de prueba
+- Configuración Meta Graph API para Instagram real
+- Todo lo demás de la lista secundaria
+
+---
+
+---
+
+## 🚨 PARA LA PRÓXIMA SESIÓN - ARRANCAR INMEDIATAMENTE
+
+**TAREA CONFIRMADA POR USUARIO**: Completar el preview/prototipo de publicación
+Instagram integrando video viral + todos los elementos de contenido viral.
+
+### 🎯 Objetivo Sesión
+
+Crear **sistema completo de preview viral para Instagram** que integre:
+
+1. **Video VEO3 Ana Real** (ya funcional)
+2. **Framework Viral** (7 elementos: Hook → CTA)
+3. **Instagram Post Preview** (player + caption + botones)
+4. **Metadata Completa** (duración, emociones, validaciones)
+
+### 📋 Checklist Implementación
+
+- [ ] `frontend/instagram-viral-preview.html` - Preview completo
+- [ ] Endpoint `POST /api/instagram/preview-viral`
+- [ ] Método `viralVideoBuilder.getPreviewData()`
+- [ ] Player video + caption editable
+- [ ] Botón publicar conectado a Instagram API
+- [ ] Testing flujo completo
+
+**Tiempo estimado**: 2.5-3.5 horas
 
 ---
 
 **Fecha creación**: 30 Septiembre 2025, 17:04h **Última actualización**: 30
-Septiembre 2025, 17:04h **Próxima sesión**: Comenzar con TAREA #1 - Integración
-Instagram
+Septiembre 2025, 23:45h **Próxima sesión**: ARRANCAR CON PREVIEW INSTAGRAM VIRAL
+(confirmado por usuario)

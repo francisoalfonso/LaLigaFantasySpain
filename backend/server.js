@@ -50,6 +50,7 @@ const veo3Routes = require('./routes/veo3');
 const videosRoutes = require('./routes/videos');
 const bunnyStreamRoutes = require('./routes/bunnyStream');
 const contentPreviewRoutes = require('./routes/contentPreview');
+const youtubeShortsRoutes = require('./routes/youtubeShorts');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -143,6 +144,9 @@ app.use('/api/images', imageGenerationLimiter, imageGeneratorRoutes);
 
 // VEO3 - muy restrictivo (5 req/hora)
 app.use('/api/veo3', veo3Limiter, veo3Routes);
+
+// YouTube Shorts - restrictivo similar a VEO3 (genera videos)
+app.use('/api/youtube-shorts', veo3Limiter, youtubeShortsRoutes);
 
 // Otros endpoints con rate limiting general
 app.use('/api/n8n-mcp', n8nMcpRoutes);

@@ -1583,3 +1583,247 @@ profesional de videos generados por VEO3.
 - **Database Testing**: Use `npm run db:test:quick` before database operations
 - **API Connectivity**: Test API-Sports connection with
   `curl http://localhost:3000/api/laliga/test` before data operations
+
+## 📱 Sistema YouTube Shorts - Monetización Automatizada (Implementado)
+
+El proyecto incluye un stack técnico completo para la generación, optimización y publicación automatizada de YouTube Shorts, enfocado en monetización mediante el programa de participación de Shorts 2025.
+
+### 🚀 Funcionalidades Implementadas
+
+#### **Sistema Completo de Generación**
+
+- **ShortsGenerator**: Generación automática de configuración optimizada por tipo de contenido (chollo_viral, breaking_news, stats_impactantes, prediccion_jornada)
+- **CaptionsService**: Subtítulos automáticos con estilo karaoke (CRÍTICO - 85% usuarios sin audio)
+- **TextOverlayService**: Overlays dinámicos de datos y estadísticas con posicionamiento inteligente
+- **ThumbnailGenerator**: Generación automática de thumbnails impactantes para CTR
+- **YouTubeAPI**: Cliente completo para YouTube Data API v3 con upload automático
+
+### 🎯 Arquitectura del Sistema
+
+**Stack Técnico** (`backend/services/youtubeShorts/`):
+- `shortsGenerator.js` - Configuración optimizada Shorts por tipo
+- `captionsService.js` - Subtítulos automáticos karaoke (85% sin audio)
+- `textOverlayService.js` - Overlays dinámicos de datos
+- `thumbnailGenerator.js` - Thumbnails automáticos impactantes
+- `youtubeAPI.js` - YouTube Data API v3 client
+
+**Ruta API**: `/api/youtube-shorts` (restrictivo, rate limit 5 req/hora)
+
+### 📊 Tipos de Contenido Soportados
+
+1. **Chollos Virales (40%)** - 20-30s
+   - Hook conspirativo (<2s)
+   - Revelación jugador + precio + stats
+   - CTA urgente
+   - Target: 80% retención, 6% engagement
+
+2. **Breaking News (25%)** - 15-25s
+   - Alerta urgente (<1.5s)
+   - Desarrollo noticia + impacto Fantasy
+   - CTA acción inmediata
+   - Target: 85% retención, 8% engagement
+
+3. **Stats Impactantes (20%)** - 25-40s
+   - Hook shock (<2.5s)
+   - Análisis datos detallado
+   - Conclusión + invitación comentarios
+   - Target: 75% retención, 5% engagement
+
+4. **Predicciones Jornada (15%)** - 40-60s
+   - Hook autoridad (<3s)
+   - 3 predicciones (última POLÉMICA)
+   - CTA seguimiento
+   - Target: 70% retención, 7% engagement
+
+### 🔧 API Endpoints Principales
+
+```bash
+# Testing y configuración
+GET  /api/youtube-shorts/test              # Test sistema completo
+GET  /api/youtube-shorts/config            # Configuración actual
+
+# Generación de Shorts
+POST /api/youtube-shorts/generate          # Config optimizada (sin video)
+POST /api/youtube-shorts/generate-video    # Video COMPLETO (VEO3 + subs + overlays + thumbnail)
+
+# Subtítulos
+POST /api/youtube-shorts/captions/generate # Generar subtítulos desde segmentos
+POST /api/youtube-shorts/captions/apply    # Aplicar subtítulos a video
+
+# Overlays de texto
+POST /api/youtube-shorts/overlays/generate # Generar overlays por tipo
+POST /api/youtube-shorts/overlays/apply    # Aplicar overlays a video
+
+# Thumbnails
+POST /api/youtube-shorts/thumbnail/generate    # Thumbnail automático
+POST /api/youtube-shorts/thumbnail/variations  # Variaciones A/B testing
+
+# YouTube Management
+POST   /api/youtube-shorts/upload              # Upload Short a YouTube
+GET    /api/youtube-shorts/videos              # Lista videos canal
+GET    /api/youtube-shorts/video/:id/stats     # Estadísticas video
+DELETE /api/youtube-shorts/video/:id           # Eliminar video
+PUT    /api/youtube-shorts/video/:id/metadata  # Actualizar metadata
+GET    /api/youtube-shorts/quota                # Verificar quota API
+GET    /api/youtube-shorts/youtube-test         # Test conexión YouTube
+
+# Mantenimiento
+POST /api/youtube-shorts/cleanup            # Limpiar archivos temporales
+```
+
+### ⚙️ Variables de Entorno Requeridas
+
+```bash
+# YouTube Data API v3
+YOUTUBE_CLIENT_ID=tu_client_id_aqui
+YOUTUBE_CLIENT_SECRET=tu_client_secret_aqui
+YOUTUBE_REFRESH_TOKEN=tu_refresh_token_aqui
+YOUTUBE_CHANNEL_ID=tu_channel_id_aqui
+```
+
+### 💡 Casos de Uso
+
+#### **Generación Completa E2E (Automatizada)**
+
+```bash
+curl -X POST http://localhost:3000/api/youtube-shorts/generate-video \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contentType": "chollo_viral",
+    "contentData": {
+      "playerName": "Pedri",
+      "price": 8.5,
+      "expectedPoints": 12,
+      "valueRatio": 1.4
+    },
+    "autoUpload": true
+  }'
+```
+
+**Proceso completo**:
+1. Genera config optimizada para Shorts
+2. Genera video con VEO3 (3 segmentos)
+3. Aplica subtítulos karaoke automáticos
+4. Aplica overlays de datos
+5. Genera thumbnail impactante
+6. (Opcional) Upload automático a YouTube
+7. Retorna URLs y metadata completa
+
+#### **Solo Configuración (Preview rápido)**
+
+```bash
+curl -X POST http://localhost:3000/api/youtube-shorts/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contentType": "breaking_news",
+    "contentData": {
+      "playerName": "Lewandowski",
+      "newsTitle": "Lesión confirmada"
+    }
+  }'
+```
+
+### 📈 Estrategia de Monetización
+
+**Basado en**: `docs/YOUTUBE_SHORTS_ESTRATEGIA_MONETIZACION.md`
+
+- **Revenue Model**: $0.05-$0.10 per 1K views (sports niche)
+- **Target Growth**: 0→100K subs en 4 fases
+- **Publicación**: 5-6 Shorts/semana optimizados
+- **Proyección Año 1**: €8,203-€18,500
+- **4 Pilares de Contenido**: Chollos (40%), Breaking (25%), Stats (20%), Predicciones (15%)
+
+### 🎯 KPIs por Tipo de Contenido
+
+| Tipo             | Retención | Engagement | Viewed/Swiped | Duración Óptima |
+|------------------|-----------|------------|---------------|-----------------|
+| Chollos          | 80%       | 6%         | 85%           | 20-30s          |
+| Breaking News    | 85%       | 8%         | 90%           | 15-25s          |
+| Stats            | 75%       | 5%         | 80%           | 25-40s          |
+| Predicciones     | 70%       | 7%         | 75%           | 40-60s          |
+
+### 🔑 Optimizaciones CRÍTICAS para Shorts
+
+1. **Subtítulos Obligatorios** (85% sin audio)
+   - Estilo karaoke word-by-word
+   - Fuente grande (32px)
+   - Highlighting dorado para palabra actual
+   - Posición centro-medio (no interferir con UI)
+
+2. **Hook Primeros 2 Segundos** (CRÍTICO)
+   - Máximo 12-15 palabras
+   - Conspirativo/Urgente/Shock según tipo
+   - Push-in rápido de cámara
+   - Sin música de fondo
+
+3. **Formato Vertical 9:16**
+   - 1080x1920 resolución
+   - Watermark top-left (no interferir con UI Shorts)
+   - Safe zones para UI YouTube
+
+4. **Text Overlays Estratégicos**
+   - Precio/Datos destacados permanentes
+   - Animaciones entrada/salida
+   - Posicionamiento inteligente (evita subtítulos y UI)
+
+5. **CTA Claro**
+   - Último segmento siempre incluye CTA
+   - "Sígueme", "Suscríbete", "Link en bio"
+   - Gesto señalar cámara
+
+### ⚠️ Consideraciones Importantes
+
+1. **Quota YouTube API**: 10,000 puntos/día - cada upload = 1,600 puntos
+2. **Rate Limiting**: 5 req/hora (mismo que VEO3)
+3. **Costo por Short**: $0.90 (3 segmentos VEO3) + procesamiento
+4. **FFmpeg requerido**: Para subtítulos y overlays
+5. **Thumbnails 16:9**: Aunque Shorts sean 9:16, thumbnail es 16:9
+6. **Título con #Shorts**: Automáticamente agregado si no presente
+7. **OAuth 2.0**: Requiere refresh token para automatización
+
+### 🚨 Testing y Validación
+
+```bash
+# Test sistema completo
+curl http://localhost:3000/api/youtube-shorts/test
+
+# Test YouTube API conexión
+curl http://localhost:3000/api/youtube-shorts/youtube-test
+
+# Verificar quota disponible
+curl http://localhost:3000/api/youtube-shorts/quota
+
+# Listar videos del canal
+curl http://localhost:3000/api/youtube-shorts/videos?maxResults=10
+```
+
+### 📊 Flujo de Producción Completo
+
+1. **Generar contenido** → ShortsGenerator selecciona config óptima
+2. **Crear video base** → VEO3 genera 3 segmentos (24s total)
+3. **Agregar subtítulos** → CaptionsService genera karaoke .ass
+4. **Aplicar overlays** → TextOverlayService agrega datos visuales
+5. **Generar thumbnail** → ThumbnailGenerator crea impactante 16:9
+6. **Validar calidad** → Verificar KPIs target cumplidos
+7. **Upload YouTube** → YouTubeAPI sube con metadata optimizada
+8. **Tracking analytics** → Monitorear retención/engagement
+
+### 💰 Economía del Sistema
+
+- **Video individual**: $0.90 (VEO3) + procesamiento
+- **Con subtítulos + overlays**: +5 minutos procesamiento
+- **Con thumbnail**: +30 segundos generación
+- **Upload YouTube**: Gratis (limitado por quota)
+- **ROI esperado**: Breakeven ~500K views acumuladas
+
+### 🎓 Mejores Prácticas
+
+1. **Siempre generar subtítulos** - 85% usuarios sin audio
+2. **Hook <2 segundos** - Crítico para retención
+3. **CTA en todos los Shorts** - Fundamental para growth
+4. **Thumbnails impactantes** - Afecta CTR inicial
+5. **Publicar consistentemente** - 5-6/semana mínimo
+6. **Analizar retención** - Optimizar según datos reales
+7. **A/B testing thumbnails** - Usar variaciones para encontrar óptimo
+
+El sistema YouTube Shorts está completamente integrado y listo para automatización de contenido optimizado para monetización 2025.

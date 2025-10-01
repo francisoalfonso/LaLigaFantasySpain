@@ -90,9 +90,15 @@ class YouTubeAPI {
     validateCredentials() {
         const missingVars = [];
 
-        if (!this.refreshToken) missingVars.push('YOUTUBE_REFRESH_TOKEN');
-        if (!this.clientId) missingVars.push('YOUTUBE_CLIENT_ID');
-        if (!this.clientSecret) missingVars.push('YOUTUBE_CLIENT_SECRET');
+        if (!this.refreshToken) {
+            missingVars.push('YOUTUBE_REFRESH_TOKEN');
+        }
+        if (!this.clientId) {
+            missingVars.push('YOUTUBE_CLIENT_ID');
+        }
+        if (!this.clientSecret) {
+            missingVars.push('YOUTUBE_CLIENT_SECRET');
+        }
 
         if (missingVars.length > 0) {
             logger.warn(
@@ -128,7 +134,10 @@ class YouTubeAPI {
 
             return this.accessToken;
         } catch (error) {
-            logger.error('❌ Error obteniendo access token:', error.response?.data || error.message);
+            logger.error(
+                '❌ Error obteniendo access token:',
+                error.response?.data || error.message
+            );
             throw new Error('Failed to get YouTube access token');
         }
     }
@@ -254,7 +263,7 @@ class YouTubeAPI {
                     `⚠️ Reintento ${attempt}/${this.config.RETRY.maxRetries} después de ${Math.round(delay / 1000)}s...`
                 );
 
-                await new Promise((resolve) => setTimeout(resolve, delay));
+                await new Promise(resolve => setTimeout(resolve, delay));
                 return this.uploadWithRetry(accessToken, videoBuffer, metadata, attempt + 1);
             }
 
@@ -306,9 +315,15 @@ class YouTubeAPI {
                 snippet: {}
             };
 
-            if (metadata.title) updateData.snippet.title = this.truncateTitle(metadata.title);
-            if (metadata.description) updateData.snippet.description = metadata.description;
-            if (metadata.tags) updateData.snippet.tags = metadata.tags;
+            if (metadata.title) {
+                updateData.snippet.title = this.truncateTitle(metadata.title);
+            }
+            if (metadata.description) {
+                updateData.snippet.description = metadata.description;
+            }
+            if (metadata.tags) {
+                updateData.snippet.tags = metadata.tags;
+            }
 
             await axios.put(`${this.config.BASE_URL}/videos?part=snippet`, updateData, {
                 headers: {
@@ -407,7 +422,7 @@ class YouTubeAPI {
                 }
             );
 
-            const videos = response.data.items.map((item) => ({
+            const videos = response.data.items.map(item => ({
                 videoId: item.id.videoId,
                 title: item.snippet.title,
                 description: item.snippet.description,
@@ -535,8 +550,10 @@ class YouTubeAPI {
      */
     truncateTitle(title) {
         const maxLength = 100;
-        if (title.length <= maxLength) return title;
-        return title.substring(0, maxLength - 3) + '...';
+        if (title.length <= maxLength) {
+            return title;
+        }
+        return `${title.substring(0, maxLength - 3)}...`;
     }
 
     /**

@@ -100,7 +100,7 @@ const SHORTS_CONFIG = {
     // KPIs target por tipo de contenido
     KPIS: {
         chollo_viral: {
-            retention: 0.80, // 80% retención mínima
+            retention: 0.8, // 80% retención mínima
             avgViewDuration: 22, // segundos
             engagement: 0.06, // 6% engagement rate
             viewed_vs_swiped: 0.85 // 85% viewed
@@ -109,16 +109,16 @@ const SHORTS_CONFIG = {
             retention: 0.85,
             avgViewDuration: 18,
             engagement: 0.08,
-            viewed_vs_swiped: 0.90
+            viewed_vs_swiped: 0.9
         },
         stats_impactantes: {
             retention: 0.75,
             avgViewDuration: 28,
             engagement: 0.05,
-            viewed_vs_swiped: 0.80
+            viewed_vs_swiped: 0.8
         },
         prediccion_jornada: {
-            retention: 0.70,
+            retention: 0.7,
             avgViewDuration: 42,
             engagement: 0.07,
             viewed_vs_swiped: 0.75
@@ -541,21 +541,27 @@ class ShortsGenerator {
     // === MÉTODOS AUXILIARES PARA GENERACIÓN DE DIÁLOGOS ===
 
     generateRevelacion(contentData) {
-        return `${contentData.playerName} está a ${contentData.price}M. ` +
+        return (
+            `${contentData.playerName} está a ${contentData.price}M. ` +
             `Con su próximo rival y forma actual, te puede dar ${contentData.expectedPoints} puntos. ` +
-            `Ratio valor ${contentData.valueRatio}x. Es un ROBO absoluto.`;
+            `Ratio valor ${contentData.valueRatio}x. Es un ROBO absoluto.`
+        );
     }
 
     generateDesarrollo(contentData) {
-        return `${contentData.newsDetail}. ` +
+        return (
+            `${contentData.newsDetail}. ` +
             `Esto afecta directamente a tu Fantasy. ` +
-            `${contentData.impact}`;
+            `${contentData.impact}`
+        );
     }
 
     generateAnalisisDatos(contentData) {
-        return `Mira este dato: ${contentData.statDetail}. ` +
+        return (
+            `Mira este dato: ${contentData.statDetail}. ` +
             `Comparado con el resto de la liga, ${contentData.comparison}. ` +
-            `Por eso creo que ${contentData.conclusion}`;
+            `Por eso creo que ${contentData.conclusion}`
+        );
     }
 
     /**

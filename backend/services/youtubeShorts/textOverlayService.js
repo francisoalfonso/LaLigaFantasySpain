@@ -48,7 +48,7 @@ const OVERLAY_CONFIG = {
         'top-center': { x: 540, y: 200, anchor: 'center' },
         'middle-left': { x: 60, y: 640 },
         'middle-right': { x: 880, y: 640, anchor: 'right' },
-        'center': { x: 540, y: 960, anchor: 'center' },
+        center: { x: 540, y: 960, anchor: 'center' },
         'bottom-left': { x: 60, y: 1600 },
         'bottom-right': { x: 880, y: 1600, anchor: 'right' },
         'bottom-center': { x: 540, y: 1600, anchor: 'center' }
@@ -80,7 +80,7 @@ const OVERLAY_CONFIG = {
             shadowOffsetX: 3,
             shadowOffsetY: 3
         },
-        'medium': {
+        medium: {
             fontSize: 60,
             fontFamily: 'Arial',
             fontColor: 'white',
@@ -92,7 +92,7 @@ const OVERLAY_CONFIG = {
             shadowOffsetX: 2,
             shadowOffsetY: 2
         },
-        'small': {
+        small: {
             fontSize: 40,
             fontFamily: 'Arial',
             fontColor: 'white',
@@ -104,7 +104,7 @@ const OVERLAY_CONFIG = {
             shadowOffsetX: 2,
             shadowOffsetY: 2
         },
-        'banner': {
+        banner: {
             fontSize: 70,
             fontFamily: 'Arial Black',
             fontColor: 'white',
@@ -140,13 +140,13 @@ const OVERLAY_CONFIG = {
             easing: 'ease-out',
             scale: { from: 0.5, to: 1.0 }
         },
-        'pulse': {
+        pulse: {
             duration: 1.0,
             easing: 'ease-in-out',
             repeat: true,
             scale: { from: 1.0, to: 1.1 }
         },
-        'bounce': {
+        bounce: {
             duration: 0.8,
             easing: 'bounce'
         }
@@ -235,7 +235,7 @@ class TextOverlayService {
         const style = this.config.TEXT_STYLES[overlay.style] || this.config.TEXT_STYLES['medium'];
 
         // Calcular timing
-        let startTime = overlay.startTime || 0;
+        const startTime = overlay.startTime || 0;
         let duration;
 
         if (overlay.duration === 'full') {

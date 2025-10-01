@@ -123,8 +123,7 @@ router.post('/generate', async (req, res) => {
             success: true,
             shortConfig,
             validation,
-            message:
-                'Configuración generada. Usar /generate-video para crear video real con VEO3.'
+            message: 'Configuración generada. Usar /generate-video para crear video real con VEO3.'
         });
     } catch (error) {
         logger.error('❌ Error generando Short config:', error);

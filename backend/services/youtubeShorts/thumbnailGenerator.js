@@ -426,7 +426,9 @@ class ThumbnailGenerator {
                 break;
             case 2:
                 // Variación con emojis adicionales
-                if (varied.price) varied.price = `💰 ${varied.price}`;
+                if (varied.price) {
+                    varied.price = `💰 ${varied.price}`;
+                }
                 varied.variationNote = 'Emojis extra';
                 break;
         }

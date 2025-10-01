@@ -14,24 +14,26 @@ class VideoConcatenator {
         this.logsDir = process.env.VEO3_LOGS_DIR || './logs/veo3';
 
         // Configuración de concatenación
+        // NOTA: Con frame-to-frame transitions, crossfade NO es necesario
+        // Ver: docs/VEO3_TRANSICIONES_FRAME_TO_FRAME.md
         this.config = {
             // Transición entre segmentos
             transition: {
-                type: 'crossfade',     // Tipo de transición
-                duration: 0.5,         // Duración de transición en segundos
-                enabled: true          // Activar transiciones
+                type: 'crossfade', // Tipo de transición (legacy)
+                duration: 0.5, // Duración de transición en segundos
+                enabled: false // ⚠️ DESACTIVADO por defecto - usar frame-to-frame
             },
             // Audio
             audio: {
-                normalize: true,       // Normalizar audio entre segmentos
-                fadeInOut: true,       // Fade in/out en cada segmento
-                fadeDuration: 0.2      // Duración del fade
+                normalize: true, // Normalizar audio entre segmentos
+                fadeInOut: false, // ⚠️ DESACTIVADO - transiciones naturales con frame-to-frame
+                fadeDuration: 0.2 // Duración del fade (solo si enabled)
             },
             // Video
             video: {
-                resolution: '1080x1920',  // Resolución final (9:16)
-                framerate: 30,            // FPS
-                bitrate: '2M'             // Bitrate del video
+                resolution: '1080x1920', // Resolución final (9:16)
+                framerate: 30, // FPS
+                bitrate: '2M' // Bitrate del video
             }
         };
 
@@ -74,7 +76,6 @@ class VideoConcatenator {
                 // Concatenación simple sin transiciones
                 return await this.concatenateSimple(videoPaths, outputPath, config);
             }
-
         } catch (error) {
             logger.error('[VideoConcatenator] Error concatenando videos:', error.message);
             throw error;
@@ -100,19 +101,21 @@ class VideoConcatenator {
             });
 
             command
-                .on('start', (commandLine) => {
+                .on('start', commandLine => {
                     logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
                 })
-                .on('progress', (progress) => {
+                .on('progress', progress => {
                     if (progress.percent) {
-                        logger.info(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
+                        logger.info(
+                            `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                        );
                     }
                 })
                 .on('end', () => {
                     logger.info(`[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`);
                     resolve(outputPath);
                 })
-                .on('error', (error) => {
+                .on('error', error => {
                     logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
                     reject(error);
                 })
@@ -150,19 +153,23 @@ class VideoConcatenator {
                 .fps(config.video.framerate)
                 .size(config.video.resolution)
                 .format('mp4')
-                .on('start', (commandLine) => {
+                .on('start', commandLine => {
                     logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
                 })
-                .on('progress', (progress) => {
+                .on('progress', progress => {
                     if (progress.percent) {
-                        logger.info(`[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`);
+                        logger.info(
+                            `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                        );
                     }
                 })
                 .on('end', () => {
-                    logger.info(`[VideoConcatenator] ✅ Concatenación con transiciones completada: ${outputPath}`);
+                    logger.info(
+                        `[VideoConcatenator] ✅ Concatenación con transiciones completada: ${outputPath}`
+                    );
                     resolve(outputPath);
                 })
-                .on('error', (error) => {
+                .on('error', error => {
                     logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
                     reject(error);
                 })
@@ -182,7 +189,9 @@ class VideoConcatenator {
 
         if (videoCount === 2) {
             // Transición simple entre 2 videos
-            filters.push(`[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[video_out]`);
+            filters.push(
+                `[0:v][1:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[video_out]`
+            );
             filters.push(`[0:a][1:a]acrossfade=d=${transitionDuration}[audio_out]`);
             filters.push(`[video_out][audio_out]concat=n=1:v=1:a=1[final_output]`);
         } else if (videoCount > 2) {
@@ -190,16 +199,26 @@ class VideoConcatenator {
             for (let i = 0; i < videoCount - 1; i++) {
                 if (i === 0) {
                     // Primera transición
-                    filters.push(`[${i}:v][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[v${i}]`);
+                    filters.push(
+                        `[${i}:v][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[v${i}]`
+                    );
                     filters.push(`[${i}:a][${i + 1}:a]acrossfade=d=${transitionDuration}[a${i}]`);
                 } else if (i === videoCount - 2) {
                     // Última transición
-                    filters.push(`[v${i - 1}][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[video_out]`);
-                    filters.push(`[a${i - 1}][${i + 1}:a]acrossfade=d=${transitionDuration}[audio_out]`);
+                    filters.push(
+                        `[v${i - 1}][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[video_out]`
+                    );
+                    filters.push(
+                        `[a${i - 1}][${i + 1}:a]acrossfade=d=${transitionDuration}[audio_out]`
+                    );
                 } else {
                     // Transiciones intermedias
-                    filters.push(`[v${i - 1}][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[v${i}]`);
-                    filters.push(`[a${i - 1}][${i + 1}:a]acrossfade=d=${transitionDuration}[a${i}]`);
+                    filters.push(
+                        `[v${i - 1}][${i + 1}:v]xfade=transition=fade:duration=${transitionDuration}:offset=7.5[v${i}]`
+                    );
+                    filters.push(
+                        `[a${i - 1}][${i + 1}:a]acrossfade=d=${transitionDuration}[a${i}]`
+                    );
                 }
             }
             filters.push(`[video_out][audio_out]concat=n=1:v=1:a=1[final_output]`);
@@ -217,7 +236,9 @@ class VideoConcatenator {
      */
     async createLongVideoFromPrompts(prompts, veo3Client, options = {}) {
         try {
-            logger.info(`[VideoConcatenator] Creando video largo con ${prompts.length} segmentos...`);
+            logger.info(
+                `[VideoConcatenator] Creando video largo con ${prompts.length} segmentos...`
+            );
 
             const videoPaths = [];
             const startTime = Date.now();
@@ -228,7 +249,10 @@ class VideoConcatenator {
                 logger.info(`[VideoConcatenator] Generando segmento ${i + 1}/${prompts.length}...`);
 
                 try {
-                    const video = await veo3Client.generateCompleteVideo(prompt, options.veo3Options);
+                    const video = await veo3Client.generateCompleteVideo(
+                        prompt,
+                        options.veo3Options
+                    );
 
                     // Descargar video localmente
                     const segmentPath = path.join(this.tempDir, `segment-${i}-${Date.now()}.mp4`);
@@ -236,7 +260,6 @@ class VideoConcatenator {
                     videoPaths.push(segmentPath);
 
                     logger.info(`[VideoConcatenator] Segmento ${i + 1} completado: ${segmentPath}`);
-
                 } catch (error) {
                     logger.error(`[VideoConcatenator] Error en segmento ${i + 1}:`, error.message);
                     // Continuar con los demás segmentos
@@ -247,7 +270,9 @@ class VideoConcatenator {
                 throw new Error('No se pudo generar ningún segmento');
             }
 
-            logger.info(`[VideoConcatenator] ${videoPaths.length} segmentos generados. Concatenando...`);
+            logger.info(
+                `[VideoConcatenator] ${videoPaths.length} segmentos generados. Concatenando...`
+            );
 
             // Concatenar todos los segmentos
             const finalPath = await this.concatenateVideos(videoPaths, options);
@@ -273,7 +298,6 @@ class VideoConcatenator {
             });
 
             return finalPath;
-
         } catch (error) {
             logger.error('[VideoConcatenator] Error creando video largo:', error.message);
             throw error;
@@ -302,7 +326,6 @@ class VideoConcatenator {
                 writer.on('finish', () => resolve(localPath));
                 writer.on('error', reject);
             });
-
         } catch (error) {
             logger.error('[VideoConcatenator] Error descargando video:', error.message);
             throw error;
@@ -325,13 +348,17 @@ class VideoConcatenator {
                 const anaVideos = this.findAnaVideos().slice(0, 2); // Máximo 2 para test
 
                 if (anaVideos.length < 2) {
-                    throw new Error('Se necesitan al menos 2 videos Ana para test. Ejecuta: npm run veo3:test-ana');
+                    throw new Error(
+                        'Se necesitan al menos 2 videos Ana para test. Ejecuta: npm run veo3:test-ana'
+                    );
                 }
 
                 videosToConcat = anaVideos;
             }
 
-            logger.info(`[VideoConcatenator] Concatenando ${videosToConcat.length} videos de test...`);
+            logger.info(
+                `[VideoConcatenator] Concatenando ${videosToConcat.length} videos de test...`
+            );
 
             const startTime = Date.now();
             const resultPath = await this.concatenateVideos(videosToConcat, {
@@ -341,7 +368,9 @@ class VideoConcatenator {
 
             logger.info('[VideoConcatenator] ✅ Test completado exitosamente');
             logger.info(`[VideoConcatenator] Video concatenado: ${resultPath}`);
-            logger.info(`[VideoConcatenator] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`);
+            logger.info(
+                `[VideoConcatenator] Tiempo de procesamiento: ${(processingTime / 1000).toFixed(2)}s`
+            );
 
             return {
                 success: true,
@@ -349,7 +378,6 @@ class VideoConcatenator {
                 outputVideo: resultPath,
                 processingTime
             };
-
         } catch (error) {
             logger.error('[VideoConcatenator] ❌ Test falló:', error.message);
             throw error;
@@ -366,11 +394,11 @@ class VideoConcatenator {
                 return [];
             }
 
-            return fs.readdirSync(this.outputDir)
+            return fs
+                .readdirSync(this.outputDir)
                 .filter(file => file.startsWith('ana-') && file.endsWith('.mp4'))
                 .map(file => path.join(this.outputDir, file))
                 .filter(filePath => fs.existsSync(filePath));
-
         } catch (error) {
             logger.error('[VideoConcatenator] Error buscando videos Ana:', error.message);
             return [];
@@ -392,7 +420,7 @@ class VideoConcatenator {
             processingTime: operation.totalTime
         };
 
-        fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\n');
+        fs.appendFileSync(logPath, `${JSON.stringify(logEntry)}\n`);
     }
 }
 

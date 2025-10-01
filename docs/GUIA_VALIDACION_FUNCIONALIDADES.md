@@ -195,17 +195,31 @@ puntos).
 3. Anotar qué funciona/no funciona
 4. Objetivo: conseguir score ≥80
 
-### **Paso 5: Validación Final**
+### **Paso 5: Generación de Video REAL**
+
+Una vez optimizados los prompts con versiones mock:
+
+1. Click en **"🎬 Generar Video REAL con VEO3"**
+2. Confirmar generación (coste: $0.90, tiempo: 4-6 min)
+3. Esperar a que se complete el proceso E2E
+4. Video REAL se guarda automáticamente como nueva versión
+5. Revisar calidad del video generado
+6. Comparar con versiones mock previas
+
+**Importante**: Solo generar videos REALES cuando score ≥80 y prompts validados.
+
+### **Paso 6: Validación Final**
 
 - ✅ Score viral ≥80 puntos
-- ✅ Mínimo 3 versiones probadas
+- ✅ Mínimo 3 versiones probadas (mocks)
+- ✅ Mínimo 1 video REAL generado y aprobado
 - ✅ Notas documentadas en historial
 - ✅ Prompts optimizados y validados
 - ✅ Caption ≤125 caracteres
 - ✅ 5-10 hashtags relevantes
 - ✅ CTA clara presente
 
-### **Paso 6: Solo si APROBADO → Automatizar**
+### **Paso 7: Solo si APROBADO → Automatizar**
 
 ```javascript
 // Ejemplo: automatización solo después de validación
@@ -321,8 +335,10 @@ docs/
 □ Sistema de versiones habilitado
 □ Prompts VEO3 visibles completos
 □ Agregado al dashboard central
-□ Mínimo 3 versiones probadas
+□ Mínimo 3 versiones probadas (mocks)
 □ Score ≥80 alcanzado
+□ Botón "Generar Video REAL" implementado
+□ Mínimo 1 video REAL generado y validado
 □ Documentación en historial
 □ ✅ LISTO PARA AUTOMATIZAR
 ```

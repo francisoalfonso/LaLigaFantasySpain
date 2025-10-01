@@ -478,6 +478,17 @@
 
                             <div class="space-y-3">
                                 <button
+                                    @click="generateRealVideo()"
+                                    :disabled="generatingReal"
+                                    class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
+                                    <span x-show="!generatingReal">🎬 Generar Video REAL con VEO3</span>
+                                    <span x-show="generatingReal" class="pulse">⏳ Generando video real (4-6 min)...</span>
+                                </button>
+                                <p class="text-xs text-white/80 text-center">✨ Crea video E2E real y guarda como versión</p>
+
+                                <div class="border-t border-white/20 my-4"></div>
+
+                                <button
                                     @click="publishNow()"
                                     :disabled="publishing"
                                     class="w-full bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
@@ -730,6 +741,11 @@
                                                     x-text="`v${version.version}`">
                                                 </span>
                                                 <span class="text-xs text-gray-500" x-text="new Date(version.timestamp).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })"></span>
+                                                <span
+                                                    x-show="version.isRealVideo"
+                                                    class="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold">
+                                                    🎬 VEO3 REAL
+                                                </span>
                                             </div>
                                             <span
                                                 x-show="version.version === currentVersion"
@@ -873,6 +889,7 @@
                 loading: false,
                 publishing: false,
                 publishSuccess: false,
+                generatingReal: false,
 
                 init() {
                     console.log('🎬 Instagram Viral Preview cargado');
@@ -1076,6 +1093,68 @@
 
                     alert(comparison);
                     console.log('⚖️ Comparando versiones:', this.currentVersion, 'vs', versionNumber);
+                },
+
+                async generateRealVideo() {
+                    if (!confirm('⚠️ Esto generará un video REAL con VEO3 (coste: $0.90, tiempo: 4-6 min).\n\n¿Continuar?')) {
+                        return;
+                    }
+
+                    this.generatingReal = true;
+
+                    try {
+                        console.log('🎬 Iniciando generación de video REAL con VEO3...');
+
+                        const response = await fetch('/api/instagram/generate-viral-real', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                playerData: this.playerData,
+                                caption: this.editableCaption
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            console.log('✅ Video REAL generado:', result.data);
+
+                            // Actualizar preview con video real
+                            this.previewData = result.data;
+                            this.editableCaption = result.data.instagram.caption;
+
+                            // Guardar en historial como nueva versión
+                            const newVersion = {
+                                version: this.promptVersions.length + 1,
+                                timestamp: new Date().toISOString(),
+                                playerData: { ...this.playerData },
+                                previewData: { ...result.data },
+                                segments: result.data.metadata.segments,
+                                videoUrl: result.data.video.url,
+                                notes: `✅ Video REAL generado con VEO3 - ${new Date().toLocaleString('es-ES')}`,
+                                viralScore: this.viralScore,
+                                isRealVideo: true
+                            };
+
+                            this.promptVersions.push(newVersion);
+                            this.currentVersion = newVersion.version;
+
+                            // Recalcular score con video real
+                            this.calculateViralScore();
+
+                            alert(`✅ Video REAL generado exitosamente!\n\n` +
+                                  `Guardado como versión ${newVersion.version}\n` +
+                                  `Score viral: ${this.viralScore}/100\n` +
+                                  `Duración: ${result.data.video.duration}`);
+                        } else {
+                            alert('❌ Error generando video real: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error generando video REAL:', error);
+                        alert('❌ Error generando video real. Ver consola para detalles.');
+                    } finally {
+                        this.generatingReal = false;
+                    }
                 },
 
                 async publishNow() {

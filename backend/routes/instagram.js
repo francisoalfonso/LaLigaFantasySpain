@@ -403,6 +403,68 @@ router.post('/publish-viral', async (req, res) => {
     }
 });
 
+// POST /api/instagram/generate-viral-real - Generar video REAL con VEO3 (E2E completo)
+router.post('/generate-viral-real', async (req, res) => {
+    try {
+        const { playerData, caption } = req.body;
+
+        if (!playerData || !playerData.playerName || !playerData.price) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required player data (playerName, price)'
+            });
+        }
+
+        logger.info('🎬 Generando video REAL con VEO3 para:', playerData.playerName);
+
+        // Crear instancia del ViralVideoBuilder
+        const viralBuilder = new ViralVideoBuilder();
+
+        // Generar video viral completo (3 segmentos con VEO3 real)
+        const videoResult = await viralBuilder.generateViralVideo(playerData);
+
+        if (!videoResult.success) {
+            throw new Error('Error generando video con VEO3');
+        }
+
+        // Obtener datos completos para preview
+        const previewData = viralBuilder.getPreviewData(videoResult, playerData);
+
+        // Si se pasó caption personalizado, usarlo
+        if (caption) {
+            previewData.instagram.caption = caption;
+            previewData.instagram.captionLength = caption.length;
+            previewData.instagram.hashtags = viralBuilder.extractHashtags(caption);
+        }
+
+        logger.info('✅ Video REAL generado exitosamente:', {
+            player: playerData.playerName,
+            videoPath: videoResult.videoPath,
+            duration: videoResult.duration,
+            segments: videoResult.segments
+        });
+
+        res.json({
+            success: true,
+            message: 'Video REAL generado con VEO3 exitosamente',
+            data: previewData,
+            metadata: {
+                isRealVideo: true,
+                generatedAt: new Date().toISOString(),
+                cost: '$0.90 (3 segmentos x $0.30)',
+                processingTime: '4-6 minutos'
+            }
+        });
+    } catch (error) {
+        logger.error('❌ Error generando video REAL con VEO3:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error generando video REAL con VEO3',
+            error: error.message
+        });
+    }
+});
+
 // POST /api/instagram/generate-content - Generar contenido automático
 router.post('/generate-content', async (req, res) => {
     try {

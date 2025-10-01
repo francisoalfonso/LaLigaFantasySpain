@@ -154,6 +154,111 @@ node scripts/veo3/test-frame-to-frame-transition.js
 
 **Estado**: ✅ Implementado y listo para testing
 
+## 📱 ESTRATEGIA INSTAGRAM 2025 - SISTEMA COMPLETO
+
+### 🎯 Estrategia Aprobada: Video-First 70% + Mix 30%
+
+**Distribución Semanal (7 posts)**:
+
+- **5 Reels Ana** (71%) - Diferenciador único, máximo alcance
+- **1-2 Carruseles datos** (21%) - Engagement profundo, saves
+- **Stories diarias** (8%) - Retención, engagement directo
+
+**Documentación completa**: `docs/INSTAGRAM_ESTRATEGIA_CONTENIDO_2025.md`
+
+#### Por Qué Este Mix (NO 100% video)
+
+**Datos Instagram 2025**:
+
+- Reels: 30.81% alcance (2x superior) pero 1.23% engagement
+- Carruseles: 14.45% alcance pero 1.92% engagement (+12% vs Reels)
+- Carruseles: +24% comments, +18% shares, save rate altísimo
+
+**Conclusión investigación**: Video-dominant para alcance, carruseles para
+engagement profundo y monetización diversa.
+
+---
+
+### 📸 Sistema Carruseles Automáticos - ContentDrips API
+
+**Herramienta aprobada**: **ContentDrips API** ($39/mes)
+
+**Por qué ContentDrips**:
+
+- ✅ Diseñado específicamente para carruseles virales
+- ✅ Multi-slide nativo (intro + 10 content + ending)
+- ✅ Integración n8n perfecta (ya lo usamos)
+- ✅ Template editor visual con labeled elements
+- ✅ Branding automático
+- ✅ ROI: 189% ahorro vs manual (€104/mes)
+
+**Uso estimado**:
+
+- 8 carruseles/mes (2 por semana)
+- 8 API calls/mes de 1000 disponibles
+- Margen enorme para escalar
+
+**Casos de uso**:
+
+1. **Top 10 Chollos Jornada** (12 slides)
+2. **Comparativa 2 Jugadores** (10 slides)
+3. **Alineación Recomendada** (12 slides)
+
+**Documentación completa**: `docs/INSTAGRAM_CARRUSELES_AUTOMATIZACION.md`
+
+#### Arquitectura Carruseles
+
+```
+Backend (Node.js Express)
+  ↓ API-Sports data + BargainAnalyzer
+  ↓ Carousel Data Formatter (/api/carousels/*)
+  ↓
+n8n Workflow
+  ↓ Schedule Trigger (Martes/Sábado 10:00 AM)
+  ↓ HTTP Request: /api/carousels/top-chollos
+  ↓ ContentDrips API: Generate carousel (~30s)
+  ↓ Wait completion (webhook)
+  ↓ Instagram Graph API: Post carousel
+  ↓
+Instagram (Publicado automáticamente)
+```
+
+#### Endpoints Backend Carruseles
+
+```bash
+# Sistema de carruseles
+GET  /api/carousels/top-chollos           # Top 10 chollos jornada
+POST /api/carousels/player-comparison     # Comparativa 2 jugadores
+GET  /api/carousels/lineup-recommendation # Alineación recomendada
+GET  /api/carousels/test                  # Test sistema
+
+# Testing
+curl http://localhost:3000/api/carousels/top-chollos
+curl http://localhost:3000/api/carousels/test
+```
+
+#### Variables de Entorno Requeridas
+
+```bash
+# ContentDrips API
+CONTENTDRIPS_API_KEY=your_api_key_here
+CONTENTDRIPS_TEMPLATE_TOP10=template_id_chollos
+CONTENTDRIPS_TEMPLATE_COMPARISON=template_id_comparison
+CONTENTDRIPS_TEMPLATE_LINEUP=template_id_lineup
+```
+
+#### Proyección Engagement Carruseles
+
+Con 15,000 seguidores (objetivo mes 6):
+
+- **8 carruseles/mes**
+- **17,344 alcance total/mes**
+- **2,304 interacciones/mes**
+- **2,600 saves/mes** (contenido evergreen)
+- **Valor**: €200-400/mes en engagement
+
+---
+
 ## 🚀 PRÓXIMA TAREA PRIORITARIA
 
 **Al retomar el proyecto, comenzar inmediatamente con:**
@@ -367,7 +472,8 @@ Fantasy la liga/
 │   │   ├── evolution.js                   # Rutas evolución valor jugadores (⚠️ CRÍTICO - necesita fix)
 │   │   ├── contentAI.js                   # Rutas generación contenido IA
 │   │   ├── imageGenerator.js              # Rutas generación imágenes dinámicas
-│   │   └── instagram.js                   # Rutas automatización Instagram
+│   │   ├── instagram.js                   # Rutas automatización Instagram
+│   │   └── carousels.js                   # Rutas carruseles automáticos Instagram (✅ IMPLEMENTADO)
 │   ├── services/
 │   │   ├── apiFootball.js                 # Cliente para API-Sports
 │   │   ├── dataProcessor.js               # Procesador de datos Fantasy
@@ -462,6 +568,16 @@ Fantasy la liga/
   ficticios)
 - `GET /api/evolution/test` - Test sistema evolución (muestra jornada 38
   ficticia)
+
+### Instagram Carousels Automation (✅ Implementado)
+
+- `GET /api/carousels/test` - Test sistema de carruseles automáticos
+- `GET /api/carousels/top-chollos` - Datos carrusel Top 10 Chollos (query:
+  limit, maxPrice)
+- `POST /api/carousels/player-comparison` - Datos comparativa 2 jugadores (body:
+  player1Id, player2Id, title)
+- `GET /api/carousels/lineup-recommendation` - Datos alineación óptima jornada
+  (query: formation, budget)
 
 ## Configuration
 

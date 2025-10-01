@@ -51,6 +51,7 @@ const videosRoutes = require('./routes/videos');
 const bunnyStreamRoutes = require('./routes/bunnyStream');
 const contentPreviewRoutes = require('./routes/contentPreview');
 const youtubeShortsRoutes = require('./routes/youtubeShorts');
+const carouselsRoutes = require('./routes/carousels');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -157,6 +158,7 @@ app.use('/api/videos', videosRoutes);
 app.use('/api/bunny', bunnyStreamRoutes);
 app.use('/api/content-preview', contentPreviewRoutes);
 app.use('/api/instagram', instagramRoutes);
+app.use('/api/carousels', carouselsRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {

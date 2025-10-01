@@ -1,0 +1,252 @@
+{
+  "name": "Instagram Carousel - Top Chollos Jornada",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 2"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger - Martes 10:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "none",
+        "url": "http://localhost:3000/api/carousels/top-chollos",
+        "options": {
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "limit",
+                "value": "10"
+              },
+              {
+                "name": "maxPrice",
+                "value": "8.0"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Fetch Carousel Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Check Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "headerAuth",
+        "url": "https://generate.contentdrips.com/render",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $credentials.contentDrips.apiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "template_id",
+              "value": "={{ $json.data.template_id }}"
+            },
+            {
+              "name": "intro_slide",
+              "value": "={{ JSON.stringify($json.data.intro_slide) }}"
+            },
+            {
+              "name": "content_slides",
+              "value": "={{ JSON.stringify($json.data.content_slides) }}"
+            },
+            {
+              "name": "ending_slide",
+              "value": "={{ JSON.stringify($json.data.ending_slide) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "ContentDrips - Generate Carousel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 200]
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificUpdate",
+        "event": "creation",
+        "options": {}
+      },
+      "name": "Wait for Render Complete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "media",
+        "operation": "create",
+        "accountId": "={{ $credentials.instagram.businessAccountId }}",
+        "mediaType": "carousel",
+        "children": "={{ $json.carousel_urls }}",
+        "caption": "={{ $json.data.intro_slide.title }}\\n\\n{{ $json.data.ending_slide.cta }}\\n\\n#FantasyLaLiga #Chollos #LaLiga",
+        "options": {}
+      },
+      "name": "Instagram - Post Carousel",
+      "type": "n8n-nodes-base.instagram",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "message": "✅ Carrusel Top Chollos publicado en Instagram\\n\\nJornada: {{ $json.stats.gameweek }}\\nJugadores: {{ $json.stats.players_count }}\\nPrecio promedio: {{ $json.stats.avg_price }}M\\n\\nURL: {{ $json.instagram_url }}",
+        "options": {}
+      },
+      "name": "Log Success",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "message": "❌ Error generando carrusel Top Chollos\\n\\nError: {{ $json.message }}",
+        "options": {}
+      },
+      "name": "Log Error",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger - Martes 10:00": {
+      "main": [
+        [
+          {
+            "node": "Fetch Carousel Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Carousel Data": {
+      "main": [
+        [
+          {
+            "node": "Check Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Success": {
+      "main": [
+        [
+          {
+            "node": "ContentDrips - Generate Carousel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ContentDrips - Generate Carousel": {
+      "main": [
+        [
+          {
+            "node": "Wait for Render Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait for Render Complete": {
+      "main": [
+        [
+          {
+            "node": "Instagram - Post Carousel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Instagram - Post Carousel": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Instagram",
+      "id": "instagram"
+    },
+    {
+      "name": "Carousel",
+      "id": "carousel"
+    },
+    {
+      "name": "Fantasy La Liga",
+      "id": "fantasy"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-10-01T00:00:00.000Z",
+  "versionId": "1.0.0"
+}

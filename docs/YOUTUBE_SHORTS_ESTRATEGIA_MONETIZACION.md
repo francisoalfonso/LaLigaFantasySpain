@@ -1,7 +1,12 @@
 # 🎬 Estrategia YouTube Shorts - Monetización Fantasy La Liga
 
-**Fecha creación**: 1 Octubre 2025 **Objetivo**: Monetización principal vía
-YouTube Shorts con contenido VEO3 automatizado
+**Fecha creación**: 1 Octubre 2025 **Fecha actualización**: 1 Octubre 2025
+**Objetivo**: Monetización principal vía YouTube Shorts con contenido VEO3
+automatizado
+
+⚠️ **IMPORTANTE**: Este documento contiene el análisis estratégico. Para la
+**implementación técnica completa (100% automatizada vía API)**, ver: →
+**`YOUTUBE_SHORTS_AUTOMATIZACION_COMPLETA.md`** ←
 
 ---
 

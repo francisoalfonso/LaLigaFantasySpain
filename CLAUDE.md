@@ -1584,23 +1584,36 @@ profesional de videos generados por VEO3.
 - **API Connectivity**: Test API-Sports connection with
   `curl http://localhost:3000/api/laliga/test` before data operations
 
-## 📱 Sistema YouTube Shorts - Monetización Automatizada (Implementado)
+## 📱 Sistema YouTube Shorts - Automatización 100% vía API (Implementado)
 
-El proyecto incluye un stack técnico completo para la generación, optimización y publicación automatizada de YouTube Shorts, enfocado en monetización mediante el programa de participación de Shorts 2025.
+El proyecto incluye un stack técnico completo para la generación, optimización y
+publicación **completamente automatizada** de YouTube Shorts mediante YouTube
+Data API v3. **CERO intervención manual diaria**.
+
+⚠️ **DOCUMENTACIÓN COMPLETA**: Ver
+`docs/YOUTUBE_SHORTS_AUTOMATIZACION_COMPLETA.md` para el flujo completo de
+automatización vía API.
 
 ### 🚀 Funcionalidades Implementadas
 
 #### **Sistema Completo de Generación**
 
-- **ShortsGenerator**: Generación automática de configuración optimizada por tipo de contenido (chollo_viral, breaking_news, stats_impactantes, prediccion_jornada)
-- **CaptionsService**: Subtítulos automáticos con estilo karaoke (CRÍTICO - 85% usuarios sin audio)
-- **TextOverlayService**: Overlays dinámicos de datos y estadísticas con posicionamiento inteligente
-- **ThumbnailGenerator**: Generación automática de thumbnails impactantes para CTR
-- **YouTubeAPI**: Cliente completo para YouTube Data API v3 con upload automático
+- **ShortsGenerator**: Generación automática de configuración optimizada por
+  tipo de contenido (chollo_viral, breaking_news, stats_impactantes,
+  prediccion_jornada)
+- **CaptionsService**: Subtítulos automáticos con estilo karaoke (CRÍTICO - 85%
+  usuarios sin audio)
+- **TextOverlayService**: Overlays dinámicos de datos y estadísticas con
+  posicionamiento inteligente
+- **ThumbnailGenerator**: Generación automática de thumbnails impactantes para
+  CTR
+- **YouTubeAPI**: Cliente completo para YouTube Data API v3 con upload
+  automático
 
 ### 🎯 Arquitectura del Sistema
 
 **Stack Técnico** (`backend/services/youtubeShorts/`):
+
 - `shortsGenerator.js` - Configuración optimizada Shorts por tipo
 - `captionsService.js` - Subtítulos automáticos karaoke (85% sin audio)
 - `textOverlayService.js` - Overlays dinámicos de datos
@@ -1612,28 +1625,28 @@ El proyecto incluye un stack técnico completo para la generación, optimizació
 ### 📊 Tipos de Contenido Soportados
 
 1. **Chollos Virales (40%)** - 20-30s
-   - Hook conspirativo (<2s)
-   - Revelación jugador + precio + stats
-   - CTA urgente
-   - Target: 80% retención, 6% engagement
+    - Hook conspirativo (<2s)
+    - Revelación jugador + precio + stats
+    - CTA urgente
+    - Target: 80% retención, 6% engagement
 
 2. **Breaking News (25%)** - 15-25s
-   - Alerta urgente (<1.5s)
-   - Desarrollo noticia + impacto Fantasy
-   - CTA acción inmediata
-   - Target: 85% retención, 8% engagement
+    - Alerta urgente (<1.5s)
+    - Desarrollo noticia + impacto Fantasy
+    - CTA acción inmediata
+    - Target: 85% retención, 8% engagement
 
 3. **Stats Impactantes (20%)** - 25-40s
-   - Hook shock (<2.5s)
-   - Análisis datos detallado
-   - Conclusión + invitación comentarios
-   - Target: 75% retención, 5% engagement
+    - Hook shock (<2.5s)
+    - Análisis datos detallado
+    - Conclusión + invitación comentarios
+    - Target: 75% retención, 5% engagement
 
 4. **Predicciones Jornada (15%)** - 40-60s
-   - Hook autoridad (<3s)
-   - 3 predicciones (última POLÉMICA)
-   - CTA seguimiento
-   - Target: 70% retención, 7% engagement
+    - Hook autoridad (<3s)
+    - 3 predicciones (última POLÉMICA)
+    - CTA seguimiento
+    - Target: 70% retención, 7% engagement
 
 ### 🔧 API Endpoints Principales
 
@@ -1701,6 +1714,7 @@ curl -X POST http://localhost:3000/api/youtube-shorts/generate-video \
 ```
 
 **Proceso completo**:
+
 1. Genera config optimizada para Shorts
 2. Genera video con VEO3 (3 segmentos)
 3. Aplica subtítulos karaoke automáticos
@@ -1731,45 +1745,46 @@ curl -X POST http://localhost:3000/api/youtube-shorts/generate \
 - **Target Growth**: 0→100K subs en 4 fases
 - **Publicación**: 5-6 Shorts/semana optimizados
 - **Proyección Año 1**: €8,203-€18,500
-- **4 Pilares de Contenido**: Chollos (40%), Breaking (25%), Stats (20%), Predicciones (15%)
+- **4 Pilares de Contenido**: Chollos (40%), Breaking (25%), Stats (20%),
+  Predicciones (15%)
 
 ### 🎯 KPIs por Tipo de Contenido
 
-| Tipo             | Retención | Engagement | Viewed/Swiped | Duración Óptima |
-|------------------|-----------|------------|---------------|-----------------|
-| Chollos          | 80%       | 6%         | 85%           | 20-30s          |
-| Breaking News    | 85%       | 8%         | 90%           | 15-25s          |
-| Stats            | 75%       | 5%         | 80%           | 25-40s          |
-| Predicciones     | 70%       | 7%         | 75%           | 40-60s          |
+| Tipo          | Retención | Engagement | Viewed/Swiped | Duración Óptima |
+| ------------- | --------- | ---------- | ------------- | --------------- |
+| Chollos       | 80%       | 6%         | 85%           | 20-30s          |
+| Breaking News | 85%       | 8%         | 90%           | 15-25s          |
+| Stats         | 75%       | 5%         | 80%           | 25-40s          |
+| Predicciones  | 70%       | 7%         | 75%           | 40-60s          |
 
 ### 🔑 Optimizaciones CRÍTICAS para Shorts
 
 1. **Subtítulos Obligatorios** (85% sin audio)
-   - Estilo karaoke word-by-word
-   - Fuente grande (32px)
-   - Highlighting dorado para palabra actual
-   - Posición centro-medio (no interferir con UI)
+    - Estilo karaoke word-by-word
+    - Fuente grande (32px)
+    - Highlighting dorado para palabra actual
+    - Posición centro-medio (no interferir con UI)
 
 2. **Hook Primeros 2 Segundos** (CRÍTICO)
-   - Máximo 12-15 palabras
-   - Conspirativo/Urgente/Shock según tipo
-   - Push-in rápido de cámara
-   - Sin música de fondo
+    - Máximo 12-15 palabras
+    - Conspirativo/Urgente/Shock según tipo
+    - Push-in rápido de cámara
+    - Sin música de fondo
 
 3. **Formato Vertical 9:16**
-   - 1080x1920 resolución
-   - Watermark top-left (no interferir con UI Shorts)
-   - Safe zones para UI YouTube
+    - 1080x1920 resolución
+    - Watermark top-left (no interferir con UI Shorts)
+    - Safe zones para UI YouTube
 
 4. **Text Overlays Estratégicos**
-   - Precio/Datos destacados permanentes
-   - Animaciones entrada/salida
-   - Posicionamiento inteligente (evita subtítulos y UI)
+    - Precio/Datos destacados permanentes
+    - Animaciones entrada/salida
+    - Posicionamiento inteligente (evita subtítulos y UI)
 
 5. **CTA Claro**
-   - Último segmento siempre incluye CTA
-   - "Sígueme", "Suscríbete", "Link en bio"
-   - Gesto señalar cámara
+    - Último segmento siempre incluye CTA
+    - "Sígueme", "Suscríbete", "Link en bio"
+    - Gesto señalar cámara
 
 ### ⚠️ Consideraciones Importantes
 
@@ -1826,4 +1841,100 @@ curl http://localhost:3000/api/youtube-shorts/videos?maxResults=10
 6. **Analizar retención** - Optimizar según datos reales
 7. **A/B testing thumbnails** - Usar variaciones para encontrar óptimo
 
-El sistema YouTube Shorts está completamente integrado y listo para automatización de contenido optimizado para monetización 2025.
+El sistema YouTube Shorts está completamente integrado y listo para
+automatización de contenido optimizado para monetización 2025.
+
+### 🤖 Automatización Completa vía YouTube Data API
+
+**TODO se puede hacer vía API** - El sistema está diseñado para operar sin
+intervención manual:
+
+#### **Setup Inicial (20 minutos - una vez)**
+
+1. Crear canal YouTube "Fantasy La Liga Pro"
+2. Configurar YouTube Data API en Google Cloud
+3. Obtener OAuth 2.0 credentials (CLIENT_ID, CLIENT_SECRET)
+4. Generar REFRESH_TOKEN para automatización
+5. Agregar credenciales a `.env`
+
+#### **Operación Diaria (0 minutos - automático)**
+
+```javascript
+// CRON job ejecuta automáticamente 5-6x/semana
+cron.schedule('0 10 * * *', async () => {
+    // 1. Seleccionar tipo de contenido del día
+    const contentType = selectDailyContentType();
+
+    // 2. Obtener datos Fantasy La Liga
+    const contentData = await getContentData(contentType);
+
+    // 3. Generar Short completo E2E
+    const short = await generateCompleteShort(contentType, contentData);
+    // → VEO3 genera video (24s, 3 segmentos)
+    // → Aplica subtítulos karaoke automáticos
+    // → Aplica overlays de datos
+    // → Genera thumbnail impactante
+
+    // 4. UPLOAD AUTOMÁTICO vía YouTube API
+    const upload = await youtubeAPI.uploadShort(short.videoPath, {
+        title: short.metadata.title,
+        description: short.metadata.description,
+        tags: short.metadata.tags,
+        thumbnailPath: short.thumbnailPath,
+        privacyStatus: 'public',
+        categoryId: '17' // Sports
+    });
+
+    // 5. Agregar a playlist automáticamente
+    await youtubeAPI.addToPlaylist(upload.videoId, PLAYLISTS[contentType]);
+
+    console.log(`✅ Short publicado: ${upload.url}`);
+});
+```
+
+#### **Capacidades YouTube Data API v3**
+
+- ✅ Upload videos (incluyendo Shorts)
+- ✅ Metadata completa (título, descripción, tags)
+- ✅ Thumbnails personalizados
+- ✅ Playlists CRUD
+- ✅ Programación de publicaciones
+- ✅ Analytics (views, likes, comments)
+- ✅ Actualizar/eliminar videos
+- ✅ Responder comentarios
+
+#### **Variables de Entorno Adicionales YouTube**
+
+```bash
+# .env
+YOUTUBE_CLIENT_ID=tu_google_oauth_client_id
+YOUTUBE_CLIENT_SECRET=tu_google_oauth_client_secret
+YOUTUBE_REFRESH_TOKEN=tu_refresh_token_permanente
+YOUTUBE_CHANNEL_ID=tu_channel_id
+```
+
+#### **Comandos de Gestión**
+
+```bash
+# Setup OAuth inicial (una vez)
+node scripts/youtube/setup-oauth.js
+
+# Test primera publicación
+npm run youtube:publish-now -- --type=chollo --test
+
+# Iniciar automatización
+npm run youtube:enable-automation
+
+# Ver dashboard
+http://localhost:3000/youtube-dashboard
+```
+
+#### **Output Esperado**
+
+- **5-6 Shorts/semana** publicados automáticamente
+- **260 Shorts/año** sin intervención manual
+- **Tiempo manual**: 0 minutos/día (después de setup)
+- **ROI Año 1**: €8,203-€18,500 (proyección conservadora)
+
+Ver documentación completa de automatización en
+`docs/YOUTUBE_SHORTS_AUTOMATIZACION_COMPLETA.md`.

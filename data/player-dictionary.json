@@ -36,9 +36,29 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "testedSuccessRate": 1,
-      "lastTested": "2025-10-03T10:31:51.862Z",
-      "totalVideos": 8,
+      "lastTested": "2025-10-03T19:24:37.095Z",
+      "totalVideos": 17,
       "addedAt": "2025-10-03T05:11:21.386Z"
+    },
+    "Pepelu": {
+      "surname": "Pepelu",
+      "team": "Valencia",
+      "safeReferences": [
+        "Pepelu",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Pepelu del Valencia",
+        "Pepelu Valencia",
+        "Pepelu del Valencia",
+        "Pepelu Valencia"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-03T13:34:09.581Z"
     }
   },
   "teams": {
@@ -59,6 +79,15 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-03T05:11:21.388Z"
+    },
+    "Valencia": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-03T13:34:09.585Z"
     }
   }
 }

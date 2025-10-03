@@ -1,6 +1,6 @@
 /**
  * Video Manager - Gestión completa de descarga y almacenamiento local de videos VEO3
- * Integrado con Bunny.net Stream para hosting profesional
+ * Sistema de almacenamiento local únicamente
  */
 
 const fs = require('fs').promises;
@@ -9,7 +9,6 @@ const logger = require('../utils/logger');
 const axios = require('axios');
 const { exec } = require('child_process');
 const { promisify } = require('util');
-const BunnyStreamManager = require('./bunnyStreamManager');
 
 const execAsync = promisify(exec);
 
@@ -20,9 +19,6 @@ class VideoManager {
         this.baseUrl = process.env.NODE_ENV === 'production'
             ? `https://${process.env.PROJECT_DOMAIN}`
             : `http://localhost:${process.env.PORT || 3000}`;
-
-        // Inicializar Bunny.net Stream Manager
-        this.bunnyStream = new BunnyStreamManager();
 
         this.initializeStorage();
     }

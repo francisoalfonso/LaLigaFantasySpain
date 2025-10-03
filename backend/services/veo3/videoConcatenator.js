@@ -2,6 +2,7 @@ const ffmpeg = require('fluent-ffmpeg');
 const logger = require('../../utils/logger');
 const path = require('path');
 const fs = require('fs');
+const ViralCaptionsGenerator = require('./viralCaptionsGenerator');
 
 /**
  * Sistema de concatenación de videos VEO3
@@ -15,6 +16,9 @@ class VideoConcatenator {
 
         // 🔧 FIX: Path al logo outro estático
         this.logoOutroPath = path.join(this.outputDir, 'logo-static.mp4');
+
+        // ✨ NUEVO: Generador de subtítulos virales
+        this.captionsGenerator = new ViralCaptionsGenerator();
 
         // Configuración de concatenación
         // NOTA: Con frame-to-frame transitions, crossfade de VIDEO NO es necesario
@@ -44,6 +48,11 @@ class VideoConcatenator {
                 enabled: true, // ✅ ACTIVADO - agregar logo al final
                 logoPath: null, // Se establece dinámicamente
                 duration: 1.5 // Duración del logo (1.5s)
+            },
+            // ✨ NUEVO: Subtítulos virales automáticos
+            viralCaptions: {
+                enabled: true, // ✅ ACTIVADO - agregar subtítulos virales
+                applyBeforeConcatenation: true // Aplicar a cada segmento antes de concatenar
             }
         };
 
@@ -60,7 +69,7 @@ class VideoConcatenator {
 
     /**
      * Concatenar lista de videos
-     * @param {Array} videoPaths - Array de rutas de videos
+     * @param {Array} videoPaths - Array de rutas de videos O array de objetos {videoPath, dialogue}
      * @param {object} options - Opciones de concatenación
      * @returns {Promise<string>} - Ruta del video concatenado
      */
@@ -68,17 +77,34 @@ class VideoConcatenator {
         try {
             logger.info(`[VideoConcatenator] Concatenando ${videoPaths.length} videos...`);
 
+            // Normalizar input: soportar tanto strings como objetos {videoPath, dialogue}
+            const segments = videoPaths.map(item => {
+                if (typeof item === 'string') {
+                    return { videoPath: item, dialogue: null };
+                }
+                return item;
+            });
+
             // Validar que todos los videos existen
-            for (const videoPath of videoPaths) {
-                if (!fs.existsSync(videoPath)) {
-                    throw new Error(`Video no encontrado: ${videoPath}`);
+            for (const segment of segments) {
+                if (!fs.existsSync(segment.videoPath)) {
+                    throw new Error(`Video no encontrado: ${segment.videoPath}`);
                 }
             }
 
             const config = { ...this.config, ...options };
 
+            // ✨ NUEVO: Aplicar subtítulos virales automáticamente si está habilitado
+            let processedSegments = [...segments];
+            if (config.viralCaptions.enabled && config.viralCaptions.applyBeforeConcatenation) {
+                logger.info(`[VideoConcatenator] ✨ Aplicando subtítulos virales a ${segments.length} segmentos...`);
+                processedSegments = await this.applyViralCaptionsToSegments(segments);
+            }
+
+            // Extraer solo las rutas de video para concatenación
+            const finalVideoPaths = processedSegments.map(s => s.videoPath);
+
             // 🔧 FIX: Agregar logo outro automáticamente si está habilitado
-            const finalVideoPaths = [...videoPaths];
             if (config.outro.enabled && fs.existsSync(this.logoOutroPath)) {
                 logger.info(`[VideoConcatenator] ✅ Agregando logo outro al final...`);
                 finalVideoPaths.push(this.logoOutroPath);
@@ -215,6 +241,62 @@ class VideoConcatenator {
                     .save(outputPath);
             }
         });
+    }
+
+    /**
+     * ✨ Aplicar subtítulos virales a cada segmento
+     * @param {Array} segments - Array de objetos {videoPath, dialogue}
+     * @returns {Promise<Array>} - Array de segmentos con subtítulos aplicados
+     */
+    async applyViralCaptionsToSegments(segments) {
+        const processedSegments = [];
+
+        for (let i = 0; i < segments.length; i++) {
+            const segment = segments[i];
+
+            // Si el segmento no tiene diálogo, saltamos los subtítulos
+            if (!segment.dialogue || segment.dialogue.trim() === '') {
+                logger.warn(`[VideoConcatenator] ⚠️  Segmento ${i + 1} sin diálogo, omitiendo subtítulos`);
+                processedSegments.push(segment);
+                continue;
+            }
+
+            try {
+                logger.info(`[VideoConcatenator] 📝 Aplicando subtítulos a segmento ${i + 1}/${segments.length}...`);
+                logger.info(`[VideoConcatenator]    Diálogo: "${segment.dialogue}"`);
+
+                // Generar video con subtítulos virales
+                const videoWithCaptions = await this.captionsGenerator.generateViralCaptions(
+                    segment.videoPath,
+                    segment.dialogue,
+                    { videoDuration: 8 } // Duración estándar de segmentos VEO3
+                );
+
+                processedSegments.push({
+                    ...segment,
+                    videoPath: videoWithCaptions, // Reemplazar por video con subtítulos
+                    originalPath: segment.videoPath, // Guardar path original por si acaso
+                    captionsApplied: true
+                });
+
+                logger.info(`[VideoConcatenator] ✅ Subtítulos aplicados a segmento ${i + 1}`);
+            } catch (error) {
+                logger.error(`[VideoConcatenator] ❌ Error aplicando subtítulos a segmento ${i + 1}:`, error.message);
+                logger.warn(`[VideoConcatenator] ⚠️  Continuando sin subtítulos para este segmento...`);
+
+                // Si falla, usar video original sin subtítulos
+                processedSegments.push({
+                    ...segment,
+                    captionsApplied: false,
+                    error: error.message
+                });
+            }
+        }
+
+        const successCount = processedSegments.filter(s => s.captionsApplied).length;
+        logger.info(`[VideoConcatenator] ✨ Subtítulos aplicados a ${successCount}/${segments.length} segmentos`);
+
+        return processedSegments;
     }
 
     /**

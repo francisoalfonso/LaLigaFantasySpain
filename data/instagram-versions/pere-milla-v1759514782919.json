@@ -1,0 +1,27 @@
+{
+  "id": "pere-milla-v1759514782919",
+  "version": 1,
+  "timestamp": "2025-10-03T18:06:22.919Z",
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Espanyol",
+    "price": 4.5,
+    "stats": {
+      "goals": 2,
+      "assists": 1,
+      "games": 4
+    },
+    "valueRatio": 1.5
+  },
+  "videoUrl": "http://localhost:3000/output/veo3/sessions/session_1759514295982/segment_1_edc714cdc94fe7cd9f9263dbba472444.mp4",
+  "caption": "🔥 CHOLLO DEL DÍA\n\nPere Milla a solo 4.5M 💰\nRatio calidad-precio BRUTAL: 1.5x\n2 goles + 1 asistencias en 4 partidos 📊\n\n#FantasyLaLiga #Chollos #PereMilla",
+  "notes": "",
+  "viralScore": 0,
+  "isRealVideo": false,
+  "metadata": {
+    "createdAt": "2025-10-03T18:06:22.919Z",
+    "updatedAt": "2025-10-03T18:06:22.919Z",
+    "userId": "system",
+    "status": "draft"
+  }
+}

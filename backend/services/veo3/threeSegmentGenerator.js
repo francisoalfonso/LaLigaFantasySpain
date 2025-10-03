@@ -34,14 +34,13 @@ class ThreeSegmentGenerator {
                 outro: 8,
                 total: 24
             },
-            // ⭐ NUEVO: Chollo viral profundo (4 segmentos = 32s) - ÓPTIMO PARA VIRALIDAD
+            // ⭐ OPTIMIZADO: Chollo viral (3 segmentos = 24s) - ESTRATEGIA REVELACIÓN SEGUNDO 3
             chollo_viral: {
-                segments: 4,
-                intro: 8,      // Hook + Contexto
-                analysis: 8,   // Análisis datos
-                stats: 8,      // Stats visuales
-                outro: 8,      // Revelación + CTA
-                total: 32
+                segments: 3,
+                intro: 8, // Hook + REVELACIÓN (segundo 3) + Precio
+                stats: 8, // Validación con datos
+                outro: 8, // Urgencia + CTA
+                total: 24
             },
             // Análisis profundo (4 segmentos = 32s)
             analisis_deep: {
@@ -76,18 +75,25 @@ class ThreeSegmentGenerator {
         const segmentCount = durations.segments;
 
         // ✅ FIX CRÍTICO: Seleccionar UNA imagen de Ana para TODOS los segmentos
-        const fixedAnaImageIndex = anaImageIndex !== null ? anaImageIndex : Math.floor(Math.random() * 4);
+        const fixedAnaImageIndex =
+            anaImageIndex !== null ? anaImageIndex : Math.floor(Math.random() * 4);
 
-        logger.info(`[MultiSegmentGenerator] Generando estructura ${segmentCount}-segmentos: ${contentType}`);
+        logger.info(
+            `[MultiSegmentGenerator] Generando estructura ${segmentCount}-segmentos: ${contentType}`
+        );
         logger.info(`[MultiSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
-        logger.info(`[MultiSegmentGenerator] ✅ Ana imagen FIJA: índice ${fixedAnaImageIndex} (MISMA en TODOS los segmentos)`);
+        logger.info(
+            `[MultiSegmentGenerator] ✅ Ana imagen FIJA: índice ${fixedAnaImageIndex} (MISMA en TODOS los segmentos)`
+        );
 
         // 🎬 NUEVO: Generar guión unificado PRIMERO para cohesión narrativa
         let unifiedScript = null;
         let viralityScore = null;
 
         if (segmentCount >= 3 && useViralStructure) {
-            logger.info(`[MultiSegmentGenerator] 📝 Generando guión unificado con arco narrativo...`);
+            logger.info(
+                `[MultiSegmentGenerator] 📝 Generando guión unificado con arco narrativo...`
+            );
 
             const scriptResult = this.unifiedScriptGenerator.generateUnifiedScript(
                 contentType,
@@ -99,9 +105,15 @@ class ThreeSegmentGenerator {
             viralityScore = scriptResult.validation.cohesive ? scriptResult.validation.score : null;
 
             logger.info(`[MultiSegmentGenerator] ✅ Guión unificado generado:`);
-            logger.info(`[MultiSegmentGenerator]    - Cohesión: ${scriptResult.validation.score}/100`);
-            logger.info(`[MultiSegmentGenerator]    - Arco emocional: ${scriptResult.arc.emotionalJourney.join(' → ')}`);
-            logger.info(`[MultiSegmentGenerator]    - Segmentos con diálogo: ${scriptResult.segments.length}`);
+            logger.info(
+                `[MultiSegmentGenerator]    - Cohesión: ${scriptResult.validation.score}/100`
+            );
+            logger.info(
+                `[MultiSegmentGenerator]    - Arco emocional: ${scriptResult.arc.emotionalJourney.join(' → ')}`
+            );
+            logger.info(
+                `[MultiSegmentGenerator]    - Segmentos con diálogo: ${scriptResult.segments.length}`
+            );
         }
 
         const segments = {};
@@ -125,26 +137,36 @@ class ThreeSegmentGenerator {
                 { segment: 'outro', taskIdKey: 'outroTaskId' }
             );
         } else if (segmentCount === 3) {
-            // Predicción estándar (intro + stats + outro)
+            // ⭐ ACTUALIZADO: Chollo viral (intro + middle + outro) - TODOS Ana hablando
+            // 🎬 Usar diálogos del guión unificado si disponible
+            const segment1Dialogue = unifiedScript?.segments[0]?.dialogue || null;
+            const segment2Dialogue = unifiedScript?.segments[1]?.dialogue || null;
+            const segment3Dialogue = unifiedScript?.segments[2]?.dialogue || null;
+
             segments.intro = this._buildIntroSegment(contentType, playerData, viralData, {
                 duration: durations.intro,
                 useViralStructure,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment1Dialogue
             });
-            segments.stats = this._buildStatsSegment(playerData, {
+
+            // 🎬 Segmento 2: Ana hablando (NO stats visuales)
+            segments.middle = this._buildMiddleSegment(contentType, playerData, viralData, {
                 duration: durations.stats,
-                style: statsStyle,
-                emphasizeStats,
-                contentType
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment2Dialogue
             });
+
             segments.outro = this._buildOutroSegment(contentType, playerData, viralData, {
                 duration: durations.outro,
                 useViralStructure,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment3Dialogue
             });
             generationOrder.push(
                 { segment: 'intro', taskIdKey: 'introTaskId' },
-                { segment: 'stats', taskIdKey: 'statsTaskId' },
+                { segment: 'middle', taskIdKey: 'middleTaskId' },
                 { segment: 'outro', taskIdKey: 'outroTaskId' }
             );
         } else if (segmentCount === 4) {
@@ -223,8 +245,12 @@ class ThreeSegmentGenerator {
             }
         };
 
-        const segmentDurations = Object.values(segments).map(s => s.duration).join('s + ');
-        logger.info(`[MultiSegmentGenerator] Estructura generada: ${durations.total}s (${segmentDurations}s)`);
+        const segmentDurations = Object.values(segments)
+            .map(s => s.duration)
+            .join('s + ');
+        logger.info(
+            `[MultiSegmentGenerator] Estructura generada: ${durations.total}s (${segmentDurations}s)`
+        );
 
         return structure;
     }
@@ -241,8 +267,16 @@ class ThreeSegmentGenerator {
         // 🎬 PRIORIDAD 1: Usar diálogo del guión unificado si disponible
         if (customDialogue) {
             dialogue = customDialogue;
-            prompt = this.promptBuilder.buildPrompt({ dialogue });
-            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para intro: "${dialogue.substring(0, 50)}..."`);
+            // 🔧 FIX: Agregar pausa inicial para evitar audio trabado
+            prompt = this.promptBuilder.buildPrompt({
+                dialogue,
+                enhanced: true,
+                behavior:
+                    'Brief pause before speaking (0.5 seconds), then speaks naturally and clearly.'
+            });
+            logger.info(
+                `[MultiSegmentGenerator] ✅ Usando diálogo unificado para intro: "${dialogue.substring(0, 50)}..."`
+            );
         } else if (useViralStructure && viralData.hook && viralData.contexto) {
             // Usar estructura viral
             dialogue = `${viralData.hook} ${viralData.contexto}`;
@@ -258,11 +292,23 @@ class ThreeSegmentGenerator {
                 { partial: true }
             );
 
-            prompt = result.prompt || this.promptBuilder.buildPrompt({ dialogue });
+            prompt =
+                result.prompt ||
+                this.promptBuilder.buildPrompt({
+                    dialogue,
+                    enhanced: true,
+                    behavior:
+                        'Brief pause before speaking (0.5 seconds), then speaks naturally and clearly.'
+                });
         } else {
             // Fallback a diálogo simple
             dialogue = viralData.intro || this._generateDefaultIntro(contentType, playerData);
-            prompt = this.promptBuilder.buildPrompt({ dialogue });
+            prompt = this.promptBuilder.buildPrompt({
+                dialogue,
+                enhanced: true,
+                behavior:
+                    'Brief pause before speaking (0.5 seconds), then speaks naturally and clearly.'
+            });
         }
 
         return {
@@ -296,7 +342,9 @@ class ThreeSegmentGenerator {
         if (customDialogue) {
             dialogue = customDialogue;
             prompt = this.promptBuilder.buildPrompt({ dialogue });
-            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para analysis: "${dialogue.substring(0, 50)}..."`);
+            logger.info(
+                `[MultiSegmentGenerator] ✅ Usando diálogo unificado para analysis: "${dialogue.substring(0, 50)}..."`
+            );
         } else if (useViralStructure && viralData.conflicto && viralData.inflexion) {
             // Usar estructura viral (conflicto + inflexión)
             dialogue = `${viralData.conflicto} ${viralData.inflexion}`;
@@ -350,7 +398,9 @@ class ThreeSegmentGenerator {
         if (customDialogue) {
             dialogue = customDialogue;
             prompt = this.promptBuilder.buildPrompt({ dialogue });
-            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para middle: "${dialogue.substring(0, 50)}..."`);
+            logger.info(
+                `[MultiSegmentGenerator] ✅ Usando diálogo unificado para middle: "${dialogue.substring(0, 50)}..."`
+            );
         } else if (useViralStructure && viralData.inflexion && viralData.resolucion) {
             // Usar estructura viral (inflexión + resolución)
             dialogue = `${viralData.inflexion} ${viralData.resolucion}`;
@@ -397,11 +447,14 @@ class ThreeSegmentGenerator {
     _buildStatsSegment(playerData, options) {
         const { duration, style, emphasizeStats, contentType } = options;
 
-        const cholloContext = contentType === 'chollo' ? {
-            reason: `Precio bajo para ${playerData.position} de ${playerData.team}`,
-            valueProposition: `${playerData.valueRatio}x valor vs precio`,
-            urgency: 'Precio puede subir pronto'
-        } : null;
+        const cholloContext =
+            contentType === 'chollo'
+                ? {
+                    reason: `Precio bajo para ${playerData.position} de ${playerData.team}`,
+                    valueProposition: `${playerData.valueRatio}x valor vs precio`,
+                    urgency: 'Precio puede subir pronto'
+                }
+                : null;
 
         const statsCardResult = cholloContext
             ? this.statsCardBuilder.buildCholloStatsSegment(playerData, cholloContext, {
@@ -444,7 +497,9 @@ class ThreeSegmentGenerator {
         if (customDialogue) {
             dialogue = customDialogue;
             prompt = this.promptBuilder.buildPrompt({ dialogue });
-            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para outro: "${dialogue.substring(0, 50)}..."`);
+            logger.info(
+                `[MultiSegmentGenerator] ✅ Usando diálogo unificado para outro: "${dialogue.substring(0, 50)}..."`
+            );
         } else if (useViralStructure && viralData.resolucion && viralData.cta) {
             // Usar estructura viral
             dialogue = `${viralData.resolucion} ${viralData.moraleja || ''} ${viralData.cta}`;
@@ -487,58 +542,150 @@ class ThreeSegmentGenerator {
 
     /**
      * Generar intro por defecto si no se proporciona viral data
+     * ✅ ACTUALIZADO: Textos CORTOS basados en video referencia que funciona
      * @private
      */
     _generateDefaultIntro(contentType, playerData) {
+        const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'el jugador';
+        // ✅ Convertir precio numérico a texto para pronunciación correcta
+        const priceText = this._numberToSpanishText(playerData.price);
         const intros = {
-            chollo: `¡Misters! He descubierto algo sobre ${playerData.name}. A ${playerData.price}€ es increíble.`,
-            analisis: `Hoy analizamos a ${playerData.name}. Los números son espectaculares.`,
-            breaking: `¡ATENCIÓN! Noticia urgente sobre ${playerData.name}.`,
-            prediccion: `Para la próxima jornada, ${playerData.name} es clave.`
+            chollo: `He encontrado el chollo absoluto... ${playerLastName} por solo ${priceText} millones... va a explotar.`,
+            analisis: `${playerLastName}. Los números hablan solos.`,
+            breaking: `ÚLTIMA HORA sobre ${playerLastName}.`,
+            prediccion: `${playerLastName} es clave esta jornada.`
         };
-        return intros[contentType] || `Hablemos de ${playerData.name}.`;
+        return intros[contentType] || `Hablemos de ${playerLastName}.`;
     }
 
     /**
      * ⭐ NUEVO: Generar análisis por defecto (segmento 2 en videos de 4 segmentos)
+     * ✅ ACTUALIZADO: Textos CORTOS y claros
      * @private
      */
     _generateDefaultAnalysis(contentType, playerData) {
         const analysis = {
-            chollo: `Tiene ${playerData.stats?.goals || 0} goles en ${playerData.stats?.games || 0} partidos. Ratio de valor ${playerData.valueRatio || '1.0'}x. Los números no mienten.`,
-            analisis: `En los últimos partidos ha rendido a nivel de jugador top. La tendencia es clara: está en forma.`,
-            breaking: `Esto cambia completamente la estrategia Fantasy. Hay que actuar rápido.`,
-            prediccion: `Partido favorable, rival débil, alta probabilidad de puntos. Todo apunta a un rendimiento alto.`
+            chollo: `${playerData.stats?.goals || 0} goles, ${playerData.stats?.assists || 0} asistencias. Vale ${playerData.valueRatio || '1.5'} veces más de lo que cuesta. Está dando el doble de puntos.`,
+            analisis: `Los últimos partidos confirman: está en forma. La tendencia es clara.`,
+            breaking: `Esto cambia TODO. Hay que actuar rápido.`,
+            prediccion: `Partido favorable. Alta probabilidad de puntos.`
         };
-        return analysis[contentType] || `Los datos confirman que es buena opción.`;
+        return analysis[contentType] || `Los datos lo confirman.`;
     }
 
     /**
-     * ⭐ NUEVO: Generar middle por defecto (segmento 3 en videos de 4 segmentos)
+     * ⭐ NUEVO: Generar middle por defecto (segmento 2 en videos de 3 segmentos)
+     * ✅ ACTUALIZADO: Textos CORTOS para validación con datos
      * @private
      */
     _generateDefaultMiddle(contentType, playerData) {
         const middle = {
-            chollo: `Su ratio calidad-precio es ${playerData.valueRatio || '1.5'}x. Eso significa que está dando MUCHO más de lo que cuesta. A ${playerData.price}M es una GANGA.`,
-            analisis: `El contexto táctico favorece su rendimiento. El entrenador confía en él y los números lo respaldan.`,
-            breaking: `Esta información cambia TODO. Los que actúen YA tendrán ventaja competitiva clara.`,
-            prediccion: `Mi análisis predice ${playerData.expectedPoints || 8} puntos. Fiabilidad alta basada en datos históricos.`
+            chollo: `${playerData.stats?.goals || 0} goles, ${playerData.stats?.assists || 0} asistencias. Vale ${playerData.valueRatio || '1.5'} veces más de lo que cuesta. Está dando el doble de puntos.`,
+            analisis: `El contexto táctico favorece su rendimiento. Los números lo respaldan.`,
+            breaking: `Esta información cambia TODO. Los que actúen YA tendrán ventaja.`,
+            prediccion: `Mi análisis predice ${playerData.expectedPoints || 8} puntos. Fiabilidad alta.`
         };
-        return middle[contentType] || `Los indicadores son muy positivos para ${playerData.name}.`;
+        const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'el jugador';
+        return middle[contentType] || `Los indicadores son muy positivos para ${playerLastName}.`;
     }
 
     /**
      * Generar outro por defecto si no se proporciona viral data
+     * ✅ ACTUALIZADO: Textos CORTOS y urgentes
      * @private
      */
     _generateDefaultOutro(contentType, playerData) {
+        const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'el jugador';
+        // ✅ Convertir precio numérico a texto para pronunciación correcta
+        const priceText = this._numberToSpanishText(playerData.price);
         const outros = {
-            chollo: `¡${playerData.name} a ${playerData.price}€ es matemática pura! ¡Fichalo AHORA!`,
-            analisis: `Los datos son claros: ${playerData.name} es una gran opción.`,
-            breaking: `¡Actualizad vuestros equipos inmediatamente!`,
-            prediccion: `Seguid mi consejo: ${playerData.name} dará puntos.`
+            chollo: `A ${priceText} millones es una ganga. Nadie lo ha fichado aún. Fichad a ${playerLastName} ahora.`,
+            analisis: `Los datos son claros. ${playerLastName} es una gran opción.`,
+            breaking: `Actualizad vuestros equipos inmediatamente.`,
+            prediccion: `${playerLastName} dará puntos. No lo dudéis.`
         };
-        return outros[contentType] || `¡No lo dudéis, Misters!`;
+        return outros[contentType] || `No lo dudéis, Misters.`;
+    }
+
+    /**
+     * Convertir número a texto en español para pronunciación correcta
+     * @private
+     */
+    _numberToSpanishText(number) {
+        if (!number) {
+            return 'cero';
+        }
+        const num = parseFloat(number);
+
+        // Separar parte entera y decimal
+        const parts = num.toString().split('.');
+        const integerPart = parseInt(parts[0]);
+        const decimalPart = parts[1] ? parts[1] : null;
+
+        // Números básicos
+        const ones = [
+            '',
+            'uno',
+            'dos',
+            'tres',
+            'cuatro',
+            'cinco',
+            'seis',
+            'siete',
+            'ocho',
+            'nueve'
+        ];
+        const teens = [
+            'diez',
+            'once',
+            'doce',
+            'trece',
+            'catorce',
+            'quince',
+            'dieciséis',
+            'diecisiete',
+            'dieciocho',
+            'diecinueve'
+        ];
+        const tens = [
+            '',
+            '',
+            'veinte',
+            'treinta',
+            'cuarenta',
+            'cincuenta',
+            'sesenta',
+            'setenta',
+            'ochenta',
+            'noventa'
+        ];
+
+        let result = '';
+
+        // Parte entera
+        if (integerPart === 0) {
+            result = 'cero';
+        } else if (integerPart < 10) {
+            result = ones[integerPart];
+        } else if (integerPart < 20) {
+            result = teens[integerPart - 10];
+        } else if (integerPart < 30) {
+            result = integerPart === 20 ? 'veinte' : `veinti${ones[integerPart - 20]}`;
+        } else if (integerPart < 100) {
+            const ten = Math.floor(integerPart / 10);
+            const one = integerPart % 10;
+            result = tens[ten] + (one > 0 ? ` y ${ones[one]}` : '');
+        }
+
+        // Agregar parte decimal si existe
+        if (decimalPart) {
+            result += ` punto ${decimalPart
+                .split('')
+                .map(d => ones[parseInt(d)] || 'cero')
+                .join(' ')}`;
+        }
+
+        return result;
     }
 
     /**
@@ -554,7 +701,12 @@ class ThreeSegmentGenerator {
         };
 
         // Check que existen los 3 segmentos
-        if (!structure.segments || !structure.segments.intro || !structure.segments.stats || !structure.segments.outro) {
+        if (
+            !structure.segments ||
+            !structure.segments.intro ||
+            !structure.segments.stats ||
+            !structure.segments.outro
+        ) {
             validation.errors.push('Faltan segmentos en la estructura');
             validation.valid = false;
             return validation;
@@ -562,11 +714,15 @@ class ThreeSegmentGenerator {
 
         // Check duración total
         if (structure.totalDuration > 30) {
-            validation.warnings.push(`Duración total ${structure.totalDuration}s excede límite Instagram (30s)`);
+            validation.warnings.push(
+                `Duración total ${structure.totalDuration}s excede límite Instagram (30s)`
+            );
         }
 
         if (structure.totalDuration > 20) {
-            validation.warnings.push(`Duración ${structure.totalDuration}s no óptima para Instagram/TikTok (recomendado: <20s)`);
+            validation.warnings.push(
+                `Duración ${structure.totalDuration}s no óptima para Instagram/TikTok (recomendado: <20s)`
+            );
         }
 
         // Check que cada segmento tiene prompt
@@ -579,12 +735,17 @@ class ThreeSegmentGenerator {
         });
 
         // Check consistencia de Ana (seed 30001)
-        if (structure.segments.intro.veo3Config?.seed !== 30001 || structure.segments.outro.veo3Config?.seed !== 30001) {
+        if (
+            structure.segments.intro.veo3Config?.seed !== 30001 ||
+            structure.segments.outro.veo3Config?.seed !== 30001
+        ) {
             validation.errors.push('Ana seed inconsistente - debe ser 30001 en intro y outro');
             validation.valid = false;
         }
 
-        logger.info(`[ThreeSegmentGenerator] Validación: ${validation.valid ? 'PASSED' : 'FAILED'}`);
+        logger.info(
+            `[ThreeSegmentGenerator] Validación: ${validation.valid ? 'PASSED' : 'FAILED'}`
+        );
         if (validation.warnings.length > 0) {
             logger.info(`[ThreeSegmentGenerator] Warnings: ${validation.warnings.join(', ')}`);
         }

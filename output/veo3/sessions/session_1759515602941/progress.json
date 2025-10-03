@@ -1,0 +1,47 @@
+{
+  "sessionId": 1759515602941,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515602941",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "d9468f356ebb780c1562d0787fc8f085",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/64b46af1-74ff-45e3-baa0-310e60ae2174.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515602941/segment_1_d9468f356ebb780c1562d0787fc8f085.mp4",
+      "filename": "segment_1_d9468f356ebb780c1562d0787fc8f085.mp4",
+      "duration": 8,
+      "dialogue": "He encontrado el chollo absoluto... Milla por solo 4.5 millones... va a explotar.",
+      "generatedAt": "2025-10-03T18:22:33.418Z",
+      "size": 1753568
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "9292d8b5cd13853e9aad47546ee427c3",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/60cd1ba9-f78e-47d9-b9c3-b43781fd3e1f.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515602941/segment_2_9292d8b5cd13853e9aad47546ee427c3.mp4",
+      "filename": "segment_2_9292d8b5cd13853e9aad47546ee427c3.mp4",
+      "duration": 8,
+      "generatedAt": "2025-10-03T18:25:34.288Z",
+      "size": 3342339
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "taskId": "79f78f1add40e2df9af7ac3ffc76fd44",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/e4b9fb68-bb0e-4dd5-882c-4e93387598aa.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515602941/segment_3_79f78f1add40e2df9af7ac3ffc76fd44.mp4",
+      "filename": "segment_3_79f78f1add40e2df9af7ac3ffc76fd44.mp4",
+      "duration": 8,
+      "dialogue": "A 4.5 millones es una ganga. Nadie lo ha fichado aún. Fichad a Milla ahora.",
+      "generatedAt": "2025-10-03T18:28:24.803Z",
+      "size": 1823708
+    }
+  ],
+  "lastUpdate": "2025-10-03T18:28:24.804Z"
+}

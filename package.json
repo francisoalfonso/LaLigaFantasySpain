@@ -51,7 +51,6 @@
   "author": "Fantasy La Liga Bot",
   "license": "MIT",
   "dependencies": {
-    "@bunnynet/stream": "^0.1.0",
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "cors": "^2.8.5",

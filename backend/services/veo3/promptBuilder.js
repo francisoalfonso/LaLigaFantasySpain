@@ -155,13 +155,14 @@ class PromptBuilder {
                 prompt += `${behavior} `;
             }
 
-            prompt += `Speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}" `;
+            // 🔧 FIX: Agregar instrucciones de entonación emocional y variada
+            prompt += `Speaking in SPANISH FROM SPAIN (not Mexican Spanish) with EXPRESSIVE and ENGAGING delivery - varying tone, pace and emotion naturally. Emphasize key words with rising intonation, speak with excitement and energy where appropriate, use pauses for impact: "${dialogue}" `;
 
             if (cinematography) {
                 prompt += `${cinematography} `;
             }
 
-            prompt += `Exact appearance from reference image.`;
+            prompt += `Exact appearance from reference image. Natural emotional facial expressions matching voice energy.`;
 
             logger.info(`[PromptBuilder] Prompt mejorado generado: ${prompt.length} chars`);
             return prompt;
@@ -169,7 +170,8 @@ class PromptBuilder {
 
         // Prompt minimal para máxima adherencia a imagen de referencia
         // CRÍTICO: SIEMPRE forzar español de España (NO mexicano)
-        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
+        // 🔧 FIX: Agregar instrucciones de entonación emocional
+        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish) with EXPRESSIVE and engaging delivery, varying tone and emotion naturally: "${dialogue}". Exact appearance from reference with natural emotional expressions.`;
 
         logger.info(`[PromptBuilder] Prompt minimal generado: ${prompt.length} chars`);
         return prompt;
@@ -340,7 +342,7 @@ class PromptBuilder {
 
         // 5. Resolución (7-9s) - explosive_excitement
         if (ratio) {
-            parts.push(`Ratio de valor: ${ratio}x. ¡Está RINDIENDO como uno de 15 millones!`);
+            parts.push(`Vale ${ratio} veces más de lo que cuesta. ¡Está RINDIENDO como uno de 15 millones!`);
         } else {
             parts.push(`Rating de ${stats.rating || 7.0}. ¡Es un CHOLLO BRUTAL!`);
         }
@@ -913,7 +915,7 @@ class PromptBuilder {
         if (targetSegments === 2) {
             return [
                 `¿Sabéis cuál es el secreto que nadie os cuenta en Fantasy? Los chollos están escondidos donde nadie mira.`,
-                `${playerName}. ${price} millones. ${team}. Ratio de valor ${valueRatio}. Es mi chollo de la jornada. Fichad antes de que suba.`
+                `${playerName}. ${price} millones. ${team}. Relación calidad-precio ${valueRatio}. Es mi chollo de la jornada. Fichad antes de que suba.`
             ];
         } else if (targetSegments === 3) {
             return [
@@ -926,7 +928,7 @@ class PromptBuilder {
             return [
                 `Tengo que contaros algo que va a cambiar vuestra estrategia en Fantasy para siempre.`,
                 `Los chollos de verdad no están en las listas de fichajes trending. Están ocultos en los equipos que nadie mira.`,
-                `${playerName}. ${team}. ${price} millones. Ratio de valor ${valueRatio}. Los números no mienten.`,
+                `${playerName}. ${team}. ${price} millones. Relación calidad-precio ${valueRatio}. Los números no mienten.`,
                 `Este es mi chollo número uno de la jornada. Fichad ahora antes de que suba de precio. Lo agradeceréis.`
             ];
         }

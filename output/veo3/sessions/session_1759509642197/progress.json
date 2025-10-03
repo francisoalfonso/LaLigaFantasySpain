@@ -1,0 +1,56 @@
+{
+  "sessionId": 1759509642197,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759509642197",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 4,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "e7d89de999950ddac12ca43ff5a209a9",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/004506b1-57ae-43f9-9183-3bdfeee9c06e.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759509642197/segment_1_e7d89de999950ddac12ca43ff5a209a9.mp4",
+      "filename": "segment_1_e7d89de999950ddac12ca43ff5a209a9.mp4",
+      "duration": 8,
+      "dialogue": "¡Misters! He encontrado EL CHOLLO de esta jornada. Estamos en jornada 5, y todos buscan opciones baratas que den puntos. Pero hay un jugador que NADIE está fichando. ¿Quién es?",
+      "generatedAt": "2025-10-03T16:42:11.336Z",
+      "size": 2163450
+    },
+    {
+      "index": 1,
+      "role": "analysis",
+      "taskId": "e7d05da7114bf19025ca9070865ee3c9",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/a85fcb99-ad38-44ae-8502-3d4c3d82db7a.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759509642197/segment_2_e7d05da7114bf19025ca9070865ee3c9.mp4",
+      "filename": "segment_2_e7d05da7114bf19025ca9070865ee3c9.mp4",
+      "duration": 8,
+      "dialogue": "Milla. Solo cuesta 4.5 millones. La mayoría aún no lo ha fichado. Pero mirad estos números...",
+      "generatedAt": "2025-10-03T16:45:32.421Z",
+      "size": 8224929
+    },
+    {
+      "index": 2,
+      "role": "middle",
+      "taskId": "f2e30a7dbbe7c1d3986eb116ecd8d6cd",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/81421fc7-4134-44c7-b661-ef790cc43d4c.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759509642197/segment_3_f2e30a7dbbe7c1d3986eb116ecd8d6cd.mp4",
+      "filename": "segment_3_f2e30a7dbbe7c1d3986eb116ecd8d6cd.mp4",
+      "duration": 8,
+      "dialogue": "2 goles y 1 asistencias en 4 partidos. Su relación calidad-precio es 1.5 veces superior. Eso significa que está dando el DOBLE de puntos que su precio sugiere.",
+      "generatedAt": "2025-10-03T16:48:42.479Z",
+      "size": 8444141
+    }
+  ],
+  "error": {
+    "segmentIndex": 3,
+    "segmentNumber": 4,
+    "segmentRole": "outro",
+    "message": "Generación falló: failed",
+    "stack": "Error: Generación falló: failed\n    at VEO3Client.waitForCompletion (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:280:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async VEO3Client.generateCompleteVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:312:27)\n    at async /Users/fran/Desktop/CURSOR/Fantasy la liga/backend/routes/veo3.js:314:37",
+    "timestamp": "2025-10-03T16:50:30.015Z"
+  },
+  "lastUpdate": "2025-10-03T16:50:30.015Z"
+}

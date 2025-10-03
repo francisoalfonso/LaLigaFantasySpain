@@ -1,7 +1,6 @@
 const axios = require('axios');
 const logger = require('../../utils/logger');
 const videoManager = require('../videoManager');
-const BunnyStreamManager = require('../bunnyStreamManager');
 const characterRefs = require('../../config/characterReferences');
 const { ALL_ANA_IMAGES } = require('../../config/veo3/anaCharacter');
 const VEO3ErrorAnalyzer = require('./veo3ErrorAnalyzer');
@@ -32,9 +31,6 @@ class VEO3Client {
         this.anaImagePool = ALL_ANA_IMAGES;
         this.currentImageIndex = 0;
         this.imageRotationEnabled = process.env.VEO3_IMAGE_ROTATION !== 'false';
-
-        // Inicializar Bunny.net Stream Manager
-        this.bunnyStream = new BunnyStreamManager();
 
         // Inicializar VEO3ErrorAnalyzer
         this.errorAnalyzer = new VEO3ErrorAnalyzer();

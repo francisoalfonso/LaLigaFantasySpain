@@ -1,0 +1,48 @@
+{
+  "sessionId": 1759518400763,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759518400763",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "eb53ee798f2cedd70830bc885526a65b",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/becea71d-d6f9-450e-9680-b10095879e3a.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759518400763/segment_1_eb53ee798f2cedd70830bc885526a65b.mp4",
+      "filename": "segment_1_eb53ee798f2cedd70830bc885526a65b.mp4",
+      "duration": 8,
+      "dialogue": "He encontrado el chollo absoluto... Milla por solo cuatro punto cinco millones... va a explotar.",
+      "generatedAt": "2025-10-03T19:08:09.678Z",
+      "size": 1813436
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "56e7a3e0258498dbab39f119e03226db",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/7c109176-17e6-44e7-b522-14e9dd4eddfd.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759518400763/segment_2_56e7a3e0258498dbab39f119e03226db.mp4",
+      "filename": "segment_2_56e7a3e0258498dbab39f119e03226db.mp4",
+      "duration": 8,
+      "dialogue": "2 goles, 1 asistencias. Su ratio valor es 1.5 veces superior. Está dando el doble de puntos.",
+      "generatedAt": "2025-10-03T19:10:59.644Z",
+      "size": 2010322
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "taskId": "c108e649ad533f1c7cbb0d9ecf8e3e1f",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/2393adb4-52d2-4a73-96fd-7e75d6425574.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759518400763/segment_3_c108e649ad533f1c7cbb0d9ecf8e3e1f.mp4",
+      "filename": "segment_3_c108e649ad533f1c7cbb0d9ecf8e3e1f.mp4",
+      "duration": 8,
+      "dialogue": "A cuatro punto cinco millones es una ganga. Nadie lo ha fichado aún. Fichad a Milla ahora.",
+      "generatedAt": "2025-10-03T19:13:38.787Z",
+      "size": 1901081
+    }
+  ],
+  "lastUpdate": "2025-10-03T19:13:38.787Z"
+}

@@ -27,16 +27,16 @@ class UnifiedScriptGenerator {
         // Estructura de arcos narrativos por tipo de contenido
         this.narrativeArcs = {
             chollo: {
-                totalDuration: 32,
-                emotionalJourney: ['curiosidad', 'intriga', 'sorpresa', 'urgencia'],
+                totalDuration: 24,
+                emotionalJourney: ['curiosidad', 'revelacion', 'validacion', 'urgencia'],
                 structure: {
                     hook: { start: 0, duration: 2, emotion: 'curiosidad' },
-                    contexto: { start: 2, duration: 4, emotion: 'intriga' },
-                    conflicto: { start: 6, duration: 6, emotion: 'intriga' },
-                    inflexion: { start: 12, duration: 8, emotion: 'sorpresa' },
-                    resolucion: { start: 20, duration: 8, emotion: 'sorpresa' },
-                    moraleja: { start: 28, duration: 2, emotion: 'urgencia' },
-                    cta: { start: 30, duration: 2, emotion: 'urgencia' }
+                    transition: { start: 2, duration: 1, emotion: 'curiosidad' },
+                    revelation: { start: 3, duration: 2, emotion: 'revelacion' }, // ⭐ SEGUNDO 3 - FACTOR X
+                    preview: { start: 5, duration: 3, emotion: 'revelacion' },
+                    validation: { start: 8, duration: 8, emotion: 'validacion' }, // Seg 2: Stats + prueba
+                    urgency: { start: 16, duration: 5, emotion: 'urgencia' },
+                    cta: { start: 21, duration: 3, emotion: 'urgencia' }
                 }
             },
             analisis: {
@@ -121,30 +121,29 @@ class UnifiedScriptGenerator {
     }
 
     /**
-     * Template de guión para chollos (32s)
+     * ⭐ Template de guión para chollos (24s) - ESTRATEGIA REVELACIÓN SEGUNDO 3
+     * Basado en estrategia viral: Hook (0-2s) → Transición (2-3s) → REVELACIÓN (3-4s)
      */
     _getCholloTemplate() {
         return {
-            // SEGMENTO 1 (0-8s): Hook + Contexto
+            // SEGMENTO 1 (0-8s): Hook susurrante + REVELACIÓN SEGUNDO 3
+            // ✅ BASADO EN VIDEO QUE FUNCIONA: Tono conspiratorio, texto corto
             segment1: {
-                hook: "¡Misters! He encontrado EL CHOLLO de esta jornada.", // 2s
-                contexto: "Estamos en {{jornada}}, y todos buscan opciones baratas que den puntos. Pero hay un jugador que NADIE está fichando.", // 6s
-                transition: "¿Quién es?"
+                whisper: "He encontrado el chollo absoluto...", // 0-3s: Susurro conspirativo
+                revelation: "{{player}} por solo {{price}} millones...", // 3-6s: ⭐ REVELACIÓN SEGUNDO 3
+                explosion: "va a explotar." // 6-8s: Explosión emocional
             },
-            // SEGMENTO 2 (8-16s): Conflicto + Inflexión (inicio)
+            // SEGMENTO 2 (8-16s): Stats clave con tono entusiasta
             segment2: {
-                conflicto: "{{player}}. Solo cuesta {{price}} millones. La mayoría lo ignora porque no es conocido.", // 6s
-                inflexion_start: "Pero mirad estos números..." // 2s
+                stats: "{{goals}} goles, {{assists}} asistencias.", // 3s: Datos rápidos
+                insight: "Su ratio valor es {{valueRatio}} veces superior.", // 3s: Insight clave
+                proof: "Está dando el doble de puntos." // 2s: Prueba contundente
             },
-            // SEGMENTO 3 (16-24s): Inflexión (cont) + Resolución
+            // SEGMENTO 3 (16-24s): Urgencia + CTA directo
             segment3: {
-                inflexion_continue: "{{goals}} goles y {{assists}} asistencias en {{games}} partidos.", // 4s
-                resolucion: "Su ratio calidad-precio es {{valueRatio}}x. Eso significa que está dando el DOBLE de puntos que su precio sugiere.", // 4s
-            },
-            // SEGMENTO 4 (24-32s): Moraleja + CTA
-            segment4: {
-                moraleja: "A {{price}}M es una GANGA absoluta. El mercado aún no lo ha valorado.", // 4s
-                cta: "Si lo fichas YA, tendrás ventaja antes que suba de precio. ¿A qué esperas?", // 4s
+                urgency: "A {{price}} millones es una ganga.", // 3s: Urgencia clara
+                scarcity: "Nadie lo ha fichado aún.", // 2s: Escasez
+                cta: "Fichad a {{player}} ahora." // 3s: CTA directo
             }
         };
     }
@@ -168,7 +167,7 @@ class UnifiedScriptGenerator {
                 resolucion: "El entrenador lo ha adelantado en el campo. Más cerca del gol = más puntos Fantasy.", // 4s
             },
             segment4: {
-                moraleja: "A {{price}}M, con este nuevo rol, es una inversión inteligente.", // 4s
+                moraleja: "A {{price}} millones, con este nuevo rol, es una inversión inteligente.", // 4s
                 cta: "Los datos no mienten. Fichalo antes que suba.", // 4s
             }
         };
@@ -205,10 +204,13 @@ class UnifiedScriptGenerator {
         // 📋 OPTIMIZACIÓN DICCIONARIO: Usar solo apellido (sin nombre completo, sin equipo)
         const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'El Jugador';
 
+        // ✅ Convertir precio numérico a texto en español
+        const priceText = this._numberToSpanishText(playerData.price || 5.0);
+
         const data = {
             player: playerLastName,  // ✅ Solo apellido para optimizar con diccionario
             team: playerData.team || 'su equipo',
-            price: playerData.price || '5.0',
+            price: priceText,  // ✅ Precio en texto (ej: "cuatro punto cinco")
             goals: playerData.stats?.goals || 0,
             assists: playerData.stats?.assists || 0,
             games: playerData.stats?.games || 0,
@@ -240,52 +242,41 @@ class UnifiedScriptGenerator {
     }
 
     /**
-     * Dividir guión en 4 segmentos de 8s cada uno
+     * ⭐ Dividir guión en 3 segmentos de 8s cada uno (CHOLLO VIRAL - REVELACIÓN SEGUNDO 3)
      */
     _divideIntoSegments(fullScript, arc) {
         const segments = [];
 
-        // Segmento 1 (0-8s): Hook + Contexto
+        // Segmento 1 (0-8s): Hook + REVELACIÓN SEGUNDO 3 + Precio
         segments.push({
             role: 'intro',
             duration: 8,
             timeRange: '0-8s',
             dialogue: this._joinScriptParts(fullScript.segment1),
-            emotion: 'curiosidad/intriga',
-            narrativeFunction: 'Hook + Contexto',
+            emotion: 'curiosidad → revelación',
+            narrativeFunction: 'Hook + REVELACIÓN (seg 3) + Preview',
             transitionTo: 'segment2'
         });
 
-        // Segmento 2 (8-16s): Conflicto + Inflexión (inicio)
+        // Segmento 2 (8-16s): Validación con datos
         segments.push({
-            role: 'analysis',
+            role: 'stats',
             duration: 8,
             timeRange: '8-16s',
             dialogue: this._joinScriptParts(fullScript.segment2),
-            emotion: 'intriga/construcción',
-            narrativeFunction: 'Conflicto + Inflexión (inicio)',
+            emotion: 'validación con pruebas',
+            narrativeFunction: 'Stats + Ratio valor + Proof',
             transitionTo: 'segment3'
         });
 
-        // Segmento 3 (16-24s): Inflexión (cont) + Resolución
-        segments.push({
-            role: 'middle',
-            duration: 8,
-            timeRange: '16-24s',
-            dialogue: this._joinScriptParts(fullScript.segment3),
-            emotion: 'sorpresa/revelación',
-            narrativeFunction: 'Inflexión + Resolución',
-            transitionTo: 'segment4'
-        });
-
-        // Segmento 4 (24-32s): Moraleja + CTA
+        // Segmento 3 (16-24s): Urgencia + CTA
         segments.push({
             role: 'outro',
             duration: 8,
-            timeRange: '24-32s',
-            dialogue: this._joinScriptParts(fullScript.segment4),
-            emotion: 'urgencia/acción',
-            narrativeFunction: 'Moraleja + CTA',
+            timeRange: '16-24s',
+            dialogue: this._joinScriptParts(fullScript.segment3),
+            emotion: 'urgencia + acción',
+            narrativeFunction: 'Urgencia + Scarcity + CTA',
             transitionTo: null
         });
 
@@ -339,6 +330,49 @@ class UnifiedScriptGenerator {
             cohesive: score >= 70,
             recommendations: score < 70 ? ['Revisar transiciones entre segmentos', 'Verificar continuidad narrativa'] : []
         };
+    }
+
+    /**
+     * Convertir número a texto en español para pronunciación correcta
+     * @private
+     */
+    _numberToSpanishText(number) {
+        if (!number) return 'cero';
+        const num = parseFloat(number);
+
+        // Separar parte entera y decimal
+        const parts = num.toString().split('.');
+        const integerPart = parseInt(parts[0]);
+        const decimalPart = parts[1] ? parts[1] : null;
+
+        // Números básicos
+        const ones = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+        const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+        const tens = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+
+        let result = '';
+
+        // Parte entera
+        if (integerPart === 0) {
+            result = 'cero';
+        } else if (integerPart < 10) {
+            result = ones[integerPart];
+        } else if (integerPart < 20) {
+            result = teens[integerPart - 10];
+        } else if (integerPart < 30) {
+            result = integerPart === 20 ? 'veinte' : 'veinti' + ones[integerPart - 20];
+        } else if (integerPart < 100) {
+            const ten = Math.floor(integerPart / 10);
+            const one = integerPart % 10;
+            result = tens[ten] + (one > 0 ? ' y ' + ones[one] : '');
+        }
+
+        // Agregar parte decimal si existe
+        if (decimalPart) {
+            result += ' punto ' + decimalPart.split('').map(d => ones[parseInt(d)] || 'cero').join(' ');
+        }
+
+        return result;
     }
 }
 

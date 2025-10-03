@@ -94,31 +94,6 @@ const envSchema = Joi.object({
         .default('professional')
         .description('Estilo de voz'),
 
-    // Bunny.net Stream (CRÍTICO para hosting videos)
-    BUNNY_STREAM_API_KEY: Joi.string()
-        .required()
-        .min(20)
-        .description('API Key de Bunny.net Stream')
-        .messages({
-            'any.required': 'BUNNY_STREAM_API_KEY es obligatoria para hosting de videos'
-        }),
-
-    BUNNY_STREAM_LIBRARY_ID: Joi.number()
-        .integer()
-        .required()
-        .description('Library ID de Bunny.net')
-        .messages({
-            'any.required': 'BUNNY_STREAM_LIBRARY_ID es obligatorio'
-        }),
-
-    BUNNY_STREAM_CDN_URL: Joi.string()
-        .uri()
-        .required()
-        .description('CDN URL de Bunny.net')
-        .messages({
-            'any.required': 'BUNNY_STREAM_CDN_URL es obligatorio'
-        }),
-
     // GitHub Configuration (Opcional)
     GITHUB_PERSONAL_ACCESS_TOKEN: Joi.string()
         .optional()
@@ -212,7 +187,6 @@ function validateEnv() {
         apiSportsConfigured: !!value.API_FOOTBALL_KEY,
         openAIConfigured: !!value.OPENAI_API_KEY,
         veo3Configured: !!value.KIE_AI_API_KEY,
-        bunnyStreamConfigured: !!value.BUNNY_STREAM_API_KEY,
         aemetConfigured: !!value.AEMET_API_KEY,
         logLevel: value.LOG_LEVEL
     });

@@ -1,0 +1,43 @@
+{
+  "sessionId": 1759511633812,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759511633812",
+  "segmentsCompleted": 2,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "7caa29ed4166d76e545dc3deab77d8eb",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/99413757-396f-49bf-a38a-2c473ecf9208.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759511633812/segment_1_7caa29ed4166d76e545dc3deab77d8eb.mp4",
+      "filename": "segment_1_7caa29ed4166d76e545dc3deab77d8eb.mp4",
+      "duration": 8,
+      "dialogue": "¡Misters! He descubierto un chollo brutal... Pere Milla está a un precio ridículo.",
+      "generatedAt": "2025-10-03T17:15:54.035Z",
+      "size": 1566059
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "6dd3861c3e42e2ad5f839b07fec7cd7b",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/7de3def3-4caf-4e7c-8afb-7e23ea782b8a.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759511633812/segment_2_6dd3861c3e42e2ad5f839b07fec7cd7b.mp4",
+      "filename": "segment_2_6dd3861c3e42e2ad5f839b07fec7cd7b.mp4",
+      "duration": 8,
+      "generatedAt": "2025-10-03T17:18:33.228Z",
+      "size": 1343310
+    }
+  ],
+  "error": {
+    "segmentIndex": 2,
+    "segmentNumber": 3,
+    "segmentRole": "outro",
+    "message": "Error API VEO3: The current credits are insufficient. Please top up.",
+    "stack": "Error: Error API VEO3: The current credits are insufficient. Please top up.\n    at VEO3Client.generateVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:161:23)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async VEO3Client.generateCompleteVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:306:32)\n    at async /Users/fran/Desktop/CURSOR/Fantasy la liga/backend/routes/veo3.js:314:37",
+    "timestamp": "2025-10-03T17:19:33.470Z"
+  },
+  "lastUpdate": "2025-10-03T17:19:33.470Z"
+}

@@ -1,0 +1,47 @@
+{
+  "sessionId": 1759515027689,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515027689",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "218159a2077cb6cac8906eebff482036",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/ebb44965-e629-41a6-ad15-a6990814a7b6.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515027689/segment_1_218159a2077cb6cac8906eebff482036.mp4",
+      "filename": "segment_1_218159a2077cb6cac8906eebff482036.mp4",
+      "duration": 8,
+      "dialogue": "¡Misters! He descubierto algo sobre Pere Milla. A 4.5€ es increíble.",
+      "generatedAt": "2025-10-03T18:12:17.213Z",
+      "size": 1663411
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "8086b7493349dbf11a47c25a97852d2a",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/ed4fdf98-3f4b-4cca-a029-484fb08c67be.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515027689/segment_2_8086b7493349dbf11a47c25a97852d2a.mp4",
+      "filename": "segment_2_8086b7493349dbf11a47c25a97852d2a.mp4",
+      "duration": 8,
+      "generatedAt": "2025-10-03T18:14:56.365Z",
+      "size": 2494294
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "taskId": "7ddaa1ab20648be9791e9629b8968302",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/d66f931a-5ad6-4c33-80bd-7b8d34bb0d31.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759515027689/segment_3_7ddaa1ab20648be9791e9629b8968302.mp4",
+      "filename": "segment_3_7ddaa1ab20648be9791e9629b8968302.mp4",
+      "duration": 8,
+      "dialogue": "¡Pere Milla a 4.5€ es matemática pura! ¡Fichalo AHORA!",
+      "generatedAt": "2025-10-03T18:18:06.502Z",
+      "size": 1854114
+    }
+  ],
+  "lastUpdate": "2025-10-03T18:18:06.502Z"
+}

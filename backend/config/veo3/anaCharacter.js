@@ -8,7 +8,10 @@ const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with short bla
 
 // URLs imágenes Ana Real en GitHub - Rotación automática para variedad visual
 const ANA_IMAGE_URLS = {
-    // Imagen principal (default)
+    // ✅ IMAGEN BASE FIJA - Pelo suelto (óptima para multi-segmento)
+    fixed: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-estudio-pelo-suelto.jpg",
+
+    // Imagen principal (legacy)
     main: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-main/Ana-001.jpeg",
 
     // Variantes coleta
@@ -37,9 +40,10 @@ const ANA_IMAGE_URLS = {
 };
 
 // URL imagen Ana Real en GitHub (backward compatibility)
-const ANA_IMAGE_URL = ANA_IMAGE_URLS.main;
+// ✅ AHORA USA IMAGEN FIJA PELO SUELTO POR DEFECTO
+const ANA_IMAGE_URL = ANA_IMAGE_URLS.fixed;
 
-// Todas las imágenes de Ana disponibles (para rotación)
+// Todas las imágenes de Ana disponibles (para rotación - legacy)
 const ALL_ANA_IMAGES = [
     ANA_IMAGE_URLS.main,
     ...ANA_IMAGE_URLS.coleta,
@@ -48,7 +52,7 @@ const ALL_ANA_IMAGES = [
 
 // Configuración por defecto Ana
 const ANA_DEFAULT_CONFIG = {
-    imageUrls: [ANA_IMAGE_URL],
+    imageUrls: [ANA_IMAGE_URL], // ✅ Usa imagen fija pelo suelto
     model: "veo3_fast",
     aspectRatio: "9:16",
     seed: 30001,
@@ -57,9 +61,9 @@ const ANA_DEFAULT_CONFIG = {
     enableFallback: true,
     // Sistema de rotación automática
     imageRotation: {
-        enabled: true,
-        strategy: 'random', // 'random', 'sequential', 'content-based'
-        pool: ALL_ANA_IMAGES
+        enabled: false, // ⚠️ DESACTIVADO - usar imagen fija para consistencia perfecta
+        strategy: 'fixed', // 'random', 'sequential', 'content-based', 'fixed'
+        pool: [ANA_IMAGE_URLS.fixed] // Solo imagen fija
     }
 };
 

@@ -13,27 +13,37 @@ class VideoConcatenator {
         this.tempDir = process.env.VEO3_TEMP_DIR || './temp/veo3';
         this.logsDir = process.env.VEO3_LOGS_DIR || './logs/veo3';
 
+        // 🔧 FIX: Path al logo outro estático
+        this.logoOutroPath = path.join(this.outputDir, 'logo-static.mp4');
+
         // Configuración de concatenación
-        // NOTA: Con frame-to-frame transitions, crossfade NO es necesario
+        // NOTA: Con frame-to-frame transitions, crossfade de VIDEO NO es necesario
+        // PERO audio crossfade SÍ mejora transiciones para evitar cortes bruscos
         // Ver: docs/VEO3_TRANSICIONES_FRAME_TO_FRAME.md
         this.config = {
             // Transición entre segmentos
             transition: {
                 type: 'crossfade', // Tipo de transición (legacy)
                 duration: 0.5, // Duración de transición en segundos
-                enabled: false // ⚠️ DESACTIVADO por defecto - usar frame-to-frame
+                enabled: false // ⚠️ DESACTIVADO por defecto - usar frame-to-frame para VIDEO
             },
             // Audio
             audio: {
                 normalize: true, // Normalizar audio entre segmentos
-                fadeInOut: false, // ⚠️ DESACTIVADO - transiciones naturales con frame-to-frame
-                fadeDuration: 0.2 // Duración del fade (solo si enabled)
+                fadeInOut: true, // ✅ ACTIVADO - evita cortes de audio en transiciones
+                fadeDuration: 0.3 // Duración del fade (0.3s para transiciones suaves)
             },
             // Video
             video: {
                 resolution: '1080x1920', // Resolución final (9:16)
                 framerate: 30, // FPS
                 bitrate: '2M' // Bitrate del video
+            },
+            // 🔧 FIX: Logo outro automático
+            outro: {
+                enabled: true, // ✅ ACTIVADO - agregar logo al final
+                logoPath: null, // Se establece dinámicamente
+                duration: 1.5 // Duración del logo (1.5s)
             }
         };
 
@@ -66,15 +76,27 @@ class VideoConcatenator {
             }
 
             const config = { ...this.config, ...options };
+
+            // 🔧 FIX: Agregar logo outro automáticamente si está habilitado
+            const finalVideoPaths = [...videoPaths];
+            if (config.outro.enabled && fs.existsSync(this.logoOutroPath)) {
+                logger.info(`[VideoConcatenator] ✅ Agregando logo outro al final...`);
+                finalVideoPaths.push(this.logoOutroPath);
+            } else if (config.outro.enabled) {
+                logger.warn(
+                    `[VideoConcatenator] ⚠️  Logo outro no encontrado: ${this.logoOutroPath}`
+                );
+            }
+
             const outputFileName = `ana-concatenated-${Date.now()}.mp4`;
             const outputPath = path.join(this.outputDir, outputFileName);
 
-            if (config.transition.enabled && videoPaths.length > 1) {
+            if (config.transition.enabled && finalVideoPaths.length > 1) {
                 // Concatenación con transiciones
-                return await this.concatenateWithTransitions(videoPaths, outputPath, config);
+                return await this.concatenateWithTransitions(finalVideoPaths, outputPath, config);
             } else {
                 // Concatenación simple sin transiciones
-                return await this.concatenateSimple(videoPaths, outputPath, config);
+                return await this.concatenateSimple(finalVideoPaths, outputPath, config);
             }
         } catch (error) {
             logger.error('[VideoConcatenator] Error concatenando videos:', error.message);
@@ -83,7 +105,8 @@ class VideoConcatenator {
     }
 
     /**
-     * Concatenación simple sin transiciones
+     * Concatenación simple sin transiciones de video
+     * PERO con audio crossfade para evitar cortes bruscos
      * @param {Array} videoPaths - Array de rutas de videos
      * @param {string} outputPath - Ruta del archivo final
      * @param {object} config - Configuración
@@ -100,26 +123,97 @@ class VideoConcatenator {
                 command.input(videoPath);
             });
 
-            command
-                .on('start', commandLine => {
-                    logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
-                })
-                .on('progress', progress => {
-                    if (progress.percent) {
+            // 🔧 FIX: Aplicar audio crossfade si está activado
+            if (config.audio.fadeInOut && videoPaths.length > 1) {
+                logger.info('[VideoConcatenator] Aplicando audio crossfade entre segmentos...');
+                const audioFilters = this.generateAudioCrossfadeFilters(videoPaths.length, config);
+
+                command
+                    .complexFilter(audioFilters, ['audio_out'])
+                    .map('[audio_out]')
+                    .videoCodec('copy') // Copiar video sin procesar (más rápido)
+                    .audioCodec('aac')
+                    .on('start', commandLine => {
+                        logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                    })
+                    .on('progress', progress => {
+                        if (progress.percent) {
+                            logger.info(
+                                `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                            );
+                        }
+                    })
+                    .on('end', () => {
                         logger.info(
-                            `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                            `[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`
                         );
-                    }
-                })
-                .on('end', () => {
-                    logger.info(`[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`);
-                    resolve(outputPath);
-                })
-                .on('error', error => {
-                    logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
-                    reject(error);
-                })
-                .mergeToFile(outputPath, this.tempDir);
+                        resolve(outputPath);
+                    })
+                    .on('error', error => {
+                        logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                        reject(error);
+                    })
+                    .save(outputPath);
+            } else {
+                // 🔧 FIX: Concatenación básica con archivo concat manual (rutas absolutas)
+                // Crear archivo concat con rutas absolutas
+                const concatListPath = path.join(this.tempDir, `concat-list-${Date.now()}.txt`);
+                const concatContent = videoPaths
+                    .map(videoPath => {
+                        // Convertir a ruta absoluta
+                        const absolutePath = path.isAbsolute(videoPath)
+                            ? videoPath
+                            : path.resolve(videoPath);
+                        return `file '${absolutePath}'`;
+                    })
+                    .join('\n');
+
+                fs.writeFileSync(concatListPath, concatContent);
+                logger.info(`[VideoConcatenator] 📋 Archivo concat creado: ${concatListPath}`);
+                logger.info(`[VideoConcatenator] 📂 Videos a concatenar:\n${concatContent}`);
+
+                // Usar concat demuxer con archivo de lista
+                ffmpeg()
+                    .input(concatListPath)
+                    .inputOptions(['-f concat', '-safe 0'])
+                    .outputOptions(['-c copy']) // Copiar streams sin re-encodear
+                    .on('start', commandLine => {
+                        logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                    })
+                    .on('progress', progress => {
+                        if (progress.percent) {
+                            logger.info(
+                                `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                            );
+                        }
+                    })
+                    .on('end', () => {
+                        logger.info(
+                            `[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`
+                        );
+                        // Limpiar archivo concat temporal
+                        try {
+                            fs.unlinkSync(concatListPath);
+                        } catch (err) {
+                            logger.warn(
+                                `[VideoConcatenator] No se pudo eliminar archivo concat temporal: ${err.message}`
+                            );
+                        }
+                        resolve(outputPath);
+                    })
+                    .on('error', error => {
+                        logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                        // Limpiar archivo concat temporal
+                        try {
+                            fs.unlinkSync(concatListPath);
+                            // eslint-disable-next-line no-unused-vars
+                        } catch (err) {
+                            // Ignorar error de limpieza
+                        }
+                        reject(error);
+                    })
+                    .save(outputPath);
+            }
         });
     }
 
@@ -224,6 +318,60 @@ class VideoConcatenator {
             filters.push(`[video_out][audio_out]concat=n=1:v=1:a=1[final_output]`);
         }
 
+        return filters;
+    }
+
+    /**
+     * Generar filtros FFmpeg SOLO para audio crossfade (sin tocar video)
+     * Usado en concatenación simple para evitar cortes de audio
+     * @param {number} videoCount - Número de videos
+     * @param {object} config - Configuración
+     * @returns {Array} - Array de filtros FFmpeg para audio
+     */
+    generateAudioCrossfadeFilters(videoCount, config) {
+        const filters = [];
+        const fadeDuration = config.audio.fadeDuration;
+
+        if (videoCount === 2) {
+            // Audio crossfade simple entre 2 videos
+            filters.push({
+                filter: 'acrossfade',
+                options: { d: fadeDuration },
+                inputs: ['0:a', '1:a'],
+                outputs: 'audio_out'
+            });
+        } else if (videoCount > 2) {
+            // Múltiples audio crossfades
+            for (let i = 0; i < videoCount - 1; i++) {
+                if (i === 0) {
+                    // Primer crossfade
+                    filters.push({
+                        filter: 'acrossfade',
+                        options: { d: fadeDuration },
+                        inputs: [`${i}:a`, `${i + 1}:a`],
+                        outputs: `a${i}`
+                    });
+                } else if (i === videoCount - 2) {
+                    // Último crossfade
+                    filters.push({
+                        filter: 'acrossfade',
+                        options: { d: fadeDuration },
+                        inputs: [`a${i - 1}`, `${i + 1}:a`],
+                        outputs: 'audio_out'
+                    });
+                } else {
+                    // Crossfades intermedios
+                    filters.push({
+                        filter: 'acrossfade',
+                        options: { d: fadeDuration },
+                        inputs: [`a${i - 1}`, `${i + 1}:a`],
+                        outputs: `a${i}`
+                    });
+                }
+            }
+        }
+
+        logger.info(`[VideoConcatenator] Generados ${filters.length} audio crossfade filters`);
         return filters;
     }
 

@@ -12,7 +12,10 @@ const PlayerCardsOverlay = require('../services/veo3/playerCardsOverlay');
 const VideoConcatenator = require('../services/veo3/videoConcatenator');
 const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
 const ThreeSegmentGenerator = require('../services/veo3/threeSegmentGenerator'); // ✅ NUEVO
-const { validateAndPrepare, updatePlayerSuccessRate } = require('../utils/playerDictionaryValidator');
+const {
+    validateAndPrepare,
+    updatePlayerSuccessRate
+} = require('../utils/playerDictionaryValidator');
 
 // Instanciar servicios
 const veo3Client = new VEO3Client();
@@ -51,7 +54,6 @@ router.get('/test', async (req, res) => {
                 timestamp: new Date().toISOString()
             });
         }
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error en test:', error.message);
         res.status(500).json({
@@ -81,19 +83,25 @@ router.post('/generate-ana', async (req, res) => {
         logger.info(`[VEO3 Routes] Generando video Ana tipo: ${type}`);
 
         let prompt;
-        let videoData = { type };
+        const videoData = { type };
 
         // ✅ VALIDACIÓN PROGRESIVA DE DICCIONARIO
         // Si el video es de un jugador específico, validar/completar diccionario
         let dictionaryData = null;
         if (playerName && req.body.team) {
-            logger.info(`[VEO3 Routes] 📋 Validando diccionario para "${playerName}" del "${req.body.team}"...`);
+            logger.info(
+                `[VEO3 Routes] 📋 Validando diccionario para "${playerName}" del "${req.body.team}"...`
+            );
 
             dictionaryData = await validateAndPrepare(playerName, req.body.team);
 
             logger.info(`[VEO3 Routes] ✅ Diccionario validado:`);
-            logger.info(`  - Referencias seguras: ${dictionaryData.player.safeReferences.join(', ')}`);
-            logger.info(`  - Tasa de éxito: ${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`);
+            logger.info(
+                `  - Referencias seguras: ${dictionaryData.player.safeReferences.join(', ')}`
+            );
+            logger.info(
+                `  - Tasa de éxito: ${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`
+            );
         }
 
         // Generar prompt según el tipo
@@ -164,7 +172,8 @@ router.post('/generate-ana', async (req, res) => {
             default:
                 return res.status(400).json({
                     success: false,
-                    message: 'Tipo no válido. Usar: chollo, analysis, prediction, intro, outro, custom'
+                    message:
+                        'Tipo no válido. Usar: chollo, analysis, prediction, intro, outro, custom'
                 });
         }
 
@@ -209,15 +218,16 @@ router.post('/generate-ana', async (req, res) => {
                     length: prompt.length,
                     validation: validation.warnings
                 },
-                dictionary: dictionaryData ? {
-                    playerInDictionary: true,
-                    successRate: (dictionaryData.player.testedSuccessRate * 100).toFixed(1) + '%',
-                    totalVideos: dictionaryData.player.totalVideos
-                } : null
+                dictionary: dictionaryData
+                    ? {
+                          playerInDictionary: true,
+                          successRate: `${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`,
+                          totalVideos: dictionaryData.player.totalVideos
+                      }
+                    : null
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error generando video Ana:', error.message);
         res.status(500).json({
@@ -251,7 +261,9 @@ router.post('/generate-multi-segment', async (req, res) => {
             });
         }
 
-        logger.info(`[VEO3 Routes] Generando video multi-segmento: ${contentType}, preset: ${preset}`);
+        logger.info(
+            `[VEO3 Routes] Generando video multi-segmento: ${contentType}, preset: ${preset}`
+        );
 
         // ✅ Validación diccionario
         let dictionaryData = null;
@@ -260,15 +272,12 @@ router.post('/generate-multi-segment', async (req, res) => {
             dictionaryData = await validateAndPrepare(playerData.name, playerData.team);
         }
 
-        // Generar estructura viral (simplificada para test)
+        // Datos contextuales para el script (NO diálogos hardcodeados)
+        // Los diálogos se generan en unifiedScriptGenerator.js
         const viralData = {
-            hook: '¡Misters! He descubierto un chollo brutal...',
-            contexto: `${playerData.name} está a un precio ridículo.`,
-            conflicto: 'Pero, ¿será un fichaje seguro?',
-            inflexion: `Los números no mienten: ${playerData.stats?.goals || 0} goles.`,
-            resolucion: `A ${playerData.price}M es matemática pura.`,
-            moraleja: 'Calidad-precio espectacular.',
-            cta: '¡Fichalo YA antes que suba!'
+            gameweek: 'jornada 5', // Contexto temporal
+            xgIncrease: '30' // Datos opcionales para análisis
+            // ⚠️ NO incluir diálogos aquí - se generan en unifiedScriptGenerator
         };
 
         // Generar estructura de segmentos
@@ -282,35 +291,138 @@ router.post('/generate-multi-segment', async (req, res) => {
             }
         );
 
-        logger.info(`[VEO3 Routes] Estructura generada: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`);
+        logger.info(
+            `[VEO3 Routes] Estructura generada: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`
+        );
 
-        // Generar cada segmento con VEO3
+        // 🔧 GENERACIÓN SECUENCIAL CON PERSISTENCIA
+        // Crear directorio de sesión para guardar segmentos
+        const sessionId = Date.now();
+        const sessionDir = path.join(
+            __dirname,
+            '../../output/veo3/sessions',
+            `session_${sessionId}`
+        );
+        await fs.promises.mkdir(sessionDir, { recursive: true });
+
+        const progressFile = path.join(sessionDir, 'progress.json');
+        logger.info(`[VEO3 Routes] 📁 Sesión creada: ${sessionDir}`);
+
+        // Generar cada segmento con VEO3 SECUENCIALMENTE
         const generatedSegments = [];
         const anaImageIndex = structure.metadata.anaImageIndex;
 
-        for (const order of structure.generationOrder) {
+        for (let i = 0; i < structure.generationOrder.length; i++) {
+            const order = structure.generationOrder[i];
             const segment = structure.segments[order.segment];
-            const segmentNum = generatedSegments.length + 1;
+            const segmentNum = i + 1;
 
-            logger.info(`[VEO3 Routes] Generando segmento ${segmentNum}/${structure.segmentCount}: ${order.segment}...`);
+            logger.info(
+                `[VEO3 Routes] 📹 Generando segmento ${segmentNum}/${structure.segmentCount}: ${order.segment}...`
+            );
 
-            const veo3Options = {
-                ...segment.veo3Config,
-                imageIndex: anaImageIndex  // ✅ Imagen fija para TODOS
-            };
+            try {
+                const veo3Options = {
+                    ...segment.veo3Config,
+                    imageIndex: anaImageIndex // ✅ Imagen fija para TODOS
+                };
 
-            const videoResult = await veo3Client.generateCompleteVideo(segment.prompt, veo3Options);
+                // Generar segmento
+                const videoResult = await veo3Client.generateCompleteVideo(
+                    segment.prompt,
+                    veo3Options
+                );
 
-            generatedSegments.push({
-                role: segment.role,
-                taskId: videoResult.taskId,
-                url: videoResult.url,
-                duration: segment.duration,
-                dialogue: segment.dialogue
-            });
+                // ✅ DESCARGAR Y GUARDAR INMEDIATAMENTE
+                logger.info(`[VEO3 Routes] 💾 Descargando segmento ${segmentNum} desde VEO3...`);
+                const response = await axios.get(videoResult.url, { responseType: 'arraybuffer' });
 
-            logger.info(`[VEO3 Routes] ✅ Segmento ${segmentNum} generado: ${videoResult.taskId}`);
+                const segmentFilename = `segment_${segmentNum}_${videoResult.taskId}.mp4`;
+                const localPath = path.join(sessionDir, segmentFilename);
+                await fs.promises.writeFile(localPath, response.data);
+
+                const segmentData = {
+                    index: i,
+                    role: segment.role,
+                    taskId: videoResult.taskId,
+                    veo3Url: videoResult.url,
+                    localPath: localPath,
+                    filename: segmentFilename,
+                    duration: segment.duration,
+                    dialogue: segment.dialogue,
+                    generatedAt: new Date().toISOString(),
+                    size: response.data.length
+                };
+
+                generatedSegments.push(segmentData);
+
+                // Persistir progreso inmediatamente
+                const progressData = {
+                    sessionId,
+                    sessionDir,
+                    segmentsCompleted: segmentNum,
+                    segmentsTotal: structure.segmentCount,
+                    playerName: playerData.name || 'unknown',
+                    contentType,
+                    preset,
+                    segments: generatedSegments,
+                    lastUpdate: new Date().toISOString()
+                };
+
+                await fs.promises.writeFile(progressFile, JSON.stringify(progressData, null, 2));
+
+                logger.info(
+                    `[VEO3 Routes] ✅ Segmento ${segmentNum} guardado: ${localPath} (${(response.data.length / 1024 / 1024).toFixed(2)} MB)`
+                );
+
+                // 🔧 DELAY entre segmentos (DESPUÉS de guardar)
+                if (segmentNum < structure.segmentCount) {
+                    const delaySeconds = 60; // Aumentado a 60s para evitar límite carga acumulada VEO3
+                    logger.info(
+                        `[VEO3 Routes] ⏱️  Esperando ${delaySeconds}s antes del siguiente segmento...`
+                    );
+                    await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+                }
+            } catch (error) {
+                logger.error(`[VEO3 Routes] ❌ Error en segmento ${segmentNum}:`, error.message);
+
+                // Guardar estado de error
+                const errorData = {
+                    sessionId,
+                    sessionDir,
+                    segmentsCompleted: generatedSegments.length,
+                    segmentsTotal: structure.segmentCount,
+                    playerName: playerData.name || 'unknown',
+                    contentType,
+                    preset,
+                    segments: generatedSegments,
+                    error: {
+                        segmentIndex: i,
+                        segmentNumber: segmentNum,
+                        segmentRole: segment.role,
+                        message: error.message,
+                        stack: error.stack,
+                        timestamp: new Date().toISOString()
+                    },
+                    lastUpdate: new Date().toISOString()
+                };
+
+                await fs.promises.writeFile(progressFile, JSON.stringify(errorData, null, 2));
+
+                logger.error(`[VEO3 Routes] 💾 Estado de error guardado en: ${progressFile}`);
+                logger.error(
+                    `[VEO3 Routes] ✅ Segmentos exitosos antes del error: ${generatedSegments.length}/${structure.segmentCount}`
+                );
+
+                throw new Error(
+                    `Fallo en segmento ${segmentNum}/${structure.segmentCount}: ${error.message}`
+                );
+            }
         }
+
+        logger.info(
+            `[VEO3 Routes] 🎉 Todos los segmentos generados exitosamente: ${generatedSegments.length}/${structure.segmentCount}`
+        );
 
         // ✅ Actualizar diccionario
         if (playerData.name && dictionaryData) {
@@ -319,56 +431,76 @@ router.post('/generate-multi-segment', async (req, res) => {
         }
 
         // 🎬 CONCATENAR VIDEOS (si hay múltiples segmentos)
+        // Ahora usamos los archivos locales ya descargados
         let finalVideoUrl = null;
         let concatenatedVideo = null;
 
         if (generatedSegments.length > 1) {
-            logger.info(`[VEO3 Routes] 🔗 Concatenando ${generatedSegments.length} segmentos...`);
+            logger.info(
+                `[VEO3 Routes] 🔗 Concatenando ${generatedSegments.length} segmentos desde archivos locales...`
+            );
 
             try {
                 const VideoConcatenator = require('../services/veo3/videoConcatenator');
                 const concatenator = new VideoConcatenator();
 
-                // Descargar videos de VEO3 a local temporalmente
-                const tempPaths = [];
-                for (const segment of generatedSegments) {
-                    const response = await axios.get(segment.url, { responseType: 'arraybuffer' });
-                    const tempPath = path.join(__dirname, '..', '..', 'temp', `segment-${segment.taskId}.mp4`);
-                    await fs.promises.writeFile(tempPath, response.data);
-                    tempPaths.push(tempPath);
-                }
+                // ✅ Usar paths locales YA descargados (no necesitamos descargar de nuevo)
+                const localPaths = generatedSegments.map(seg => seg.localPath);
 
-                // Concatenar videos
-                const outputPath = await concatenator.concatenateVideos(tempPaths, {
+                logger.info(`[VEO3 Routes] 📂 Segmentos locales listos para concatenar:`);
+                localPaths.forEach((path, idx) => {
+                    logger.info(`[VEO3 Routes]    ${idx + 1}. ${path}`);
+                });
+
+                // Concatenar videos desde archivos locales (+ logo outro automático)
+                const outputPath = await concatenator.concatenateVideos(localPaths, {
                     transition: { enabled: false }, // Sin transiciones
-                    audio: { fadeInOut: false }
+                    audio: { fadeInOut: false },
+                    outro: { enabled: true } // ✅ Agregar logo blanco FLP al final
                 });
 
                 // Leer video concatenado y usar ruta estática correcta
                 finalVideoUrl = `http://localhost:3000/output/veo3/${path.basename(outputPath)}`;
 
-                // Limpiar archivos temporales
-                for (const tempPath of tempPaths) {
-                    if (fs.existsSync(tempPath)) {
-                        fs.unlinkSync(tempPath);
-                    }
-                }
-
+                // Guardar metadata del video concatenado
                 concatenatedVideo = {
-                    videoId: `concat_${Date.now()}`,
+                    videoId: `concat_${sessionId}`,
                     title: `${playerData.name}_${contentType}_${preset}`,
-                    duration: structure.totalDuration
+                    duration: structure.totalDuration,
+                    sessionId: sessionId,
+                    sessionDir: sessionDir,
+                    outputPath: outputPath
                 };
 
+                // Actualizar progress con video final
+                const finalProgress = {
+                    sessionId,
+                    sessionDir,
+                    segmentsCompleted: generatedSegments.length,
+                    segmentsTotal: structure.segmentCount,
+                    playerName: playerData.name || 'unknown',
+                    contentType,
+                    preset,
+                    segments: generatedSegments,
+                    concatenatedVideo: concatenatedVideo,
+                    finalVideoUrl: finalVideoUrl,
+                    completedAt: new Date().toISOString()
+                };
+
+                await fs.promises.writeFile(progressFile, JSON.stringify(finalProgress, null, 2));
+
                 logger.info(`[VEO3 Routes] ✅ Videos concatenados: ${finalVideoUrl}`);
+                logger.info(`[VEO3 Routes] 📄 Progreso final guardado: ${progressFile}`);
             } catch (error) {
                 logger.error(`[VEO3 Routes] ❌ Error concatenando:`, error.message);
-                // Fallback: usar primer segmento
-                finalVideoUrl = generatedSegments[0]?.url;
+                // Fallback: usar primer segmento local
+                finalVideoUrl = `http://localhost:3000/output/veo3/sessions/session_${sessionId}/${generatedSegments[0]?.filename}`;
+                logger.warn(`[VEO3 Routes] ⚠️ Usando segmento 1 como fallback: ${finalVideoUrl}`);
             }
         } else {
-            // Solo un segmento
-            finalVideoUrl = generatedSegments[0]?.url;
+            // Solo un segmento - usar archivo local
+            finalVideoUrl = `http://localhost:3000/output/veo3/sessions/session_${sessionId}/${generatedSegments[0]?.filename}`;
+            logger.info(`[VEO3 Routes] ✅ Video único disponible: ${finalVideoUrl}`);
         }
 
         res.json({
@@ -381,28 +513,31 @@ router.post('/generate-multi-segment', async (req, res) => {
                 totalDuration: structure.totalDuration,
                 anaImageIndex,
                 segments: generatedSegments,
-                concatenatedVideo: concatenatedVideo ? {
-                    url: finalVideoUrl,
-                    videoId: concatenatedVideo.videoId,
-                    duration: structure.totalDuration,
-                    title: concatenatedVideo.title
-                } : null,
-                finalVideoUrl,  // ✅ URL del video final (concatenado o primer segmento)
+                concatenatedVideo: concatenatedVideo
+                    ? {
+                          url: finalVideoUrl,
+                          videoId: concatenatedVideo.videoId,
+                          duration: structure.totalDuration,
+                          title: concatenatedVideo.title
+                      }
+                    : null,
+                finalVideoUrl, // ✅ URL del video final (concatenado o primer segmento)
                 playerData: {
                     name: playerData.name,
                     team: playerData.team,
                     price: playerData.price
                 },
                 structure,
-                dictionary: dictionaryData ? {
-                    playerInDictionary: true,
-                    successRate: (dictionaryData.player.testedSuccessRate * 100).toFixed(1) + '%',
-                    totalVideos: dictionaryData.player.totalVideos
-                } : null
+                dictionary: dictionaryData
+                    ? {
+                          playerInDictionary: true,
+                          successRate: `${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`,
+                          totalVideos: dictionaryData.player.totalVideos
+                      }
+                    : null
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error generando video multi-segmento:', error.message);
         res.status(500).json({
@@ -438,14 +573,17 @@ router.get('/status/:taskId', async (req, res) => {
             data: {
                 taskId,
                 status: status.data?.successFlag,
-                statusText: status.data?.successFlag === 0 ? 'processing' :
-                           status.data?.successFlag === 1 ? 'completed' : 'failed',
+                statusText:
+                    status.data?.successFlag === 0
+                        ? 'processing'
+                        : status.data?.successFlag === 1
+                          ? 'completed'
+                          : 'failed',
                 result: status.data?.response,
                 error: status.data?.errorMessage
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error obteniendo estado:', error.message);
         res.status(500).json({
@@ -483,8 +621,12 @@ router.get('/video-info/:taskId', async (req, res) => {
             data: {
                 taskId,
                 status: status.data?.successFlag,
-                statusText: status.data?.successFlag === 0 ? 'processing' :
-                           status.data?.successFlag === 1 ? 'completed' : 'failed',
+                statusText:
+                    status.data?.successFlag === 0
+                        ? 'processing'
+                        : status.data?.successFlag === 1
+                          ? 'completed'
+                          : 'failed',
                 info: {
                     resolution: status.data.response.resolution || 'desconocida',
                     hasAudio: status.data.response.hasAudioList?.[0] || false,
@@ -494,7 +636,6 @@ router.get('/video-info/:taskId', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error obteniendo información del video:', error.message);
         res.status(500).json({
@@ -542,7 +683,6 @@ router.post('/add-player-card', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error agregando player card:', error.message);
         res.status(500).json({
@@ -583,7 +723,6 @@ router.post('/concatenate', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error concatenando videos:', error.message);
         res.status(500).json({
@@ -610,10 +749,12 @@ router.post('/generate-long-video', async (req, res) => {
             });
         }
 
-        logger.info(`[VEO3 Routes] Generando video largo tema "${theme}" con ${segmentCount} segmentos`);
+        logger.info(
+            `[VEO3 Routes] Generando video largo tema "${theme}" con ${segmentCount} segmentos`
+        );
 
         // Generar prompts basados en el tema
-        let prompts = [];
+        const prompts = [];
 
         switch (theme.toLowerCase()) {
             case 'chollos':
@@ -628,18 +769,24 @@ router.post('/generate-long-video', async (req, res) => {
                 const analysisPlayers = ['Vinicius', 'Gavi', 'Morata'];
                 const analysisPrices = [11.5, 7.0, 8.0];
                 for (let i = 0; i < Math.min(segmentCount, analysisPlayers.length); i++) {
-                    prompts.push(promptBuilder.buildAnalysisPrompt(analysisPlayers[i], analysisPrices[i]));
+                    prompts.push(
+                        promptBuilder.buildAnalysisPrompt(analysisPlayers[i], analysisPrices[i])
+                    );
                 }
                 break;
 
             case 'jornada':
-                prompts.push(promptBuilder.buildIntroPrompt({
-                    dialogue: "¡Hola Misters! Bienvenidos al análisis completo de la jornada."
-                }));
+                prompts.push(
+                    promptBuilder.buildIntroPrompt({
+                        dialogue: '¡Hola Misters! Bienvenidos al análisis completo de la jornada.'
+                    })
+                );
                 prompts.push(promptBuilder.buildCholloPrompt('Pedri', 8.5));
-                prompts.push(promptBuilder.buildOutroPrompt({
-                    dialogue: "¡Hasta la próxima! No olvidéis estos chollos."
-                }));
+                prompts.push(
+                    promptBuilder.buildOutroPrompt({
+                        dialogue: '¡Hasta la próxima! No olvidéis estos chollos.'
+                    })
+                );
                 break;
 
             default:
@@ -649,7 +796,11 @@ router.post('/generate-long-video', async (req, res) => {
                 });
         }
 
-        const resultPath = await concatenator.createLongVideoFromPrompts(prompts, veo3Client, options);
+        const resultPath = await concatenator.createLongVideoFromPrompts(
+            prompts,
+            veo3Client,
+            options
+        );
 
         res.json({
             success: true,
@@ -662,7 +813,6 @@ router.post('/generate-long-video', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error generando video largo:', error.message);
         res.status(500).json({
@@ -712,7 +862,6 @@ router.post('/test-minimal-prompt', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error en test minimal:', error.message);
         res.status(500).json({
@@ -763,7 +912,6 @@ router.get('/config', (req, res) => {
             data: config,
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error obteniendo configuración:', error.message);
         res.status(500).json({
@@ -786,15 +934,16 @@ router.post('/complete-workflow', async (req, res) => {
         if (!dataType || !apiData) {
             return res.status(400).json({
                 success: false,
-                message: 'dataType y apiData requeridos. Ejemplo: dataType="chollos", apiData={players: [...]}'
+                message:
+                    'dataType y apiData requeridos. Ejemplo: dataType="chollos", apiData={players: [...]}'
             });
         }
 
         logger.info(`[VEO3 Routes] ⚡ FLUJO COMPLETO iniciado - Tipo: ${dataType}`);
 
         // PASO 1: Generar guiones basados en datos de API
-        let scripts = [];
-        let metadata = {
+        const scripts = [];
+        const metadata = {
             dataType,
             originalApiData: apiData,
             timestamp: new Date().toISOString(),
@@ -810,7 +959,9 @@ router.post('/complete-workflow', async (req, res) => {
                     });
                 }
 
-                logger.info(`[VEO3 Routes] 📝 Generando guiones para ${apiData.players.length} chollos`);
+                logger.info(
+                    `[VEO3 Routes] 📝 Generando guiones para ${apiData.players.length} chollos`
+                );
 
                 // Crear scripts personalizados para cada chollo
                 for (let i = 0; i < apiData.players.length; i++) {
@@ -819,11 +970,12 @@ router.post('/complete-workflow', async (req, res) => {
                         id: `chollo_${i + 1}`,
                         player: player.name,
                         price: player.price,
-                        dialogue: i === 0
-                            ? `¡Misters! Los chollos de hoy: ${player.name} del ${player.team} a ${player.price}€ rating ${player.rating}. ¡Oportunidad de oro!`
-                            : i === apiData.players.length - 1
-                            ? `Para terminar, ${player.name} completa nuestros chollos de hoy. Estos ${apiData.players.length} jugadores pueden transformar vuestros equipos.`
-                            : `Continuamos con ${player.name}. A ${player.price}€ es una ganga espectacular. Los números son matemática pura!`,
+                        dialogue:
+                            i === 0
+                                ? `¡Misters! Los chollos de hoy: ${player.name} del ${player.team} a ${player.price}€ rating ${player.rating}. ¡Oportunidad de oro!`
+                                : i === apiData.players.length - 1
+                                  ? `Para terminar, ${player.name} completa nuestros chollos de hoy. Estos ${apiData.players.length} jugadores pueden transformar vuestros equipos.`
+                                  : `Continuamos con ${player.name}. A ${player.price}€ es una ganga espectacular. Los números son matemática pura!`,
                         prompt: `The person in the reference image speaking in Spanish: "SCRIPT_PLACEHOLDER". Exact appearance from reference image.`
                     };
                     scripts.push(script);
@@ -847,7 +999,8 @@ router.post('/complete-workflow', async (req, res) => {
                 if (!apiData.gameweek || !apiData.highlights) {
                     return res.status(400).json({
                         success: false,
-                        message: 'Para tipo "jornada" se requiere apiData.gameweek y apiData.highlights'
+                        message:
+                            'Para tipo "jornada" se requiere apiData.gameweek y apiData.highlights'
                     });
                 }
 
@@ -889,7 +1042,9 @@ router.post('/complete-workflow', async (req, res) => {
             const script = scripts[i];
             const finalPrompt = script.prompt.replace('SCRIPT_PLACEHOLDER', script.dialogue);
 
-            logger.info(`[VEO3 Routes] 🎥 Generando video ${i + 1}/${scripts.length}: ${script.id}`);
+            logger.info(
+                `[VEO3 Routes] 🎥 Generando video ${i + 1}/${scripts.length}: ${script.id}`
+            );
 
             try {
                 // CRÍTICO: Usar generateCompleteVideo que ya integra VideoManager
@@ -906,7 +1061,6 @@ router.post('/complete-workflow', async (req, res) => {
                 });
 
                 logger.info(`[VEO3 Routes] ✅ Video ${i + 1} completado: ${video.url}`);
-
             } catch (error) {
                 logger.error(`[VEO3 Routes] ❌ Error video ${i + 1}:`, error.message);
                 videoResults.push({
@@ -999,7 +1153,6 @@ router.post('/complete-workflow', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] ❌ Error en flujo completo:', error.message);
         res.status(500).json({
@@ -1056,9 +1209,11 @@ router.get('/health', async (req, res) => {
         health.directories.temp = fs.existsSync(process.env.VEO3_TEMP_DIR || './temp/veo3');
         health.directories.logs = fs.existsSync(process.env.VEO3_LOGS_DIR || './logs/veo3');
 
-        const allHealthy = health.veo3Api && health.anaImageUrl &&
-                          Object.values(health.directories).every(d => d) &&
-                          Object.values(health.environment).every(e => e);
+        const allHealthy =
+            health.veo3Api &&
+            health.anaImageUrl &&
+            Object.values(health.directories).every(d => d) &&
+            Object.values(health.environment).every(e => e);
 
         res.status(allHealthy ? 200 : 503).json({
             success: allHealthy,
@@ -1066,7 +1221,6 @@ router.get('/health', async (req, res) => {
             data: health,
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error en health check:', error.message);
         res.status(500).json({
@@ -1086,13 +1240,7 @@ router.post('/generate-viral', async (req, res) => {
     try {
         logger.info('[VEO3 Routes] Generando video viral...');
 
-        const {
-            playerName,
-            price,
-            ratio,
-            team,
-            stats
-        } = req.body;
+        const { playerName, price, ratio, team, stats } = req.body;
 
         // Validar datos requeridos
         if (!playerName || !price || !ratio || !team) {
@@ -1132,7 +1280,6 @@ router.post('/generate-viral', async (req, res) => {
             },
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error generando video viral:', error.message);
         res.status(500).json({
@@ -1162,7 +1309,6 @@ router.get('/dictionary/stats', async (req, res) => {
             data: stats,
             timestamp: new Date().toISOString()
         });
-
     } catch (error) {
         logger.error('[VEO3 Routes] Error obteniendo estadísticas:', error.message);
         res.status(500).json({

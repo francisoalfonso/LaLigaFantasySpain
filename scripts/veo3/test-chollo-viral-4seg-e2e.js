@@ -68,7 +68,7 @@ async function main() {
                 valueRatio: TEST_CONFIG.valueRatio
             }
         }, {
-            timeout: 1200000 // 20 minutos timeout (4 segmentos)
+            timeout: 1800000 // 30 minutos timeout (4 segmentos + concatenación)
         });
 
         if (!generateResponse.data.success) {
@@ -95,8 +95,18 @@ async function main() {
             console.log(`   Videos totales: ${videoData.dictionary.totalVideos}`);
         }
 
-        // Usar URL del primer segmento para el dashboard
-        const firstSegmentUrl = videoData.segments[0]?.url || '';
+        // Validar concatenación
+        if (videoData.concatenatedVideo) {
+            console.log(`\n🎬 Video Concatenado:`);
+            console.log(`   URL: ${videoData.finalVideoUrl}`);
+            console.log(`   Duración total: ${videoData.concatenatedVideo.duration}s`);
+            console.log(`   Video ID: ${videoData.concatenatedVideo.videoId}`);
+        } else {
+            console.log(`\n⚠️  No se concatenó (usando primer segmento)`);
+        }
+
+        // Usar URL del video final (concatenado o primer segmento)
+        const finalVideoUrl = videoData.finalVideoUrl || videoData.segments[0]?.url || '';
 
         // PASO 2: Esperar un momento y verificar estado
         console.log(`\n${'─'.repeat(80)}`);
@@ -114,8 +124,14 @@ async function main() {
         console.log('⏳ Guardando versión en dashboard...');
 
         const saveResponse = await axios.post(`${API_BASE}/api/instagram/versions/save`, {
-            playerName: TEST_CONFIG.playerName,
-            videoUrl: firstSegmentUrl,
+            playerData: {
+                playerName: TEST_CONFIG.playerName,
+                team: TEST_CONFIG.team,
+                price: TEST_CONFIG.price,
+                stats: TEST_CONFIG.stats,
+                valueRatio: TEST_CONFIG.valueRatio
+            },
+            videoUrl: finalVideoUrl,
             caption: `🔥 CHOLLO DEL DÍA\n\n${TEST_CONFIG.playerName} a solo ${TEST_CONFIG.price}M 💰\nRatio calidad-precio BRUTAL: ${TEST_CONFIG.valueRatio}x\n${TEST_CONFIG.stats.goals} goles + ${TEST_CONFIG.stats.assists} asistencias en ${TEST_CONFIG.stats.games} partidos 📊\n\n#FantasyLaLiga #Chollos #${TEST_CONFIG.playerName.replace(' ', '')}`,
             metadata: {
                 type: 'chollo_viral',
@@ -127,8 +143,6 @@ async function main() {
                 optimizedPrompt: true,
                 testE2E: true,
                 generatedAt: new Date().toISOString(),
-                stats: TEST_CONFIG.stats,
-                valueRatio: TEST_CONFIG.valueRatio,
                 allSegments: videoData.segments.map(s => ({
                     role: s.role,
                     taskId: s.taskId,
@@ -144,7 +158,7 @@ async function main() {
 
         console.log(`\n✅ Versión guardada en dashboard:`);
         console.log(`   ID: ${saveResponse.data.data.versionId}`);
-        console.log(`   Player: ${saveResponse.data.data.playerName}`);
+        console.log(`   Player: ${saveResponse.data.data.playerData.playerName}`);
         console.log(`   Timestamp: ${saveResponse.data.data.timestamp}`);
 
         // RESUMEN FINAL
@@ -170,7 +184,7 @@ async function main() {
         console.log(`   🎬 Segmentos: ${videoData.segmentCount} (intro + analysis + stats + outro)\n`);
 
         console.log('🔗 URLs Útiles:');
-        console.log(`   📹 Segmento 1: ${videoData.segments[0]?.url}`);
+        console.log(`   📹 Video Final (${videoData.concatenatedVideo ? 'concatenado' : 'primer segmento'}): ${finalVideoUrl}`);
         console.log(`   📱 Dashboard: http://localhost:3000/instagram-viral-preview.html`);
         console.log(`   📊 Diccionario: http://localhost:3000/api/veo3/dictionary/stats\n`);
 

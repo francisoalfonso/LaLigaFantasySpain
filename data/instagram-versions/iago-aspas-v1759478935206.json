@@ -1,0 +1,115 @@
+{
+  "id": "iago-aspas-v1759478935206",
+  "version": 1,
+  "timestamp": "2025-10-03T08:08:55.206Z",
+  "playerData": {
+    "playerName": "Iago Aspas",
+    "team": "Celta de Vigo",
+    "price": 8,
+    "ratio": 1.4,
+    "stats": {
+      "goals": 1,
+      "assists": 2,
+      "games": 5,
+      "rating": 7.2,
+      "position": "Defensa"
+    }
+  },
+  "previewData": {
+    "video": {
+      "path": "./output/veo3/viral/ana-viral-carvajal-1759244590195.mp4",
+      "url": "https://vz-139dde2a-4e6.b-cdn.net/a1643923-93d1-40ca-b212-c1b8b4281155/play_720p.mp4",
+      "duration": "~24s",
+      "segments": 3,
+      "structure": "Hook → Desarrollo → CTA",
+      "isRealVideo": true
+    },
+    "instagram": {
+      "caption": "🚨 ALERTA CHOLLO - JORNADA ACTUAL 🚨\n\nIago Aspas - Celta de Vigo\n💰 Solo €8M (Ratio 1.4x)\n⚡ 72 pts acumulados\n📈 Proyección: 86+ pts\n⚽ 1 goles + 2 asistencias\n\n¿Por qué es IMPRESCINDIBLE?\n✅ Precio infravaluado\n✅ Buen calendario\n✅ En racha\n\n⏰ Ficha ANTES de que suba de precio\n\n¿Le metes en tu plantilla? 👇\n\n#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #CeltadeVigo #Jornada #Fichajes #CholloDelDia",
+      "captionLength": 403,
+      "hashtags": [
+        "#FantasyLaLiga",
+        "#Chollos",
+        "#Misters",
+        "#LaLiga",
+        "#Fantasy",
+        "#CeltadeVigo",
+        "#Jornada",
+        "#Fichajes",
+        "#CholloDelDia"
+      ],
+      "estimatedReach": 500,
+      "bestTimeToPost": "18:00-21:00",
+      "platform": "instagram",
+      "format": "9:16 vertical"
+    },
+    "player": {
+      "name": "Iago Aspas",
+      "team": "Celta de Vigo",
+      "price": 8,
+      "ratio": 1.4,
+      "stats": {
+        "goals": 1,
+        "assists": 2,
+        "games": 5,
+        "rating": 7.2,
+        "position": "Defensa"
+      }
+    },
+    "metadata": {
+      "playerName": "Iago Aspas",
+      "price": 8,
+      "ratio": 1.4,
+      "team": "Celta de Vigo",
+      "stats": {
+        "goals": 1,
+        "assists": 2,
+        "games": 5,
+        "rating": 7.2,
+        "position": "Defensa"
+      },
+      "generatedAt": "2025-10-03T08:08:55.197Z",
+      "segments": [
+        {
+          "type": "hook",
+          "dialogue": "Pssst... Misters, venid que os cuento un secreto... He encontrado un Defensa del Celta de Vigo por €8M que está rindiendo como uno de €15M..."
+        },
+        {
+          "type": "development",
+          "dialogue": "Iago Aspas. Ratio valor 1.4x. 1 goles, 2 asistencias en 5 partidos. Rating 7.2. Y lo mejor... buen calendario próximos partidos."
+        },
+        {
+          "type": "cta",
+          "dialogue": "¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!"
+        }
+      ]
+    },
+    "generatedAt": "2025-10-03T08:08:55.197Z",
+    "status": "ready_to_publish"
+  },
+  "segments": [
+    {
+      "type": "hook",
+      "dialogue": "Pssst... Misters, venid que os cuento un secreto... He encontrado un Defensa del Celta de Vigo por €8M que está rindiendo como uno de €15M..."
+    },
+    {
+      "type": "development",
+      "dialogue": "Iago Aspas. Ratio valor 1.4x. 1 goles, 2 asistencias en 5 partidos. Rating 7.2. Y lo mejor... buen calendario próximos partidos."
+    },
+    {
+      "type": "cta",
+      "dialogue": "¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!"
+    }
+  ],
+  "videoUrl": "https://vz-139dde2a-4e6.b-cdn.net/a1643923-93d1-40ca-b212-c1b8b4281155/play_720p.mp4",
+  "caption": "🚨 ALERTA CHOLLO - JORNADA ACTUAL 🚨\n\nIago Aspas - Celta de Vigo\n💰 Solo €8M (Ratio 1.4x)\n⚡ 72 pts acumulados\n📈 Proyección: 86+ pts\n⚽ 1 goles + 2 asistencias\n\n¿Por qué es IMPRESCINDIBLE?\n✅ Precio infravaluado\n✅ Buen calendario\n✅ En racha\n\n⏰ Ficha ANTES de que suba de precio\n\n¿Le metes en tu plantilla? 👇\n\n#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #CeltadeVigo #Jornada #Fichajes #CholloDelDia",
+  "notes": "",
+  "viralScore": 83,
+  "isRealVideo": false,
+  "metadata": {
+    "createdAt": "2025-10-03T08:08:55.206Z",
+    "updatedAt": "2025-10-03T08:08:55.206Z",
+    "userId": "system",
+    "status": "draft"
+  }
+}

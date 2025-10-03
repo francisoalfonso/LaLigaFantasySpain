@@ -1,0 +1,3 @@
+file '/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759404891125_1759404891125.mp4'
+file '/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759405290423_1759405290423.mp4'
+file '/Users/fran/Desktop/CURSOR/Fantasy la liga/output/videos/video_1759405698496_1759405698496.mp4'

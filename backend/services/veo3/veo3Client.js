@@ -230,97 +230,23 @@ class VEO3Client {
                         `[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`
                     );
 
+                    // ✅ STACK SIMPLIFICADO: URLs VEO3 directas (sin Bunny.net)
+                    // Las URLs VEO3 son públicas por defecto con Cloudflare CDN
                     const veo3Url = status.data.response.resultUrls[0];
-                    logger.info(`[VEO3Client] Descargando video de VEO3: ${veo3Url}`);
+                    logger.info(`[VEO3Client] ✅ Video VEO3 disponible: ${veo3Url}`);
+                    logger.info(`[VEO3Client] ✅ Usando URL VEO3 directa (sin Bunny.net)`);
 
-                    // NUEVA ESTRATEGIA: Subir directamente a Bunny.net Stream
-                    try {
-                        logger.info(`[VEO3Client] Subiendo video a Bunny.net Stream: ${veo3Url}`);
-
-                        const bunnyData = await this.bunnyStream.uploadFromVeo3Url(veo3Url, {
-                            taskId,
-                            title: `Ana Real - Video ${new Date().toISOString().slice(0, 10)}`,
-                            duration: status.data.response.duration,
-                            cost: status.data.response.cost,
-                            veo3OriginalUrl: veo3Url,
-                            service: 'veo3',
-                            type: 'veo3_generated',
-                            seeds: status.data.response.seeds
-                        });
-
-                        logger.info(
-                            `[VEO3Client] Video subido exitosamente a Bunny.net: ${bunnyData.directUrl}`
-                        );
-
-                        return {
-                            taskId,
-                            url: bunnyData.directUrl, // URL PERMANENTE de Bunny.net
-                            bunnyId: bunnyData.id,
-                            embedUrl: bunnyData.embedUrl,
-                            thumbnailUrl: bunnyData.thumbnailUrl,
-                            streamUrl: bunnyData.bunnyUrl,
-                            originalUrl: veo3Url,
-                            duration: status.data.response.duration,
-                            cost: status.data.response.cost,
-                            generatedAt: new Date(),
-                            success: true,
-                            platform: 'bunny',
-                            videoId: bunnyData.id // ID de Bunny.net para futuras referencias
-                        };
-                    } catch (bunnyError) {
-                        logger.error(
-                            `[VEO3Client] Error subiendo a Bunny.net: ${bunnyError.message}`
-                        );
-
-                        // Fallback: Intentar descarga local como antes
-                        try {
-                            logger.info(`[VEO3Client] Fallback: intentando descarga local`);
-
-                            const videoData = await videoManager.downloadAndStore(veo3Url, {
-                                taskId,
-                                duration: status.data.response.duration,
-                                cost: status.data.response.cost,
-                                veo3OriginalUrl: veo3Url,
-                                service: 'veo3'
-                            });
-
-                            logger.info(
-                                `[VEO3Client] Video almacenado localmente como fallback: ${videoData.publicUrl}`
-                            );
-
-                            return {
-                                taskId,
-                                url: videoData.publicUrl,
-                                localPath: videoData.localPath,
-                                originalUrl: veo3Url,
-                                duration: status.data.response.duration,
-                                cost: status.data.response.cost,
-                                generatedAt: new Date(),
-                                success: true,
-                                platform: 'local',
-                                videoId: videoData.id,
-                                bunnyError: bunnyError.message
-                            };
-                        } catch (localError) {
-                            logger.error(
-                                `[VEO3Client] Ambos fallback fallaron: ${localError.message}`
-                            );
-
-                            // Último fallback: URL original (lo que teníamos antes)
-                            logger.warn('[VEO3Client] Usando URL original como último recurso');
-                            return {
-                                taskId,
-                                url: veo3Url,
-                                duration: status.data.response.duration,
-                                cost: status.data.response.cost,
-                                generatedAt: new Date(),
-                                success: true,
-                                platform: 'external',
-                                bunnyError: bunnyError.message,
-                                localError: localError.message
-                            };
-                        }
-                    }
+                    return {
+                        taskId,
+                        url: veo3Url, // ✅ URL VEO3 directa - pública y con CDN
+                        originalUrl: veo3Url,
+                        duration: status.data.response.duration,
+                        cost: status.data.response.cost,
+                        generatedAt: new Date(),
+                        success: true,
+                        platform: 'veo3',
+                        seeds: status.data.response.seeds
+                    };
                 }
 
                 // Video falló

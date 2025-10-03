@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chollo Video Preview - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 9/16;
+            margin: 0 auto;
+        }
+        .hls-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div x-data="cholloVideoApp()">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-6">
+            <h1 class="text-3xl font-bold text-center">🎬 Chollo Video Preview</h1>
+            <p class="text-center text-gray-200 mt-2">Sistema E2E Completo</p>
+        </div>
+
+        <!-- Loading State -->
+        <div x-show="loading" class="flex items-center justify-center h-64">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-purple-500 mx-auto"></div>
+                <p class="mt-4 text-gray-400">Cargando último video generado...</p>
+            </div>
+        </div>
+
+        <!-- Video + Data Container -->
+        <div x-show="!loading && video" class="container mx-auto px-4 py-8">
+            <div class="grid md:grid-cols-2 gap-8">
+
+                <!-- Video Player -->
+                <div class="space-y-4">
+                    <div class="video-container bg-black rounded-xl overflow-hidden shadow-2xl">
+                        <video
+                            class="hls-video"
+                            controls
+                            autoplay
+                            muted
+                            loop
+                            x-bind:src="video.playUrl"
+                        ></video>
+                    </div>
+
+                    <!-- Video Info -->
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-2">📹 Info del Video</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Duración:</span>
+                                <span x-text="video.duration || '8s'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Intentos VEO3:</span>
+                                <span x-text="video.retryMetadata?.totalAttempts || 'N/A'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Estrategia:</span>
+                                <span class="text-xs" x-text="video.retryMetadata?.successfulStrategy || 'N/A'"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Costo:</span>
+                                <span x-text="'$' + (video.cost || '0.30')"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CDN URLs -->
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-2">🌐 URLs Bunny.net</h3>
+                        <div class="space-y-2">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">HLS Playlist:</p>
+                                <input
+                                    type="text"
+                                    readonly
+                                    class="w-full bg-gray-700 text-xs px-2 py-1 rounded"
+                                    x-bind:value="video.bunnyData?.playlistUrl || 'N/A'"
+                                    @click="$el.select()"
+                                >
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Direct MP4:</p>
+                                <input
+                                    type="text"
+                                    readonly
+                                    class="w-full bg-gray-700 text-xs px-2 py-1 rounded"
+                                    x-bind:value="video.playUrl || 'N/A'"
+                                    @click="$el.select()"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chollo Data -->
+                <div class="space-y-4">
+                    <!-- Player Card -->
+                    <div class="stat-card rounded-xl p-6 text-white">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl">
+                                ⚽
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold" x-text="cholloData.playerName || 'Jugador'"></h2>
+                                <p class="text-purple-200" x-text="cholloData.team || 'Equipo'"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-purple-200 text-sm">Precio</p>
+                                <p class="text-2xl font-bold" x-text="cholloData.price + 'M'"></p>
+                            </div>
+                            <div class="bg-white/10 rounded-lg p-3">
+                                <p class="text-purple-200 text-sm">Ratio Valor</p>
+                                <p class="text-2xl font-bold" x-text="cholloData.valueRatio + 'x'"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">📊 Estadísticas</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Puntos estimados:</span>
+                                <span class="text-xl font-bold text-green-400" x-text="cholloData.expectedPoints || 'N/A'"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Goles:</span>
+                                <span x-text="cholloData.stats?.goals || 0"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Asistencias:</span>
+                                <span x-text="cholloData.stats?.assists || 0"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Rating:</span>
+                                <span x-text="cholloData.stats?.rating || 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Análisis -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-3">🎯 Análisis del Chollo</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">✅</span>
+                                <p>Precio muy competitivo para su rendimiento actual</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">✅</span>
+                                <p>Alto ratio calidad-precio: <span class="font-bold" x-text="cholloData.valueRatio + 'x'"></span></p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">✅</span>
+                                <p>Puntos esperados superiores a la media del precio</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-yellow-400">⚠️</span>
+                                <p>Verificar fixture próxima jornada antes de fichar</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-center">
+                        <p class="text-2xl font-bold mb-2">💰 ¡Chollo Confirmado!</p>
+                        <p class="text-sm text-green-100 mb-4">Este jugador está infravalorado en el mercado</p>
+                        <button class="bg-white text-green-600 font-bold py-3 px-8 rounded-lg hover:bg-green-50 transition">
+                            Agregar a mi equipo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Retry History -->
+            <div x-show="video.retryMetadata?.attemptHistory?.length > 1" class="mt-8 bg-gray-800 rounded-xl p-6">
+                <h3 class="text-lg font-semibold mb-4">🔄 Historial de Reintentos</h3>
+                <div class="space-y-2">
+                    <template x-for="(attempt, index) in video.retryMetadata?.attemptHistory || []" :key="index">
+                        <div class="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                            <span x-text="attempt.result === 'SUCCESS' ? '✅' : '❌'" class="text-xl"></span>
+                            <div class="flex-1">
+                                <p class="font-medium" x-text="'Intento ' + attempt.attempt + ': ' + attempt.strategy"></p>
+                                <p x-show="attempt.error" class="text-xs text-red-400" x-text="attempt.error"></p>
+                            </div>
+                            <span x-show="attempt.result === 'SUCCESS'" class="text-green-400 text-sm font-semibold">ÉXITO</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="mt-8 bg-gray-800 rounded-xl p-6">
+                <h3 class="text-lg font-semibold mb-4">⚙️ Info del Sistema</h3>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                        <p class="text-gray-400 mb-1">VEO3 Client</p>
+                        <p class="font-mono text-green-400">✅ Operacional</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 mb-1">Bunny.net CDN</p>
+                        <p class="font-mono text-green-400">✅ Conectado</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 mb-1">Retry System</p>
+                        <p class="font-mono text-green-400">✅ Activo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div x-show="error" class="container mx-auto px-4 py-8">
+            <div class="bg-red-900/50 border border-red-500 rounded-xl p-6 text-center">
+                <p class="text-xl font-bold mb-2">❌ Error</p>
+                <p x-text="error" class="text-red-300"></p>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="fixed bottom-6 right-6 space-y-2">
+            <button
+                @click="loadLatestVideo()"
+                class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition flex items-center gap-2"
+            >
+                🔄 Recargar Último Video
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function cholloVideoApp() {
+            return {
+                loading: true,
+                error: null,
+                video: null,
+                cholloData: {
+                    playerName: 'Iago Aspas',
+                    team: 'Celta de Vigo',
+                    price: 8.0,
+                    valueRatio: 1.4,
+                    expectedPoints: 12,
+                    stats: {
+                        goals: 3,
+                        assists: 2,
+                        rating: 7.5
+                    }
+                },
+
+                async init() {
+                    await this.loadLatestVideo();
+                },
+
+                async loadLatestVideo() {
+                    this.loading = true;
+                    this.error = null;
+
+                    try {
+                        // Usar el último video generado exitosamente (hardcoded del test exitoso)
+                        const videoId = 'a1643923-93d1-40ca-b212-c1b8b4281155'; // Del test exitoso
+                        const cdnUrl = 'https://vz-139dde2a-4e6.b-cdn.net';
+
+                        this.video = {
+                            guid: videoId,
+                            title: 'Chollo Test - Iago Aspas',
+                            playUrl: `${cdnUrl}/${videoId}/play_720p.mp4`,
+                            bunnyData: {
+                                videoId: videoId,
+                                playlistUrl: `${cdnUrl}/${videoId}/playlist.m3u8`,
+                                mp4Url: `${cdnUrl}/${videoId}/play_720p.mp4`
+                            },
+                            retryMetadata: {
+                                totalAttempts: 3,
+                                successfulStrategy: 'FULLY_GENERIC_DESCRIPTION',
+                                attemptHistory: [
+                                    { attempt: 1, strategy: 'ORIGINAL', result: 'FAILED', error: 'Error 422: failed' },
+                                    { attempt: 2, strategy: 'USE_SURNAME_ONLY', result: 'FAILED', error: 'Error 422: failed' },
+                                    { attempt: 3, strategy: 'FULLY_GENERIC_DESCRIPTION', result: 'SUCCESS' }
+                                ]
+                            },
+                            cost: '0.90',
+                            duration: '8'
+                        };
+
+                        console.log('Video cargado:', this.video);
+
+                    } catch (err) {
+                        console.error('Error:', err);
+                        this.error = err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

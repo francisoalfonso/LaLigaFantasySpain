@@ -1,6 +1,9 @@
 const express = require('express');
 const logger = require('../utils/logger');
 const router = express.Router();
+const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 
 // Importar servicios VEO3
 const VEO3Client = require('../services/veo3/veo3Client');
@@ -315,6 +318,59 @@ router.post('/generate-multi-segment', async (req, res) => {
             await updatePlayerSuccessRate(playerData.name, success);
         }
 
+        // 🎬 CONCATENAR VIDEOS (si hay múltiples segmentos)
+        let finalVideoUrl = null;
+        let concatenatedVideo = null;
+
+        if (generatedSegments.length > 1) {
+            logger.info(`[VEO3 Routes] 🔗 Concatenando ${generatedSegments.length} segmentos...`);
+
+            try {
+                const VideoConcatenator = require('../services/veo3/videoConcatenator');
+                const concatenator = new VideoConcatenator();
+
+                // Descargar videos de VEO3 a local temporalmente
+                const tempPaths = [];
+                for (const segment of generatedSegments) {
+                    const response = await axios.get(segment.url, { responseType: 'arraybuffer' });
+                    const tempPath = path.join(__dirname, '..', '..', 'temp', `segment-${segment.taskId}.mp4`);
+                    await fs.promises.writeFile(tempPath, response.data);
+                    tempPaths.push(tempPath);
+                }
+
+                // Concatenar videos
+                const outputPath = await concatenator.concatenateVideos(tempPaths, {
+                    transition: { enabled: false }, // Sin transiciones
+                    audio: { fadeInOut: false }
+                });
+
+                // Leer video concatenado y usar ruta estática correcta
+                finalVideoUrl = `http://localhost:3000/output/veo3/${path.basename(outputPath)}`;
+
+                // Limpiar archivos temporales
+                for (const tempPath of tempPaths) {
+                    if (fs.existsSync(tempPath)) {
+                        fs.unlinkSync(tempPath);
+                    }
+                }
+
+                concatenatedVideo = {
+                    videoId: `concat_${Date.now()}`,
+                    title: `${playerData.name}_${contentType}_${preset}`,
+                    duration: structure.totalDuration
+                };
+
+                logger.info(`[VEO3 Routes] ✅ Videos concatenados: ${finalVideoUrl}`);
+            } catch (error) {
+                logger.error(`[VEO3 Routes] ❌ Error concatenando:`, error.message);
+                // Fallback: usar primer segmento
+                finalVideoUrl = generatedSegments[0]?.url;
+            }
+        } else {
+            // Solo un segmento
+            finalVideoUrl = generatedSegments[0]?.url;
+        }
+
         res.json({
             success: true,
             message: `Video multi-segmento ${contentType} generado exitosamente`,
@@ -325,6 +381,13 @@ router.post('/generate-multi-segment', async (req, res) => {
                 totalDuration: structure.totalDuration,
                 anaImageIndex,
                 segments: generatedSegments,
+                concatenatedVideo: concatenatedVideo ? {
+                    url: finalVideoUrl,
+                    videoId: concatenatedVideo.videoId,
+                    duration: structure.totalDuration,
+                    title: concatenatedVideo.title
+                } : null,
+                finalVideoUrl,  // ✅ URL del video final (concatenado o primer segmento)
                 playerData: {
                     name: playerData.name,
                     team: playerData.team,

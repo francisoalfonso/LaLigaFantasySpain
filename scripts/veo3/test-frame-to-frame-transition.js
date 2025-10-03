@@ -58,10 +58,10 @@ async function runFrameToFrameTest() {
         const promptBuilder = new PromptBuilder();
         const concatenator = new VideoConcatenator();
 
-        const healthCheck = veo3.getHealth();
-        if (!healthCheck.configured) {
+        // Verificar configuración básica
+        if (!process.env.KIE_AI_API_KEY) {
             throw new Error(
-                'VEO3 no está configurado correctamente. Verifica variables de entorno.'
+                'VEO3 no está configurado correctamente. Verifica KIE_AI_API_KEY en .env'
             );
         }
 

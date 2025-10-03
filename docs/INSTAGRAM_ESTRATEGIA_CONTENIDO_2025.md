@@ -15,6 +15,11 @@
 6. [Calendario de Contenidos](#calendario-de-contenidos)
 7. [Métricas y KPIs](#métricas-y-kpis)
 8. [Monetización](#monetización)
+   - [Framework €100K TOFU-MOFU-BOFU](#-framework-100k-estrategia-tofu-mofu-bofu)
+   - [Brand Partnerships](#1-brand-partnerships-fuente-complementaria)
+   - [Instagram Subscriptions](#2-instagram-subscriptions)
+   - [Instagram Gifts](#3-instagram-gifts)
+   - [Affiliate Marketing](#4-affiliate-marketing)
 
 ---
 
@@ -484,7 +489,252 @@ shares (lo envían a amigos de su liga).
 
 ## 💰 Monetización Estrategia 2025
 
-### 1. Brand Partnerships (Principal fuente ingresos)
+### 🔥 FRAMEWORK €100K: Estrategia TOFU-MOFU-BOFU
+
+**Basado en caso real**: Sistema que generó +€100,000 en Instagram
+
+#### **Concepto Clave: Embudo 3 Fases**
+
+```
+TOFU (Top of Funnel) - ALCANCE MÁXIMO
+↓ Contenido viral que atrae masas
+↓ 80% valor general + 20% nicho específico
+↓
+MOFU (Middle of Funnel) - CUALIFICACIÓN
+↓ Lead magnet que filtra audiencia real
+↓ PDF, guía, masterclass gratis
+↓
+BOFU (Bottom of Funnel) - CONVERSIÓN
+↓ DM filtrado → Llamada de ventas
+↓ 32% conversión llamada → cliente
+```
+
+---
+
+### 🎯 Fase 1: TOFU - Contenido Viral (80/20 Rule)
+
+**Objetivo**: Alcance máximo + viralidad controlada
+
+**Fórmula UMV (Umbral Mínimo de Viralidad)**:
+- **80% contenido general emocional** (aplica a cualquiera)
+- **20% nicho específico** (Fantasy La Liga)
+
+**Ejemplo TOFU Fantasy La Liga**:
+
+❌ **INCORRECTO** (100% nicho):
+> "Pedri tiene ratio 1.35 en Fantasy con 8.5M precio y ROI del 140% según xG"
+
+✅ **CORRECTO** (80% general + 20% nicho):
+> "¿Sabías que hay un jugador del Barça que NADIE ficha pero que puede darte 30 puntos extra cada jornada? Te lo cuento..."
+
+**Por qué funciona**:
+- Cualquiera entiende "30 puntos extra" (beneficio emocional)
+- "NADIE ficha" = FOMO universal
+- "Jugador Barça" = reconocible para no-Fantasy
+- Nicho específico viene DESPUÉS del hook
+
+**Aplicación Ana Real**:
+- Hooks emocionales primeros 2s (80% general)
+- Revelación Fantasy específica segundos 3-8 (20% nicho)
+- CTA para Lead Magnet (transición TOFU→MOFU)
+
+---
+
+### 🧲 Fase 2: MOFU - Lead Magnet (Cualificación Audiencia)
+
+**Objetivo**: Filtrar curiosos de compradores reales
+
+**Lead Magnets Recomendados Fantasy La Liga**:
+
+1. **PDF "Top 10 Chollos Cada Jornada"**
+   - Valor: Análisis exclusivo semanal
+   - Entrega: Email automático n8n
+   - Cualifica: Solo managers serios lo descargan
+
+2. **Masterclass Gratis "Cómo Ganar Tu Liga Fantasy"**
+   - Duración: 30 min video Ana
+   - Contenido: Sistema paso a paso fichajes
+   - Cualifica: Inversión de tiempo = interés real
+
+3. **Grupo Telegram Exclusivo "Alertas Chollos 24h"**
+   - Valor: Info antes que otros
+   - Acceso: Registro con email
+   - Cualifica: Engagement diario = audiencia activa
+
+4. **Guía Completa "Análisis Rivales por Equipo"**
+   - Valor: Data que nadie más tiene
+   - Formato: Spreadsheet descargable
+   - Cualifica: Usuarios avanzados
+
+**Sistema de Entrega**:
+```
+Reel Ana (TOFU) → CTA "Link en bio" → Landing page → Formulario email → Lead Magnet automático (n8n) → Secuencia emails → Oferta BOFU
+```
+
+**Ejemplo CTA en Reel**:
+> "Si quieres mi lista completa de los 50 mejores chollos de la temporada, link en bio. Es gratis pero solo por 48 horas."
+
+---
+
+### 💬 Fase 3: BOFU - DM Filtrado + Llamada de Ventas
+
+**Objetivo**: Convertir leads cualificados en clientes de pago
+
+#### **Sistema de 5 Niveles de Consciencia**
+
+| Nivel | Consciencia        | Estrategia                              | Ejemplo Fantasy La Liga                                |
+|-------|--------------------|-----------------------------------------|-------------------------------------------------------|
+| **0** | Inconsciente       | Educación básica                        | "¿Qué es Fantasy La Liga?"                            |
+| **1** | Problema consciente| Agitar problema                          | "¿Siempre acabas último en tu liga?"                  |
+| **2** | Solución consciente| Mostrar que hay solución                 | "Existe un sistema para ganar consistentemente"       |
+| **3** | Producto consciente| Presentar tu producto                    | "Mi servicio Premium te da ventaja competitiva"       |
+| **4** | Listo para comprar | Cerrar venta con urgencia/escasez        | "Solo 10 plazas disponibles este mes a €99"          |
+
+**Estrategia de Mensajes**:
+
+**Nivel 0-1** (Reel viral TOFU):
+> "¿Sabes por qué siempre pierdes en Fantasy? Te lo explico..."
+
+**Nivel 2** (Lead Magnet MOFU):
+> "Descarga mi sistema paso a paso que me llevó a ganar 3 ligas consecutivas"
+
+**Nivel 3-4** (DM BOFU):
+> "Hola [nombre], vi que descargaste mi guía. ¿Te ayudó? Tengo una oferta especial solo para ti..."
+
+#### **Filtro de DMs (Crítico)**
+
+**NO responder a**:
+- "¿Quién será mi capitán?" (pregunta gratis)
+- "¿Ficho a X o Y?" (busca consejo rápido)
+- "¿Cuánto cuesta?" (solo precio, no valor)
+
+**SÍ responder a**:
+- "Descargué tu guía, ¿cómo puedo profundizar?"
+- "Llevo 3 temporadas sin ganar, ¿me ayudas?"
+- "¿Tienes algún servicio personalizado?"
+
+**Script DM → Llamada**:
+```
+Usuario: "Descargué tu guía, muy buena. ¿Tienes algo más avanzado?"
+
+Tú: "Qué bien que te sirvió! Tengo mi servicio Premium donde trabajamos 1-a-1 tu estrategia. ¿Te viene bien una llamada de 15 min mañana para ver si encaja contigo?"
+
+Usuario: "Sí, perfecto"
+
+Tú: [Envía Calendly] "Genial, agenda aquí tu mejor horario 👇"
+```
+
+#### **Llamada de Ventas (32% Conversión)**
+
+**Estructura llamada**:
+
+1. **Romper hielo (2 min)**
+   - "Cuéntame, ¿cuánto llevas jugando Fantasy?"
+   - Establecer rapport
+
+2. **Descubrir dolor (5 min)**
+   - "¿Cuál es tu mayor frustración en Fantasy?"
+   - "¿Qué has probado antes que no funcionó?"
+   - Identificar problema real
+
+3. **Presentar solución (5 min)**
+   - "Mi servicio Premium incluye..."
+   - Enfocarse en RESULTADOS, no features
+   - "Mis clientes promedian top 3 en sus ligas"
+
+4. **Manejar objeciones (3 min)**
+   - Precio: "€99/mes es menos que 2 cervezas/semana y podría hacerte ganar €500 en premios"
+   - Tiempo: "Solo necesitas 10 min/semana revisar mi análisis"
+   - Confianza: "Prueba 1 mes, si no subes posiciones te devuelvo el dinero"
+
+5. **Cierre (2 min)**
+   - "¿Empezamos este mes o prefieres esperar a la próxima jornada?"
+   - Asumir venta, no preguntar "¿quieres?"
+
+**Tasa conversión esperada**: 32% (benchmark industry)
+
+**Pricing Tiers**:
+- **Básico** (€49/mes): Análisis semanal + alertas
+- **Premium** (€99/mes): Básico + llamada quincenal + grupo privado
+- **VIP** (€299/mes): Premium + línea directa DM + alineación personalizada
+
+---
+
+### 📊 Matemática €100K Instagram
+
+**Fórmula Real**:
+```
+8 clientes Premium/mes × €2,000 venta única = €16,000/mes
+€16,000/mes × 6 meses = €96,000 ≈ €100K
+```
+
+**Adaptado a Fantasy La Liga (conservador)**:
+```
+FASE 1 (Mes 1-3): TOFU - Crecer a 5K seguidores
+- 5 Reels/semana viral (80/20 rule)
+- 0 ingresos (inversión en audiencia)
+
+FASE 2 (Mes 4-6): MOFU - Implementar Lead Magnets
+- Ofrecer PDF/Masterclass gratis
+- Meta: 500 emails capturados
+- Ingresos: €500/mes (primeros brand deals)
+
+FASE 3 (Mes 7-9): BOFU - Lanzar Premium
+- Filtrar DMs de leads cualificados
+- Meta: 5 clientes Premium/mes @ €99 = €495/mes
+- + Brand deals: €1,000/mes
+- Total: €1,500/mes
+
+FASE 4 (Mes 10-12): ESCALA - Optimizar Embudo
+- Meta: 15 clientes Premium/mes @ €99 = €1,485/mes
+- + Brand deals: €2,000/mes
+- + Afiliados: €500/mes
+- Total: €4,000/mes
+
+AÑO 1 TOTAL: €18,000-€25,000 (conservador)
+AÑO 2 OBJETIVO: €100,000 (con base establecida)
+```
+
+---
+
+### 🎯 Integración Framework €100K con Sistema Ana
+
+**TOFU (Reels Ana)**:
+- 80% hooks emocionales generales
+- 20% Fantasy específico
+- CTA a Lead Magnet al final
+- Ejemplo: "Link en bio para mi guía completa gratis"
+
+**MOFU (Carruseles + Lead Magnets)**:
+- Carruseles educativos profundos
+- CTA a descarga PDF/Masterclass
+- Captura emails vía n8n automation
+- Secuencia emails automática (5 emails → oferta Premium)
+
+**BOFU (DMs + Llamadas)**:
+- Responder solo DMs cualificados
+- Ofrecer llamada discovery gratuita
+- Cerrar Premium con 32% conversión
+- Upsell VIP a mejores clientes
+
+---
+
+### 📈 KPIs Framework €100K
+
+| Fase | Métrica Clave | Target Mes 3 | Target Mes 6 | Target Mes 12 |
+|------|---------------|--------------|--------------|---------------|
+| **TOFU** | Alcance Reels | 5K views/Reel | 15K views/Reel | 50K views/Reel |
+| **TOFU** | Seguidores nuevos | +500/mes | +1,500/mes | +5,000/mes |
+| **MOFU** | Emails capturados | 100 | 500 | 2,000 |
+| **MOFU** | Tasa descarga Lead Magnet | 5% | 8% | 12% |
+| **BOFU** | DMs cualificados | 5/mes | 20/mes | 50/mes |
+| **BOFU** | Llamadas agendadas | 2/mes | 10/mes | 25/mes |
+| **BOFU** | Clientes Premium cerrados | 0 | 5/mes | 15/mes |
+| **€€€** | Ingresos totales | €0 | €1,500/mes | €4,000/mes |
+
+---
+
+### 1. Brand Partnerships (Fuente complementaria)
 
 **Timing**: Mes 4+ (5K seguidores mínimo)
 

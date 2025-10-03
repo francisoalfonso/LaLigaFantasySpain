@@ -8,6 +8,8 @@ const PromptBuilder = require('../services/veo3/promptBuilder');
 const PlayerCardsOverlay = require('../services/veo3/playerCardsOverlay');
 const VideoConcatenator = require('../services/veo3/videoConcatenator');
 const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
+const ThreeSegmentGenerator = require('../services/veo3/threeSegmentGenerator'); // ✅ NUEVO
+const { validateAndPrepare, updatePlayerSuccessRate } = require('../utils/playerDictionaryValidator');
 
 // Instanciar servicios
 const veo3Client = new VEO3Client();
@@ -15,6 +17,7 @@ const promptBuilder = new PromptBuilder();
 const playerCards = new PlayerCardsOverlay();
 const concatenator = new VideoConcatenator();
 const viralBuilder = new ViralVideoBuilder();
+const multiSegmentGenerator = new ThreeSegmentGenerator(); // ✅ NUEVO
 
 /**
  * @route GET /api/veo3/test
@@ -77,6 +80,19 @@ router.post('/generate-ana', async (req, res) => {
         let prompt;
         let videoData = { type };
 
+        // ✅ VALIDACIÓN PROGRESIVA DE DICCIONARIO
+        // Si el video es de un jugador específico, validar/completar diccionario
+        let dictionaryData = null;
+        if (playerName && req.body.team) {
+            logger.info(`[VEO3 Routes] 📋 Validando diccionario para "${playerName}" del "${req.body.team}"...`);
+
+            dictionaryData = await validateAndPrepare(playerName, req.body.team);
+
+            logger.info(`[VEO3 Routes] ✅ Diccionario validado:`);
+            logger.info(`  - Referencias seguras: ${dictionaryData.player.safeReferences.join(', ')}`);
+            logger.info(`  - Tasa de éxito: ${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`);
+        }
+
         // Generar prompt según el tipo
         switch (type) {
             case 'chollo':
@@ -91,7 +107,8 @@ router.post('/generate-ana', async (req, res) => {
                     ...options,
                     stats: req.body.stats || {},
                     ratio: req.body.ratio,
-                    team: req.body.team || playerName.split(' ').pop() // fallback
+                    team: req.body.team || playerName.split(' ').pop(), // fallback
+                    dictionaryData // ✅ Pasar datos del diccionario al prompt builder
                 };
                 prompt = promptBuilder.buildCholloPrompt(playerName, price, cholloOptions);
                 videoData.player = playerName;
@@ -161,6 +178,17 @@ router.post('/generate-ana', async (req, res) => {
         // Generar video
         const video = await veo3Client.generateCompleteVideo(prompt, options.veo3Options);
 
+        // ✅ ACTUALIZAR TASA DE ÉXITO EN DICCIONARIO
+        // Si se generó exitosamente un video de jugador, actualizar estadísticas
+        if (playerName && dictionaryData) {
+            const success = video && video.taskId; // Video generado correctamente
+            await updatePlayerSuccessRate(playerName, success);
+
+            if (success) {
+                logger.info(`[VEO3 Routes] ✅ Actualizada tasa de éxito para "${playerName}"`);
+            }
+        }
+
         res.json({
             success: true,
             message: 'Video Ana generado exitosamente',
@@ -177,7 +205,12 @@ router.post('/generate-ana', async (req, res) => {
                     text: prompt,
                     length: prompt.length,
                     validation: validation.warnings
-                }
+                },
+                dictionary: dictionaryData ? {
+                    playerInDictionary: true,
+                    successRate: (dictionaryData.player.testedSuccessRate * 100).toFixed(1) + '%',
+                    totalVideos: dictionaryData.player.totalVideos
+                } : null
             },
             timestamp: new Date().toISOString()
         });
@@ -187,6 +220,131 @@ router.post('/generate-ana', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error generando video Ana',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+/**
+ * ⭐ NUEVO: @route POST /api/veo3/generate-multi-segment
+ * @desc Generar video multi-segmento (2-4 segmentos según preset)
+ * Soporta: breaking_news (2seg/16s), prediccion_standard (3seg/24s), chollo_viral (4seg/32s)
+ */
+router.post('/generate-multi-segment', async (req, res) => {
+    try {
+        const {
+            contentType = 'chollo',
+            playerData,
+            preset = 'chollo_viral',
+            options = {}
+        } = req.body;
+
+        // Validar datos requeridos
+        if (!playerData || !playerData.name) {
+            return res.status(400).json({
+                success: false,
+                message: 'playerData con name requerido'
+            });
+        }
+
+        logger.info(`[VEO3 Routes] Generando video multi-segmento: ${contentType}, preset: ${preset}`);
+
+        // ✅ Validación diccionario
+        let dictionaryData = null;
+        if (playerData.name && playerData.team) {
+            logger.info(`[VEO3 Routes] 📋 Validando diccionario para "${playerData.name}"...`);
+            dictionaryData = await validateAndPrepare(playerData.name, playerData.team);
+        }
+
+        // Generar estructura viral (simplificada para test)
+        const viralData = {
+            hook: '¡Misters! He descubierto un chollo brutal...',
+            contexto: `${playerData.name} está a un precio ridículo.`,
+            conflicto: 'Pero, ¿será un fichaje seguro?',
+            inflexion: `Los números no mienten: ${playerData.stats?.goals || 0} goles.`,
+            resolucion: `A ${playerData.price}M es matemática pura.`,
+            moraleja: 'Calidad-precio espectacular.',
+            cta: '¡Fichalo YA antes que suba!'
+        };
+
+        // Generar estructura de segmentos
+        const structure = multiSegmentGenerator.generateThreeSegments(
+            contentType,
+            playerData,
+            viralData,
+            {
+                preset,
+                ...options
+            }
+        );
+
+        logger.info(`[VEO3 Routes] Estructura generada: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`);
+
+        // Generar cada segmento con VEO3
+        const generatedSegments = [];
+        const anaImageIndex = structure.metadata.anaImageIndex;
+
+        for (const order of structure.generationOrder) {
+            const segment = structure.segments[order.segment];
+            const segmentNum = generatedSegments.length + 1;
+
+            logger.info(`[VEO3 Routes] Generando segmento ${segmentNum}/${structure.segmentCount}: ${order.segment}...`);
+
+            const veo3Options = {
+                ...segment.veo3Config,
+                imageIndex: anaImageIndex  // ✅ Imagen fija para TODOS
+            };
+
+            const videoResult = await veo3Client.generateCompleteVideo(segment.prompt, veo3Options);
+
+            generatedSegments.push({
+                role: segment.role,
+                taskId: videoResult.taskId,
+                url: videoResult.url,
+                duration: segment.duration,
+                dialogue: segment.dialogue
+            });
+
+            logger.info(`[VEO3 Routes] ✅ Segmento ${segmentNum} generado: ${videoResult.taskId}`);
+        }
+
+        // ✅ Actualizar diccionario
+        if (playerData.name && dictionaryData) {
+            const success = generatedSegments.length === structure.segmentCount;
+            await updatePlayerSuccessRate(playerData.name, success);
+        }
+
+        res.json({
+            success: true,
+            message: `Video multi-segmento ${contentType} generado exitosamente`,
+            data: {
+                contentType,
+                preset,
+                segmentCount: structure.segmentCount,
+                totalDuration: structure.totalDuration,
+                anaImageIndex,
+                segments: generatedSegments,
+                playerData: {
+                    name: playerData.name,
+                    team: playerData.team,
+                    price: playerData.price
+                },
+                structure,
+                dictionary: dictionaryData ? {
+                    playerInDictionary: true,
+                    successRate: (dictionaryData.player.testedSuccessRate * 100).toFixed(1) + '%',
+                    totalVideos: dictionaryData.player.totalVideos
+                } : null
+            },
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        logger.error('[VEO3 Routes] Error generando video multi-segmento:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error generando video multi-segmento',
             error: error.message,
             timestamp: new Date().toISOString()
         });
@@ -917,6 +1075,36 @@ router.post('/generate-viral', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error generando video viral',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+/**
+ * @route GET /api/veo3/dictionary/stats
+ * @desc Obtener estadísticas del diccionario de jugadores
+ */
+router.get('/dictionary/stats', async (req, res) => {
+    try {
+        const { getDictionaryStats } = require('../utils/playerDictionaryValidator');
+
+        logger.info('[VEO3 Routes] Consultando estadísticas del diccionario...');
+
+        const stats = await getDictionaryStats();
+
+        res.json({
+            success: true,
+            message: 'Estadísticas del diccionario obtenidas',
+            data: stats,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (error) {
+        logger.error('[VEO3 Routes] Error obteniendo estadísticas:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo estadísticas del diccionario',
             error: error.message,
             timestamp: new Date().toISOString()
         });

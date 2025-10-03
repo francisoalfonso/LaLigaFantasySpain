@@ -2,6 +2,7 @@
 const express = require('express');
 const logger = require('../utils/logger');
 const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
+const versionManager = require('../services/instagramVersionManager');
 const axios = require('axios');
 const router = express.Router();
 
@@ -595,5 +596,197 @@ function generateGenericContent() {
         media_type: 'single'
     };
 }
+
+// ========================================
+// ENDPOINTS DE GESTIÓN DE VERSIONES
+// ========================================
+
+// POST /api/instagram/versions/save - Guardar nueva versión
+router.post('/versions/save', async (req, res) => {
+    try {
+        const versionData = req.body;
+
+        if (!versionData.playerData || !versionData.playerData.playerName) {
+            return res.status(400).json({
+                success: false,
+                message: 'playerData con playerName es requerido'
+            });
+        }
+
+        const savedVersion = await versionManager.saveVersion(versionData);
+
+        res.json({
+            success: true,
+            message: 'Versión guardada correctamente',
+            data: savedVersion
+        });
+    } catch (error) {
+        logger.error('❌ Error guardando versión:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error guardando versión',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/versions/stats - Obtener estadísticas del sistema (DEBE IR PRIMERO)
+router.get('/versions/stats', async (req, res) => {
+    try {
+        const stats = await versionManager.getStats();
+
+        res.json({
+            success: true,
+            data: stats
+        });
+    } catch (error) {
+        logger.error('❌ Error obteniendo estadísticas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo estadísticas',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/versions/compare/:id1/:id2 - Comparar dos versiones (DEBE IR ANTES DE :versionId)
+router.get('/versions/compare/:id1/:id2', async (req, res) => {
+    try {
+        const { id1, id2 } = req.params;
+        const comparison = await versionManager.compareVersions(id1, id2);
+
+        res.json({
+            success: true,
+            message: 'Comparación generada',
+            data: comparison
+        });
+    } catch (error) {
+        logger.error('❌ Error comparando versiones:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error comparando versiones',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/versions/player/:playerName - Obtener versiones de jugador
+router.get('/versions/player/:playerName', async (req, res) => {
+    try {
+        const { playerName } = req.params;
+        const versions = await versionManager.getVersionsByPlayer(playerName);
+
+        res.json({
+            success: true,
+            message: `${versions.length} versiones encontradas`,
+            data: {
+                player: playerName,
+                versions: versions,
+                count: versions.length
+            }
+        });
+    } catch (error) {
+        logger.error('❌ Error obteniendo versiones del jugador:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo versiones',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/versions - Obtener todas las versiones
+router.get('/versions', async (req, res) => {
+    try {
+        const versions = await versionManager.getAllVersions();
+
+        res.json({
+            success: true,
+            message: `${versions.length} versiones totales`,
+            data: {
+                versions: versions,
+                count: versions.length
+            }
+        });
+    } catch (error) {
+        logger.error('❌ Error obteniendo todas las versiones:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo versiones',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/versions/:versionId - Obtener versión específica (DEBE IR AL FINAL)
+router.get('/versions/:versionId', async (req, res) => {
+    try {
+        const { versionId } = req.params;
+        const version = await versionManager.getVersionById(versionId);
+
+        if (!version) {
+            return res.status(404).json({
+                success: false,
+                message: 'Versión no encontrada'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: version
+        });
+    } catch (error) {
+        logger.error('❌ Error obteniendo versión:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error obteniendo versión',
+            error: error.message
+        });
+    }
+});
+
+// PUT /api/instagram/versions/:versionId/notes - Actualizar notas de versión
+router.put('/versions/:versionId/notes', async (req, res) => {
+    try {
+        const { versionId } = req.params;
+        const { notes } = req.body;
+
+        const updatedVersion = await versionManager.updateNotes(versionId, notes);
+
+        res.json({
+            success: true,
+            message: 'Notas actualizadas',
+            data: updatedVersion
+        });
+    } catch (error) {
+        logger.error('❌ Error actualizando notas:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error actualizando notas',
+            error: error.message
+        });
+    }
+});
+
+// DELETE /api/instagram/versions/:versionId - Eliminar versión
+router.delete('/versions/:versionId', async (req, res) => {
+    try {
+        const { versionId } = req.params;
+        const result = await versionManager.deleteVersion(versionId);
+
+        res.json({
+            success: true,
+            message: 'Versión eliminada',
+            data: result
+        });
+    } catch (error) {
+        logger.error('❌ Error eliminando versión:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error eliminando versión',
+            error: error.message
+        });
+    }
+});
 
 module.exports = router;

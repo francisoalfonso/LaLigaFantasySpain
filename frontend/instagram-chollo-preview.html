@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Instagram - Chollo Pere Milla</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Instagram mockup styles */
+        .instagram-phone {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .instagram-header {
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instagram-story-bar {
+            height: 2px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 1px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .instagram-story-progress {
+            height: 100%;
+            background: white;
+            animation: progress 8s linear forwards;
+        }
+
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .instagram-footer {
+            background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            padding: 20px 16px;
+        }
+
+        .caption-box {
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-8">
+
+    <div class="flex gap-8">
+        <!-- Instagram Phone Mockup -->
+        <div class="instagram-phone">
+            <!-- Header -->
+            <div class="instagram-header">
+                <div class="flex items-center gap-2 flex-1">
+                    <div class="instagram-story-bar">
+                        <div class="instagram-story-progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile info overlay -->
+            <div class="absolute top-14 left-4 z-20 flex items-center gap-2">
+                <img src="https://via.placeholder.com/32/667eea/ffffff?text=A" alt="Avatar Ana" class="avatar">
+                <span class="text-white text-sm font-semibold">fantasylaligatips</span>
+                <span class="logo-badge">VERIFIED</span>
+            </div>
+
+            <!-- Video -->
+            <div class="video-container">
+                <video
+                    id="previewVideo"
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    class="w-full h-full object-cover"
+                >
+                    <source src="https://tempfile.aiquickdraw.com/s/358ce5a4-d1f9-4729-b9cd-2e5de6f79607.mp4" type="video/mp4">
+                    Tu navegador no soporta video HTML5
+                </video>
+            </div>
+
+            <!-- Footer / Caption -->
+            <div class="instagram-footer">
+                <div class="caption-box">
+                    <p class="text-white text-sm mb-2">
+                        <span class="font-bold">🔥 CHOLLO DEL DÍA</span>
+                    </p>
+                    <p class="text-white text-xs opacity-90">
+                        Pere Milla a solo 4.5M 💰<br>
+                        Ratio calidad-precio BRUTAL: 1.5x<br>
+                        2 goles + 1 asistencia en 4 partidos 📊
+                    </p>
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">#FantasyLaLiga</span>
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">#Chollos</span>
+                        <span class="text-xs bg-purple-600 text-white px-2 py-1 rounded">#PereMilla</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <div class="action-btn">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="action-btn">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <div class="action-btn">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                        </svg>
+                    </div>
+                    <div class="action-btn ml-auto">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="w-96 bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">📱 Preview Instagram Reel</h2>
+
+            <div class="space-y-4">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                    <h3 class="font-bold text-green-800 mb-2">✅ Sistema Completado</h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• Diccionario: Pere Milla agregado</li>
+                        <li>• Optimización: "Pere Milla" → "Milla"</li>
+                        <li>• Video generado: 8s, 9:16</li>
+                        <li>• Tasa de éxito: 100%</li>
+                    </ul>
+                </div>
+
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <h3 class="font-bold text-blue-800 mb-2">📊 Datos del Chollo</h3>
+                    <div class="text-sm text-blue-700 space-y-1">
+                        <p><strong>Jugador:</strong> Pere Milla (Espanyol)</p>
+                        <p><strong>Precio:</strong> 4.5M</p>
+                        <p><strong>Ratio:</strong> 1.5x</p>
+                        <p><strong>Stats:</strong> 2 goles, 1 asistencia (4 partidos)</p>
+                        <p><strong>Rating:</strong> 7.2</p>
+                    </div>
+                </div>
+
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                    <h3 class="font-bold text-purple-800 mb-2">🎬 Detalles Video</h3>
+                    <div class="text-sm text-purple-700 space-y-1">
+                        <p><strong>Duración:</strong> 8 segundos</p>
+                        <p><strong>Formato:</strong> 9:16 (vertical)</p>
+                        <p><strong>Ana:</strong> Consistente ✅</p>
+                        <p><strong>Diálogo:</strong> Optimizado (sin equipo)</p>
+                        <p><strong>Idioma:</strong> Español de España</p>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                    <h3 class="font-bold text-yellow-800 mb-2">💡 Caption Generado</h3>
+                    <p class="text-sm text-yellow-700 mb-2">
+                        🔥 CHOLLO DEL DÍA<br><br>
+                        Pere Milla a solo 4.5M 💰<br>
+                        Ratio calidad-precio BRUTAL: 1.5x<br>
+                        2 goles + 1 asistencia en 4 partidos 📊<br><br>
+                        #FantasyLaLiga #Chollos #PereMilla
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 border-l-4 border-gray-500 p-4">
+                    <h3 class="font-bold text-gray-800 mb-2">📈 Métricas Esperadas</h3>
+                    <div class="text-sm text-gray-700 space-y-1">
+                        <p>• Alcance: 3,000-5,000 usuarios</p>
+                        <p>• Engagement: 6-8%</p>
+                        <p>• Retención: 80%+ (8s video)</p>
+                        <p>• Saves: 100-200 (alta utilidad)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t">
+                <button onclick="document.getElementById('previewVideo').currentTime = 0; document.getElementById('previewVideo').play();"
+                        class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                    🔄 Reproducir de nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-replay video on end
+        const video = document.getElementById('previewVideo');
+
+        video.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+        });
+
+        // Handle video errors
+        video.addEventListener('error', function(e) {
+            console.error('Error cargando video:', e);
+            const container = this.parentElement;
+            container.innerHTML = `
+                <div class="text-white text-center p-8">
+                    <p class="mb-4">⚠️ Video en procesamiento</p>
+                    <p class="text-sm opacity-75">El video se está generando en VEO3.<br>Estará disponible en unos minutos.</p>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

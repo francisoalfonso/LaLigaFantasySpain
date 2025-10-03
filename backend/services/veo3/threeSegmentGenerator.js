@@ -1,7 +1,9 @@
 /**
- * Generador de videos 3-segmentos para VEO3
- * Estructura: Ana Intro + Stats Card + Ana Outro
- * Optimizado para Instagram Reels/TikTok (<20s)
+ * Generador de videos multi-segmento para VEO3
+ * Estructura flexible: 2-4 segmentos según tipo de contenido
+ * Optimizado para Instagram Reels (16-32s)
+ *
+ * ACTUALIZADO: Soporte para 4 segmentos (32s) - óptimo para viralidad
  */
 
 const PromptBuilder = require('./promptBuilder');
@@ -13,105 +15,169 @@ class ThreeSegmentGenerator {
         this.promptBuilder = new PromptBuilder();
         this.statsCardBuilder = new StatsCardPromptBuilder();
 
-        // Duraciones recomendadas por tipo de contenido
+        // ✅ ACTUALIZADO: Duraciones recomendadas - Ahora con 4 segmentos para chollos
         this.durationPresets = {
-            chollo_quick: {
-                intro: 5,
-                stats: 6,
-                outro: 5,
+            // Breaking news rápido (2 segmentos = 16s)
+            breaking_news: {
+                segments: 2,
+                intro: 8,
+                outro: 8,
                 total: 16
             },
-            chollo_standard: {
-                intro: 6,
-                stats: 6,
-                outro: 6,
-                total: 18
-            },
-            analisis_deep: {
-                intro: 7,
+            // Predicción estándar (3 segmentos = 24s)
+            prediccion_standard: {
+                segments: 3,
+                intro: 8,
                 stats: 8,
-                outro: 7,
-                total: 22
+                outro: 8,
+                total: 24
             },
-            breaking_news: {
-                intro: 4,
-                stats: 5,
-                outro: 4,
-                total: 13
+            // ⭐ NUEVO: Chollo viral profundo (4 segmentos = 32s) - ÓPTIMO PARA VIRALIDAD
+            chollo_viral: {
+                segments: 4,
+                intro: 8,      // Hook + Contexto
+                analysis: 8,   // Análisis datos
+                stats: 8,      // Stats visuales
+                outro: 8,      // Revelación + CTA
+                total: 32
+            },
+            // Análisis profundo (4 segmentos = 32s)
+            analisis_deep: {
+                segments: 4,
+                intro: 8,
+                analysis: 8,
+                stats: 8,
+                outro: 8,
+                total: 32
             }
         };
     }
 
     /**
-     * Generar estructura completa de 3 segmentos
+     * ✅ ACTUALIZADO: Generar estructura multi-segmento (2-4 segmentos)
      * @param {string} contentType - Tipo de contenido (chollo, analisis, breaking, prediccion)
      * @param {object} playerData - Datos del jugador
      * @param {object} viralData - Datos para estructura viral (hook, contexto, etc)
      * @param {object} options - Opciones adicionales
-     * @returns {object} - Estructura completa de 3 segmentos
+     * @returns {object} - Estructura completa multi-segmento
      */
     generateThreeSegments(contentType, playerData, viralData, options = {}) {
         const {
-            preset = 'chollo_standard',
+            preset = 'chollo_viral', // ✅ NUEVO: Usar chollo_viral (4 segmentos) por defecto
             statsStyle = 'fantasy_premium',
             emphasizeStats = ['price', 'goals', 'valueRatio'],
-            useViralStructure = true
+            useViralStructure = true,
+            anaImageIndex = null
         } = options;
 
         const durations = this.durationPresets[preset];
+        const segmentCount = durations.segments;
 
-        logger.info(`[ThreeSegmentGenerator] Generando estructura 3-segmentos: ${contentType}`);
-        logger.info(`[ThreeSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
+        // ✅ FIX CRÍTICO: Seleccionar UNA imagen de Ana para TODOS los segmentos
+        const fixedAnaImageIndex = anaImageIndex !== null ? anaImageIndex : Math.floor(Math.random() * 4);
 
-        // Segmento 1: Ana Intro (Hook + Contexto)
-        const segment1 = this._buildIntroSegment(contentType, playerData, viralData, {
-            duration: durations.intro,
-            useViralStructure
-        });
+        logger.info(`[MultiSegmentGenerator] Generando estructura ${segmentCount}-segmentos: ${contentType}`);
+        logger.info(`[MultiSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
+        logger.info(`[MultiSegmentGenerator] ✅ Ana imagen FIJA: índice ${fixedAnaImageIndex} (MISMA en TODOS los segmentos)`);
 
-        // Segmento 2: Stats Card
-        const segment2 = this._buildStatsSegment(playerData, {
-            duration: durations.stats,
-            style: statsStyle,
-            emphasizeStats,
-            contentType
-        });
+        const segments = {};
+        const generationOrder = [];
 
-        // Segmento 3: Ana Outro (Resolución + CTA)
-        const segment3 = this._buildOutroSegment(contentType, playerData, viralData, {
-            duration: durations.outro,
-            useViralStructure
-        });
+        // ✅ NUEVO: Generar segmentos según preset (2, 3 o 4 segmentos)
+        if (segmentCount === 2) {
+            // Breaking news rápido (intro + outro)
+            segments.intro = this._buildIntroSegment(contentType, playerData, viralData, {
+                duration: durations.intro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            segments.outro = this._buildOutroSegment(contentType, playerData, viralData, {
+                duration: durations.outro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            generationOrder.push(
+                { segment: 'intro', taskIdKey: 'introTaskId' },
+                { segment: 'outro', taskIdKey: 'outroTaskId' }
+            );
+        } else if (segmentCount === 3) {
+            // Predicción estándar (intro + stats + outro)
+            segments.intro = this._buildIntroSegment(contentType, playerData, viralData, {
+                duration: durations.intro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            segments.stats = this._buildStatsSegment(playerData, {
+                duration: durations.stats,
+                style: statsStyle,
+                emphasizeStats,
+                contentType
+            });
+            segments.outro = this._buildOutroSegment(contentType, playerData, viralData, {
+                duration: durations.outro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            generationOrder.push(
+                { segment: 'intro', taskIdKey: 'introTaskId' },
+                { segment: 'stats', taskIdKey: 'statsTaskId' },
+                { segment: 'outro', taskIdKey: 'outroTaskId' }
+            );
+        } else if (segmentCount === 4) {
+            // ⭐ NUEVO: Chollo viral profundo (intro + analysis + stats + outro)
+            segments.intro = this._buildIntroSegment(contentType, playerData, viralData, {
+                duration: durations.intro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            segments.analysis = this._buildAnalysisSegment(contentType, playerData, viralData, {
+                duration: durations.analysis,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            segments.stats = this._buildStatsSegment(playerData, {
+                duration: durations.stats,
+                style: statsStyle,
+                emphasizeStats,
+                contentType
+            });
+            segments.outro = this._buildOutroSegment(contentType, playerData, viralData, {
+                duration: durations.outro,
+                useViralStructure,
+                anaImageIndex: fixedAnaImageIndex
+            });
+            generationOrder.push(
+                { segment: 'intro', taskIdKey: 'introTaskId' },
+                { segment: 'analysis', taskIdKey: 'analysisTaskId' },
+                { segment: 'stats', taskIdKey: 'statsTaskId' },
+                { segment: 'outro', taskIdKey: 'outroTaskId' }
+            );
+        }
 
         const structure = {
             contentType,
             preset,
             totalDuration: durations.total,
-            segments: {
-                intro: segment1,
-                stats: segment2,
-                outro: segment3
-            },
+            segmentCount,
+            segments,
             metadata: {
                 playerName: playerData.name,
                 team: playerData.team,
                 statsShown: emphasizeStats,
                 viralStructure: useViralStructure,
-                instagramOptimized: durations.total <= 20
+                instagramOptimized: durations.total <= 35,
+                anaImageIndex: fixedAnaImageIndex
             },
-            generationOrder: [
-                { segment: 'intro', taskIdKey: 'introTaskId' },
-                { segment: 'stats', taskIdKey: 'statsTaskId' },
-                { segment: 'outro', taskIdKey: 'outroTaskId' }
-            ],
+            generationOrder,
             concatenationConfig: {
-                outputName: `${playerData.name.toLowerCase()}_${contentType}_${Date.now()}.mp4`,
-                transition: 'crossfade',
-                transitionDuration: 0.5
+                outputName: `${playerData.name.toLowerCase()}_${contentType}_${segmentCount}seg_${Date.now()}.mp4`,
+                transition: 'direct_cut', // ✅ Cortes directos (sin crossfade)
+                transitionDuration: 0
             }
         };
 
-        logger.info(`[ThreeSegmentGenerator] Estructura generada: ${durations.total}s (${segment1.duration}s + ${segment2.duration}s + ${segment3.duration}s)`);
+        const segmentDurations = Object.values(segments).map(s => s.duration).join('s + ');
+        logger.info(`[MultiSegmentGenerator] Estructura generada: ${durations.total}s (${segmentDurations}s)`);
 
         return structure;
     }
@@ -121,7 +187,7 @@ class ThreeSegmentGenerator {
      * @private
      */
     _buildIntroSegment(contentType, playerData, viralData, options) {
-        const { duration, useViralStructure } = options;
+        const { duration, useViralStructure, anaImageIndex } = options; // ✅ Extraer anaImageIndex
 
         let prompt, dialogue;
 
@@ -157,7 +223,58 @@ class ThreeSegmentGenerator {
                 aspectRatio: '9:16',
                 duration,
                 seed: 30001, // Ana fixed seed
-                model: 'veo3_fast'
+                model: 'veo3_fast',
+                imageRotation: 'fixed', // ✅ Imagen fija
+                imageIndex: anaImageIndex // ✅ Usar índice fijo para este video
+            }
+        };
+    }
+
+    /**
+     * ⭐ NUEVO: Construir segmento analysis (Ana hablando sobre datos)
+     * Solo para videos de 4 segmentos
+     * @private
+     */
+    _buildAnalysisSegment(contentType, playerData, viralData, options) {
+        const { duration, useViralStructure, anaImageIndex } = options;
+
+        let prompt, dialogue;
+
+        if (useViralStructure && viralData.conflicto && viralData.inflexion) {
+            // Usar estructura viral (conflicto + inflexión)
+            dialogue = `${viralData.conflicto} ${viralData.inflexion}`;
+
+            const structuredData = {
+                conflicto: viralData.conflicto,
+                inflexion: viralData.inflexion
+            };
+
+            const result = this.promptBuilder.buildViralStructuredPrompt(
+                contentType,
+                structuredData,
+                { partial: true }
+            );
+
+            prompt = result.prompt || this.promptBuilder.buildPrompt({ dialogue });
+        } else {
+            // Fallback: Análisis de datos del jugador
+            dialogue = this._generateDefaultAnalysis(contentType, playerData);
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+        }
+
+        return {
+            type: 'ana_speaking',
+            role: 'analysis',
+            duration,
+            dialogue,
+            prompt,
+            veo3Config: {
+                aspectRatio: '9:16',
+                duration,
+                seed: 30001,
+                model: 'veo3_fast',
+                imageRotation: 'fixed',
+                imageIndex: anaImageIndex
             }
         };
     }
@@ -208,7 +325,7 @@ class ThreeSegmentGenerator {
      * @private
      */
     _buildOutroSegment(contentType, playerData, viralData, options) {
-        const { duration, useViralStructure } = options;
+        const { duration, useViralStructure, anaImageIndex } = options; // ✅ Extraer anaImageIndex
 
         let prompt, dialogue;
 
@@ -245,7 +362,9 @@ class ThreeSegmentGenerator {
                 aspectRatio: '9:16',
                 duration,
                 seed: 30001, // Ana fixed seed
-                model: 'veo3_fast'
+                model: 'veo3_fast',
+                imageRotation: 'fixed', // ✅ Imagen fija
+                imageIndex: anaImageIndex // ✅ Usar índice fijo para este video
             }
         };
     }
@@ -262,6 +381,20 @@ class ThreeSegmentGenerator {
             prediccion: `Para la próxima jornada, ${playerData.name} es clave.`
         };
         return intros[contentType] || `Hablemos de ${playerData.name}.`;
+    }
+
+    /**
+     * ⭐ NUEVO: Generar análisis por defecto (segmento 2 en videos de 4 segmentos)
+     * @private
+     */
+    _generateDefaultAnalysis(contentType, playerData) {
+        const analysis = {
+            chollo: `Tiene ${playerData.stats?.goals || 0} goles en ${playerData.stats?.games || 0} partidos. Ratio de valor ${playerData.valueRatio || '1.0'}x. Los números no mienten.`,
+            analisis: `En los últimos partidos ha rendido a nivel de jugador top. La tendencia es clara: está en forma.`,
+            breaking: `Esto cambia completamente la estrategia Fantasy. Hay que actuar rápido.`,
+            prediccion: `Partido favorable, rival débil, alta probabilidad de puntos. Todo apunta a un rendimiento alto.`
+        };
+        return analysis[contentType] || `Los datos confirman que es buena opción.`;
     }
 
     /**

@@ -274,7 +274,10 @@
                                         <div class="video-placeholder w-full h-full">
                                             <div>
                                                 <div class="text-4xl mb-4">🎬</div>
-                                                <div>Selecciona jugador para ver preview</div>
+                                                <div>Selecciona jugador y genera preview</div>
+                                                <div class="text-xs mt-2 text-white/70">
+                                                    <span x-text="`${promptVersions.length} versiones guardadas`"></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </template>
@@ -288,14 +291,14 @@
                                         </div>
                                     </template>
 
-                                    <template x-if="!loading && previewData">
+                                    <template x-if="!loading && previewData && previewData.video && previewData.video.url">
                                         <div class="w-full h-full relative" x-data="{ muted: true, isPlaying: true }">
                                             <video
                                                 x-ref="videoPlayer"
                                                 class="instagram-video"
                                                 :src="previewData.video.url"
                                                 @loadeddata="console.log('✅ Video cargado:', previewData.video.url)"
-                                                @error="console.error('❌ Error cargando video:', previewData.video.url)"
+                                                @error="console.error('❌ Error cargando video:', previewData.video.url); console.error('Objeto previewData completo:', previewData)"
                                                 :muted="muted"
                                                 loop
                                                 playsinline
@@ -731,7 +734,7 @@
                                     <div
                                         class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
                                         :class="version.version === currentVersion ? 'border-purple-500 bg-purple-50' : 'border-gray-200 hover:border-purple-300'"
-                                        @click="currentVersion = version.version">
+                                        @click="loadVersion(version.version)">
 
                                         <div class="flex items-start justify-between mb-2">
                                             <div class="flex items-center gap-2">
@@ -746,6 +749,12 @@
                                                     class="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold">
                                                     🎬 VEO3 REAL
                                                 </span>
+                                                <span
+                                                    x-show="version.viralScore"
+                                                    class="text-xs px-2 py-1 rounded font-bold"
+                                                    :class="version.viralScore >= 80 ? 'bg-green-100 text-green-700' : version.viralScore >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'"
+                                                    x-text="`⭐ ${version.viralScore}`">
+                                                </span>
                                             </div>
                                             <span
                                                 x-show="version.version === currentVersion"
@@ -756,9 +765,13 @@
 
                                         <div class="text-sm">
                                             <div class="font-semibold text-gray-800 mb-1" x-text="`${version.playerData.playerName} - ${version.playerData.team}`"></div>
-                                            <div class="text-xs text-gray-600 grid grid-cols-2 gap-1">
-                                                <span>💰 Precio: €<span x-text="version.playerData.price"></span>M</span>
-                                                <span>📊 Ratio: <span x-text="version.playerData.ratio"></span>x</span>
+                                            <div class="text-xs text-gray-600 grid grid-cols-3 gap-1">
+                                                <span>💰 €<span x-text="version.playerData.price"></span>M</span>
+                                                <span>📊 <span x-text="version.playerData.ratio"></span>x</span>
+                                                <span x-show="version.playerData.stats">
+                                                    ⚽ <span x-text="version.playerData.stats?.goals || 0"></span>G
+                                                    / <span x-text="version.playerData.stats?.assists || 0"></span>A
+                                                </span>
                                             </div>
                                         </div>
 
@@ -783,6 +796,7 @@
                                                     <textarea
                                                         x-model="version.notes"
                                                         @click.stop
+                                                        @blur="updateVersionNotes(version.version)"
                                                         class="w-full mt-1 text-xs p-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                                                         rows="2"
                                                         placeholder="Ej: Hook muy largo, CTA funciona mejor..."></textarea>
@@ -890,10 +904,23 @@
                 publishing: false,
                 publishSuccess: false,
                 generatingReal: false,
+                initialized: false,
 
-                init() {
+                async init() {
+                    // Evitar doble inicialización
+                    if (this.initialized) {
+                        console.log('⚠️ Init ya ejecutado, saltando...');
+                        return;
+                    }
+                    this.initialized = true;
+
                     console.log('🎬 Instagram Viral Preview cargado');
                     console.log('📋 Tab activo:', this.activeTab);
+
+                    // Cargar versiones guardadas del jugador actual si existe
+                    if (this.playerData.playerName) {
+                        await this.loadVersionsFromBackend(this.playerData.playerName);
+                    }
                 },
 
                 calculateViralScore() {
@@ -1030,20 +1057,28 @@
                             this.previewData = result.data;
                             this.editableCaption = result.data.instagram.caption;
 
-                            // Guardar en historial de versiones
-                            this.promptVersions.push({
+                            // Calcular score viral primero
+                            this.calculateViralScore();
+
+                            // Guardar en historial de versiones LOCAL
+                            const newVersion = {
                                 version: this.promptVersions.length + 1,
                                 timestamp: new Date().toISOString(),
                                 playerData: { ...this.playerData },
                                 previewData: { ...result.data },
                                 segments: result.data.metadata.segments,
                                 videoUrl: result.data.video.url,
-                                notes: '' // Para que el usuario pueda agregar notas
-                            });
+                                caption: this.editableCaption,
+                                notes: '',
+                                viralScore: this.viralScore,
+                                isRealVideo: false
+                            };
+
+                            this.promptVersions.push(newVersion);
                             this.currentVersion = this.promptVersions.length;
 
-                            // Calcular score viral
-                            this.calculateViralScore();
+                            // 🔥 GUARDAR EN BACKEND (persistencia real)
+                            this.saveVersionToBackend(newVersion);
 
                             console.log('✅ Preview generado y guardado en historial (v' + this.currentVersion + '):', result.data);
                         } else {
@@ -1058,20 +1093,50 @@
                 },
 
                 loadVersion(versionNumber) {
+                    console.log('🔄 Intentando cargar versión:', versionNumber);
+
                     const version = this.promptVersions.find(v => v.version === versionNumber);
                     if (!version) {
+                        console.error('❌ Versión no encontrada:', versionNumber);
                         alert('Versión no encontrada');
                         return;
                     }
 
-                    // Cargar datos de la versión
-                    this.playerData = { ...version.playerData };
-                    this.previewData = { ...version.previewData };
-                    this.editableCaption = version.previewData.instagram.caption;
-                    this.currentVersion = versionNumber;
+                    console.log('✅ Versión encontrada:', version);
 
-                    console.log('🔄 Versión cargada:', versionNumber);
-                    alert(`Versión ${versionNumber} cargada. Puedes ver el video y los prompts de esta versión.`);
+                    // Limpiar primero previewData para forzar re-render
+                    this.previewData = null;
+
+                    // Usar $nextTick para asegurar reactividad
+                    this.$nextTick(() => {
+                        // Cargar datos de la versión
+                        this.playerData = { ...version.playerData };
+                        this.previewData = { ...version.previewData };
+                        this.editableCaption = version.caption || (version.previewData ? version.previewData.instagram.caption : '');
+                        this.currentVersion = versionNumber;
+
+                        // Recalcular viral score si existe
+                        if (version.viralScore) {
+                            this.viralScore = version.viralScore;
+                        } else {
+                            this.calculateViralScore();
+                        }
+
+                        console.log('🔄 Versión cargada correctamente:', {
+                            version: versionNumber,
+                            playerName: this.playerData.playerName,
+                            price: this.playerData.price,
+                            videoUrl: this.previewData?.video?.url,
+                            viralScore: this.viralScore
+                        });
+
+                        // Verificar que el video existe
+                        if (this.previewData && this.previewData.video && this.previewData.video.url) {
+                            console.log('✅ Video URL:', this.previewData.video.url);
+                        } else {
+                            console.warn('⚠️ No se encontró URL de video en previewData:', this.previewData);
+                        }
+                    });
                 },
 
                 compareVersions(versionNumber) {
@@ -1260,6 +1325,106 @@
                         alert('Error regenerando video');
                     } finally {
                         this.loading = false;
+                    }
+                },
+
+                // 🔥 NUEVAS FUNCIONES: Persistencia en Backend
+
+                async saveVersionToBackend(versionData) {
+                    try {
+                        console.log('💾 Guardando versión en backend...', versionData.playerData.playerName);
+
+                        const response = await fetch('/api/instagram/versions/save', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(versionData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            console.log('✅ Versión guardada en backend:', result.data.id);
+                            // Actualizar ID de la versión con el del backend
+                            versionData.backendId = result.data.id;
+                        } else {
+                            console.warn('⚠️ No se pudo guardar en backend:', result.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error guardando versión en backend:', error);
+                        // No mostramos error al usuario, la versión está en memoria
+                    }
+                },
+
+                async loadVersionsFromBackend(playerName) {
+                    try {
+                        console.log('📂 Cargando versiones del backend para:', playerName);
+
+                        const response = await fetch(`/api/instagram/versions/player/${encodeURIComponent(playerName)}`);
+                        const result = await response.json();
+
+                        if (result.success && result.data.versions.length > 0) {
+                            // Convertir versiones del backend al formato local (orden inverso para tener la más reciente primero)
+                            this.promptVersions = result.data.versions.reverse().map((v, index) => ({
+                                version: index + 1,
+                                timestamp: v.timestamp,
+                                playerData: v.playerData,
+                                previewData: v.previewData,
+                                segments: v.segments,
+                                videoUrl: v.videoUrl,
+                                caption: v.caption,
+                                notes: v.notes,
+                                viralScore: v.viralScore,
+                                isRealVideo: v.isRealVideo,
+                                backendId: v.id
+                            }));
+
+                            this.currentVersion = this.promptVersions.length;
+
+                            // 🔥 CARGAR AUTOMÁTICAMENTE LA ÚLTIMA VERSIÓN PARA MOSTRAR EL VIDEO
+                            const latestVersion = this.promptVersions[this.promptVersions.length - 1];
+                            if (latestVersion && latestVersion.previewData) {
+                                this.previewData = latestVersion.previewData;
+                                this.editableCaption = latestVersion.caption;
+
+                                // Calcular viral score y checklist
+                                if (latestVersion.viralScore) {
+                                    this.viralScore = latestVersion.viralScore;
+                                }
+                                this.calculateViralScore(); // Forzar cálculo para generar checklist
+
+                                console.log(`✅ ${result.data.versions.length} versiones cargadas. Mostrando última versión:`, latestVersion.version);
+                                console.log('📹 Video URL:', latestVersion.previewData.video?.url);
+                                console.log('📊 Viral Score:', this.viralScore, 'Checklist items:', this.viralChecklist.length);
+                            }
+                        } else {
+                            console.log('ℹ️ No hay versiones guardadas para este jugador');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error cargando versiones del backend:', error);
+                    }
+                },
+
+                async updateVersionNotes(versionNumber) {
+                    const version = this.promptVersions.find(v => v.version === versionNumber);
+                    if (!version || !version.backendId) {
+                        console.warn('⚠️ Versión no tiene ID de backend');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/api/instagram/versions/${version.backendId}/notes`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ notes: version.notes })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            console.log('✅ Notas actualizadas en backend');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error actualizando notas:', error);
                     }
                 },
 

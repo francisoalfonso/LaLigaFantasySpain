@@ -1,0 +1,80 @@
+{
+  "id": "dani-carvajal-v1759387176104",
+  "version": 2,
+  "timestamp": "2025-10-02T06:39:36.104Z",
+  "playerData": {
+    "playerName": "Dani Carvajal",
+    "team": "Real Madrid",
+    "price": 5,
+    "ratio": 3.37,
+    "stats": {
+      "goals": 1,
+      "assists": 2,
+      "games": 5,
+      "rating": 7.2,
+      "position": "Defensa"
+    }
+  },
+  "previewData": {
+    "video": {
+      "path": "./output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+      "url": "/output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+      "duration": "~24s",
+      "segments": 3,
+      "structure": "Hook → Desarrollo → CTA"
+    },
+    "instagram": {
+      "caption": "🔥 VIDEO 2 OCT - CON Frame-to-Frame ✨\n\nDani Carvajal - Real Madrid\n💰 €5M (Ratio 3.37x)\n\n✅ Versión MEJORADA con transiciones invisibles\n\n#FantasyLaLiga #Chollos #RealMadrid",
+      "captionLength": 160,
+      "hashtags": [
+        "#FantasyLaLiga",
+        "#Chollos",
+        "#RealMadrid"
+      ],
+      "format": "9:16 vertical"
+    },
+    "metadata": {
+      "playerName": "Dani Carvajal",
+      "generatedAt": "2025-10-02T00:12:00.000Z",
+      "segments": [
+        {
+          "type": "hook",
+          "dialogue": "Video generado CON transiciones frame-to-frame (versión 2 oct)"
+        },
+        {
+          "type": "development",
+          "dialogue": "Este video usa transiciones invisibles entre segmentos"
+        },
+        {
+          "type": "cta",
+          "dialogue": "Transiciones perfectas sin discontinuidad visual"
+        }
+      ]
+    }
+  },
+  "segments": [
+    {
+      "type": "hook",
+      "dialogue": "Video generado CON transiciones frame-to-frame (versión 2 oct)"
+    },
+    {
+      "type": "development",
+      "dialogue": "Este video usa transiciones invisibles entre segmentos"
+    },
+    {
+      "type": "cta",
+      "dialogue": "Transiciones perfectas sin discontinuidad visual"
+    }
+  ],
+  "videoUrl": "/output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+  "caption": "🔥 VIDEO 2 OCT - CON Frame-to-Frame ✨\n\nDani Carvajal - Real Madrid\n💰 €5M (Ratio 3.37x)\n\n✅ Versión MEJORADA con transiciones invisibles\n\n#FantasyLaLiga #Chollos #RealMadrid",
+  "notes": "🎬 Video 2 oct (5.5MB) - CON transiciones frame-to-frame. Continuidad visual perfecta entre segmentos.",
+  "viralScore": 88,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-02T06:39:36.104Z",
+    "updatedAt": "2025-10-02T06:39:36.104Z",
+    "userId": "system",
+    "status": "draft"
+  }
+}

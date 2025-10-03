@@ -1,0 +1,114 @@
+{
+  "id": "dani-carvajal-v1759385599564",
+  "version": 1,
+  "timestamp": "2025-10-02T06:13:19.564Z",
+  "playerData": {
+    "playerName": "Dani Carvajal",
+    "team": "Real Madrid",
+    "price": 5,
+    "ratio": 3.37,
+    "stats": {
+      "goals": 1,
+      "assists": 2,
+      "games": 5,
+      "rating": 7.2,
+      "position": "Defensa"
+    }
+  },
+  "previewData": {
+    "video": {
+      "path": "./output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+      "url": "/output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+      "duration": "~24s",
+      "segments": 3,
+      "structure": "Hook → Desarrollo → CTA"
+    },
+    "instagram": {
+      "caption": "🚨 ALERTA CHOLLO - JORNADA ACTUAL 🚨\n\nDani Carvajal - Real Madrid\n💰 Solo €5M (Ratio 3.37x)\n⚡ 72 pts acumulados\n📈 Proyección: 86+ pts\n⚽ 1 goles + 2 asistencias\n\n¿Por qué es IMPRESCINDIBLE?\n✅ Precio infravaluado\n✅ Buen calendario\n✅ En racha\n\n⏰ Ficha ANTES de que suba de precio\n\n¿Le metes en tu plantilla? 👇\n\n#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #RealMadrid #Jornada #Fichajes #CholloDelDia",
+      "captionLength": 404,
+      "hashtags": [
+        "#FantasyLaLiga",
+        "#Chollos",
+        "#Misters",
+        "#LaLiga",
+        "#Fantasy",
+        "#RealMadrid",
+        "#Jornada",
+        "#Fichajes",
+        "#CholloDelDia"
+      ],
+      "estimatedReach": 975,
+      "bestTimeToPost": "18:00-21:00",
+      "platform": "instagram",
+      "format": "9:16 vertical"
+    },
+    "player": {
+      "name": "Dani Carvajal",
+      "team": "Real Madrid",
+      "price": 5,
+      "ratio": 3.37,
+      "stats": {
+        "goals": 1,
+        "assists": 2,
+        "games": 5,
+        "rating": 7.2,
+        "position": "Defensa"
+      }
+    },
+    "metadata": {
+      "playerName": "Dani Carvajal",
+      "price": 5,
+      "ratio": 3.37,
+      "team": "Real Madrid",
+      "stats": {
+        "goals": 1,
+        "assists": 2,
+        "games": 5,
+        "rating": 7.2,
+        "position": "Defensa"
+      },
+      "generatedAt": "2025-10-02T06:13:19.555Z",
+      "segments": [
+        {
+          "type": "hook",
+          "dialogue": "Pssst... Misters, venid que os cuento un secreto... He encontrado un Defensa del Real Madrid por €5M que está rindiendo como uno de €15M..."
+        },
+        {
+          "type": "development",
+          "dialogue": "Dani Carvajal. Ratio valor 3.37x. 1 goles, 2 asistencias en 5 partidos. Rating 7.2. Y lo mejor... buen calendario próximos partidos."
+        },
+        {
+          "type": "cta",
+          "dialogue": "¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!"
+        }
+      ]
+    },
+    "generatedAt": "2025-10-02T06:13:19.555Z",
+    "status": "ready_to_publish"
+  },
+  "segments": [
+    {
+      "type": "hook",
+      "dialogue": "Pssst... Misters, venid que os cuento un secreto... He encontrado un Defensa del Real Madrid por €5M que está rindiendo como uno de €15M..."
+    },
+    {
+      "type": "development",
+      "dialogue": "Dani Carvajal. Ratio valor 3.37x. 1 goles, 2 asistencias en 5 partidos. Rating 7.2. Y lo mejor... buen calendario próximos partidos."
+    },
+    {
+      "type": "cta",
+      "dialogue": "¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!"
+    }
+  ],
+  "videoUrl": "/output/veo3/viral/ana-viral-dani-carvajal-1759356740.mp4",
+  "caption": "🚨 ALERTA CHOLLO - JORNADA ACTUAL 🚨\n\nDani Carvajal - Real Madrid\n💰 Solo €5M (Ratio 3.37x)\n⚡ 72 pts acumulados\n📈 Proyección: 86+ pts\n⚽ 1 goles + 2 asistencias\n\n¿Por qué es IMPRESCINDIBLE?\n✅ Precio infravaluado\n✅ Buen calendario\n✅ En racha\n\n⏰ Ficha ANTES de que suba de precio\n\n¿Le metes en tu plantilla? 👇\n\n#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #RealMadrid #Jornada #Fichajes #CholloDelDia",
+  "notes": "",
+  "viralScore": 83,
+  "isRealVideo": false,
+  "metadata": {
+    "createdAt": "2025-10-02T06:13:19.564Z",
+    "updatedAt": "2025-10-02T06:13:19.564Z",
+    "userId": "system",
+    "status": "draft"
+  }
+}

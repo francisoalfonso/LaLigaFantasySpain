@@ -1,0 +1,64 @@
+{
+  "players": {
+    "Iago Aspas": {
+      "surname": "Aspas",
+      "team": "Celta de Vigo",
+      "safeReferences": [
+        "Aspas",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Aspas del Celta de Vigo",
+        "Aspas Celta de Vigo",
+        "Iago Aspas del Celta de Vigo",
+        "Iago Aspas Celta de Vigo"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-03T05:05:32.049Z"
+    },
+    "Pere Milla": {
+      "surname": "Milla",
+      "team": "Espanyol",
+      "safeReferences": [
+        "Milla",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Milla del Espanyol",
+        "Milla Espanyol",
+        "Pere Milla del Espanyol",
+        "Pere Milla Espanyol"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 1,
+      "lastTested": "2025-10-03T05:19:19.333Z",
+      "totalVideos": 1,
+      "addedAt": "2025-10-03T05:11:21.386Z"
+    }
+  },
+  "teams": {
+    "Celta de Vigo": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-03T05:05:32.053Z"
+    },
+    "Espanyol": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-03T05:11:21.388Z"
+    }
+  }
+}

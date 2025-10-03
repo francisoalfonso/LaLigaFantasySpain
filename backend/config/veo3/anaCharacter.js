@@ -4,10 +4,47 @@
  */
 
 // Ana Character Bible - EXACTO para consistencia entre videos
-const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. Confident posture, natural hand gestures for emphasis, professional broadcaster energy";
+const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. NO watch, NO jewelry, NO accessories. Confident posture, natural hand gestures for emphasis, professional broadcaster energy";
 
-// URL imagen Ana Real en GitHub
-const ANA_IMAGE_URL = "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-main/Ana-001.jpeg";
+// URLs imágenes Ana Real en GitHub - Rotación automática para variedad visual
+const ANA_IMAGE_URLS = {
+    // Imagen principal (default)
+    main: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-main/Ana-001.jpeg",
+
+    // Variantes coleta
+    coleta: [
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-coleta-01.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-coleta-02.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-coleta-03.png"
+    ],
+
+    // Variantes peinado
+    peinado: [
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido1-01.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-01.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-02.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-03.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-04.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-05.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-06.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-07.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-08.png",
+        "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-peinido2-09.jpg"
+    ],
+
+    // Estudio vacío (para referencia)
+    studio: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-estudio.jpg"
+};
+
+// URL imagen Ana Real en GitHub (backward compatibility)
+const ANA_IMAGE_URL = ANA_IMAGE_URLS.main;
+
+// Todas las imágenes de Ana disponibles (para rotación)
+const ALL_ANA_IMAGES = [
+    ANA_IMAGE_URLS.main,
+    ...ANA_IMAGE_URLS.coleta,
+    ...ANA_IMAGE_URLS.peinado
+];
 
 // Configuración por defecto Ana
 const ANA_DEFAULT_CONFIG = {
@@ -17,7 +54,13 @@ const ANA_DEFAULT_CONFIG = {
     seed: 30001,
     waterMark: "Fantasy La Liga Pro",
     enableTranslation: true,
-    enableFallback: true
+    enableFallback: true,
+    // Sistema de rotación automática
+    imageRotation: {
+        enabled: true,
+        strategy: 'random', // 'random', 'sequential', 'content-based'
+        pool: ALL_ANA_IMAGES
+    }
 };
 
 // Configuración de estudio para Ana
@@ -114,6 +157,8 @@ const AUDIO_ENVIRONMENTS = {
 module.exports = {
     ANA_CHARACTER_BIBLE,
     ANA_IMAGE_URL,
+    ANA_IMAGE_URLS,
+    ALL_ANA_IMAGES,
     ANA_DEFAULT_CONFIG,
     STUDIO_CONFIGURATIONS,
     EMOTIONAL_DIRECTIONS,

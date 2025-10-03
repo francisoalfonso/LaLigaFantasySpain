@@ -3,6 +3,10 @@ const logger = require('../../utils/logger');
 const videoManager = require('../videoManager');
 const BunnyStreamManager = require('../bunnyStreamManager');
 const characterRefs = require('../../config/characterReferences');
+const { ALL_ANA_IMAGES } = require('../../config/veo3/anaCharacter');
+const VEO3ErrorAnalyzer = require('./veo3ErrorAnalyzer');
+const VEO3RetryManager = require('./veo3RetryManager');
+const { validateAndPrepare, updatePlayerSuccessRate } = require('../../utils/playerDictionaryValidator');
 
 // Ana Character Bible - MANTENER PARA BACKWARD COMPATIBILITY
 const ANA_CHARACTER_BIBLE =
@@ -24,8 +28,20 @@ class VEO3Client {
         this.requestDelay = parseInt(process.env.VEO3_REQUEST_DELAY) || 6000;
         this.timeout = parseInt(process.env.VEO3_TIMEOUT) || 300000;
 
+        // Sistema de rotación de imágenes Ana
+        this.anaImagePool = ALL_ANA_IMAGES;
+        this.currentImageIndex = 0;
+        this.imageRotationEnabled = process.env.VEO3_IMAGE_ROTATION !== 'false';
+
         // Inicializar Bunny.net Stream Manager
         this.bunnyStream = new BunnyStreamManager();
+
+        // Inicializar VEO3ErrorAnalyzer
+        this.errorAnalyzer = new VEO3ErrorAnalyzer();
+
+        // Inicializar VEO3RetryManager (después de que 'this' esté completamente inicializado)
+        // Se inicializa lazy en el primer uso para evitar dependencias circulares
+        this._retryManager = null;
 
         // Referencias de personajes (nuevo sistema)
         this.characterReferences = {
@@ -44,6 +60,49 @@ class VEO3Client {
                 '[VEO3Client] ANA_IMAGE_URL no encontrada, usando sistema multi-referencia'
             );
         }
+
+        logger.info(`[VEO3Client] Sistema rotación imágenes Ana: ${this.imageRotationEnabled ? 'ACTIVO' : 'DESACTIVO'} (${this.anaImagePool.length} imágenes disponibles)`);
+    }
+
+    /**
+     * Getter lazy para RetryManager
+     * @returns {VEO3RetryManager}
+     */
+    get retryManager() {
+        if (!this._retryManager) {
+            this._retryManager = new VEO3RetryManager(this);
+            logger.info('[VEO3Client] VEO3RetryManager inicializado');
+        }
+        return this._retryManager;
+    }
+
+    /**
+     * Seleccionar imagen Ana para rotación
+     * @param {string} strategy - Estrategia: 'random', 'sequential', 'specific'
+     * @param {number} specificIndex - Índice específico (opcional)
+     * @returns {string} URL de la imagen seleccionada
+     */
+    selectAnaImage(strategy = 'random', specificIndex = null) {
+        if (!this.imageRotationEnabled) {
+            return this.anaImageUrl;
+        }
+
+        let selectedUrl;
+
+        if (specificIndex !== null && specificIndex >= 0 && specificIndex < this.anaImagePool.length) {
+            selectedUrl = this.anaImagePool[specificIndex];
+            logger.info(`[VEO3Client] Imagen Ana específica seleccionada: índice ${specificIndex}`);
+        } else if (strategy === 'random') {
+            const randomIndex = Math.floor(Math.random() * this.anaImagePool.length);
+            selectedUrl = this.anaImagePool[randomIndex];
+            logger.info(`[VEO3Client] Imagen Ana aleatoria seleccionada: índice ${randomIndex}/${this.anaImagePool.length}`);
+        } else { // sequential
+            selectedUrl = this.anaImagePool[this.currentImageIndex];
+            this.currentImageIndex = (this.currentImageIndex + 1) % this.anaImagePool.length;
+            logger.info(`[VEO3Client] Imagen Ana secuencial seleccionada: índice ${this.currentImageIndex - 1}/${this.anaImagePool.length}`);
+        }
+
+        return selectedUrl;
     }
 
     /**
@@ -54,9 +113,21 @@ class VEO3Client {
      */
     async generateVideo(prompt, options = {}) {
         try {
+            // Usar imagen específica si se proporciona, sino usar rotación
+            let selectedImage;
+            if (options.imageUrl) {
+                // Imagen específica proporcionada - PRIORIDAD
+                selectedImage = options.imageUrl;
+                logger.info(`[VEO3Client] Usando imagen específica: ${selectedImage}`);
+            } else {
+                // Sistema de rotación automática
+                const rotationStrategy = options.imageRotation || 'random';
+                selectedImage = this.selectAnaImage(rotationStrategy, options.imageIndex);
+            }
+
             const params = {
                 prompt,
-                imageUrls: [this.anaImageUrl],
+                imageUrls: [selectedImage],
                 model: options.model || this.defaultModel,
                 aspectRatio: options.aspectRatio || this.defaultAspect,
                 seed: this.characterSeed, // CRÍTICO: SEED FIJO para Ana consistencia
@@ -75,6 +146,7 @@ class VEO3Client {
             };
 
             logger.info(`[VEO3Client] Generando video con prompt: ${prompt.substring(0, 100)}...`);
+            logger.info(`[VEO3Client] Imagen Ana: ${selectedImage.split('/').pop()}`);
             logger.info(
                 `[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`
             );
@@ -137,9 +209,10 @@ class VEO3Client {
      * Esperar a que se complete la generación del video
      * @param {string} taskId - ID de la tarea
      * @param {number} timeout - Timeout en milisegundos (default: 5 min)
+     * @param {string} prompt - Prompt original (opcional, para análisis de errores)
      * @returns {Promise<object>} - Resultado del video completado
      */
-    async waitForCompletion(taskId, timeout = this.timeout) {
+    async waitForCompletion(taskId, timeout = this.timeout, prompt = null) {
         const startTime = Date.now();
         let attempts = 0;
 
@@ -258,6 +331,30 @@ class VEO3Client {
                         `[VEO3Client] Status completo:`,
                         JSON.stringify(status.data, null, 2)
                     );
+
+                    // NUEVO: Analizar error con VEO3ErrorAnalyzer
+                    if (prompt) {
+                        const errorAnalysis = this.errorAnalyzer.analyzeError(status, prompt, taskId);
+
+                        logger.warn('[VEO3Client] 🔍 Análisis de error automático:');
+                        logger.warn(`   Error Category: ${errorAnalysis.errorCategory}`);
+                        logger.warn(`   Triggers detectados: ${errorAnalysis.likelyTriggers.length}`);
+                        logger.warn(`   Confianza análisis: ${(errorAnalysis.confidence * 100).toFixed(0)}%`);
+
+                        if (errorAnalysis.suggestedFixes.length > 0) {
+                            logger.warn('\n   💡 Fixes sugeridos:');
+                            errorAnalysis.suggestedFixes.slice(0, 3).forEach((fix, i) => {
+                                logger.warn(`   ${i + 1}. ${fix.strategy} (confianza: ${(fix.confidence * 100).toFixed(0)}%)`);
+                                logger.warn(`      ${fix.description}`);
+                            });
+                        }
+
+                        // Agregar análisis al error para retry manager
+                        const enhancedError = new Error(`Generación falló: ${errorMsg}`);
+                        enhancedError.analysis = errorAnalysis;
+                        throw enhancedError;
+                    }
+
                     throw new Error(`Generación falló: ${errorMsg}`);
                 }
 
@@ -598,6 +695,44 @@ class VEO3Client {
             Natural hand gestures for emphasis.
             Direct eye contact with camera.
         `.trim();
+    }
+
+    /**
+     * ============================================
+     * MÉTODOS CON RETRY AUTOMÁTICO (PRODUCCIÓN 24/7)
+     * ============================================
+     */
+
+    /**
+     * Generar video con retry automático inteligente
+     * Método recomendado para producción 24/7
+     *
+     * @param {string} prompt - Prompt del video
+     * @param {object} options - Opciones VEO3
+     * @param {object} context - Contexto (playerName, team, etc.)
+     * @returns {Promise<object>} - Video con metadata de retry
+     */
+    async generateVideoWithRetry(prompt, options = {}, context = {}) {
+        return await this.retryManager.generateWithRetry(prompt, options, context);
+    }
+
+    /**
+     * Generar múltiples segmentos con retry automático
+     * Método recomendado para videos multi-segmento en producción
+     *
+     * @param {Array} segments - Array de {label, prompt, context}
+     * @param {object} options - Opciones VEO3
+     * @returns {Promise<Array>} - Array de resultados con metadata
+     */
+    async generateMultipleWithRetry(segments, options = {}) {
+        return await this.retryManager.generateMultipleWithRetry(segments, options);
+    }
+
+    /**
+     * Obtener estadísticas del retry manager
+     */
+    getRetryStats() {
+        return this.retryManager.getStats();
     }
 }
 

@@ -9,11 +9,13 @@
 const PromptBuilder = require('./promptBuilder');
 const logger = require('../../utils/logger');
 const StatsCardPromptBuilder = require('./statsCardPromptBuilder');
+const UnifiedScriptGenerator = require('./unifiedScriptGenerator');
 
 class ThreeSegmentGenerator {
     constructor() {
         this.promptBuilder = new PromptBuilder();
         this.statsCardBuilder = new StatsCardPromptBuilder();
+        this.unifiedScriptGenerator = new UnifiedScriptGenerator();
 
         // ✅ ACTUALIZADO: Duraciones recomendadas - Ahora con 4 segmentos para chollos
         this.durationPresets = {
@@ -80,6 +82,28 @@ class ThreeSegmentGenerator {
         logger.info(`[MultiSegmentGenerator] Preset: ${preset} (${durations.total}s total)`);
         logger.info(`[MultiSegmentGenerator] ✅ Ana imagen FIJA: índice ${fixedAnaImageIndex} (MISMA en TODOS los segmentos)`);
 
+        // 🎬 NUEVO: Generar guión unificado PRIMERO para cohesión narrativa
+        let unifiedScript = null;
+        let viralityScore = null;
+
+        if (segmentCount >= 3 && useViralStructure) {
+            logger.info(`[MultiSegmentGenerator] 📝 Generando guión unificado con arco narrativo...`);
+
+            const scriptResult = this.unifiedScriptGenerator.generateUnifiedScript(
+                contentType,
+                playerData,
+                { viralData }
+            );
+
+            unifiedScript = scriptResult;
+            viralityScore = scriptResult.validation.cohesive ? scriptResult.validation.score : null;
+
+            logger.info(`[MultiSegmentGenerator] ✅ Guión unificado generado:`);
+            logger.info(`[MultiSegmentGenerator]    - Cohesión: ${scriptResult.validation.score}/100`);
+            logger.info(`[MultiSegmentGenerator]    - Arco emocional: ${scriptResult.arc.emotionalJourney.join(' → ')}`);
+            logger.info(`[MultiSegmentGenerator]    - Segmentos con diálogo: ${scriptResult.segments.length}`);
+        }
+
         const segments = {};
         const generationOrder = [];
 
@@ -125,26 +149,46 @@ class ThreeSegmentGenerator {
             );
         } else if (segmentCount === 4) {
             // ⭐ NUEVO: Chollo viral profundo (intro + analysis + stats + outro)
+            // 🎬 Usar diálogos del guión unificado si disponible
+            const segment1Dialogue = unifiedScript?.segments[0]?.dialogue || null;
+            const segment2Dialogue = unifiedScript?.segments[1]?.dialogue || null;
+            const segment3Dialogue = unifiedScript?.segments[2]?.dialogue || null;
+            const segment4Dialogue = unifiedScript?.segments[3]?.dialogue || null;
+
             segments.intro = this._buildIntroSegment(contentType, playerData, viralData, {
                 duration: durations.intro,
                 useViralStructure,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment1Dialogue
             });
             segments.analysis = this._buildAnalysisSegment(contentType, playerData, viralData, {
                 duration: durations.analysis,
                 useViralStructure,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment2Dialogue
             });
-            segments.stats = this._buildStatsSegment(playerData, {
-                duration: durations.stats,
-                style: statsStyle,
-                emphasizeStats,
-                contentType
-            });
+
+            // 🎬 DECISIÓN: Si hay guión unificado, segmento 3 es Ana hablando, NO stats visuales
+            if (segment3Dialogue) {
+                segments.stats = this._buildMiddleSegment(contentType, playerData, viralData, {
+                    duration: durations.stats,
+                    useViralStructure,
+                    anaImageIndex: fixedAnaImageIndex,
+                    customDialogue: segment3Dialogue
+                });
+            } else {
+                segments.stats = this._buildStatsSegment(playerData, {
+                    duration: durations.stats,
+                    style: statsStyle,
+                    emphasizeStats,
+                    contentType
+                });
+            }
             segments.outro = this._buildOutroSegment(contentType, playerData, viralData, {
                 duration: durations.outro,
                 useViralStructure,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                customDialogue: segment4Dialogue
             });
             generationOrder.push(
                 { segment: 'intro', taskIdKey: 'introTaskId' },
@@ -166,7 +210,10 @@ class ThreeSegmentGenerator {
                 statsShown: emphasizeStats,
                 viralStructure: useViralStructure,
                 instagramOptimized: durations.total <= 35,
-                anaImageIndex: fixedAnaImageIndex
+                anaImageIndex: fixedAnaImageIndex,
+                viralityScore: viralityScore,
+                narrativeCohesion: unifiedScript ? unifiedScript.validation.cohesive : null,
+                emotionalJourney: unifiedScript ? unifiedScript.arc.emotionalJourney : null
             },
             generationOrder,
             concatenationConfig: {
@@ -187,11 +234,16 @@ class ThreeSegmentGenerator {
      * @private
      */
     _buildIntroSegment(contentType, playerData, viralData, options) {
-        const { duration, useViralStructure, anaImageIndex } = options; // ✅ Extraer anaImageIndex
+        const { duration, useViralStructure, anaImageIndex, customDialogue } = options; // ✅ Agregar customDialogue
 
         let prompt, dialogue;
 
-        if (useViralStructure && viralData.hook && viralData.contexto) {
+        // 🎬 PRIORIDAD 1: Usar diálogo del guión unificado si disponible
+        if (customDialogue) {
+            dialogue = customDialogue;
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para intro: "${dialogue.substring(0, 50)}..."`);
+        } else if (useViralStructure && viralData.hook && viralData.contexto) {
             // Usar estructura viral
             dialogue = `${viralData.hook} ${viralData.contexto}`;
 
@@ -236,11 +288,16 @@ class ThreeSegmentGenerator {
      * @private
      */
     _buildAnalysisSegment(contentType, playerData, viralData, options) {
-        const { duration, useViralStructure, anaImageIndex } = options;
+        const { duration, useViralStructure, anaImageIndex, customDialogue } = options;
 
         let prompt, dialogue;
 
-        if (useViralStructure && viralData.conflicto && viralData.inflexion) {
+        // 🎬 PRIORIDAD 1: Usar diálogo del guión unificado si disponible
+        if (customDialogue) {
+            dialogue = customDialogue;
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para analysis: "${dialogue.substring(0, 50)}..."`);
+        } else if (useViralStructure && viralData.conflicto && viralData.inflexion) {
             // Usar estructura viral (conflicto + inflexión)
             dialogue = `${viralData.conflicto} ${viralData.inflexion}`;
 
@@ -265,6 +322,60 @@ class ThreeSegmentGenerator {
         return {
             type: 'ana_speaking',
             role: 'analysis',
+            duration,
+            dialogue,
+            prompt,
+            veo3Config: {
+                aspectRatio: '9:16',
+                duration,
+                seed: 30001,
+                model: 'veo3_fast',
+                imageRotation: 'fixed',
+                imageIndex: anaImageIndex
+            }
+        };
+    }
+
+    /**
+     * ⭐ NUEVO: Construir segmento middle (Ana hablando - inflexión + resolución)
+     * Solo para videos de 4 segmentos con guión unificado
+     * @private
+     */
+    _buildMiddleSegment(contentType, playerData, viralData, options) {
+        const { duration, useViralStructure, anaImageIndex, customDialogue } = options;
+
+        let prompt, dialogue;
+
+        // 🎬 PRIORIDAD 1: Usar diálogo del guión unificado si disponible
+        if (customDialogue) {
+            dialogue = customDialogue;
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para middle: "${dialogue.substring(0, 50)}..."`);
+        } else if (useViralStructure && viralData.inflexion && viralData.resolucion) {
+            // Usar estructura viral (inflexión + resolución)
+            dialogue = `${viralData.inflexion} ${viralData.resolucion}`;
+
+            const structuredData = {
+                inflexion: viralData.inflexion,
+                resolucion: viralData.resolucion
+            };
+
+            const result = this.promptBuilder.buildViralStructuredPrompt(
+                contentType,
+                structuredData,
+                { partial: true }
+            );
+
+            prompt = result.prompt || this.promptBuilder.buildPrompt({ dialogue });
+        } else {
+            // Fallback: Resolución de datos del jugador
+            dialogue = this._generateDefaultMiddle(contentType, playerData);
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+        }
+
+        return {
+            type: 'ana_speaking',
+            role: 'middle',
             duration,
             dialogue,
             prompt,
@@ -325,11 +436,16 @@ class ThreeSegmentGenerator {
      * @private
      */
     _buildOutroSegment(contentType, playerData, viralData, options) {
-        const { duration, useViralStructure, anaImageIndex } = options; // ✅ Extraer anaImageIndex
+        const { duration, useViralStructure, anaImageIndex, customDialogue } = options; // ✅ Agregar customDialogue
 
         let prompt, dialogue;
 
-        if (useViralStructure && viralData.resolucion && viralData.cta) {
+        // 🎬 PRIORIDAD 1: Usar diálogo del guión unificado si disponible
+        if (customDialogue) {
+            dialogue = customDialogue;
+            prompt = this.promptBuilder.buildPrompt({ dialogue });
+            logger.info(`[MultiSegmentGenerator] ✅ Usando diálogo unificado para outro: "${dialogue.substring(0, 50)}..."`);
+        } else if (useViralStructure && viralData.resolucion && viralData.cta) {
             // Usar estructura viral
             dialogue = `${viralData.resolucion} ${viralData.moraleja || ''} ${viralData.cta}`;
 
@@ -395,6 +511,20 @@ class ThreeSegmentGenerator {
             prediccion: `Partido favorable, rival débil, alta probabilidad de puntos. Todo apunta a un rendimiento alto.`
         };
         return analysis[contentType] || `Los datos confirman que es buena opción.`;
+    }
+
+    /**
+     * ⭐ NUEVO: Generar middle por defecto (segmento 3 en videos de 4 segmentos)
+     * @private
+     */
+    _generateDefaultMiddle(contentType, playerData) {
+        const middle = {
+            chollo: `Su ratio calidad-precio es ${playerData.valueRatio || '1.5'}x. Eso significa que está dando MUCHO más de lo que cuesta. A ${playerData.price}M es una GANGA.`,
+            analisis: `El contexto táctico favorece su rendimiento. El entrenador confía en él y los números lo respaldan.`,
+            breaking: `Esta información cambia TODO. Los que actúen YA tendrán ventaja competitiva clara.`,
+            prediccion: `Mi análisis predice ${playerData.expectedPoints || 8} puntos. Fiabilidad alta basada en datos históricos.`
+        };
+        return middle[contentType] || `Los indicadores son muy positivos para ${playerData.name}.`;
     }
 
     /**

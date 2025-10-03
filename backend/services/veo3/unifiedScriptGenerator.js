@@ -133,7 +133,7 @@ class UnifiedScriptGenerator {
             },
             // SEGMENTO 2 (8-16s): Conflicto + Inflexión (inicio)
             segment2: {
-                conflicto: "{{player}} del {{team}}. Solo cuesta {{price}} millones. La mayoría lo ignora porque juega en un equipo medio.", // 6s
+                conflicto: "{{player}}. Solo cuesta {{price}} millones. La mayoría lo ignora porque no es conocido.", // 6s
                 inflexion_start: "Pero mirad estos números..." // 2s
             },
             // SEGMENTO 3 (16-24s): Inflexión (cont) + Resolución
@@ -202,8 +202,11 @@ class UnifiedScriptGenerator {
      * Construir guión completo con datos reales
      */
     _buildFullScript(template, playerData, viralData) {
+        // 📋 OPTIMIZACIÓN DICCIONARIO: Usar solo apellido (sin nombre completo, sin equipo)
+        const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'El Jugador';
+
         const data = {
-            player: playerData.name || 'El Jugador',
+            player: playerLastName,  // ✅ Solo apellido para optimizar con diccionario
             team: playerData.team || 'su equipo',
             price: playerData.price || '5.0',
             goals: playerData.stats?.goals || 0,

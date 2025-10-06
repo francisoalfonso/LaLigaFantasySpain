@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Carruseles Instagram - Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-blue-900 min-h-screen">
+    <div x-data="carouselPreview()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-xl">
+            <div class="max-w-7xl mx-auto px-6 py-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-4">
+                        <a href="/" class="text-white hover:text-gray-200 transition">
+                            <i class="fas fa-arrow-left text-2xl"></i>
+                        </a>
+                        <div class="text-4xl">📸</div>
+                        <div>
+                            <h1 class="text-3xl font-bold">Preview Carruseles Instagram</h1>
+                            <p class="text-purple-100">Sistema de validación visual - ContentDrips API</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="refreshData()"
+                                :disabled="loading"
+                                class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition disabled:opacity-50">
+                            <i class="fas fa-sync-alt mr-2" :class="{'fa-spin': loading}"></i>
+                            Actualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Tipo de carrusel -->
+                    <div>
+                        <label class="block text-white text-sm font-semibold mb-2">
+                            <i class="fas fa-layer-group mr-2"></i>Tipo de Carrusel
+                        </label>
+                        <select x-model="carouselType" @change="loadCarouselData()"
+                                class="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50">
+                            <option value="top-chollos">Top 10 Chollos</option>
+                            <option value="player-comparison">Comparativa Jugadores</option>
+                            <option value="lineup-recommendation">Alineación Recomendada</option>
+                        </select>
+                    </div>
+
+                    <!-- Límite (para top-chollos) -->
+                    <div x-show="carouselType === 'top-chollos'">
+                        <label class="block text-white text-sm font-semibold mb-2">
+                            <i class="fas fa-hashtag mr-2"></i>Número de Jugadores
+                        </label>
+                        <input type="number" x-model="limit" @change="loadCarouselData()" min="3" max="15"
+                               class="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50">
+                    </div>
+
+                    <!-- Precio máximo (para top-chollos) -->
+                    <div x-show="carouselType === 'top-chollos'">
+                        <label class="block text-white text-sm font-semibold mb-2">
+                            <i class="fas fa-euro-sign mr-2"></i>Precio Máximo (M)
+                        </label>
+                        <input type="number" x-model="maxPrice" @change="loadCarouselData()" min="1" max="15" step="0.5"
+                               class="w-full px-4 py-3 rounded-lg bg-white/20 text-white border border-white/30 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div x-show="loading" class="text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent"></div>
+                <p class="text-white mt-4">Cargando datos del carrusel...</p>
+            </div>
+
+            <!-- Error State -->
+            <div x-show="error && !loading" class="bg-red-500/20 border border-red-500 rounded-xl p-6 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-2xl mr-4 mt-1"></i>
+                    <div>
+                        <h3 class="text-red-400 font-bold text-lg mb-2">Error cargando datos</h3>
+                        <p class="text-white" x-text="error"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carousel Data Preview -->
+            <div x-show="carouselData && !loading" class="space-y-6">
+
+                <!-- Stats Summary -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6">
+                    <h2 class="text-white text-2xl font-bold mb-4">
+                        <i class="fas fa-chart-bar mr-2"></i>Resumen del Carrusel
+                    </h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-white/70 text-sm">Total Slides</div>
+                            <div class="text-white text-2xl font-bold" x-text="carouselData?.stats?.players_count + 2 || '-'"></div>
+                            <div class="text-white/50 text-xs">Intro + Content + Ending</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-white/70 text-sm">Jornada</div>
+                            <div class="text-white text-2xl font-bold" x-text="carouselData?.stats?.gameweek || '-'"></div>
+                            <div class="text-white/50 text-xs">La Liga 2025-26</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-white/70 text-sm">Precio Promedio</div>
+                            <div class="text-white text-2xl font-bold" x-text="carouselData?.stats?.avg_price + 'M' || '-'"></div>
+                            <div class="text-white/50 text-xs">De los jugadores</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-4">
+                            <div class="text-white/70 text-sm">Posiciones</div>
+                            <div class="text-white text-xl font-bold">
+                                <span x-text="carouselData?.stats?.positions?.GK || 0"></span>GK ·
+                                <span x-text="carouselData?.stats?.positions?.DEF || 0"></span>D ·
+                                <span x-text="carouselData?.stats?.positions?.MID || 0"></span>M ·
+                                <span x-text="carouselData?.stats?.positions?.FWD || 0"></span>F
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 1: Intro - Instagram Format (1080x1350) -->
+                <div class="max-w-md mx-auto">
+                    <div class="aspect-[4/5] bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 rounded-xl shadow-2xl overflow-hidden relative">
+                        <!-- Instagram-style header mockup -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/20 backdrop-blur-sm p-4 flex items-center justify-between z-10">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-white/20"></div>
+                                <span class="text-white text-sm font-semibold">laligafantasyspain</span>
+                            </div>
+                            <div class="text-white">⋮</div>
+                        </div>
+
+                        <!-- Main content -->
+                        <div class="h-full flex flex-col items-center justify-center p-8 text-center relative">
+                            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                                <span class="text-white text-xs font-bold">1 / <span x-text="(carouselData?.stats?.players_count || 0) + 2"></span></span>
+                            </div>
+
+                            <div class="text-white/80 text-xs font-bold uppercase tracking-wider mb-4">Jornada <span x-text="carouselData?.stats?.gameweek"></span></div>
+                            <h3 class="text-white text-5xl font-black mb-4 leading-tight drop-shadow-lg" x-text="carouselData?.data?.intro_slide?.title"></h3>
+                            <div class="w-24 h-1 bg-white/50 rounded-full mb-4"></div>
+                            <p class="text-white text-xl font-semibold mb-2" x-text="carouselData?.data?.intro_slide?.subtitle"></p>
+                            <p class="text-white/80 text-sm" x-text="carouselData?.data?.intro_slide?.date"></p>
+
+                            <!-- Engagement indicator -->
+                            <div class="absolute bottom-20 left-0 right-0 flex justify-center space-x-2">
+                                <div class="w-2 h-2 bg-white rounded-full"></div>
+                                <div class="w-2 h-2 bg-white/40 rounded-full"></div>
+                                <div class="w-2 h-2 bg-white/40 rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <!-- Instagram-style bottom actions mockup -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-4">
+                            <div class="flex items-center justify-between text-white">
+                                <div class="flex space-x-4">
+                                    <i class="far fa-heart text-2xl"></i>
+                                    <i class="far fa-comment text-2xl"></i>
+                                    <i class="far fa-paper-plane text-2xl"></i>
+                                </div>
+                                <i class="far fa-bookmark text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slides 2-N: Content (Players) - Instagram Carousel Format -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <template x-for="(player, index) in carouselData?.data?.content_slides" :key="player.player_id">
+                        <div class="aspect-[4/5] bg-white rounded-xl shadow-2xl overflow-hidden relative hover:shadow-3xl transition-all transform hover:scale-[1.02]">
+                            <!-- Instagram-style header mockup -->
+                            <div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/30 to-transparent p-3 flex items-center justify-between z-10">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 rounded-full bg-white/30"></div>
+                                    <span class="text-white text-xs font-semibold drop-shadow">laligafantasyspain</span>
+                                </div>
+                                <div class="bg-white/30 backdrop-blur-sm px-2 py-1 rounded-full">
+                                    <span class="text-white text-xs font-bold" x-text="(index + 2) + ' / ' + ((carouselData?.stats?.players_count || 0) + 2)"></span>
+                                </div>
+                            </div>
+
+                            <!-- Position Badge -->
+                            <div class="absolute top-14 right-3 z-10">
+                                <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg" x-text="player.position"></div>
+                            </div>
+
+                            <!-- Player Photo Background -->
+                            <div class="absolute inset-0">
+                                <div class="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 opacity-90"></div>
+                                <img :src="player.photo_url"
+                                     :alt="player.player_name"
+                                     class="w-full h-full object-cover opacity-20 blur-sm"
+                                     onerror="this.style.display='none'">
+                            </div>
+
+                            <!-- Main Content -->
+                            <div class="relative h-full flex flex-col p-6">
+                                <!-- Player Photo -->
+                                <div class="flex-shrink-0 flex justify-center mb-4 mt-8">
+                                    <div class="relative">
+                                        <img :src="player.photo_url"
+                                             :alt="player.player_name"
+                                             class="w-32 h-32 rounded-full border-4 border-white object-cover shadow-2xl"
+                                             onerror="this.src='https://via.placeholder.com/128?text=' + player.player_name.charAt(0)">
+                                        <!-- Team Logo Badge -->
+                                        <img :src="player.team_logo"
+                                             :alt="player.team"
+                                             class="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-white p-1 shadow-lg border-2 border-white"
+                                             onerror="this.style.display='none'">
+                                    </div>
+                                </div>
+
+                                <!-- Player Info -->
+                                <div class="text-center mb-4">
+                                    <h4 class="text-2xl font-black text-white drop-shadow-lg" x-text="player.player_name"></h4>
+                                    <p class="text-sm text-white/90 font-semibold" x-text="player.team"></p>
+                                </div>
+
+                                <!-- Stats Grid - Viral Style -->
+                                <div class="flex-grow flex items-center">
+                                    <div class="w-full grid grid-cols-3 gap-2">
+                                        <div class="text-center bg-white/95 backdrop-blur rounded-xl p-3 shadow-lg">
+                                            <div class="text-3xl font-black text-blue-600" x-text="player.goals"></div>
+                                            <div class="text-xs text-gray-600 font-bold uppercase">Goles</div>
+                                        </div>
+                                        <div class="text-center bg-white/95 backdrop-blur rounded-xl p-3 shadow-lg">
+                                            <div class="text-3xl font-black text-purple-600" x-text="player.assists"></div>
+                                            <div class="text-xs text-gray-600 font-bold uppercase">Asist</div>
+                                        </div>
+                                        <div class="text-center bg-white/95 backdrop-blur rounded-xl p-3 shadow-lg">
+                                            <div class="text-3xl font-black text-green-600" x-text="player.rating"></div>
+                                            <div class="text-xs text-gray-600 font-bold uppercase">Rating</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Price & Value - Bottom Card -->
+                                <div class="mt-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-4 shadow-2xl">
+                                    <div class="flex justify-between items-center">
+                                        <div class="text-center flex-1">
+                                            <div class="text-xs text-white/80 font-bold uppercase">Precio</div>
+                                            <div class="text-2xl font-black text-white" x-text="player.price"></div>
+                                        </div>
+                                        <div class="w-px h-10 bg-white/30"></div>
+                                        <div class="text-center flex-1">
+                                            <div class="text-xs text-white/80 font-bold uppercase">Ratio</div>
+                                            <div class="text-2xl font-black text-white" x-text="player.value_ratio"></div>
+                                        </div>
+                                        <div class="w-px h-10 bg-white/30"></div>
+                                        <div class="text-center flex-1">
+                                            <div class="text-xs text-white/80 font-bold uppercase">Puntos</div>
+                                            <div class="text-2xl font-black text-white" x-text="player.predicted_points"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Instagram-style bottom actions mockup -->
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-3">
+                                <div class="flex items-center justify-between text-white text-sm">
+                                    <div class="flex space-x-3">
+                                        <i class="far fa-heart"></i>
+                                        <i class="far fa-comment"></i>
+                                        <i class="far fa-paper-plane"></i>
+                                    </div>
+                                    <i class="far fa-bookmark"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Last Slide: Ending/CTA - Instagram Format -->
+                <div class="max-w-md mx-auto">
+                    <div class="aspect-[4/5] bg-gradient-to-br from-green-500 via-teal-500 to-blue-600 rounded-xl shadow-2xl overflow-hidden relative">
+                        <!-- Instagram-style header mockup -->
+                        <div class="absolute top-0 left-0 right-0 bg-black/20 backdrop-blur-sm p-4 flex items-center justify-between z-10">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-white/20"></div>
+                                <span class="text-white text-sm font-semibold">laligafantasyspain</span>
+                            </div>
+                            <div class="text-white">⋮</div>
+                        </div>
+
+                        <!-- Main content -->
+                        <div class="h-full flex flex-col items-center justify-center p-8 text-center relative">
+                            <div class="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                                <span class="text-white text-xs font-bold" x-text="((carouselData?.stats?.players_count || 0) + 2) + ' / ' + ((carouselData?.stats?.players_count || 0) + 2)"></span>
+                            </div>
+
+                            <!-- Icon/Emoji -->
+                            <div class="text-6xl mb-6">🔥</div>
+
+                            <!-- CTA -->
+                            <h3 class="text-white text-4xl font-black mb-6 leading-tight drop-shadow-lg" x-text="carouselData?.data?.ending_slide?.cta"></h3>
+
+                            <!-- Engagement Question -->
+                            <div class="bg-white/20 backdrop-blur-lg rounded-2xl p-6 mb-6 max-w-sm">
+                                <p class="text-white text-xl font-bold" x-text="carouselData?.data?.ending_slide?.engagement_text"></p>
+                            </div>
+
+                            <!-- Footer/Handle -->
+                            <div class="flex items-center space-x-2 mb-4">
+                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                    <i class="fab fa-instagram text-white text-xl"></i>
+                                </div>
+                                <p class="text-white text-lg font-bold" x-text="carouselData?.data?.ending_slide?.footer"></p>
+                            </div>
+
+                            <!-- Call to Action Button Mockup -->
+                            <div class="bg-white text-green-600 px-8 py-3 rounded-full font-black text-lg shadow-2xl transform hover:scale-105 transition-transform cursor-pointer">
+                                SÍGUENOS 👆
+                            </div>
+                        </div>
+
+                        <!-- Instagram-style bottom actions mockup -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-4">
+                            <div class="flex items-center justify-between text-white">
+                                <div class="flex space-x-4">
+                                    <i class="far fa-heart text-2xl"></i>
+                                    <i class="far fa-comment text-2xl"></i>
+                                    <i class="far fa-paper-plane text-2xl"></i>
+                                </div>
+                                <i class="far fa-bookmark text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Data (Collapsible) -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden">
+                    <button @click="showJson = !showJson" class="w-full p-4 text-left text-white font-semibold hover:bg-white/5 transition">
+                        <i class="fas mr-2" :class="showJson ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                        Ver JSON para ContentDrips API
+                    </button>
+                    <div x-show="showJson" x-collapse class="p-6 border-t border-white/20">
+                        <pre class="bg-black/50 text-green-400 p-4 rounded-lg overflow-x-auto text-xs font-mono" x-text="JSON.stringify(carouselData?.data, null, 2)"></pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function carouselPreview() {
+            return {
+                carouselType: 'top-chollos',
+                limit: 10,
+                maxPrice: 8.0,
+                loading: false,
+                error: null,
+                carouselData: null,
+                showJson: false,
+
+                init() {
+                    this.loadCarouselData();
+                },
+
+                async loadCarouselData() {
+                    this.loading = true;
+                    this.error = null;
+
+                    try {
+                        let url = '';
+
+                        if (this.carouselType === 'top-chollos') {
+                            url = `/api/carousels/top-chollos?limit=${this.limit}&maxPrice=${this.maxPrice}`;
+                        } else if (this.carouselType === 'player-comparison') {
+                            // TODO: Implementar cuando tengamos UI para seleccionar jugadores
+                            this.error = 'Comparativa de jugadores: Próximamente (requiere selección de 2 jugadores)';
+                            this.loading = false;
+                            return;
+                        } else if (this.carouselType === 'lineup-recommendation') {
+                            url = `/api/carousels/lineup-recommendation`;
+                        }
+
+                        const response = await fetch(url);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.carouselData = result;
+                        } else {
+                            this.error = result.message || 'Error desconocido';
+                        }
+                    } catch (err) {
+                        this.error = err.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async refreshData() {
+                    await this.loadCarouselData();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

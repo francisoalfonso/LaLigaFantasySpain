@@ -65,9 +65,20 @@ router.get(
         const limit = parseInt(req.query.limit) || 10;
         const maxPrice = parseFloat(req.query.maxPrice) || 8.0;
 
-        // 1. Obtener top chollos
+        // 1. Obtener top chollos usando bargainAnalyzer
         logger.info(`📊 Obteniendo top ${limit} chollos (precio max: ${maxPrice})...`);
-        const chollos = await bargainAnalyzer.getTopBargains({ maxPrice, limit });
+        const result = await bargainAnalyzer.identifyBargains(limit, { maxPrice });
+
+        if (!result.success) {
+            return res.json({
+                success: false,
+                message: `Error obteniendo chollos: ${result.error}`,
+                data: null
+            });
+        }
+
+        // result.data contiene los chollos ya formateados
+        const chollos = result.data;
 
         if (chollos.length === 0) {
             return res.json({
@@ -77,59 +88,48 @@ router.get(
             });
         }
 
-        // 2. Enriquecer con datos completos de jugadores
-        logger.info('🔍 Enriqueciendo datos de jugadores...');
-        const enrichedPlayers = await Promise.all(
-            chollos.map(async player => {
-                try {
-                    // Obtener datos completos del jugador
-                    const fullData = await playersManager.getPlayer(player.id);
+        // 2. Formatear datos para ContentDrips (mapear estructura)
+        logger.info('🔍 Formateando datos para carrusel...');
 
-                    // Obtener próximo rival
-                    const nextFixture = fullData.nextFixture || {};
+        // Helper para formatear rating con máximo 1 decimal
+        const formatRating = rating => {
+            if (!rating || rating === 'N/A') {
+                return 'N/A';
+            }
+            const numRating = parseFloat(rating);
+            return isNaN(numRating) ? 'N/A' : numRating.toFixed(1);
+        };
 
-                    return {
-                        player_id: player.id,
-                        player_name: player.name,
-                        team: player.team,
-                        position: player.position,
-                        price: `${player.priceEstimated.toFixed(1)}M`,
-                        price_value: player.priceEstimated,
-                        value_ratio: player.valueRatio.toFixed(2),
-                        photo_url: fullData.photo || '',
-                        // Stats clave
-                        goals: player.goalsTotal || 0,
-                        assists: player.assists || 0,
-                        rating: player.rating ? player.rating.toFixed(2) : 'N/A',
-                        minutes: player.minutesPlayed || 0,
-                        games: player.gamesPlayed || 0,
-                        // Próximo partido
-                        next_rival: nextFixture.opponent || 'TBD',
-                        next_rival_difficulty: nextFixture.difficulty || 'medium',
-                        next_match_home: nextFixture.isHome || false,
-                        // Predicción
-                        predicted_points: player.predictedPoints
-                            ? player.predictedPoints.toFixed(1)
-                            : 'N/A'
-                    };
-                } catch (error) {
-                    logger.error(`Error enriqueciendo jugador ${player.id}:`, error.message);
-                    // Retornar datos básicos si falla el enriquecimiento
-                    return {
-                        player_id: player.id,
-                        player_name: player.name,
-                        team: player.team,
-                        position: player.position,
-                        price: `${player.priceEstimated.toFixed(1)}M`,
-                        value_ratio: player.valueRatio.toFixed(2),
-                        photo_url: '',
-                        goals: player.goalsTotal || 0,
-                        assists: player.assists || 0,
-                        rating: player.rating ? player.rating.toFixed(2) : 'N/A'
-                    };
-                }
-            })
-        );
+        // Mapeo de posiciones a español
+        const positionMap = {
+            GK: 'Portero',
+            DEF: 'Defensa',
+            MID: 'Centrocampista',
+            FWD: 'Delantero'
+        };
+
+        const enrichedPlayers = chollos.map(player => {
+            return {
+                player_id: player.id,
+                player_name: player.name,
+                team: player.team?.name || 'Unknown',
+                team_logo: player.team?.logo || '',
+                position: positionMap[player.position] || player.position,
+                position_short: player.position, // Mantener código original también
+                price: `${player.analysis.estimatedPrice.toFixed(1)}M`,
+                price_value: parseFloat(player.analysis.estimatedPrice.toFixed(1)),
+                value_ratio: parseFloat(player.analysis.valueRatio.toFixed(1)),
+                photo_url: player.photo || '',
+                // Stats clave
+                goals: player.stats?.goals || 0,
+                assists: player.stats?.assists || 0,
+                rating: formatRating(player.stats?.rating),
+                minutes: player.stats?.minutes || 0,
+                games: player.stats?.games || 0,
+                // Predicción
+                predicted_points: parseFloat(player.analysis.estimatedPoints.toFixed(1))
+            };
+        });
 
         // 3. Obtener jornada actual
         const currentGameweek = await getCurrentGameweek();

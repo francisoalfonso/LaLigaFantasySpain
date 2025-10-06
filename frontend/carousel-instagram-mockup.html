@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Mockup - Carruseles Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* iPhone 14 Pro mockup */
+        .iphone-frame {
+            width: 390px;
+            height: 844px;
+            background: #000;
+            border-radius: 55px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+        }
+
+        .iphone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+
+        .iphone-screen {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 45px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .instagram-story {
+            width: 64px;
+            height: 64px;
+            padding: 2px;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            border-radius: 50%;
+        }
+
+        .instagram-story-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-purple-700 to-pink-600 min-h-screen flex items-center justify-center p-8">
+    <div x-data="instagramMockup()" x-init="init()">
+        <!-- Back Button -->
+        <div class="mb-6 flex items-center justify-between max-w-6xl mx-auto">
+            <a href="/carousel-preview.html" class="text-white hover:text-purple-200 transition flex items-center space-x-2">
+                <i class="fas fa-arrow-left text-xl"></i>
+                <span class="font-semibold">Volver al Preview</span>
+            </a>
+            <button @click="refreshData()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition">
+                <i class="fas fa-sync-alt mr-2" :class="{'fa-spin': loading}"></i>
+                Actualizar
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex flex-col lg:flex-row gap-8 items-start justify-center max-w-6xl mx-auto">
+
+            <!-- iPhone Mockup -->
+            <div class="flex-shrink-0">
+                <div class="iphone-frame">
+                    <div class="iphone-notch"></div>
+                    <div class="iphone-screen">
+
+                        <!-- Instagram App -->
+                        <div class="h-full flex flex-col bg-white">
+
+                            <!-- Status Bar -->
+                            <div class="px-6 pt-3 pb-2 flex items-center justify-between text-xs">
+                                <span class="font-semibold">9:41</span>
+                                <div class="flex items-center space-x-1">
+                                    <i class="fas fa-signal text-xs"></i>
+                                    <i class="fas fa-wifi text-xs"></i>
+                                    <i class="fas fa-battery-full text-xs"></i>
+                                </div>
+                            </div>
+
+                            <!-- Instagram Header -->
+                            <div class="px-4 py-2 flex items-center justify-between border-b">
+                                <svg class="h-7" viewBox="0 0 103 29" fill="none">
+                                    <path d="M6.5 0C2.91 0 0 2.91 0 6.5v16C0 26.09 2.91 29 6.5 29h16c3.59 0 6.5-2.91 6.5-6.5v-16C29 2.91 26.09 0 22.5 0h-16zm0 2h16C25.44 2 27 3.56 27 6.5v16c0 2.94-1.56 4.5-4.5 4.5h-16C3.56 27 2 25.44 2 22.5v-16C2 3.56 3.56 2 6.5 2z" fill="currentColor"/>
+                                    <text x="35" y="20" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Instagram</text>
+                                </svg>
+                                <div class="flex items-center space-x-4 text-xl">
+                                    <i class="far fa-plus-square"></i>
+                                    <i class="far fa-heart"></i>
+                                    <i class="fab fa-facebook-messenger"></i>
+                                </div>
+                            </div>
+
+                            <!-- Stories -->
+                            <div class="px-4 py-3 flex space-x-4 overflow-x-auto border-b">
+                                <!-- Your Story -->
+                                <div class="flex-shrink-0 text-center">
+                                    <div class="instagram-story">
+                                        <div class="instagram-story-inner">
+                                            <img src="/assets/instagram/foto-perfil-FLP.png" alt="Tu historia" class="w-full h-full object-cover">
+                                        </div>
+                                    </div>
+                                    <div class="text-xs mt-1 font-semibold">Tu historia</div>
+                                </div>
+
+                                <!-- Other Stories -->
+                                <template x-for="i in 4" :key="i">
+                                    <div class="flex-shrink-0 text-center">
+                                        <div class="instagram-story">
+                                            <div class="instagram-story-inner bg-gray-200"></div>
+                                        </div>
+                                        <div class="text-xs mt-1 text-gray-600">usuario_<span x-text="i"></span></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Feed Post (Carousel) -->
+                            <div class="flex-1 overflow-y-auto">
+
+                                <!-- Post Header -->
+                                <div class="px-4 py-3 flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <img src="/assets/instagram/foto-perfil-FLP.png" alt="Fantasy La Liga Pro" class="w-8 h-8 rounded-full border border-gray-300">
+                                        <div>
+                                            <div class="font-semibold text-sm">laligafantasyspain</div>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </div>
+
+                                <!-- Carousel Content - Slide Intro (Clean Design) -->
+                                <div class="relative bg-white aspect-[4/5]" x-show="currentSlide === 0">
+                                    <!-- Background Pattern -->
+                                    <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
+
+                                    <!-- Logo FLP -->
+                                    <div class="absolute top-6 left-6">
+                                        <img src="/assets/instagram/foto-perfil-FLP.png" alt="FLP" class="w-12 h-12 rounded-lg shadow-sm">
+                                    </div>
+
+                                    <!-- Slide Indicator -->
+                                    <div class="absolute top-6 right-6 bg-gray-100 px-3 py-1 rounded-full">
+                                        <span class="text-gray-600 text-xs font-medium">1 / <span x-text="totalSlides"></span></span>
+                                    </div>
+
+                                    <!-- Main Content -->
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                        <!-- Jornada Badge -->
+                                        <div class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide mb-6">
+                                            JORNADA <span x-text="carouselData?.stats?.gameweek || '5'"></span>
+                                        </div>
+
+                                        <!-- Title -->
+                                        <h1 class="text-4xl font-black text-gray-900 mb-3 leading-tight max-w-xs" x-text="carouselData?.data?.intro_slide?.title || 'Top 10 Chollos'"></h1>
+
+                                        <!-- Accent Line -->
+                                        <div class="w-20 h-1 bg-gradient-to-r from-[#E85D54] to-[#FF8A82] rounded-full mb-4"></div>
+
+                                        <!-- Subtitle -->
+                                        <p class="text-gray-600 text-sm font-medium max-w-xs" x-text="carouselData?.data?.intro_slide?.subtitle || 'Análisis por Ana Fantasy'"></p>
+
+                                        <!-- Stats Summary -->
+                                        <div class="mt-8 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm max-w-xs w-full">
+                                            <div class="grid grid-cols-3 gap-3 text-center">
+                                                <div>
+                                                    <div class="text-2xl font-black text-[#E85D54]" x-text="carouselData?.stats?.players_count || '10'"></div>
+                                                    <div class="text-xs text-gray-500 font-medium mt-1">JUGADORES</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-2xl font-black text-gray-900" x-text="carouselData?.stats?.avg_price + 'M' || '4.2M'"></div>
+                                                    <div class="text-xs text-gray-500 font-medium mt-1">PRECIO</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-2xl font-black text-gray-900">LA LIGA</div>
+                                                    <div class="text-xs text-gray-500 font-medium mt-1">2025-26</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Player Slide (Clean Design) -->
+                                <template x-if="currentSlide > 0 && currentSlide <= (carouselData?.data?.content_slides?.length || 0)">
+                                    <div class="relative bg-white aspect-[4/5]">
+                                        <!-- Background -->
+                                        <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
+
+                                        <!-- Player Content -->
+                                        <div class="h-full flex flex-col p-6 relative">
+                                            <!-- Header -->
+                                            <div class="flex items-center justify-between mb-6">
+                                                <!-- Position Badge -->
+                                                <div class="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-semibold" x-text="currentPlayer?.position"></div>
+
+                                                <!-- Slide Indicator -->
+                                                <div class="bg-gray-100 px-3 py-1 rounded-full">
+                                                    <span class="text-gray-600 text-xs font-medium" x-text="(currentSlide + 1) + ' / ' + totalSlides"></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Player Photo & Team -->
+                                            <div class="flex-shrink-0 mb-4">
+                                                <div class="flex items-center space-x-4">
+                                                    <!-- Photo -->
+                                                    <div class="relative flex-shrink-0">
+                                                        <img :src="currentPlayer?.photo_url"
+                                                             :alt="currentPlayer?.player_name"
+                                                             class="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
+                                                             onerror="this.src='https://via.placeholder.com/80?text=?'">
+                                                    </div>
+
+                                                    <!-- Player Info -->
+                                                    <div class="flex-1 min-w-0">
+                                                        <h4 class="text-2xl font-black text-gray-900 truncate" x-text="currentPlayer?.player_name"></h4>
+                                                        <div class="flex items-center space-x-2 mt-1">
+                                                            <img :src="currentPlayer?.team_logo"
+                                                                 class="w-5 h-5 object-contain"
+                                                                 onerror="this.style.display='none'">
+                                                            <p class="text-sm text-gray-600 font-medium" x-text="currentPlayer?.team"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Stats Grid (Clean Cards) -->
+                                            <div class="flex-grow">
+                                                <div class="grid grid-cols-3 gap-3 mb-4">
+                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.goals"></div>
+                                                        <div class="text-xs text-gray-500 font-medium mt-1">GOLES</div>
+                                                    </div>
+                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.assists"></div>
+                                                        <div class="text-xs text-gray-500 font-medium mt-1">ASIST</div>
+                                                    </div>
+                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
+                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.rating"></div>
+                                                        <div class="text-xs text-gray-500 font-medium mt-1">RATING</div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Price & Value Card -->
+                                                <div class="bg-gray-900 rounded-2xl p-4">
+                                                    <div class="grid grid-cols-3 gap-4 text-center">
+                                                        <div>
+                                                            <div class="text-xs text-gray-400 font-medium mb-1">PRECIO</div>
+                                                            <div class="text-2xl font-black text-white" x-text="currentPlayer?.price"></div>
+                                                        </div>
+                                                        <div class="border-l border-r border-gray-700">
+                                                            <div class="text-xs text-gray-400 font-medium mb-1">RATIO</div>
+                                                            <div class="text-2xl font-black text-[#E85D54]" x-text="currentPlayer?.value_ratio"></div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="text-xs text-gray-400 font-medium mb-1">PUNTOS</div>
+                                                            <div class="text-2xl font-black text-white" x-text="currentPlayer?.predicted_points"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer Tag -->
+                                            <div class="mt-4 flex items-center justify-center space-x-2">
+                                                <div class="w-2 h-2 bg-[#E85D54] rounded-full"></div>
+                                                <span class="text-xs text-gray-500 font-medium">FANTASY LA LIGA PRO</span>
+                                                <div class="w-2 h-2 bg-[#E85D54] rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- CTA Slide (Clean Design) -->
+                                <div class="relative bg-white aspect-[4/5]" x-show="currentSlide === totalSlides - 1">
+                                    <!-- Background -->
+                                    <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
+
+                                    <!-- Slide Indicator -->
+                                    <div class="absolute top-6 right-6 bg-gray-100 px-3 py-1 rounded-full">
+                                        <span class="text-gray-600 text-xs font-medium" x-text="totalSlides + ' / ' + totalSlides"></span>
+                                    </div>
+
+                                    <!-- Main Content -->
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+                                        <!-- Icon -->
+                                        <div class="w-20 h-20 bg-[#E85D54] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+                                            <i class="fas fa-link text-white text-3xl"></i>
+                                        </div>
+
+                                        <!-- CTA -->
+                                        <h3 class="text-3xl font-black text-gray-900 mb-4 leading-tight max-w-xs" x-text="carouselData?.data?.ending_slide?.cta || 'Link en bio'"></h3>
+
+                                        <!-- Accent Line -->
+                                        <div class="w-16 h-1 bg-gradient-to-r from-[#E85D54] to-[#FF8A82] rounded-full mb-6"></div>
+
+                                        <!-- Engagement Question -->
+                                        <div class="bg-white border-2 border-gray-200 rounded-2xl p-6 mb-6 max-w-sm w-full">
+                                            <p class="text-xl font-bold text-gray-900" x-text="carouselData?.data?.ending_slide?.engagement_text || '¿Cuál vas a fichar?'"></p>
+                                        </div>
+
+                                        <!-- Social -->
+                                        <div class="flex items-center space-x-2 mb-4">
+                                            <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+                                                <i class="fab fa-instagram text-white text-sm"></i>
+                                            </div>
+                                            <p class="text-sm text-gray-600 font-semibold" x-text="carouselData?.data?.ending_slide?.footer || '@laligafantasyspain'"></p>
+                                        </div>
+
+                                        <!-- CTA Button -->
+                                        <div class="bg-gray-900 text-white px-8 py-3 rounded-full font-black text-sm shadow-lg hover:bg-gray-800 transition">
+                                            SÍGUENOS →
+                                        </div>
+
+                                        <!-- Footer Dots -->
+                                        <div class="mt-8 flex items-center space-x-2">
+                                            <div class="w-2 h-2 bg-[#E85D54] rounded-full"></div>
+                                            <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                                            <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Post Actions -->
+                                <div class="px-4 py-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center space-x-4 text-2xl">
+                                            <i class="far fa-heart"></i>
+                                            <i class="far fa-comment"></i>
+                                            <i class="far fa-paper-plane"></i>
+                                        </div>
+                                        <!-- Carousel Dots -->
+                                        <div class="flex items-center space-x-1">
+                                            <template x-for="i in totalSlides" :key="i">
+                                                <div class="w-1.5 h-1.5 rounded-full" :class="currentSlide === i - 1 ? 'bg-blue-500' : 'bg-gray-300'"></div>
+                                            </template>
+                                        </div>
+                                        <i class="far fa-bookmark text-2xl"></i>
+                                    </div>
+                                    <div class="font-semibold text-sm mb-1">2,847 Me gusta</div>
+                                    <div class="text-sm">
+                                        <span class="font-semibold">laligafantasyspain</span>
+                                        <span class="ml-1" x-text="carouselData?.data?.intro_slide?.title || 'Top 10 Chollos'"></span>
+                                        <span class="text-gray-500 ml-1">más...</span>
+                                    </div>
+                                    <div class="text-gray-500 text-xs mt-1">Ver los 124 comentarios</div>
+                                    <div class="text-gray-400 text-xs mt-1">Hace 2 horas</div>
+                                </div>
+
+                            </div>
+
+                            <!-- Navigation Arrows (for demo) -->
+                            <div class="absolute top-1/2 left-2 right-2 flex justify-between pointer-events-none" style="transform: translateY(-50%);">
+                                <button @click="prevSlide()"
+                                        class="bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg pointer-events-auto"
+                                        :disabled="currentSlide === 0">
+                                    <i class="fas fa-chevron-left text-sm"></i>
+                                </button>
+                                <button @click="nextSlide()"
+                                        class="bg-white/80 hover:bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg pointer-events-auto"
+                                        :disabled="currentSlide === totalSlides - 1">
+                                    <i class="fas fa-chevron-right text-sm"></i>
+                                </button>
+                            </div>
+
+                            <!-- Bottom Navigation -->
+                            <div class="border-t flex items-center justify-around py-2 bg-white">
+                                <i class="fas fa-home text-xl"></i>
+                                <i class="fas fa-search text-xl text-gray-400"></i>
+                                <i class="far fa-plus-square text-xl text-gray-400"></i>
+                                <i class="fas fa-film text-xl text-gray-400"></i>
+                                <img src="/assets/instagram/foto-perfil-FLP.png" alt="Profile" class="w-6 h-6 rounded-full border border-gray-300">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="flex-1 max-w-md">
+                <div class="bg-white/10 backdrop-blur-lg rounded-xl p-6 text-white">
+                    <h2 class="text-2xl font-bold mb-4">Vista Previa Instagram</h2>
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <div class="font-semibold mb-1">📱 Formato</div>
+                            <div class="text-white/80">Carrusel Instagram 4:5 (1080x1350px)</div>
+                        </div>
+                        <div>
+                            <div class="font-semibold mb-1">🎯 Total Slides</div>
+                            <div class="text-white/80"><span x-text="totalSlides"></span> slides (Intro + <span x-text="carouselData?.stats?.players_count || 0"></span> jugadores + CTA)</div>
+                        </div>
+                        <div>
+                            <div class="font-semibold mb-1">⚽ Jornada</div>
+                            <div class="text-white/80">Jornada <span x-text="carouselData?.stats?.gameweek || '-'"></span> · La Liga 2025-26</div>
+                        </div>
+                        <div>
+                            <div class="font-semibold mb-1">💰 Precio Promedio</div>
+                            <div class="text-white/80"><span x-text="carouselData?.stats?.avg_price || '-'"></span>M</div>
+                        </div>
+                        <div>
+                            <div class="font-semibold mb-1">📊 Posiciones</div>
+                            <div class="text-white/80">
+                                <span x-text="carouselData?.stats?.positions?.GK || 0"></span> GK ·
+                                <span x-text="carouselData?.stats?.positions?.DEF || 0"></span> DEF ·
+                                <span x-text="carouselData?.stats?.positions?.MID || 0"></span> MID ·
+                                <span x-text="carouselData?.stats?.positions?.FWD || 0"></span> FWD
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-white/20">
+                            <div class="font-semibold mb-2">Navegación</div>
+                            <div class="flex items-center space-x-2">
+                                <button @click="prevSlide()"
+                                        class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg transition"
+                                        :disabled="currentSlide === 0">
+                                    <i class="fas fa-chevron-left"></i> Anterior
+                                </button>
+                                <div class="flex-1 text-center">
+                                    <span x-text="currentSlide + 1"></span> / <span x-text="totalSlides"></span>
+                                </div>
+                                <button @click="nextSlide()"
+                                        class="bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg transition"
+                                        :disabled="currentSlide === totalSlides - 1">
+                                    Siguiente <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function instagramMockup() {
+            return {
+                carouselData: null,
+                loading: false,
+                currentSlide: 0,
+                totalSlides: 0,
+
+                get currentPlayer() {
+                    if (!this.carouselData?.data?.content_slides) return null;
+                    const playerIndex = this.currentSlide - 1;
+                    return this.carouselData.data.content_slides[playerIndex] || null;
+                },
+
+                init() {
+                    this.loadCarouselData();
+                },
+
+                async loadCarouselData() {
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/api/carousels/top-chollos?limit=10');
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.carouselData = result;
+                            this.totalSlides = (result.data.content_slides?.length || 0) + 2; // Intro + Players + CTA
+                        }
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async refreshData() {
+                    this.currentSlide = 0;
+                    await this.loadCarouselData();
+                },
+
+                nextSlide() {
+                    if (this.currentSlide < this.totalSlides - 1) {
+                        this.currentSlide++;
+                    }
+                },
+
+                prevSlide() {
+                    if (this.currentSlide > 0) {
+                        this.currentSlide--;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

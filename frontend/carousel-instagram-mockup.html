@@ -143,52 +143,41 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </div>
 
-                                <!-- Carousel Content - Slide Intro (Clean Design) -->
-                                <div class="relative bg-white aspect-[4/5]" x-show="currentSlide === 0">
-                                    <!-- Background Pattern -->
-                                    <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
-
-                                    <!-- Logo FLP -->
-                                    <div class="absolute top-6 left-6">
-                                        <img src="/assets/instagram/foto-perfil-FLP.png" alt="FLP" class="w-12 h-12 rounded-lg shadow-sm">
-                                    </div>
-
-                                    <!-- Slide Indicator -->
-                                    <div class="absolute top-6 right-6 bg-gray-100 px-3 py-1 rounded-full">
-                                        <span class="text-gray-600 text-xs font-medium">1 / <span x-text="totalSlides"></span></span>
-                                    </div>
-
-                                    <!-- Main Content -->
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                                        <!-- Jornada Badge -->
-                                        <div class="bg-gray-900 text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide mb-6">
-                                            JORNADA <span x-text="carouselData?.stats?.gameweek || '5'"></span>
+                                <!-- Carousel Content - Slide Intro (Diseño Replicado) -->
+                                <div class="relative aspect-[4/5] overflow-hidden" x-show="currentSlide === 0" style="background: #F9F7F4;">
+                                    <!-- Contenido Principal -->
+                                    <div class="h-full flex flex-col justify-between p-8">
+                                        <!-- Título TOP CHOLLOS -->
+                                        <div class="mt-12">
+                                            <h1 class="text-6xl font-black text-black leading-none tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
+                                                TOP CHOLLOS
+                                            </h1>
                                         </div>
 
-                                        <!-- Title -->
-                                        <h1 class="text-4xl font-black text-gray-900 mb-3 leading-tight max-w-xs" x-text="carouselData?.data?.intro_slide?.title || 'Top 10 Chollos'"></h1>
+                                        <!-- Badge Jornada -->
+                                        <div class="flex justify-center -mt-4">
+                                            <div class="bg-black text-white px-8 py-3 rounded-full inline-block">
+                                                <span class="text-lg font-light tracking-wider" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
+                                                    Jornada <span x-text="carouselData?.stats?.gameweek || '5'"></span>
+                                                </span>
+                                            </div>
+                                        </div>
 
-                                        <!-- Accent Line -->
-                                        <div class="w-20 h-1 bg-gradient-to-r from-[#E85D54] to-[#FF8A82] rounded-full mb-4"></div>
+                                        <!-- Texto Inferior + Logo -->
+                                        <div class="relative">
+                                            <!-- Texto -->
+                                            <div class="mb-8">
+                                                <p class="text-4xl font-light text-black leading-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
+                                                    ¿Quieres<br>
+                                                    triunfar<br>
+                                                    esta<br>
+                                                    jornada?
+                                                </p>
+                                            </div>
 
-                                        <!-- Subtitle -->
-                                        <p class="text-gray-600 text-sm font-medium max-w-xs" x-text="carouselData?.data?.intro_slide?.subtitle || 'Análisis por Ana Fantasy'"></p>
-
-                                        <!-- Stats Summary -->
-                                        <div class="mt-8 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm max-w-xs w-full">
-                                            <div class="grid grid-cols-3 gap-3 text-center">
-                                                <div>
-                                                    <div class="text-2xl font-black text-[#E85D54]" x-text="carouselData?.stats?.players_count || '10'"></div>
-                                                    <div class="text-xs text-gray-500 font-medium mt-1">JUGADORES</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-2xl font-black text-gray-900" x-text="carouselData?.stats?.avg_price + 'M' || '4.2M'"></div>
-                                                    <div class="text-xs text-gray-500 font-medium mt-1">PRECIO</div>
-                                                </div>
-                                                <div>
-                                                    <div class="text-2xl font-black text-gray-900">LA LIGA</div>
-                                                    <div class="text-xs text-gray-500 font-medium mt-1">2025-26</div>
-                                                </div>
+                                            <!-- Logo Circular FLP (derecha inferior) -->
+                                            <div class="absolute -bottom-16 -right-8">
+                                                <img src="/assets/instagram/logo-flp-circular.png" alt="FLP" class="w-56 h-56 object-contain">
                                             </div>
                                         </div>
                                     </div>

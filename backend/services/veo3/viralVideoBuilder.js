@@ -1,7 +1,11 @@
 const logger = require('../../utils/logger');
 const VEO3Client = require('./veo3Client');
 const PromptBuilder = require('./promptBuilder');
+const UnifiedScriptGenerator = require('./unifiedScriptGenerator');
 const VideoConcatenator = require('./videoConcatenator');
+const frameExtractor = require('./frameExtractor'); // ✅ Singleton, no constructor
+const supabaseFrameUploader = require('./supabaseFrameUploader'); // ✅ Upload frames to Supabase
+const { checkPlayerInDictionary } = require('../../utils/playerDictionaryValidator');
 const path = require('path');
 const fs = require('fs');
 
@@ -13,7 +17,9 @@ class ViralVideoBuilder {
     constructor() {
         this.veo3Client = new VEO3Client();
         this.promptBuilder = new PromptBuilder();
+        this.scriptGenerator = new UnifiedScriptGenerator();
         this.concatenator = new VideoConcatenator();
+        this.frameExtractor = frameExtractor; // ✅ Usar instancia singleton
 
         this.outputDir = process.env.VEO3_OUTPUT_DIR || './output/veo3';
         this.viralDir = path.join(this.outputDir, 'viral');
@@ -29,106 +35,179 @@ class ViralVideoBuilder {
 
     /**
      * Generar video viral completo con estructura de 3 segmentos
+     *
+     * CONTINUIDAD VISUAL (10 Oct 2025):
+     * - Segmento 1: Genera con imagen Ana desde Supabase
+     * - Extrae último frame seg1 → Sube a Supabase → Segmento 2 usa esa URL
+     * - Extrae último frame seg2 → Sube a Supabase → Segmento 3 usa esa URL
+     * - Resultado: Videos fluyen naturalmente sin saltos de cámara
+     *
      * @param {object} playerData - Datos del jugador (chollo)
      * @param {object} options - Opciones de personalización
      * @returns {Promise<object>} - Video viral generado y metadatos
      */
-    async generateViralVideo(playerData) {
+    async generateViralVideo(playerData, _options = {}) {
         try {
             const { playerName, price, ratio, team, stats = {} } = playerData;
 
-            logger.info(`[ViralVideoBuilder] Generando video viral para ${playerName}...`);
+            // ✅ VALIDAR DICCIONARIO (6 Oct 2025 - Fix Error 422)
+            const playerCheck = await checkPlayerInDictionary(playerName);
+
+            // Obtener referencias seguras
+            let safeReference = 'el jugador';
+            if (playerCheck.exists && playerCheck.data?.safeReferences && playerCheck.data.safeReferences.length > 0) {
+                const refs = playerCheck.data.safeReferences;
+                safeReference = refs.find(ref => ref.includes('centrocampista') || ref.includes('delantero') || ref.includes('defensa'))
+                                || refs[1] || refs[0];
+            }
+
+            logger.info(
+                `[ViralVideoBuilder] Generando video viral para ${playerName} (ref: "${safeReference}")...`
+            );
+
+            // ====================================
+            // GENERAR SCRIPT UNIFICADO CON SISTEMA INTELIGENTE
+            // ====================================
+            logger.info('[ViralVideoBuilder] 📝 Generando script unificado con UnifiedScriptGenerator...');
+
+            const unifiedScript = this.scriptGenerator.generateUnifiedScript('chollo', playerData);
+
+            logger.info(`[ViralVideoBuilder] ✅ Script generado - ${unifiedScript.segments.length} segmentos`);
+            logger.info(`[ViralVideoBuilder]    Segment 1: "${unifiedScript.segments[0].dialogue.substring(0, 50)}..."`);
+            logger.info(`[ViralVideoBuilder]    Segment 2: "${unifiedScript.segments[1].dialogue.substring(0, 50)}..."`);
+            logger.info(`[ViralVideoBuilder]    Segment 3: "${unifiedScript.segments[2].dialogue.substring(0, 50)}..."`);
 
             // ====================================
             // SEGMENTO 1: HOOK (8s) - Susurro conspirativo
             // ====================================
-            logger.info('[ViralVideoBuilder] Generando segmento 1: HOOK conspirativo...');
+            logger.info('[ViralVideoBuilder] Generando segmento 1: HOOK conspirativo (FRAME-TO-FRAME)...');
 
-            // 🔴 FIX HOOK: Mejorado para mayor impacto viral
-            // Cambios: Más específico, más intriga, mejor valor percibido
-            const hookDialogue = `Pssst... Misters... ¿Sabéis quién está fichando todo el mundo esta jornada? Un ${stats.position || 'jugador'} del ${team} por solo €${price}M... y está dando más puntos que jugadores de €12M o más...`;
+            const segment1Dialogue = unifiedScript.segments[0].dialogue;
+            const segment1Emotion = unifiedScript.segments[0].emotion;
 
+            // ✅ FIX (9 Oct 2025): Usar prompts simples + Image-to-Video para continuidad REAL
+            // NO usar descripciones textuales (artificia), sino extraer frame real del video anterior
             const hookPrompt = this.promptBuilder.buildPrompt({
-                dialogue: hookDialogue,
-                enhanced: true,
-                behavior: `She starts with conspiratorial whisper, leaning close to camera with finger to lips in shushing gesture, eyes sparkling with intrigue. Leans forward progressively, creating intimate connection. Background: modern sports studio with subtle La Liga branding.`,
-                cinematography: `Camera: Starts at comfortable medium shot, slowly dollies in to intimate close-up as she leans forward. Lighting: warm and intimate, creating conspiratorial mood. Subtle depth of field for cinematic feel.`
+                dialogue: segment1Dialogue,
+                emotion: segment1Emotion,
+                role: 'intro'
             });
 
+            // ✅ FIX (6 Oct 2025): SÍ pasar imagen Ana (necesaria para que aparezca en video)
             const segment1Result = await this.veo3Client.generateVideo(hookPrompt, {
-                duration: 8,
-                aspect: '9:16'
+                aspectRatio: '9:16',
+                useImageReference: true // ✅ Usar imagen Ana para que aparezca en el video
             });
+
+            // ✅ ESPERAR segmento 1 ANTES de generar segmento 2 (secuencial)
+            logger.info('[ViralVideoBuilder] Esperando segmento 1...');
+            const segment1 = await this.veo3Client.waitForCompletion(segment1Result.data.taskId);
+
+            // 🎬 Extraer último frame del segmento 1 y subir a Supabase para continuidad
+            logger.info('[ViralVideoBuilder] Extrayendo último frame del segmento 1...');
+            const segment1VideoPath = await this.downloadVideo(segment1.resultUrls[0], 'seg1-for-frame');
+            const segment1LastFrameLocal = await this.frameExtractor.extractLastFrame(segment1VideoPath);
+            logger.info(`[ViralVideoBuilder] ✅ Frame local extraído: ${segment1LastFrameLocal}`);
+
+            // ✅ Subir frame a Supabase Storage y obtener URL pública
+            const segment1LastFrame = await supabaseFrameUploader.uploadFrame(segment1LastFrameLocal, 'seg1-end');
+            logger.info(`[ViralVideoBuilder] ✅ Frame en Supabase: ${segment1LastFrame}`);
 
             // ====================================
             // SEGMENTO 2: DESARROLLO (8s) - Revelación + Datos
             // ====================================
-            logger.info('[ViralVideoBuilder] Generando segmento 2: REVELACIÓN con datos...');
-            const developmentDialogue = `${playerName}. Ratio valor ${ratio}x. ${stats.goals || 0} goles, ${stats.assists || 0} asistencias en ${stats.games || 0} partidos. Rating ${stats.rating || 0}. Y lo mejor... buen calendario próximos partidos.`;
+            logger.info(
+                `[ViralVideoBuilder] Generando segmento 2: REVELACIÓN (Image-to-Video desde Supabase)...`
+            );
 
+            const segment2Dialogue = unifiedScript.segments[1].dialogue;
+            const segment2Emotion = unifiedScript.segments[1].emotion;
+
+            // ✅ Prompt simple para continuidad natural
             const developmentPrompt = this.promptBuilder.buildPrompt({
-                dialogue: developmentDialogue,
-                enhanced: true,
-                behavior: `She reveals name with confident smile and authoritative body language. Uses natural hand gestures to emphasize key statistics, pointing at imaginary graphics. Professional broadcaster energy with growing enthusiasm.`,
-                cinematography: `Camera: Steady medium shot, occasional subtle push-in on key stats. Lighting: brightens slightly from intimate to energetic broadcast lighting. Graphics overlay space on sides.`
+                dialogue: segment2Dialogue,
+                emotion: segment2Emotion,
+                role: 'middle'
             });
 
+            // ✅ Generar segmento 2 con URL pública de Supabase (Image-to-Video)
             const segment2Result = await this.veo3Client.generateVideo(developmentPrompt, {
-                duration: 8,
-                aspect: '9:16'
+                aspectRatio: '9:16',
+                useImageReference: true,
+                imageUrl: segment1LastFrame // ✅ URL pública de Supabase Storage
             });
+
+            // ✅ ESPERAR segmento 2 ANTES de generar segmento 3 (secuencial)
+            logger.info('[ViralVideoBuilder] Esperando segmento 2...');
+            const segment2 = await this.veo3Client.waitForCompletion(segment2Result.data.taskId);
+
+            // 🎬 Extraer último frame del segmento 2 y subir a Supabase para continuidad
+            logger.info('[ViralVideoBuilder] Extrayendo último frame del segmento 2...');
+            const segment2VideoPath = await this.downloadVideo(segment2.resultUrls[0], 'seg2-for-frame');
+            const segment2LastFrameLocal = await this.frameExtractor.extractLastFrame(segment2VideoPath);
+            logger.info(`[ViralVideoBuilder] ✅ Frame local extraído: ${segment2LastFrameLocal}`);
+
+            // ✅ Subir frame a Supabase Storage y obtener URL pública
+            const segment2LastFrame = await supabaseFrameUploader.uploadFrame(segment2LastFrameLocal, 'seg2-end');
+            logger.info(`[ViralVideoBuilder] ✅ Frame en Supabase: ${segment2LastFrame}`);
 
             // ====================================
             // SEGMENTO 3: CALL-TO-ACTION (8s) - Urgencia
             // ====================================
-            logger.info('[ViralVideoBuilder] Generando segmento 3: CALL-TO-ACTION urgente...');
-            const ctaDialogue = `¿Fichamos o esperamos? Yo lo tengo claro, Misters. A este precio es IMPRESCINDIBLE para vuestra plantilla. ¿A qué esperáis? ¡Fichad ya!`;
+            logger.info(
+                `[ViralVideoBuilder] Generando segmento 3: CALL-TO-ACTION (Image-to-Video desde Supabase)...`
+            );
 
+            const segment3Dialogue = unifiedScript.segments[2].dialogue;
+            const segment3Emotion = unifiedScript.segments[2].emotion;
+
+            // ✅ Prompt simple para continuidad natural
             const ctaPrompt = this.promptBuilder.buildPrompt({
-                dialogue: ctaDialogue,
-                enhanced: true,
-                behavior: `She asks question with raised eyebrow and slight head tilt, then builds to passionate conviction with decisive nod. Ends with direct camera address and confident smile, creating urgency and FOMO.`,
-                cinematography: `Camera: Medium close-up, slight push-in on final call to action. Lighting: full broadcast lighting, vibrant and energetic. Eye contact maintained throughout for direct connection.`
+                dialogue: segment3Dialogue,
+                emotion: segment3Emotion,
+                role: 'outro'
             });
 
+            // ✅ Generar segmento 3 con URL pública de Supabase (Image-to-Video)
             const segment3Result = await this.veo3Client.generateVideo(ctaPrompt, {
-                duration: 8,
-                aspect: '9:16'
+                aspectRatio: '9:16',
+                useImageReference: true,
+                imageUrl: segment2LastFrame // ✅ URL pública de Supabase Storage
             });
 
-            // Esperar a que los 3 videos se completen
-            logger.info('[ViralVideoBuilder] Esperando a que se completen los 3 segmentos...');
-
-            const segment1 = await this.veo3Client.waitForCompletion(segment1Result.taskId);
-            const segment2 = await this.veo3Client.waitForCompletion(segment2Result.taskId);
-            const segment3 = await this.veo3Client.waitForCompletion(segment3Result.taskId);
+            // ✅ ESPERAR segmento 3
+            logger.info('[ViralVideoBuilder] Esperando segmento 3...');
+            const segment3 = await this.veo3Client.waitForCompletion(segment3Result.data.taskId);
 
             // ====================================
             // CONCATENAR SEGMENTOS
             // ====================================
-            logger.info('[ViralVideoBuilder] Concatenando 3 segmentos con transiciones suaves...');
+            logger.info('[ViralVideoBuilder] Concatenando 3 segmentos...');
 
-            const videoURLs = [
-                segment1.resultUrls[0],
-                segment2.resultUrls[0],
-                segment3.resultUrls[0]
-            ];
+            // Descargar todos los segmentos
+            const tempPaths = await Promise.all([
+                this.downloadVideo(segment1.resultUrls[0], 'segment-1'),
+                this.downloadVideo(segment2.resultUrls[0], 'segment-2'),
+                this.downloadVideo(segment3.resultUrls[0], 'segment-3')
+            ]);
 
-            // Descargar videos a temp
-            const tempPaths = await Promise.all(
-                videoURLs.map((url, index) => this.downloadVideo(url, `segment-${index + 1}`))
-            );
-
-            // Concatenar con transiciones crossfade
+            // ✅ Concatenar SIN transiciones (continuidad visual ya garantizada por Supabase frames)
             const finalVideoPath = await this.concatenator.concatenateVideos(tempPaths, {
                 transition: {
-                    type: 'crossfade',
-                    duration: 0.5,
-                    enabled: true
+                    type: 'none', // No crossfade - frames ya garantizan continuidad
+                    duration: 0,
+                    enabled: false
                 },
                 audio: {
                     normalize: true,
-                    fadeInOut: true
+                    fadeInOut: false // Sin fade audio - continuidad natural
+                },
+                outro: {
+                    enabled: true, // ✅ Agregar logo outro + freeze frame
+                    freezeFrame: {
+                        enabled: true,
+                        duration: 0.8 // 0.8s freeze frame antes del logo
+                    }
                 }
             });
 
@@ -159,14 +238,16 @@ class ViralVideoBuilder {
                     team,
                     stats,
                     generatedAt: new Date().toISOString(),
+                    unifiedScript: unifiedScript,
                     segments: [
-                        { type: 'hook', taskId: segment1.taskId, dialogue: hookDialogue },
+                        { type: 'hook', taskId: segment1.taskId, dialogue: segment1Dialogue, emotion: segment1Emotion },
                         {
                             type: 'development',
                             taskId: segment2.taskId,
-                            dialogue: developmentDialogue
+                            dialogue: segment2Dialogue,
+                            emotion: segment2Emotion
                         },
-                        { type: 'cta', taskId: segment3.taskId, dialogue: ctaDialogue }
+                        { type: 'cta', taskId: segment3.taskId, dialogue: segment3Dialogue, emotion: segment3Emotion }
                     ]
                 }
             };

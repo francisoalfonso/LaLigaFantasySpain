@@ -1,20 +1,51 @@
 # Prioridades - Fantasy La Liga Pro
 
-**Última actualización**: 2025-10-09 15:30
+**Última actualización**: 2025-10-11 21:30
 
-## 🔴 P0 - CRÍTICO (Hacer HOY)
+## 🔴 P0 - CRÍTICO (Hacer HOY - 12 Oct)
 
-### ✅ COMPLETADO
+### 🚧 EN PROGRESO
+- [ ] **Testing E2E sistema VEO3 optimizado**
+  - Comando: `npm run veo3:test-nano-banana`
+  - Validar logs: "✅ IDEAL" en diálogos 40-45 palabras
+  - Comparar con video problemático: db72769c3ec28b017d768ddf880d98df
+  - **Checklist verificación**:
+    - ❌ NO hay silencios largos (>1s)
+    - ❌ NO hay voz en off inventada
+    - ✅ Ana habla fluido todo el segmento
+    - ✅ Transiciones invisibles frame-to-frame
+    - ✅ Acciones físicas progresivas
+
+### ✅ COMPLETADO (11 Oct)
+- [x] **Optimización prompts VEO3 playground-style**
+  - Nuevo método `buildEnhancedNanoBananaPrompt()` en promptBuilder.js
+  - Diálogos extendidos: 10 → 40-45 palabras (+320%)
+  - Duración segmentos: 7s → 8s (estándar playground)
+  - Velocidad habla: 2.5 → 5 palabras/segundo (natural)
+  - Endpoint veo3.js actualizado
+  - Documento resumen: RESUMEN-MEJORA-PROMPTS-VEO3-11OCT2025.md
+  - Commit: 09b4619, Push: ✅ GitHub
+
+### ✅ COMPLETADO (9-10 Oct)
 - [x] **Estructura `.claude/` reglas centralizadas**
   - `.cursorrules` creado
   - `.claude/START_HERE.md` punto de entrada único
   - `.claude/rules/01-CRITICAL-RULES.md` reglas inquebrantables
   - Migración completa: CODE_STYLE, API_GUIDELINES, NORMAS_DESARROLLO
 
-### 🚧 EN PROGRESO
+## 🟡 P1 - IMPORTANTE (Esta semana 14-18 Oct)
+
+### Iteración según resultados test
+- [ ] **Ajustes post-testing si necesario**
+  - Analizar feedback de videos generados
+  - Ajustar rangos palabras si >50% fuera de ideal
+  - Refinar mapeo emociones → tonos si inconsistencias
+  - Actualizar documento resumen con resultados reales
+
+### Workflows y Referencia (postponed desde P0)
 - [ ] **Completar workflows `.claude/workflows/`**
   - session-start.md
-  - new-feature.md  
+  - new-feature.md
   - debugging.md
   - deployment.md
 
@@ -23,19 +54,6 @@
   - services.md
   - commands.md
   - troubleshooting.md
-
-## 🟡 P1 - IMPORTANTE (Esta semana)
-
-### Testing y Validación
-- [ ] **Validación E2E flujo Instagram chollos virales**
-  - Endpoint: `/api/instagram/preview-viral`
-  - Frontend: `instagram-viral-preview.html`
-  - Backend: Sistema versionado prompts
-
-- [ ] **Testing sistema versionado prompts VEO3**
-  - Persistencia backend + localStorage
-  - Historial de versiones funcional
-  - Comparación de versiones
 
 ### Documentación Oficial APIs
 - [ ] **Descargar documentación oficial API-Sports**
@@ -81,23 +99,24 @@
 
 | Prioridad | Total | Completado | En Progreso | Bloqueado |
 |-----------|-------|------------|--------------|-----------|
-| P0 | 3 | 1 | 2 | 0 |
-| P1 | 4 | 0 | 0 | 2 |
+| P0 | 3 | 2 | 1 | 0 |
+| P1 | 5 | 0 | 0 | 2 |
 | P2 | 4 | 0 | 0 | 0 |
-| **TOTAL** | **11** | **1** | **2** | **2** |
+| **TOTAL** | **12** | **2** | **1** | **2** |
 
 ## 🎯 Objetivos Semana
 
 ### Esta Semana (Oct 9-15)
-1. ✅ Completar workflows `.claude/workflows/`
-2. ✅ Crear archivos referencia `.claude/reference/`
-3. ✅ Validación E2E Instagram chollos virales
-4. ✅ Testing sistema versionado VEO3
+1. ✅ Estructura reglas `.claude/` centralizada
+2. ✅ Optimización prompts VEO3 playground-style
+3. 🚧 Testing E2E sistema VEO3 optimizado (mañana 12 Oct)
+4. ⏸️ Workflows y archivos referencia (postponed a P1)
 
-### Próxima Semana (Oct 16-22)
-1. Descargar documentación oficial APIs
-2. Optimizar sistema cache VEO3
-3. Implementar métricas avanzadas
+### Próxima Semana (Oct 14-18)
+1. Iteración según resultados test VEO3
+2. Completar workflows y archivos referencia
+3. Descargar documentación oficial APIs
+4. Optimizar sistema cache VEO3
 
 ## 🚨 Bloqueadores Críticos
 
@@ -117,8 +136,8 @@
 
 ---
 
-**Próxima revisión**: 2025-10-16
+**Próxima revisión**: 2025-10-12 (post-test E2E)
 **Responsable**: Claude + Fran
-**Estado**: ✅ **EN PROGRESO** - P0 completado, P1 en curso
+**Estado**: ✅ **P0 CASI COMPLETO** - Optimización VEO3 implementada, pendiente validación E2E
 
 

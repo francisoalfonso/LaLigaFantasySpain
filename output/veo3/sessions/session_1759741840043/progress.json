@@ -1,0 +1,19 @@
+{
+  "sessionId": 1759741840043,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759741840043",
+  "segmentsCompleted": 0,
+  "segmentsTotal": 2,
+  "playerName": "Dani Carvajal",
+  "contentType": "chollo",
+  "preset": "chollo_quick",
+  "segments": [],
+  "error": {
+    "segmentIndex": 0,
+    "segmentNumber": 1,
+    "segmentRole": "intro",
+    "message": "Error API VEO3: The current credits are insufficient. Please top up.",
+    "stack": "Error: Error API VEO3: The current credits are insufficient. Please top up.\n    at VEO3Client.generateVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:189:23)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async VEO3Client.generateCompleteVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:356:32)\n    at async /Users/fran/Desktop/CURSOR/Fantasy la liga/backend/routes/veo3.js:383:37",
+    "timestamp": "2025-10-06T09:10:40.368Z"
+  },
+  "lastUpdate": "2025-10-06T09:10:40.368Z"
+}

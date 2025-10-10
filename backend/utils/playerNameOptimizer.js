@@ -11,6 +11,20 @@
  */
 
 const logger = require('./logger');
+const path = require('path');
+const fs = require('fs');
+
+// 🔧 FIX: Cargar player-dictionary.json automáticamente
+const PLAYER_DICTIONARY_PATH = path.join(__dirname, '../../data/player-dictionary.json');
+let playerDictionary = {};
+
+try {
+    const dictionaryRaw = fs.readFileSync(PLAYER_DICTIONARY_PATH, 'utf-8');
+    playerDictionary = JSON.parse(dictionaryRaw);
+    logger.info(`[PlayerNameOptimizer] ✅ Diccionario cargado: ${Object.keys(playerDictionary).length} jugadores`);
+} catch (error) {
+    logger.error('[PlayerNameOptimizer] ❌ Error cargando player-dictionary.json:', error.message);
+}
 
 /**
  * Extraer apellido de nombre completo
@@ -23,17 +37,26 @@ function extractSurname(fullName) {
         return fullName || '';
     }
 
-    // Casos especiales
+    // 🔧 FIX: Primero verificar player-dictionary.json
+    if (playerDictionary[fullName] && playerDictionary[fullName].surname) {
+        const safeSurname = playerDictionary[fullName].surname;
+        logger.info(`[PlayerNameOptimizer] 📖 DICCIONARIO: "${fullName}" → "${safeSurname}"`);
+        return safeSurname;
+    }
+
+    // Casos especiales hardcoded (fallback)
     const specialCases = {
         'Vinicius Junior': 'Vinicius',
         'Vinicius Jr': 'Vinicius',
         'Robert Lewandowski': 'Lewandowski',
         'Kylian Mbappé': 'Mbappé',
         'Lionel Messi': 'Messi',
-        'Cristiano Ronaldo': 'Ronaldo'
+        'Cristiano Ronaldo': 'Ronaldo',
+        'Gavi': 'el centrocampista' // 🚨 FIX CRÍTICO: Evitar nombre directo
     };
 
     if (specialCases[fullName]) {
+        logger.info(`[PlayerNameOptimizer] 🔧 SPECIAL CASE: "${fullName}" → "${specialCases[fullName]}"`);
         return specialCases[fullName];
     }
 

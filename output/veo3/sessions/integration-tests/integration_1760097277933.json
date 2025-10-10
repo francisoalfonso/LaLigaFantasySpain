@@ -1,0 +1,41 @@
+{
+  "sessionId": "integration_test_1760097277932",
+  "timestamp": "2025-10-10T11:54:37.932Z",
+  "duration_seconds": 124.9,
+  "cost_usd": 0.06,
+  "images": [
+    {
+      "index": 1,
+      "shot": "wide",
+      "segmentRole": "hook",
+      "originalUrl": "https://tempfile.aiquickdraw.com/workers/nano/image_1760097198388_axyc9f_9x16_576x1024.png",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg1-wide-1760097275312.png",
+      "seed": 12500,
+      "generatedAt": "2025-10-10T11:53:21.344Z"
+    },
+    {
+      "index": 2,
+      "shot": "medium",
+      "segmentRole": "development",
+      "originalUrl": "https://tempfile.aiquickdraw.com/workers/nano/image_1760097242801_pom2ja_9x16_576x1024.png",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg2-medium-1760097276265.png",
+      "seed": 12501,
+      "generatedAt": "2025-10-10T11:54:06.201Z"
+    },
+    {
+      "index": 3,
+      "shot": "close-up",
+      "segmentRole": "cta",
+      "originalUrl": "https://tempfile.aiquickdraw.com/workers/nano/image_1760097274398_kmvvx0_9x16_576x1024.png",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg3-close-up-1760097277647.png",
+      "seed": 12502,
+      "generatedAt": "2025-10-10T11:54:35.155Z"
+    }
+  ],
+  "metadata": {
+    "duration_seconds": 124.9,
+    "cost_usd": 0.06,
+    "nanoBananaModel": "google/nano-banana-edit",
+    "processedAt": "2025-10-10T11:54:37.932Z"
+  }
+}

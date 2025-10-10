@@ -4,12 +4,13 @@
  */
 
 // Ana Character Bible - EXACTO para consistencia entre videos
-const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with short black curly hair styled in a professional ponytail, warm brown eyes, athletic build, wearing a navy blue sports blazer with subtle La Liga branding. NO watch, NO jewelry, NO accessories. Confident posture, natural hand gestures for emphasis, professional broadcaster energy";
+const ANA_CHARACTER_BIBLE = "A 32-year-old Spanish sports analyst with long blonde wavy hair, green-hazel eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Natural smile, confident posture, warm and approachable professional broadcaster energy";
 
-// URLs imágenes Ana Real en GitHub - Rotación automática para variedad visual
+// URLs imágenes Ana Real - Rotación automática para variedad visual
 const ANA_IMAGE_URLS = {
     // ✅ IMAGEN BASE FIJA - Pelo suelto (óptima para multi-segmento)
-    fixed: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-estudio-pelo-suelto.jpg",
+    // NOTA: Migrado a Supabase Storage (infraestructura propia, 6 Oct 2025)
+    fixed: "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/ana-estudio-01.jpeg",
 
     // Imagen principal (legacy)
     main: "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-main/Ana-001.jpeg",
@@ -43,11 +44,14 @@ const ANA_IMAGE_URLS = {
 // ✅ AHORA USA IMAGEN FIJA PELO SUELTO POR DEFECTO
 const ANA_IMAGE_URL = ANA_IMAGE_URLS.fixed;
 
-// Todas las imágenes de Ana disponibles (para rotación - legacy)
+// Todas las imágenes de Ana disponibles (para rotación)
+// ✅ SOLO 1 IMAGEN para desarrollo (agregar más aquí para activar rotación en futuro)
 const ALL_ANA_IMAGES = [
-    ANA_IMAGE_URLS.main,
-    ...ANA_IMAGE_URLS.coleta,
-    ...ANA_IMAGE_URLS.peinado
+    ANA_IMAGE_URLS.fixed  // Solo ana-estudio-pelo-suelto.jpg por ahora
+    // Para activar rotación, descomentar:
+    // ANA_IMAGE_URLS.main,
+    // ...ANA_IMAGE_URLS.coleta,
+    // ...ANA_IMAGE_URLS.peinado
 ];
 
 // Configuración por defecto Ana

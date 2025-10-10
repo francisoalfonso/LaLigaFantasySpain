@@ -35,11 +35,16 @@ module.exports = {
     SELECTED_REASON: "Mejor relación calidad/precio para Fantasy La Liga 2025-26"
   },
 
-  // Sistema de puntos Fantasy La Liga
+  // Sistema de puntos Fantasy La Liga 2025-26 (DAZN Points completo)
   FANTASY_POINTS: {
-    // Puntos base por posición
+    // ============================================
+    // PUNTOS BASE
+    // ============================================
     MATCH_PLAYED: 2,
 
+    // ============================================
+    // OFFENSIVE STATS
+    // ============================================
     // Puntos por goles según posición
     GOALS: {
       GK: 10,   // Portero
@@ -51,18 +56,68 @@ module.exports = {
     // Puntos por asistencias (todas las posiciones)
     ASSIST: 3,
 
-    // Puntos específicos para porteros
-    PENALTY_SAVED: 5,
-    CLEAN_SHEET_GK: 4,
-    GOAL_CONCEDED_GK: -1,
+    // Remates (shots)
+    SHOT_ON_TARGET: 0.5,   // Remate a puerta
+    SHOT_OFF_TARGET: 0,    // Remate fuera (no puntúa)
 
-    // Puntos específicos para defensas
-    CLEAN_SHEET_DEF: 4,
+    // ============================================
+    // POSSESSION STATS (DAZN 2025-26)
+    // ============================================
+    DRIBBLE_SUCCESS: 1,     // Regate completado con éxito
+    DRIBBLE_FAILED: -0.5,   // Regate fallido
+
+    KEY_PASS: 1,            // Pase clave (oportunidad de gol)
+    ACCURATE_CROSS: 0.5,    // Centro al área completado
+
+    PASS_ACCURACY_BONUS: {  // Bonus por % pases completados
+      ABOVE_90: 2,          // >90% precisión
+      ABOVE_85: 1,          // >85% precisión
+      BELOW_70: -1          // <70% precisión (pérdida posesión)
+    },
+
+    // ============================================
+    // DEFENSIVE STATS (DAZN 2025-26)
+    // ============================================
+    TACKLE_SUCCESS: 1,      // Entrada exitosa
+    INTERCEPTION: 1,        // Intercepción
+    CLEARANCE: 0.5,         // Despeje
+    BLOCK: 0.5,             // Bloqueo de remate
+
+    DUEL_WON: 0.3,          // Duelo ganado (aéreo o terrestre)
+    DUEL_LOST: -0.2,        // Duelo perdido
+
+    BALL_RECOVERY: 0.5,     // Balón recuperado
+
+    // ============================================
+    // GOALKEEPER SPECIFIC
+    // ============================================
+    SAVE: 1,                // Parada
+    SAVE_DIFFICULT: 2,      // Parada difícil (estimado por rating)
+    PENALTY_SAVED: 5,       // Penalti parado
+    CLEAN_SHEET_GK: 4,      // Portería a cero
+    GOAL_CONCEDED_GK: -1,   // Gol encajado
+
+    // ============================================
+    // DEFENDER SPECIFIC
+    // ============================================
+    CLEAN_SHEET_DEF: 4,     // Portería a cero
     GOALS_CONCEDED_DEF: -0.5, // -1 punto cada 2 goles
 
-    // Penalizaciones (todas las posiciones)
+    // ============================================
+    // DISCIPLINE (Penalizaciones)
+    // ============================================
     YELLOW_CARD: -1,
-    RED_CARD: -3
+    RED_CARD: -3,
+    FOUL_COMMITTED: -0.2,   // Falta cometida (acumulativo)
+    PENALTY_CONCEDED: -2,   // Penalti cometido
+
+    // ============================================
+    // NEGATIVE STATS
+    // ============================================
+    POSSESSION_LOST: -0.1,  // Balón perdido
+    PENALTY_MISSED: -3,     // Penalti fallado
+    OWN_GOAL: -5,           // Gol en propia puerta
+    OFFSIDE: -0.2           // Fuera de juego (acumulativo)
   },
 
   // Mapeo de posiciones

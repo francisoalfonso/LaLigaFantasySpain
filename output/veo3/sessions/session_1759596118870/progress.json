@@ -1,0 +1,19 @@
+{
+  "sessionId": 1759596118870,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759596118870",
+  "segmentsCompleted": 0,
+  "segmentsTotal": 3,
+  "playerName": "Gavi",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [],
+  "error": {
+    "segmentIndex": 0,
+    "segmentNumber": 1,
+    "segmentRole": "intro",
+    "message": "Generación falló: failed",
+    "stack": "Error: Generación falló: failed\n    at VEO3Client.waitForCompletion (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:299:27)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async VEO3Client.generateCompleteVideo (/Users/fran/Desktop/CURSOR/Fantasy la liga/backend/services/veo3/veo3Client.js:331:27)\n    at async /Users/fran/Desktop/CURSOR/Fantasy la liga/backend/routes/veo3.js:331:37",
+    "timestamp": "2025-10-04T16:43:28.327Z"
+  },
+  "lastUpdate": "2025-10-04T16:43:28.327Z"
+}

@@ -1,0 +1,102 @@
+{
+  "id": "lucas-ahijado-v1760086206601",
+  "version": 1,
+  "timestamp": "2025-10-10T08:50:06.602Z",
+  "playerData": {
+    "playerName": "Lucas Ahijado",
+    "team": "Oviedo",
+    "price": 6.56,
+    "ratio": 1.58,
+    "stats": {
+      "games": 5,
+      "minutes": 369,
+      "goals": 0,
+      "assists": 1,
+      "rating": "6.88"
+    }
+  },
+  "testMetadata": {
+    "testDate": "2025-10-10T08:50:06.602Z",
+    "testNumber": 1,
+    "fixesApplied": [
+      "guion-unificado",
+      "subtitulos-virales",
+      "logo-outro",
+      "player-card-overlay",
+      "imagen-ana-fija",
+      "sin-transiciones-camara"
+    ],
+    "testPurpose": "E2E completo - Video viral con player card para Lucas Ahijado",
+    "feedback": {
+      "whatWorks": [],
+      "whatFails": [],
+      "severity": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "reviewedBy": null,
+      "reviewDate": null,
+      "reviewNotes": "Pendiente de revisión manual en test-history.html"
+    },
+    "checklist": {
+      "imagenAnaFija": true,
+      "sinTransicionesCamara": true,
+      "audioSinCortes": null,
+      "vozConsistente": null,
+      "pronunciacionCorrecta": null,
+      "logoOutro": true,
+      "duracionCorrecta": null,
+      "hookSegundo3": true,
+      "ctaClaro": null
+    },
+    "qualityScore": {
+      "videoQuality": null,
+      "audioQuality": null,
+      "viralPotential": null,
+      "technicalScore": null,
+      "overallScore": 10,
+      "autoCalculated": true,
+      "calculationMethod": "Initial base score (pending manual review)"
+    }
+  },
+  "veo3Config": {
+    "anaImageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/ana-estudio-01.jpeg",
+    "seed": 30001,
+    "enhanced": false,
+    "modelVersion": "veo3",
+    "segmentCount": 3,
+    "totalDuration": 24,
+    "segments": [
+      {
+        "index": 1,
+        "type": "hook",
+        "taskId": "d85c711023d6bbd1cfc77e5d937a93ef",
+        "dialogue": "He encontrado el chollo absoluto... Jugador está a precio regalado... va a explotar.",
+        "emotion": "curiosidad"
+      },
+      {
+        "index": 2,
+        "type": "development",
+        "taskId": "b18ed72f13b2de1948c73ce925d58b1e",
+        "dialogue": "Números espectaculares... dobla su valor en puntos. Está volando en Fantasy.",
+        "emotion": "autoridad"
+      },
+      {
+        "index": 3,
+        "type": "cta",
+        "taskId": "e9c39e585727dd2e9757d9f4d694c949",
+        "dialogue": "Es una ganga total. Nadie lo ha fichado aún. Fichadlo ahora antes que suba.",
+        "emotion": "accion"
+      }
+    ]
+  },
+  "viralScore": 60,
+  "isRealVideo": true,
+  "caption": "🚨 ALERTA CHOLLO - JORNADA ACTUAL 🚨\n\nLucas Ahijado - Oviedo\n💰 Solo €6.56M (Ratio 1.58x)\n⚡ 68 pts acumulados\n📈 Proyección: 81+ pts\n + 1 asistencias\n\n¿Por qué es IMPRESCINDIBLE?\n✅ Precio infravaluado\n✅ Buen calendario\n✅ En racha\n\n⏰ Ficha ANTES de que suba de precio\n\n¿Le metes en tu plantilla? 👇\n\n#FantasyLaLiga #Chollos #Misters #LaLiga #Fantasy #Oviedo #Jornada #Fichajes #CholloDelDia",
+  "metadata": {
+    "createdAt": "2025-10-10T08:50:06.602Z",
+    "updatedAt": "2025-10-10T08:50:06.602Z",
+    "status": "testing"
+  }
+}

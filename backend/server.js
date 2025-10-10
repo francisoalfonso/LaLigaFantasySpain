@@ -1,5 +1,7 @@
 // Servidor Express principal para Dashboard Fantasy La Liga
-require('dotenv').config();
+require('dotenv').config(); // Cargar .env principal
+require('dotenv').config({ path: '.env.supabase' }); // Cargar .env.supabase
+require('dotenv').config({ path: '.env.n8n' }); // Cargar .env.n8n
 
 // Validar variables de entorno ANTES de inicializar cualquier servicio
 const { validateAllEnv } = require('./config/envValidator');
@@ -51,6 +53,8 @@ const videosRoutes = require('./routes/videos');
 const contentPreviewRoutes = require('./routes/contentPreview');
 const youtubeShortsRoutes = require('./routes/youtubeShorts');
 const carouselsRoutes = require('./routes/carousels');
+const testHistoryRoutes = require('./routes/testHistory');
+const nanoBananaRoutes = require('./routes/nanoBanana');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -94,6 +98,9 @@ app.use('/assets/images', express.static(path.join(__dirname, 'assets/images')))
 
 // Servir videos VEO3 generados
 app.use('/output/veo3', express.static(path.join(__dirname, '../output/veo3')));
+
+// Servir carpeta data (para test history videos)
+app.use('/data', express.static(path.join(__dirname, '../data')));
 
 // Middleware para logging de peticiones
 app.use((req, res, next) => {
@@ -142,6 +149,9 @@ app.use('/api/ai', heavyOperationsLimiter, contentAIRoutes);
 // Generación de imágenes (30 req/15min)
 app.use('/api/images', imageGenerationLimiter, imageGeneratorRoutes);
 
+// Nano Banana - generación de imágenes Ana (30 req/15min)
+app.use('/api/nano-banana', imageGenerationLimiter, nanoBananaRoutes);
+
 // VEO3 - muy restrictivo (5 req/hora)
 app.use('/api/veo3', veo3Limiter, veo3Routes);
 
@@ -157,6 +167,7 @@ app.use('/api/videos', videosRoutes);
 app.use('/api/content-preview', contentPreviewRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/carousels', carouselsRoutes);
+app.use('/api/test-history', testHistoryRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -300,7 +311,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Iniciar servidor
-app.listen(PORT, HOST, () => {
+const server = app.listen(PORT, HOST, () => {
     // Banner de inicio con logger estructurado
     const banner = [
         '',
@@ -330,13 +341,18 @@ app.listen(PORT, HOST, () => {
             images: '30 req/15min'
         }
     });
+});
 
-    // Verificar configuración
-    if (!process.env.API_FOOTBALL_KEY) {
-        logger.warn('API_FOOTBALL_KEY no configurada');
-    } else {
-        logger.success('API-Sports Key configurada - Plan Ultra activo');
-    }
+// ✅ FIX: Aumentar timeout del servidor para rutas VEO3 de larga duración
+// Videos VEO3 tardan ~4-6 minutos, default Node.js es 2 minutos
+server.timeout = 900000; // 15 minutos (igual que timeout del cliente E2E)
+server.keepAliveTimeout = 905000; // 15 min + 5s margen
+server.headersTimeout = 910000; // Debe ser > keepAliveTimeout
+
+logger.info('⏱️  Timeouts del servidor configurados para VEO3', {
+    timeout: '15 minutos',
+    keepAlive: '15 min + 5s',
+    headers: '15 min + 10s'
 });
 
 // Manejo graceful de cierre

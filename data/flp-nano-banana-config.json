@@ -1,0 +1,128 @@
+{
+  "updated_at": "2025-10-10T09:56:25.255Z",
+  "bucket": "flp",
+  "structure": {
+    "ana": 4,
+    "estudio": 1,
+    "kits": 13
+  },
+  "total_images": 18,
+  "ana_references": [
+    {
+      "role": "body-outfit",
+      "description": "Cuerpo completo / outfit (polo FLP)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-03.png",
+      "path": "ana/ana-peinido2-03.png"
+    },
+    {
+      "role": "face-frontal",
+      "description": "Rostro frontal (Face ID principal)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-04.png",
+      "path": "ana/ana-peinido2-04.png"
+    },
+    {
+      "role": "face-right-profile",
+      "description": "Perfil derecho (volumen lateral)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-06.png",
+      "path": "ana/ana-peinido2-06.png"
+    },
+    {
+      "role": "face-left-profile",
+      "description": "Perfil izquierdo (equilibrio facial)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-07.png",
+      "path": "ana/ana-peinido2-07.png"
+    }
+  ],
+  "estudio": {
+    "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-FLP.jpg",
+    "path": "estudio/estudio-FLP.jpg",
+    "description": "Entorno del estudio (luces neón + pantallas) - VA AL FINAL en el array de referencias"
+  },
+  "kits": [
+    {
+      "team": "Bilbao",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/Bilbao.png",
+      "path": "kits/Bilbao.png",
+      "description": "Kit Athletic Bilbao"
+    },
+    {
+      "team": "Villarreal",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/Villarreal.png",
+      "path": "kits/Villarreal.png",
+      "description": "Kit Villarreal"
+    },
+    {
+      "team": "alaves",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/alaves.png",
+      "path": "kits/alaves.png",
+      "description": "Kit Alavés"
+    },
+    {
+      "team": "atletico",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/atletico.png",
+      "path": "kits/atletico.png",
+      "description": "Kit Atlético Madrid"
+    },
+    {
+      "team": "betis",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/betis.png",
+      "path": "kits/betis.png",
+      "description": "Kit Betis"
+    },
+    {
+      "team": "celta",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/celta.png",
+      "path": "kits/celta.png",
+      "description": "Kit Celta"
+    },
+    {
+      "team": "espanol",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/espanol.png",
+      "path": "kits/espanol.png",
+      "description": "Kit Español"
+    },
+    {
+      "team": "getafe",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/getafe.png",
+      "path": "kits/getafe.png",
+      "description": "Kit Getafe"
+    },
+    {
+      "team": "mallorca",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/mallorca.png",
+      "path": "kits/mallorca.png",
+      "description": "Kit Mallorca"
+    },
+    {
+      "team": "oviedo",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/oviedo.png",
+      "path": "kits/oviedo.png",
+      "description": "Kit Oviedo"
+    },
+    {
+      "team": "real-sociedad",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/real-sociedad.png",
+      "path": "kits/real-sociedad.png",
+      "description": "Kit Real Sociedad"
+    },
+    {
+      "team": "sevilla",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/sevilla.png",
+      "path": "kits/sevilla.png",
+      "description": "Kit Sevilla"
+    },
+    {
+      "team": "valencia",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/kits/valencia.png",
+      "path": "kits/valencia.png",
+      "description": "Kit Valencia"
+    }
+  ],
+  "model": "google/nano-banana-edit",
+  "seed": 12500,
+  "prompt_strength": 0.75,
+  "image_size": "9:16",
+  "output_format": "png",
+  "transparent_background": false,
+  "notes": "CONFIGURACIÓN DEFINITIVA VALIDADA - Oct 10, 2025: image_size '9:16' fuerza vertical correcto (576x1024), prompt_strength 0.75, prompt BASE sin añadidos (aspecto realista natural, NO 3D/render). REGLA CRÍTICA: Usar SOLO prompt base sin texto extra. Variación entre imágenes se logra con seed (+1, +2), NO con texto adicional. NO MODIFICAR ESTA CONFIGURACIÓN."
+}

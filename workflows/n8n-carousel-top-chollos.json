@@ -20,7 +20,7 @@
     {
       "parameters": {
         "authentication": "none",
-        "url": "http://localhost:3000/api/carousels/top-chollos",
+        "url": "http://localhost:3000/api/carousels/generate-with-hook",
         "options": {
           "queryParameters": {
             "parameters": [
@@ -36,10 +36,11 @@
           }
         }
       },
-      "name": "Fetch Carousel Data",
+      "name": "Fetch Carousel Data (con Hook Viral)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 3,
-      "position": [450, 300]
+      "position": [450, 300],
+      "notes": "Llama a /api/carousels/generate-with-hook que ejecuta el hook viral de .claude/hooks/carousel-intro-hook.md"
     },
     {
       "parameters": {
@@ -158,14 +159,14 @@
       "main": [
         [
           {
-            "node": "Fetch Carousel Data",
+            "node": "Fetch Carousel Data (con Hook Viral)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Fetch Carousel Data": {
+    "Fetch Carousel Data (con Hook Viral)": {
       "main": [
         [
           {

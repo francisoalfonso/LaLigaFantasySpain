@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Instagram Video Version Schema",
+  "description": "Schema para documentar pruebas y versiones de videos Instagram",
+  "type": "object",
+  "required": ["id", "version", "timestamp", "playerData"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier: {player-slug}-v{timestamp}"
+    },
+    "version": {
+      "type": "number",
+      "description": "Sequential version number for this player"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "playerData": {
+      "type": "object",
+      "required": ["playerName", "team", "price"],
+      "properties": {
+        "playerName": "string",
+        "team": "string",
+        "price": "number",
+        "stats": "object",
+        "ratio": "number"
+      }
+    },
+    "testMetadata": {
+      "type": "object",
+      "description": "✨ NUEVO: Metadata de pruebas y fixes aplicados",
+      "properties": {
+        "testDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "📅 Fecha/hora exacta del test (para ordenar en pila)"
+        },
+        "testNumber": {
+          "type": "number",
+          "description": "#️⃣ Número secuencial global de test (ej: Test #47)"
+        },
+        "fixesApplied": {
+          "type": "array",
+          "description": "Lista de fixes aplicados en esta versión",
+          "items": {
+            "type": "string",
+            "enum": [
+              "imagen-ana-fija",
+              "sin-transiciones-camara",
+              "audio-fade-in-out",
+              "logo-outro",
+              "subtitulos-virales",
+              "pronunciacion-ratio",
+              "numeros-completos",
+              "apellidos-solo",
+              "guion-unificado"
+            ]
+          }
+        },
+        "testPurpose": {
+          "type": "string",
+          "description": "Propósito del test",
+          "examples": [
+            "Test imagen Ana consistente",
+            "Validar eliminación transiciones",
+            "E2E completo post-fixes"
+          ]
+        },
+        "feedback": {
+          "type": "object",
+          "description": "📝 Feedback detallado del test (LO QUE FUNCIONA Y LO QUE FALLA)",
+          "required": ["whatWorks", "whatFails", "reviewedBy", "reviewDate"],
+          "properties": {
+            "whatWorks": {
+              "type": "array",
+              "description": "✅ Lo que funciona bien en este video",
+              "items": {
+                "type": "string",
+                "examples": [
+                  "Ana tiene la misma imagen en los 3 segmentos",
+                  "Cámara completamente estática, sin zooms",
+                  "Audio sin cortes en transiciones",
+                  "Pronunciación de números correcta"
+                ]
+              }
+            },
+            "whatFails": {
+              "type": "array",
+              "description": "❌ Lo que falla o necesita mejora",
+              "items": {
+                "type": "string",
+                "examples": [
+                  "Ana cambia de ropa en segmento 2",
+                  "Hay zoom lento en el hook inicial",
+                  "Audio se traba en segundo 8",
+                  "Iluminación muy oscura en segmento 3"
+                ]
+              }
+            },
+            "severity": {
+              "type": "object",
+              "description": "Severidad de los fallos",
+              "properties": {
+                "critical": {
+                  "type": "number",
+                  "description": "# de fallos críticos (bloqueantes)"
+                },
+                "major": {
+                  "type": "number",
+                  "description": "# de fallos mayores (importantes)"
+                },
+                "minor": {
+                  "type": "number",
+                  "description": "# de fallos menores (cosméticos)"
+                }
+              }
+            },
+            "reviewedBy": {
+              "type": "string",
+              "description": "Quién revisó (Usuario o Claude)",
+              "examples": ["Usuario", "Claude Code", "Usuario + Claude"]
+            },
+            "reviewDate": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Cuándo se completó el feedback"
+            },
+            "reviewNotes": {
+              "type": "string",
+              "description": "Notas adicionales del revisor"
+            }
+          }
+        },
+        "checklist": {
+          "type": "object",
+          "description": "Checklist de validación completado",
+          "properties": {
+            "imagenAnaFija": { "type": "boolean", "description": "✅ Misma imagen Ana en 3 segmentos" },
+            "sinTransicionesCamara": { "type": "boolean", "description": "✅ Cámara estática sin zooms" },
+            "audioSinCortes": { "type": "boolean", "description": "✅ Audio sin trabas en seg 0,8,16" },
+            "vozConsistente": { "type": "boolean", "description": "✅ Misma voz en todo el video" },
+            "pronunciacionCorrecta": { "type": "boolean", "description": "✅ Números y ratio bien pronunciados" },
+            "logoOutro": { "type": "boolean", "description": "✅ Logo 1.5s al final" },
+            "duracionCorrecta": { "type": "boolean", "description": "✅ Duración 32-34s total" },
+            "hookSegundo3": { "type": "boolean", "description": "✅ Revelación jugador en seg 3" },
+            "ctaClaro": { "type": "boolean", "description": "✅ CTA directo al final" }
+          }
+        },
+        "qualityScore": {
+          "type": "object",
+          "description": "Scores de calidad detallados",
+          "properties": {
+            "videoQuality": { "type": "number", "minimum": 0, "maximum": 10 },
+            "audioQuality": { "type": "number", "minimum": 0, "maximum": 10 },
+            "viralPotential": { "type": "number", "minimum": 0, "maximum": 10 },
+            "technicalScore": { "type": "number", "minimum": 0, "maximum": 10 },
+            "overallScore": { "type": "number", "minimum": 0, "maximum": 10 }
+          }
+        },
+        "comparisonWith": {
+          "type": "string",
+          "description": "ID de versión anterior para comparar",
+          "examples": ["pere-milla-v1759490675402"]
+        },
+        "improvements": {
+          "type": "array",
+          "description": "Mejoras vs versión anterior",
+          "items": { "type": "string" }
+        },
+        "issues": {
+          "type": "array",
+          "description": "Problemas detectados en esta versión",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "veo3Config": {
+      "type": "object",
+      "description": "✨ NUEVO: Configuración VEO3 usada",
+      "properties": {
+        "anaImageUrl": { "type": "string", "description": "URL imagen Ana usada" },
+        "seed": { "type": "number", "description": "Seed Ana (30001)" },
+        "enhanced": { "type": "boolean", "description": "Enhanced mode activado?" },
+        "modelVersion": { "type": "string", "description": "veo3_fast o veo3" },
+        "segmentCount": { "type": "number", "description": "Número de segmentos" },
+        "totalDuration": { "type": "number", "description": "Duración total segundos" }
+      }
+    },
+    "previewData": {
+      "type": "object",
+      "description": "Data del preview generado"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Caption Instagram generado"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Notas adicionales manuales"
+    },
+    "viralScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Score viral (0-100)"
+    },
+    "isRealVideo": {
+      "type": "boolean",
+      "description": "Video real VEO3 o mock?"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "createdAt": "string",
+        "updatedAt": "string",
+        "userId": "string",
+        "status": {
+          "type": "string",
+          "enum": ["draft", "testing", "approved", "published", "archived"]
+        }
+      }
+    }
+  }
+}

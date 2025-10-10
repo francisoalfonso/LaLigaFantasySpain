@@ -1,0 +1,46 @@
+{
+  "test_date": "2025-10-10T10:53:41.092Z",
+  "test_type": "full_progression",
+  "duration_seconds": 119.6,
+  "total_cost_usd": 0.06,
+  "images": [
+    {
+      "index": 1,
+      "shot": "wide",
+      "segmentRole": "hook",
+      "url": "https://tempfile.aiquickdraw.com/workers/nano/image_1760093541083_3kmiom_9x16_576x1024.png",
+      "prompt": "ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, red FLP polo shirt, fully integrated with the studio lighting and reflections, red neon light reflecting on her right side, subtle blue glow from the monitor screens, realistic soft shadows, Canon EOS R5 85mm f1.4 lens, shallow depth of field, cinematic film grain, authentic human skin texture, no CGI, no render, no plastic skin, wide shot, full body from waist up, standing confidently in the center of the FLP studio, natural pose with hands gesturing",
+      "seed": 12500,
+      "referenceCount": 5,
+      "generatedAt": "2025-10-10T10:52:23.649Z"
+    },
+    {
+      "index": 2,
+      "shot": "medium",
+      "segmentRole": "development",
+      "url": "https://tempfile.aiquickdraw.com/v/0c7ffb0227264a6a907bbf81db810e7f_1760093584_0.png",
+      "prompt": "ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, red FLP polo shirt, fully integrated with the studio lighting and reflections, red neon light reflecting on her right side, subtle blue glow from the monitor screens, realistic soft shadows, Canon EOS R5 85mm f1.4 lens, shallow depth of field, cinematic film grain, authentic human skin texture, no CGI, no render, no plastic skin, medium shot, from waist up, direct eye contact with camera, professional confident expression, slight smile",
+      "seed": 12501,
+      "referenceCount": 5,
+      "generatedAt": "2025-10-10T10:53:08.951Z"
+    },
+    {
+      "index": 3,
+      "shot": "close-up",
+      "segmentRole": "cta",
+      "url": "https://tempfile.aiquickdraw.com/workers/nano/image_1760093617926_13zbbg_9x16_576x1024.png",
+      "prompt": "ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, red FLP polo shirt, fully integrated with the studio lighting and reflections, red neon light reflecting on her right side, subtle blue glow from the monitor screens, realistic soft shadows, Canon EOS R5 85mm f1.4 lens, shallow depth of field, cinematic film grain, authentic human skin texture, no CGI, no render, no plastic skin, close-up, head and shoulders only, intense direct eye contact, warm confident expression, engaging the viewer",
+      "seed": 12502,
+      "referenceCount": 5,
+      "generatedAt": "2025-10-10T10:53:41.090Z"
+    }
+  ],
+  "validation_checklist": {
+    "identity_consistency": null,
+    "realistic_skin": null,
+    "studio_integration": null,
+    "cinematic_progression": null,
+    "flp_branding": null,
+    "professional_expressions": null
+  }
+}

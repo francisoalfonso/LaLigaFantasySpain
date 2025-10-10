@@ -1,0 +1,124 @@
+# Cursor Rules - Fantasy La Liga Pro
+
+## 🔴 INICIO DE SESIÓN (OBLIGATORIO)
+
+**ANTES de responder a CUALQUIER pregunta del usuario, SIEMPRE ejecutar estos pasos:**
+
+1. ✅ Leer `.claude/START_HERE.md` (índice maestro)
+2. ✅ Leer `.claude/rules/01-CRITICAL-RULES.md` (reglas inquebrantables)
+3. ✅ Leer `.claude/status/CURRENT-SPRINT.md` (estado actual)
+4. ✅ Confirmar en tu PRIMERA respuesta: "✅ Contexto cargado: START_HERE + CRITICAL-RULES + CURRENT-SPRINT leídos"
+
+**Sin excepciones. Esto previene pérdida de contexto.**
+
+---
+
+## 📋 REGLAS DURANTE LA SESIÓN
+
+### Antes de Crear Archivos
+- ❌ **NUNCA** crear archivos sin leer `.claude/rules/02-development.md` primero
+- ✅ **SIEMPRE** buscar archivos existentes: `ls [directorio]/ | grep -i [keyword]`
+- ✅ **SIEMPRE** preguntar: "¿Ya existe algo similar que pueda reutilizar?"
+
+### Antes de Codificar
+- ✅ Consultar `.claude/rules/03-code-style.md` para estándares
+- ✅ Usar Winston logger (NO `console.log`)
+- ✅ Validar inputs con Joi
+- ✅ Try/catch en todas las funciones async
+
+### Antes de Usar APIs
+- ✅ Consultar `.claude/rules/04-apis.md` para guidelines
+- ✅ Verificar documentación oficial en `/docs/[API_NAME]_OFICIAL.md`
+- ✅ Aplicar rate limiting SIEMPRE
+
+### Antes de Usar VEO3
+- ✅ Consultar `.claude/rules/05-veo3.md` para reglas específicas
+- ❌ **NUNCA** cambiar `ANA_CHARACTER_SEED=30001`
+- ❌ **NUNCA** cambiar `ANA_IMAGE_URL`
+- ❌ **NUNCA** crear prompts >80 palabras
+- ✅ **SIEMPRE** usar "speaks in Spanish from Spain" (lowercase)
+- ✅ **SIEMPRE** usar referencias genéricas ("el jugador", NO nombres de jugadores)
+
+---
+
+## 🎯 WORKFLOWS ESPECÍFICOS
+
+### Desarrollar Nueva Funcionalidad
+1. Leer `.claude/workflows/new-feature.md`
+2. Verificar en `.claude/status/PRIORITIES.md` que es P0/P1
+3. Seguir proceso documentado
+
+### Debugging
+1. Leer `.claude/workflows/debugging.md`
+2. Consultar `.claude/reference/troubleshooting.md`
+3. Verificar logs con Winston
+
+### Modificar Base de Datos
+- ❌ **NUNCA** modificar schema sin actualizar AMBOS:
+  - `database/supabase-schema.sql`
+  - `database/init-database.js`
+- ✅ **SIEMPRE** ejecutar `npm run db:init` después de cambios
+
+---
+
+## 🚨 REGLAS CRÍTICAS QUE NUNCA SE ROMPEN
+
+1. **Temporada La Liga**: SIEMPRE usar `season=2025` (temporada 2025-26)
+2. **Ana VEO3**: NUNCA modificar seed 30001 ni imagen URL
+3. **Prompts VEO3**: MÁXIMO 80 palabras, pattern simple
+4. **Player names**: NUNCA en prompts VEO3 (usar genéricos)
+5. **Secrets**: NUNCA hardcodear (usar .env)
+6. **Logging**: NUNCA console.log (usar Winston)
+7. **Rate limiting**: SIEMPRE aplicar en APIs externas
+
+---
+
+## ✅ VALIDACIONES AUTOMÁTICAS
+
+Antes de hacer commit, verificar:
+
+- [ ] ESLint pasa: `npm run lint`
+- [ ] Tests pasan: `npm test`
+- [ ] No hay `console.log` en código
+- [ ] No hay secrets hardcodeados
+- [ ] Documentación actualizada si creaste archivos
+
+---
+
+## 📚 REFERENCIAS RÁPIDAS
+
+- **Endpoints**: `.claude/reference/endpoints.md`
+- **Servicios**: `.claude/reference/services.md`
+- **Comandos**: `.claude/reference/commands.md`
+- **Troubleshooting**: `.claude/reference/troubleshooting.md`
+
+---
+
+## 🔄 CIERRE DE SESIÓN (OBLIGATORIO)
+
+**ANTES de terminar CUALQUIER sesión:**
+
+1. ✅ Actualizar `.claude/status/CURRENT-SPRINT.md` con progreso
+2. ✅ Actualizar `.claude/status/PRIORITIES.md` con tareas completadas
+3. ✅ Actualizar `.claude/status/DECISIONS-LOG.md` con decisiones técnicas
+4. ✅ GitHub commit con mensaje estructurado
+5. ✅ Push a GitHub repositorio
+6. ✅ Health check del sistema
+7. ✅ Mensaje de cierre al usuario
+
+**SIEMPRE consultar**: `.claude/workflows/session-close.md`
+
+---
+
+## 🎓 REGLA DE ORO
+
+**SI NO ESTÁ EN `.claude/`, NO LO ASUMAS. SIEMPRE CONSULTA LA DOCUMENTACIÓN.**
+
+**NUNCA omitas la lectura inicial de START_HERE.md + CRITICAL-RULES.md + CURRENT-SPRINT.md.**
+
+---
+
+Última actualización: 2025-10-09
+Versión: 1.0.0
+
+

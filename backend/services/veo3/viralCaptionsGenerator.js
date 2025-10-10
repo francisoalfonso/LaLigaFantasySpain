@@ -53,7 +53,7 @@ class ViralCaptionsGenerator {
         console.log(`📝 ${words.length} palabras detectadas`);
 
         // Calcular timing para cada palabra
-        const wordTimings = this.calculateWordTimings(words, options.videoDuration || 8);
+        const wordTimings = this.calculateWordTimings(words, options.videoDuration || 7);  // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
 
         // Generar filtro FFmpeg para subtítulos
         const subtitleFilter = this.buildSubtitleFilter(wordTimings);
@@ -203,7 +203,7 @@ class ViralCaptionsGenerator {
                 const outputPath = await this.generateViralCaptions(
                     segment.videoPath,
                     segment.dialogue,
-                    { videoDuration: segment.duration || 8 }
+                    { videoDuration: segment.duration || 7 }  // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
                 );
 
                 results.push({

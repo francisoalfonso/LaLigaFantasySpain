@@ -6,6 +6,7 @@ const {
     validateSafeForVEO3,
     generateOptimizedCholloContent
 } = require('../../utils/playerNameOptimizer');
+const CreativeReferenceGenerator = require('../creativeReferenceGenerator');
 
 const {
     ANA_CHARACTER_BIBLE,
@@ -132,6 +133,7 @@ class PromptBuilder {
         this.maxLength = 500; // Límite recomendado VEO3
         this.emocionesPorElemento = EMOCIONES_POR_ELEMENTO;
         this.arcosEmocionales = ARCOS_EMOCIONALES;
+        this.creativeRefGenerator = new CreativeReferenceGenerator();
     }
 
     /**
@@ -144,36 +146,118 @@ class PromptBuilder {
             dialogue = '',
             enhanced = false, // Nuevo: activar modo mejorado con descripción
             behavior = '', // Descripción del comportamiento
-            cinematography = '' // Descripción de la cinematografía
+            cinematography = '', // Descripción de la cinematografía
+            role, // ✅ Rol del segmento (intro, middle, outro) - 8 Oct 2025
+            emotion // ✅ Tono emocional opcional - 8 Oct 2025
         } = config;
 
         if (enhanced && (behavior || cinematography)) {
-            // Prompt mejorado con descripción de comportamiento y cinematografía
-            let prompt = `Sports analysis video featuring the person from the reference image. `;
+            // ✅ PROMPT ENHANCED OPTIMIZADO (4 Oct 2025)
+            // Basado en investigación: prompts simples y directos funcionan mejor
+            // Preservación explícita de estilo incluida
+            // + Características físicas clave (6 Oct 2025)
+            let prompt = `The person from the reference image with long blonde wavy hair and green-hazel eyes `;
 
             if (behavior) {
-                prompt += `${behavior} `;
+                // Simplificar behavior (eliminar exceso de detalles)
+                const simpleBehavior = behavior.split('.')[0]; // Solo primera frase
+                prompt += `${simpleBehavior}. `;
             }
 
-            // 🔧 FIX: Agregar instrucciones de entonación emocional y variada
-            prompt += `Speaking in SPANISH FROM SPAIN (not Mexican Spanish) with EXPRESSIVE and ENGAGING delivery - varying tone, pace and emotion naturally. Emphasize key words with rising intonation, speak with excitement and energy where appropriate, use pauses for impact: "${dialogue}" `;
+            prompt += `speaks in SPANISH FROM SPAIN (not Mexican Spanish) with energy and emotion: "${dialogue}". `;
 
             if (cinematography) {
-                prompt += `${cinematography} `;
+                // Simplificar cinematography (eliminar exceso de detalles)
+                const simpleCinema = cinematography.split('.')[0]; // Solo primera frase
+                prompt += `${simpleCinema}. `;
             }
 
-            prompt += `Exact appearance from reference image. Natural emotional facial expressions matching voice energy.`;
+            prompt += `Maintain the exact appearance and style from the reference image.`;
 
-            logger.info(`[PromptBuilder] Prompt mejorado generado: ${prompt.length} chars`);
+            logger.info(`[PromptBuilder] Prompt enhanced optimizado: ${prompt.length} chars`);
             return prompt;
         }
 
-        // Prompt minimal para máxima adherencia a imagen de referencia
-        // CRÍTICO: SIEMPRE forzar español de España (NO mexicano)
-        // 🔧 FIX: Agregar instrucciones de entonación emocional
-        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish) with EXPRESSIVE and engaging delivery, varying tone and emotion naturally: "${dialogue}". Exact appearance from reference with natural emotional expressions.`;
+        // ✅ PROMPT OPTIMIZADO (4 Oct 2025 + 8 Oct 2025): Basado en investigación VEO3
+        // Fuente: GitHub veo3-api, Replicate blog, Google DeepMind guide
+        // Cambios clave:
+        // 1. Simplificado: 30-50 palabras (vs 100+ anterior)
+        // 2. Preservación explícita: "Maintain the exact appearance"
+        // 3. SPANISH FROM SPAIN (MAYÚSCULAS + not Mexican) para forzar acento español
+        // 4. TONO DIFERENCIADO por rol (susurro → autoridad → urgencia) - 8 Oct 2025
+        // 5. Características físicas clave: "long blonde wavy hair and green-hazel eyes"
 
-        logger.info(`[PromptBuilder] Prompt minimal generado: ${prompt.length} chars`);
+        // ========================================
+        // CATÁLOGO COMPLETO DE EMOCIONES ANA
+        // ========================================
+        // Actualizado 8 Oct 2025: Tono dinámico basado en contenido, NO en posición
+        // Cada emoción del guión se mapea al tono de voz más apropiado
+
+        const emotionalCatalog = {
+            // CURIOSIDAD / INTRIGA
+            'curiosidad': 'in a conspiratorial whisper, leaning in close as if sharing a secret',
+            'intriga': 'with mysterious intrigue, raising eyebrows slightly',
+            'sorpresa': 'with genuine surprise and wide eyes, discovering something unexpected',
+
+            // REVELACIÓN / DESCUBRIMIENTO
+            'revelacion': 'with confident revelation, as if unveiling hidden truth',
+            'descubrimiento': 'with excitement of discovery, gesturing naturally',
+
+            // AUTORIDAD / PROFESIONALIDAD
+            'autoridad': 'with confident professional authority, presenting data clearly',
+            'analisis': 'with analytical focus, explaining complex information simply',
+            'construccion': 'building the argument methodically, step by step',
+
+            // VALIDACIÓN / PRUEBA
+            'validacion': 'with factual validation, backing claims with concrete data',
+            'evidencia': 'presenting evidence confidently, pointing to key facts',
+
+            // URGENCIA / ACCIÓN
+            'urgencia': 'with urgency and excitement, creating immediate need to act',
+            'escasez': 'emphasizing scarcity and time sensitivity, leaning forward',
+            'accion': 'with decisive call to action, direct and compelling',
+
+            // IMPACTO / SHOCK
+            'impacto': 'with impactful delivery, emphasizing magnitude',
+            'shock': 'with dramatic revelation, highlighting unexpected turn',
+
+            // CONCLUSIÓN / CIERRE
+            'conclusion': 'wrapping up with clear takeaway, confident summary',
+            'moraleja': 'delivering key insight with wisdom, reflective tone',
+
+            // EMPATÍA / CONEXIÓN
+            'empatia': 'with empathy and understanding, connecting personally',
+            'complicidad': 'with knowing complicity, as if sharing insider knowledge',
+
+            // ENERGÍA POSITIVA
+            'entusiasmo': 'with genuine enthusiasm and positive energy',
+            'celebracion': 'celebrating success, smiling naturally'
+        };
+
+        // Si se especifica emoción explícita, usarla del catálogo
+        // Si no, intentar inferir del rol (backward compatibility temporal)
+        let tone;
+        if (emotion && emotionalCatalog[emotion]) {
+            tone = emotionalCatalog[emotion];
+        } else if (role) {
+            // Backward compatibility: mapeo temporal basado en rol
+            // TODO: Eliminar cuando todos los flujos usen emotion directamente
+            const roleToEmotion = {
+                intro: 'curiosidad',
+                middle: 'autoridad',
+                outro: 'urgencia'
+            };
+            const inferredEmotion = roleToEmotion[role];
+            tone = emotionalCatalog[inferredEmotion] || 'with energy and emotion';
+        } else {
+            // 🔧 FIX: Fallback SIEMPRE debe incluir "SPANISH FROM SPAIN" (mayúsculas + not Mexican)
+            // Este es el único cambio crítico para forzar acento español en TODOS los casos
+            tone = 'with energy and emotion';
+        }
+
+        const prompt = `The person from the reference image with long blonde wavy hair and green-hazel eyes speaks in CASTILIAN SPANISH FROM SPAIN with EUROPEAN SPANISH accent (CRITICAL: not Mexican, not Latin American, ONLY Castilian Spanish from Spain) ${tone}: "${dialogue}". Maintain the exact appearance and style from the reference image.`;
+
+        logger.info(`[PromptBuilder] Prompt optimizado generado (${role || 'default'}): ${prompt.length} chars`);
         return prompt;
     }
 
@@ -256,10 +340,10 @@ class PromptBuilder {
         }
 
         // Construir diálogo estructurado con estadísticas (NUEVO - siguiendo mejores prácticas)
-        const { stats = {}, ratio, team, enhanced = false } = options;
+        const { stats = {}, ratio, team, enhanced = false, dictionaryData } = options;
 
         // Estructura viral de 7 elementos para chollo (10-12s)
-        const dialogue = this._buildCholloDialogue(playerName, price, { stats, ratio, team });
+        const dialogue = this._buildCholloDialogue(playerName, price, { stats, ratio, team, dictionaryData });
 
         // Si enhanced=true, usar prompt mejorado con comportamiento
         if (enhanced) {
@@ -271,8 +355,8 @@ class PromptBuilder {
             });
         }
 
-        // Prompt con FORZAR español de España (NO mexicano)
-        const prompt = `The person in the reference image speaking in SPANISH FROM SPAIN (not Mexican Spanish): "${dialogue}". Exact appearance from reference image.`;
+        // 🔧 FIX: Usar buildPrompt() base que tiene TODOS los fixes (SPANISH FROM SPAIN + with energy and emotion)
+        const prompt = this.buildPrompt({ dialogue });
 
         logger.info(
             `[PromptBuilder] Chollo prompt con estructura viral y español de España: ${prompt.length} chars`
@@ -314,10 +398,41 @@ class PromptBuilder {
      * @private
      */
     _buildCholloDialogue(playerName, price, data) {
-        const { stats = {}, ratio, team } = data;
+        const { stats = {}, ratio, team, position, dictionaryData } = data;
 
-        // ✅ OPTIMIZACIÓN V3: Usar SOLO apellido, SIN equipo
-        const surname = extractSurname(playerName);
+        // ✅ REFERENCIAS CREATIVAS (10 Oct 2025): Usar CreativeReferenceGenerator
+        // En lugar de referencias genéricas aburridas, usamos alternativas virales:
+        // Ej: "Vinicius Jr." → ["Vini", "el 7 madridista", "el brasileño"]
+        // Ej: "Iago Aspas" → ["el moañés", "el capitán celeste", "el 10 del Celta"]
+
+        let safeReference = 'el jugador'; // Default fallback
+
+        // Intentar usar CreativeReferenceGenerator primero
+        try {
+            safeReference = this.creativeRefGenerator.getCreativeReference(
+                playerName,
+                {
+                    team: team,
+                    position: position,
+                    number: stats.number || null
+                },
+                {
+                    avoidGeneric: true,      // Evitar "el jugador" si hay mejores opciones
+                    preferNickname: true     // Preferir apodos conocidos (más virales)
+                }
+            );
+
+            logger.info(`[PromptBuilder] 🎨 Referencia creativa: "${playerName}" → "${safeReference}"`);
+        } catch (error) {
+            // Fallback al sistema anterior si falla
+            if (dictionaryData?.player?.safeReferences) {
+                const refs = dictionaryData.player.safeReferences;
+                safeReference = refs.find(ref => ref.includes('delantero') || ref.includes('centrocampista') || ref.includes('defensa'))
+                                || refs[1]
+                                || refs[0];
+            }
+            logger.warn(`[PromptBuilder] ⚠️ CreativeReferenceGenerator falló, usando fallback: "${safeReference}"`);
+        }
 
         // Estructura viral: hook → contexto → conflicto → inflexión → resolución → moraleja → cta
         const parts = [];
@@ -326,18 +441,15 @@ class PromptBuilder {
         parts.push(`¡Misters! Venid que os cuento un secreto...`);
 
         // 2. Contexto (2-4s) - building_tension
-        // ❌ ANTES: `He encontrado un jugador del ${team || 'equipo'} a solo ${price} euros...`
-        // ✅ AHORA: SIN mención de equipo (evita bloqueo Google Content Policy)
-        parts.push(`He encontrado un jugador a solo ${price} euros...`);
+        parts.push(`He encontrado ${safeReference} a solo ${price} euros...`);
 
         // 3. Conflicto (4-5s) - implicit_tension
         parts.push(`¿Demasiado barato para ser bueno?`);
 
         // 4. Inflexión (5-7s) - explosive_revelation
-        // ❌ ANTES: `¡${playerName}!` (nombre completo bloqueado)
-        // ✅ AHORA: Solo apellido (95% confianza bypass)
+        // ✅ AHORA: Solo referencia genérica (bypass garantizado)
         parts.push(
-            `¡${surname}! ${stats.goals || 0} goles, ${stats.assists || 0} asistencias en ${stats.games || 0} partidos.`
+            `${stats.goals || 0} goles, ${stats.assists || 0} asistencias en ${stats.games || 0} partidos.`
         );
 
         // 5. Resolución (7-9s) - explosive_excitement

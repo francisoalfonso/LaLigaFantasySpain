@@ -1,0 +1,56 @@
+{
+  "lastTestNumber": 49,
+  "history": [
+    {
+      "testNumber": 46,
+      "date": "2025-10-03T21:18:00.000Z",
+      "player": "Pere Milla",
+      "purpose": "BASELINE PRE-FIXES - Video sin optimizaciones",
+      "fixes": []
+    },
+    {
+      "testNumber": 47,
+      "date": "2025-10-04T09:23:06.902Z",
+      "player": "Dani Carvajal",
+      "purpose": "Frame-to-frame + fixes post-baseline",
+      "fixes": [
+        "imagen-ana-fija",
+        "sin-transiciones-camara",
+        "frame-to-frame-continuity"
+      ]
+    },
+    {
+      "testNumber": 48,
+      "date": "2025-10-04T14:34:00.000Z",
+      "player": "Dani Carvajal",
+      "purpose": "Fix acento mexicano → español castellano (CRÍTICO)",
+      "fixes": [
+        "acento-espanol-castilian-reforzado"
+      ]
+    },
+    {
+      "testNumber": 49,
+      "date": "2025-10-10T12:21:29.466Z",
+      "player": "Pere Milla",
+      "purpose": "Test Nano Banana → Supabase → VEO3",
+      "fixes": [
+        "nano-banana-image-refs",
+        "supabase-storage",
+        "veo3-with-initial-frames"
+      ]
+    }
+  ],
+  "nextTest": {
+    "testNumber": 49,
+    "expectedDate": "2025-10-05T09:00:00.000Z",
+    "player": "TBD",
+    "purpose": "Validar frame-to-frame secuencial + subtítulos karaoke",
+    "plannedFixes": [
+      "frame-to-frame-secuencial",
+      "subtitulos-karaoke-instagram",
+      "logo-outro-1.5s"
+    ]
+  },
+  "currentTest": 4,
+  "lastUpdated": "2025-10-10T12:21:29.466Z"
+}

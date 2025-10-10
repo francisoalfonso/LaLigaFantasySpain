@@ -146,16 +146,16 @@
                                 <!-- Carousel Content - Slide Intro (Diseño Replicado) -->
                                 <div class="relative aspect-[4/5] overflow-hidden" x-show="currentSlide === 0" style="background: #F9F7F4;">
                                     <!-- Contenido Principal -->
-                                    <div class="h-full flex flex-col justify-between p-8">
+                                    <div class="h-full flex flex-col justify-between pl-8 pr-0 py-8">
                                         <!-- Título TOP CHOLLOS -->
                                         <div class="mt-12">
-                                            <h1 class="text-6xl font-black text-black leading-none tracking-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
+                                            <h1 class="text-5xl font-black text-black leading-none tracking-tight whitespace-nowrap" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
                                                 TOP CHOLLOS
                                             </h1>
                                         </div>
 
-                                        <!-- Badge Jornada -->
-                                        <div class="flex justify-center -mt-4">
+                                        <!-- Badge Jornada (centrado, a la altura de las flechas) -->
+                                        <div class="absolute left-1/2 transform -translate-x-1/2" style="top: calc(50% - 55px); z-index: 10;">
                                             <div class="bg-black text-white px-8 py-3 rounded-full inline-block">
                                                 <span class="text-lg font-light tracking-wider" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
                                                     Jornada <span x-text="carouselData?.stats?.gameweek || '5'"></span>
@@ -163,110 +163,92 @@
                                             </div>
                                         </div>
 
-                                        <!-- Texto Inferior + Logo -->
-                                        <div class="relative">
-                                            <!-- Texto -->
-                                            <div class="mb-8">
-                                                <p class="text-4xl font-light text-black leading-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;">
-                                                    ¿Quieres<br>
-                                                    triunfar<br>
-                                                    esta<br>
-                                                    jornada?
+                                        <!-- Texto Hook + Logo Cortado -->
+                                        <div class="relative pb-6">
+                                            <!-- Texto Hook (más grande y estrecho) -->
+                                            <div class="mb-4" style="max-width: 160px;">
+                                                <p class="text-3xl font-semibold text-black leading-tight" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.3px;">
+                                                    Los 10 chollos que cambiarán tu jornada
                                                 </p>
                                             </div>
 
-                                            <!-- Logo Circular FLP (derecha inferior) -->
-                                            <div class="absolute -bottom-16 -right-8">
-                                                <img src="/assets/instagram/logo-flp-circular.png" alt="FLP" class="w-56 h-56 object-contain">
+                                            <!-- Logo FLP Cortado por Derecha (pegado al borde derecho inferior) -->
+                                            <div class="absolute bottom-0 right-0" style="width: 180px; height: 180px;">
+                                                <img src="/assets/instagram/logo-flp-cortado-derecha.png" alt="FLP" class="w-full h-full object-contain" style="object-position: right center;">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Player Slide (Clean Design) -->
-                                <template x-if="currentSlide > 0 && currentSlide <= (carouselData?.data?.content_slides?.length || 0)">
-                                    <div class="relative bg-white aspect-[4/5]">
-                                        <!-- Background -->
-                                        <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white"></div>
+                                <!-- Player Slides (Diseño Replicado) -->
+                                <template x-for="(player, index) in carouselData?.data?.content_slides || []" :key="player.player_id">
+                                    <div class="relative aspect-[4/5]" style="background: #F9F7F4;" x-show="currentSlide === index + 1">
+                                        <!-- Badge Posición (superior derecha) -->
+                                        <div class="absolute top-6 right-6 z-10">
+                                            <div class="bg-black text-white px-6 py-2.5 rounded-full">
+                                                <span class="text-sm font-light tracking-wide" x-text="player?.position"></span>
+                                            </div>
+                                        </div>
 
-                                        <!-- Player Content -->
-                                        <div class="h-full flex flex-col p-6 relative">
-                                            <!-- Header -->
-                                            <div class="flex items-center justify-between mb-6">
-                                                <!-- Position Badge -->
-                                                <div class="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-semibold" x-text="currentPlayer?.position"></div>
+                                        <!-- Logo FLP Cortado (inferior izquierda - pegado al borde) -->
+                                        <div class="absolute left-0 z-0" style="width: 180px; height: 180px; bottom: 24px;">
+                                            <img src="/assets/instagram/logo-flp-cortado-izquierda.png" alt="FLP" class="w-full h-full object-contain" style="object-position: left center;">
+                                        </div>
 
-                                                <!-- Slide Indicator -->
-                                                <div class="bg-gray-100 px-3 py-1 rounded-full">
-                                                    <span class="text-gray-600 text-xs font-medium" x-text="(currentSlide + 1) + ' / ' + totalSlides"></span>
+                                        <!-- Contenido Principal -->
+                                        <div class="h-full flex flex-col items-center justify-center px-4 py-6 relative z-10">
+                                            <!-- Foto del Jugador + Logo Equipo -->
+                                            <div class="relative mb-3">
+                                                <!-- Foto circular -->
+                                                <div class="w-32 h-32 rounded-full overflow-hidden bg-white shadow-lg" style="border: 2px solid rgba(232, 93, 84, 0.15);">
+                                                    <img :src="player?.photo_url"
+                                                         :alt="player?.player_name"
+                                                         class="w-full h-full object-cover"
+                                                         onerror="this.src='https://via.placeholder.com/128?text=?'">
+                                                </div>
+                                                <!-- Logo equipo sobrepuesto -->
+                                                <div class="absolute -bottom-1 -right-1 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center" style="border: 2px solid #F9F7F4;">
+                                                    <img :src="player?.team_logo"
+                                                         class="w-9 h-9 object-contain"
+                                                         onerror="this.style.display='none'">
                                                 </div>
                                             </div>
 
-                                            <!-- Player Photo & Team -->
-                                            <div class="flex-shrink-0 mb-4">
-                                                <div class="flex items-center space-x-4">
-                                                    <!-- Photo -->
-                                                    <div class="relative flex-shrink-0">
-                                                        <img :src="currentPlayer?.photo_url"
-                                                             :alt="currentPlayer?.player_name"
-                                                             class="w-20 h-20 rounded-xl object-cover border-2 border-gray-200"
-                                                             onerror="this.src='https://via.placeholder.com/80?text=?'">
-                                                    </div>
+                                            <!-- Nombre del Jugador -->
+                                            <h2 class="text-2xl font-black text-black text-center mb-4" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: -0.3px;" x-text="player?.player_name"></h2>
 
-                                                    <!-- Player Info -->
-                                                    <div class="flex-1 min-w-0">
-                                                        <h4 class="text-2xl font-black text-gray-900 truncate" x-text="currentPlayer?.player_name"></h4>
-                                                        <div class="flex items-center space-x-2 mt-1">
-                                                            <img :src="currentPlayer?.team_logo"
-                                                                 class="w-5 h-5 object-contain"
-                                                                 onerror="this.style.display='none'">
-                                                            <p class="text-sm text-gray-600 font-medium" x-text="currentPlayer?.team"></p>
-                                                        </div>
-                                                    </div>
+                                            <!-- Stats: 3 Cards Blancas -->
+                                            <div class="grid grid-cols-3 gap-2 mb-3 w-full max-w-xs">
+                                                <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                                                    <div class="text-2xl font-black text-black leading-none" x-text="player?.goals"></div>
+                                                    <div class="text-[9px] text-gray-400 font-bold mt-1 tracking-wider">GOLES</div>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                                                    <div class="text-2xl font-black text-black leading-none" x-text="player?.assists"></div>
+                                                    <div class="text-[9px] text-gray-400 font-bold mt-1 tracking-wider">ASIST</div>
+                                                </div>
+                                                <div class="bg-white rounded-lg p-2 text-center shadow-sm">
+                                                    <div class="text-2xl font-black text-black leading-none" x-text="player?.rating"></div>
+                                                    <div class="text-[9px] text-gray-400 font-bold mt-1 tracking-wider">RATING</div>
                                                 </div>
                                             </div>
 
-                                            <!-- Stats Grid (Clean Cards) -->
-                                            <div class="flex-grow">
-                                                <div class="grid grid-cols-3 gap-3 mb-4">
-                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.goals"></div>
-                                                        <div class="text-xs text-gray-500 font-medium mt-1">GOLES</div>
+                                            <!-- Card Negra: Precio, Ratio, Puntos -->
+                                            <div class="rounded-2xl py-3 px-1 w-full max-w-xs shadow-lg" style="background: #1a1d29;">
+                                                <div class="grid grid-cols-3 text-center divide-x divide-gray-700">
+                                                    <div class="px-1">
+                                                        <div class="text-[9px] text-gray-400 font-bold mb-1 tracking-wider">PRECIO</div>
+                                                        <div class="text-xl font-black text-white leading-none" x-text="player?.price"></div>
                                                     </div>
-                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.assists"></div>
-                                                        <div class="text-xs text-gray-500 font-medium mt-1">ASIST</div>
+                                                    <div class="px-1">
+                                                        <div class="text-[9px] text-gray-400 font-bold mb-1 tracking-wider">RATIO</div>
+                                                        <div class="text-xl font-black leading-none" style="color: #E85D54;" x-text="player?.value_ratio"></div>
                                                     </div>
-                                                    <div class="bg-white border border-gray-200 rounded-xl p-3 text-center">
-                                                        <div class="text-3xl font-black text-gray-900" x-text="currentPlayer?.rating"></div>
-                                                        <div class="text-xs text-gray-500 font-medium mt-1">RATING</div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Price & Value Card -->
-                                                <div class="bg-gray-900 rounded-2xl p-4">
-                                                    <div class="grid grid-cols-3 gap-4 text-center">
-                                                        <div>
-                                                            <div class="text-xs text-gray-400 font-medium mb-1">PRECIO</div>
-                                                            <div class="text-2xl font-black text-white" x-text="currentPlayer?.price"></div>
-                                                        </div>
-                                                        <div class="border-l border-r border-gray-700">
-                                                            <div class="text-xs text-gray-400 font-medium mb-1">RATIO</div>
-                                                            <div class="text-2xl font-black text-[#E85D54]" x-text="currentPlayer?.value_ratio"></div>
-                                                        </div>
-                                                        <div>
-                                                            <div class="text-xs text-gray-400 font-medium mb-1">PUNTOS</div>
-                                                            <div class="text-2xl font-black text-white" x-text="currentPlayer?.predicted_points"></div>
-                                                        </div>
+                                                    <div class="px-1">
+                                                        <div class="text-[9px] text-gray-400 font-bold mb-1 tracking-wider">PUNTOS</div>
+                                                        <div class="text-xl font-black text-white leading-none" x-text="player?.predicted_points"></div>
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <!-- Footer Tag -->
-                                            <div class="mt-4 flex items-center justify-center space-x-2">
-                                                <div class="w-2 h-2 bg-[#E85D54] rounded-full"></div>
-                                                <span class="text-xs text-gray-500 font-medium">FANTASY LA LIGA PRO</span>
-                                                <div class="w-2 h-2 bg-[#E85D54] rounded-full"></div>
                                             </div>
                                         </div>
                                     </div>

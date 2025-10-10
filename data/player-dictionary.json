@@ -36,8 +36,8 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "testedSuccessRate": 1,
-      "lastTested": "2025-10-03T19:24:37.095Z",
-      "totalVideos": 17,
+      "lastTested": "2025-10-06T05:59:45.239Z",
+      "totalVideos": 19,
       "addedAt": "2025-10-03T05:11:21.386Z"
     },
     "Pepelu": {
@@ -59,6 +59,152 @@
       "lastTested": null,
       "totalVideos": 0,
       "addedAt": "2025-10-03T13:34:09.581Z"
+    },
+    "Dani Carvajal": {
+      "surname": "Carvajal",
+      "team": "Real Madrid",
+      "safeReferences": [
+        "Carvajal",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Carvajal del Real Madrid",
+        "Carvajal Real Madrid",
+        "Dani Carvajal del Real Madrid",
+        "Dani Carvajal Real Madrid"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 1,
+      "lastTested": "2025-10-04T09:23:06.304Z",
+      "totalVideos": 1,
+      "addedAt": "2025-10-04T09:15:46.229Z"
+    },
+    "Nico Williams": {
+      "surname": "Williams",
+      "team": "Athletic Club",
+      "safeReferences": [
+        "Williams",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Williams del Athletic Club",
+        "Williams Athletic Club",
+        "Nico Williams del Athletic Club",
+        "Nico Williams Athletic Club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-04T16:10:30.013Z"
+    },
+    "Lamine Yamal": {
+      "surname": "Yamal",
+      "team": "Barcelona",
+      "safeReferences": [
+        "Yamal",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Yamal del Barcelona",
+        "Yamal Barcelona",
+        "Lamine Yamal del Barcelona",
+        "Lamine Yamal Barcelona"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-04T16:15:24.305Z"
+    },
+    "Pedri": {
+      "surname": "el centrocampista",
+      "team": "Barcelona",
+      "safeReferences": [
+        "el centrocampista",
+        "el jugador",
+        "el volante"
+      ],
+      "avoidCombinations": [
+        "Pedri del Barcelona",
+        "Pedri Barcelona",
+        "Pedri del Barcelona",
+        "Pedri Barcelona"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 1,
+      "lastTested": "2025-10-06T05:54:02.827Z",
+      "totalVideos": 1,
+      "addedAt": "2025-10-04T16:18:53.760Z"
+    },
+    "Gavi": {
+      "surname": "el centrocampista",
+      "team": "Barcelona",
+      "safeReferences": [
+        "el centrocampista",
+        "el jugador",
+        "el canterano"
+      ],
+      "avoidCombinations": [
+        "Gavi del Barcelona",
+        "Gavi Barcelona",
+        "Gavi del Barcelona",
+        "Gavi Barcelona"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 1,
+      "lastTested": "2025-10-06T05:57:05.269Z",
+      "totalVideos": 1,
+      "addedAt": "2025-10-04T16:33:57.939Z"
+    },
+    "Robert Lewandowski": {
+      "surname": "Lewandowski",
+      "team": "Barcelona",
+      "safeReferences": [
+        "Lewandowski",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Lewandowski del Barcelona",
+        "Lewandowski Barcelona",
+        "Robert Lewandowski del Barcelona",
+        "Robert Lewandowski Barcelona"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-06T05:47:24.774Z"
+    },
+    "El Jugador": {
+      "surname": "Jugador",
+      "team": "Mallorca",
+      "position": null,
+      "number": null,
+      "safeReferences": [
+        "Jugador",
+        "el jugador"
+      ],
+      "avoidCombinations": [
+        "Jugador del Mallorca",
+        "Jugador Mallorca",
+        "El Jugador del Mallorca",
+        "El Jugador Mallorca"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [
+        "Jugador"
+      ],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-10T06:21:01.408Z"
     }
   },
   "teams": {
@@ -88,6 +234,33 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-03T13:34:09.585Z"
+    },
+    "Real Madrid": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-04T09:15:46.235Z"
+    },
+    "Athletic Club": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-04T16:10:30.019Z"
+    },
+    "Barcelona": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-04T16:15:24.309Z"
     }
   }
 }

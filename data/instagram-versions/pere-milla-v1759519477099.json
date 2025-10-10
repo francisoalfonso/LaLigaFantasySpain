@@ -1,0 +1,101 @@
+{
+  "id": "pere-milla-v1759519477099",
+  "version": 46,
+  "timestamp": "2025-10-03T19:24:37.659Z",
+
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Espanyol",
+    "position": "FWD",
+    "price": 4.5,
+    "stats": {
+      "goals": 2,
+      "assists": 1
+    },
+    "valueRatio": 1.5
+  },
+
+  "testMetadata": {
+    "testDate": "2025-10-03T19:24:37.659Z",
+    "testNumber": 46,
+    "fixesApplied": [],
+    "testPurpose": "BASELINE PRE-FIXES - Video generado ANTES de aplicar fixes críticos (imagen fija + sin transiciones)",
+
+    "feedback": {
+      "whatWorks": [
+        "✅ Guión viral cumple framework 7 elementos",
+        "✅ Hook conspirativo efectivo (seg 0)",
+        "✅ Revelación jugador en timing correcto",
+        "✅ Datos concretos (2 goles, 1 asistencia, ratio 1.5)",
+        "✅ CTA claro 'Fichad a Milla ahora'",
+        "✅ Duración correcta 24s (3 segmentos × 8s)",
+        "✅ Audio sin cortes en transiciones",
+        "✅ Pronunciación '4.5 millones' correcta"
+      ],
+      "whatFails": [
+        "❌ CRÍTICO: Ana cambia de imagen entre segmentos (rotación aleatoria entre 14 imágenes)",
+        "❌ CRÍTICO: Transiciones de cámara presentes (zooms, dollys) - enhanced mode activado",
+        "⚠️ MAYOR: Iluminación varía entre segmentos por imágenes Ana diferentes",
+        "⚠️ MAYOR: Inconsistencia visual rompe inmersión"
+      ],
+      "severity": {
+        "critical": 2,
+        "major": 2,
+        "minor": 0
+      },
+      "reviewedBy": "Claude Code",
+      "reviewDate": "2025-10-04T09:02:00.000Z",
+      "reviewNotes": "Video baseline para comparar con versiones post-fixes. Los 2 problemas críticos identificados (imagen Ana aleatoria + transiciones cámara) fueron corregidos en los fixes aplicados después de este test."
+    },
+
+    "checklist": {
+      "imagenAnaFija": false,
+      "sinTransicionesCamara": false,
+      "audioSinCortes": true,
+      "vozConsistente": true,
+      "pronunciacionCorrecta": true,
+      "logoOutro": false,
+      "duracionCorrecta": true,
+      "hookSegundo3": true,
+      "ctaClaro": true
+    },
+
+    "qualityScore": {
+      "videoQuality": 6.5,
+      "audioQuality": 8.5,
+      "viralPotential": 7.5,
+      "technicalScore": 6.0,
+      "overallScore": 7.125
+    },
+
+    "comparisonWith": null,
+    "improvements": [],
+    "issues": [
+      "Imagen Ana inconsistente entre segmentos",
+      "Transiciones de cámara distraen del mensaje",
+      "Iluminación variable por rotación de imágenes"
+    ]
+  },
+
+  "veo3Config": {
+    "anaImageUrl": "ROTACIÓN ALEATORIA (14 imágenes pool)",
+    "seed": 30001,
+    "enhanced": true,
+    "modelVersion": "veo3_fast",
+    "segmentCount": 3,
+    "totalDuration": 24
+  },
+
+  "videoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1759519477099.mp4",
+  "caption": "🔥 CHOLLO DEL DÍA\n\nPere Milla a solo 4.5M 💰\nRatio calidad-precio: 1.5x\n2 goles + 1 asistencia 📊\n\n#FantasyLaLiga #Chollos #Espanyol",
+  "notes": "📍 TEST #46 - BASELINE PRE-FIXES\n❌ Imagen Ana aleatoria (14 imágenes pool)\n❌ Enhanced mode activado (transiciones)\n🎯 Referencia para comparar mejoras",
+  "viralScore": 75,
+  "isRealVideo": true,
+
+  "metadata": {
+    "createdAt": "2025-10-03T19:24:37.659Z",
+    "updatedAt": "2025-10-04T09:02:00.000Z",
+    "userId": "system",
+    "status": "archived"
+  }
+}

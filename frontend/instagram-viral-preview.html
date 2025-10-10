@@ -930,6 +930,59 @@
                     let totalScore = 0;
                     const maxScore = 100;
 
+                    // ========================================
+                    // CRITERIOS GUIÓN UNIFICADO (30 puntos)
+                    // ========================================
+
+                    // Cohesión narrativa (10 puntos)
+                    const cohesionScore = this.previewData.metadata?.viralityScore || 0;
+                    if (cohesionScore >= 80) {
+                        checks.push({ category: 'Guión Unificado', item: 'Cohesión narrativa ≥80/100', status: true, points: 10 });
+                        totalScore += 10;
+                    } else if (cohesionScore >= 60) {
+                        checks.push({ category: 'Guión Unificado', item: `Cohesión ${cohesionScore}/100 (mejorar)`, status: true, points: 6 });
+                        totalScore += 6;
+                    } else {
+                        checks.push({ category: 'Guión Unificado', item: `Cohesión baja (${cohesionScore}/100)`, status: false, points: 0 });
+                    }
+
+                    // Tonos emocionales diferenciados (10 puntos)
+                    const segments = this.previewData.metadata?.segments || [];
+                    const hasWhisper = segments[0]?.dialogue?.toLowerCase().includes('pssst') || segments[0]?.dialogue?.toLowerCase().includes('misters');
+                    const hasAuthority = segments.length > 1 && (segments[1]?.dialogue?.match(/\d+\.\d+|goles|asistencias/i) !== null);
+                    const hasUrgency = segments.length > 2 && (segments[2]?.dialogue?.toLowerCase().includes('fichad') || segments[2]?.dialogue?.toLowerCase().includes('imprescindible'));
+
+                    if (hasWhisper && hasAuthority && hasUrgency) {
+                        checks.push({ category: 'Tonos Emocionales', item: 'Tonos diferenciados: susurro → autoridad → urgencia', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        const toneCount = [hasWhisper, hasAuthority, hasUrgency].filter(Boolean).length;
+                        checks.push({ category: 'Tonos Emocionales', item: `Solo ${toneCount}/3 tonos presentes`, status: false, points: toneCount * 3 });
+                        totalScore += toneCount * 3;
+                    }
+
+                    // Diálogos pronunciables (10 puntos)
+                    const allDialogues = segments.map(s => s?.dialogue || '').join(' ');
+                    const hasNumbers = /\d+\.\d+/.test(allDialogues); // ❌ números como 1.8
+                    const hasRatioWord = allDialogues.toLowerCase().includes('veces'); // ✅ "veces" en vez de "x"
+                    const hasDuplicatePlural = /(\d+)\s+(goles|asistencias)\s+\1/.test(allDialogues); // ❌ "2 goles goles"
+
+                    if (!hasNumbers && hasRatioWord && !hasDuplicatePlural) {
+                        checks.push({ category: 'Diálogos', item: 'Diálogos 100% pronunciables (sin números/duplicados)', status: true, points: 10 });
+                        totalScore += 10;
+                    } else {
+                        const issues = [];
+                        if (hasNumbers) issues.push('números sin convertir');
+                        if (!hasRatioWord) issues.push('ratio no pronunciable');
+                        if (hasDuplicatePlural) issues.push('plurales duplicados');
+                        checks.push({ category: 'Diálogos', item: `Problemas: ${issues.join(', ')}`, status: false, points: 4 });
+                        totalScore += 4;
+                    }
+
+                    // ========================================
+                    // CRITERIOS ORIGINALES (70 puntos)
+                    // ========================================
+
                     // DURACIÓN DEL VIDEO (15 puntos)
                     const videoDuration = 24; // nuestro video es 24s
                     if (videoDuration <= 30) {

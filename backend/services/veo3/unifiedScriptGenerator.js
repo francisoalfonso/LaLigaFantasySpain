@@ -21,9 +21,13 @@
  */
 
 const logger = require('../../utils/logger');
+const EmotionAnalyzer = require('./emotionAnalyzer');
+const CreativeReferenceGenerator = require('../creativeReferenceGenerator');
 
 class UnifiedScriptGenerator {
     constructor() {
+        this.emotionAnalyzer = new EmotionAnalyzer();
+        this.creativeRefGenerator = new CreativeReferenceGenerator();
         // Estructura de arcos narrativos por tipo de contenido
         this.narrativeArcs = {
             chollo: {
@@ -121,29 +125,50 @@ class UnifiedScriptGenerator {
     }
 
     /**
-     * ⭐ Template de guión para chollos (24s) - ESTRATEGIA REVELACIÓN SEGUNDO 3
-     * Basado en estrategia viral: Hook (0-2s) → Transición (2-3s) → REVELACIÓN (3-4s)
+     * ⭐ Template de guión para chollos (24s) - ARCO NARRATIVO PROGRESIVO
+     * Basado en estrategia viral: Hook → Revelación (seg 3) → Validación → Urgencia → CTA
+     *
+     * 🎯 CONSTRAINT CRÍTICO: Máximo 17 palabras por segmento (~7s de audio)
+     * - Ana habla ~2.5 palabras/segundo
+     * - Video: 8s por escena (duración total)
+     * - Audio: 7s máximo (1s silencio al final para evitar "cara rara" en corte)
+     * - Total: 3 escenas × 8s = 24s | Audio total: 3 × 7s = 21s
+     *
+     * ✅ ARCO NARRATIVO ÚNICO - Sin repeticiones entre escenas
+     * - Escena 1: Presenta el chollo (CONVERSACIONAL, sin decir precio)
+     * - Escena 2: Valida con datos (CONVERSACIONAL, sin leer cifras)
+     * - Escena 3: Cierra con urgencia (scarcity + CTA sin repetir datos)
+     *
+     * 🔴 FIX 9 Oct 2025: NO PRONUNCIAR NÚMEROS - Explicar con palabras
+     * - Precio/ratio/stats → APARECEN en la tarjeta del jugador (segundo 3)
+     * - Ana → EXPLICA el significado sin leer cifras
+     * - "seis punto sesenta y cuatro" ❌ → "precio regalado" ✅
      */
     _getCholloTemplate() {
         return {
-            // SEGMENTO 1 (0-8s): Hook susurrante + REVELACIÓN SEGUNDO 3
-            // ✅ BASADO EN VIDEO QUE FUNCIONA: Tono conspiratorio, texto corto
+            // SEGMENTO 1 (0-8s): ACTO 1 - Hook + REVELACIÓN FACTOR X
+            // 🎭 Función: Capturar atención + revelar el chollo SIN decir precio
+            // 📊 ~14 palabras total → ~5.6s audio → ✅ CABE EN 7s
             segment1: {
-                whisper: "He encontrado el chollo absoluto...", // 0-3s: Susurro conspirativo
-                revelation: "{{player}} por solo {{price}} millones...", // 3-6s: ⭐ REVELACIÓN SEGUNDO 3
-                explosion: "va a explotar." // 6-8s: Explosión emocional
+                hook: "He encontrado el chollo absoluto...", // 0-3s: Susurro conspirativo (5 palabras)
+                revelation: "{{player}} está a precio regalado...", // 3-6s: ⭐ FACTOR X segundo 3 - SIN decir cifra (6 palabras)
+                promise: "va a explotar." // 6-8s: Promesa emocional (3 palabras)
             },
-            // SEGMENTO 2 (8-16s): Stats clave con tono entusiasta
+            // SEGMENTO 2 (8-16s): ACTO 2 - Validación con datos
+            // 🎭 Función: Probar por qué es chollo - ACOMPAÑAR cifras de la tarjeta con expresiones
+            // 📊 ~14 palabras total → ~5.6s audio → ✅ CABE EN 7s
             segment2: {
-                stats: "{{goals}} goles, {{assists}} asistencias.", // 3s: Datos rápidos
-                insight: "Su ratio valor es {{valueRatio}} veces superior.", // 3s: Insight clave
-                proof: "Está dando el doble de puntos." // 2s: Prueba contundente
+                impact: "Números espectaculares...", // 2s: Intro impactante (~2 palabras)
+                proof: "dobla su valor en puntos.", // 2s: Expresión que acompaña el ratio (~6 palabras)
+                evidence: "Está volando en Fantasy." // 2s: Cierre contundente (~4 palabras)
             },
-            // SEGMENTO 3 (16-24s): Urgencia + CTA directo
+            // SEGMENTO 3 (16-24s): ACTO 3 - Cierre urgente
+            // 🎭 Función: Scarcity + CTA (SIN repetir precio/nombre)
+            // 📊 ~13 palabras total → ~5.2s audio → ✅ CABE EN 7s
             segment3: {
-                urgency: "A {{price}} millones es una ganga.", // 3s: Urgencia clara
-                scarcity: "Nadie lo ha fichado aún.", // 2s: Escasez
-                cta: "Fichad a {{player}} ahora." // 3s: CTA directo
+                urgency: "Es una ganga total.", // 2s: Urgencia sin repetir precio (~4 palabras)
+                scarcity: "Nadie lo ha fichado aún.", // 2s: Escasez social (~5 palabras)
+                cta: "Fichadlo ahora antes que suba." // 3s: CTA con urgencia temporal (~5 palabras)
             }
         };
     }
@@ -201,20 +226,51 @@ class UnifiedScriptGenerator {
      * Construir guión completo con datos reales
      */
     _buildFullScript(template, playerData, viralData) {
-        // 📋 OPTIMIZACIÓN DICCIONARIO: Usar solo apellido (sin nombre completo, sin equipo)
-        const playerLastName = playerData.name ? playerData.name.split(' ').pop() : 'El Jugador';
+        // ✅ REFERENCIAS CREATIVAS: Usar CreativeReferenceGenerator para frases atractivas
+        // En lugar de solo apellido, usaremos referencias virales:
+        // Ej: "Vinicius Jr." → ["Vini", "el 7 madridista", "el brasileño", "el extremo del Madrid"]
+        const playerName = playerData.name || 'El Jugador';
+
+        // Generar referencias creativas automáticamente
+        const creativeRef = this.creativeRefGenerator.getCreativeReference(
+            playerName,
+            {
+                team: playerData.team,
+                position: playerData.position,
+                number: playerData.number || null
+            },
+            {
+                avoidGeneric: true,      // Evitar "el jugador" si hay alternativas mejores
+                preferNickname: true     // Preferir apodos conocidos
+            }
+        );
+
+        logger.info(`[UnifiedScriptGenerator] 🎨 Referencia creativa: "${playerName}" → "${creativeRef}"`);
+
+        const playerLastName = creativeRef; // Usar referencia creativa en lugar de solo apellido
 
         // ✅ Convertir precio numérico a texto en español
         const priceText = this._numberToSpanishText(playerData.price || 5.0);
+
+        // ✅ NORMA #1: Pluralización correcta (gol/goles, asistencia/asistencias)
+        const goals = playerData.stats?.goals || 0;
+        const assists = playerData.stats?.assists || 0;
+        const goalsText = goals === 1 ? `${goals} gol` : `${goals} goles`;
+        const assistsText = assists === 1 ? `${assists} asistencia` : `${assists} asistencias`;
+
+        // ✅ Convertir ratio numérico a texto pronunciable (ej: 1.8 → "uno punto ocho")
+        const ratioValue = playerData.ratio || playerData.valueRatio || 1.0;
+        const valueRatioText = this._numberToSpanishText(ratioValue);
 
         const data = {
             player: playerLastName,  // ✅ Solo apellido para optimizar con diccionario
             team: playerData.team || 'su equipo',
             price: priceText,  // ✅ Precio en texto (ej: "cuatro punto cinco")
-            goals: playerData.stats?.goals || 0,
-            assists: playerData.stats?.assists || 0,
+            goals: goalsText,  // ✅ Con pluralización correcta ("2 goles" o "1 gol")
+            assists: assistsText,  // ✅ Con pluralización correcta ("1 asistencia" o "2 asistencias")
             games: playerData.stats?.games || 0,
-            valueRatio: playerData.valueRatio || '1.0',
+            valueRatio: ratioValue, // Número para uso en lógica
+            valueRatioText,  // ✅ Texto pronunciable (ej: "uno punto ocho")
             jornada: viralData.gameweek || 'jornada 5',
             xgIncrease: viralData.xgIncrease || '30',
             newsContent: viralData.newsContent || 'cambio en la alineación titular',
@@ -248,37 +304,74 @@ class UnifiedScriptGenerator {
         const segments = [];
 
         // Segmento 1 (0-8s): Hook + REVELACIÓN SEGUNDO 3 + Precio
+        const dialogue1 = this._joinScriptParts(fullScript.segment1);
+
+        // 🤖 ANÁLISIS INTELIGENTE: Detectar emoción basada en contenido
+        const segment1Analysis = this.emotionAnalyzer.analyzeSegment(dialogue1, {
+            narrativeRole: 'hook',
+            contentType: arc.emotionalJourney ? 'chollo' : 'generic',
+            position: 0
+        });
+
         segments.push({
             role: 'intro',
             duration: 8,
             timeRange: '0-8s',
-            dialogue: this._joinScriptParts(fullScript.segment1),
-            emotion: 'curiosidad → revelación',
+            dialogue: dialogue1,
+            emotion: segment1Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
+            emotionDistribution: segment1Analysis.emotionDistribution,
             narrativeFunction: 'Hook + REVELACIÓN (seg 3) + Preview',
             transitionTo: 'segment2'
         });
 
         // Segmento 2 (8-16s): Validación con datos
+        const dialogue2 = this._joinScriptParts(fullScript.segment2);
+
+        // 🤖 ANÁLISIS INTELIGENTE: Detectar emoción basada en contenido
+        const segment2Analysis = this.emotionAnalyzer.analyzeSegment(dialogue2, {
+            narrativeRole: 'resolucion',
+            contentType: arc.emotionalJourney ? 'chollo' : 'generic',
+            position: 0.5,
+            previousEmotion: segment1Analysis.dominantEmotion
+        });
+
         segments.push({
             role: 'stats',
             duration: 8,
             timeRange: '8-16s',
-            dialogue: this._joinScriptParts(fullScript.segment2),
-            emotion: 'validación con pruebas',
+            dialogue: dialogue2,
+            emotion: segment2Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
+            emotionDistribution: segment2Analysis.emotionDistribution,
             narrativeFunction: 'Stats + Ratio valor + Proof',
             transitionTo: 'segment3'
         });
 
         // Segmento 3 (16-24s): Urgencia + CTA
+        const dialogue3 = this._joinScriptParts(fullScript.segment3);
+
+        // 🤖 ANÁLISIS INTELIGENTE: Detectar emoción basada en contenido
+        const segment3Analysis = this.emotionAnalyzer.analyzeSegment(dialogue3, {
+            narrativeRole: 'cta',
+            contentType: arc.emotionalJourney ? 'chollo' : 'generic',
+            position: 1.0,
+            previousEmotion: segment2Analysis.dominantEmotion
+        });
+
         segments.push({
             role: 'outro',
             duration: 8,
             timeRange: '16-24s',
-            dialogue: this._joinScriptParts(fullScript.segment3),
-            emotion: 'urgencia + acción',
+            dialogue: dialogue3,
+            emotion: segment3Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
+            emotionDistribution: segment3Analysis.emotionDistribution,
             narrativeFunction: 'Urgencia + Scarcity + CTA',
             transitionTo: null
         });
+
+        // ⚠️ VALIDACIÓN: Verificar que cada diálogo cabe en 7s de audio (~17 palabras máx)
+        this._validateDialogueDuration(dialogue1, 'Segmento 1');
+        this._validateDialogueDuration(dialogue2, 'Segmento 2');
+        this._validateDialogueDuration(dialogue3, 'Segmento 3');
 
         return segments;
     }
@@ -329,6 +422,33 @@ class UnifiedScriptGenerator {
             checks,
             cohesive: score >= 70,
             recommendations: score < 70 ? ['Revisar transiciones entre segmentos', 'Verificar continuidad narrativa'] : []
+        };
+    }
+
+    /**
+     * ⚠️ Validar que el diálogo cabe en 7 segundos de audio
+     * @param {string} dialogue - Texto del diálogo
+     * @param {string} segmentName - Nombre del segmento (para logging)
+     */
+    _validateDialogueDuration(dialogue, segmentName) {
+        const words = dialogue.trim().split(/\s+/);
+        const wordCount = words.length;
+        const estimatedDuration = wordCount / 2.5; // Ana habla ~2.5 palabras/segundo
+
+        if (wordCount > 17) {
+            logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} EXCEDE 17 palabras:`);
+            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (límite: 17)`);
+            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (máx: 7s)`);
+            logger.warn(`[UnifiedScriptGenerator]    - Diálogo: "${dialogue}"`);
+            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Ana terminará con "cara rara" en el corte`);
+        } else {
+            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio)`);
+        }
+
+        return {
+            wordCount,
+            estimatedDuration,
+            fitsIn7s: wordCount <= 17
         };
     }
 

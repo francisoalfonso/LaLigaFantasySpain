@@ -1,0 +1,102 @@
+{
+  "id": "pere-milla-v1760098889444",
+  "version": 1,
+  "timestamp": "2025-10-10T12:21:29.464Z",
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Elche",
+    "price": 6,
+    "stats": {
+      "goals": 2,
+      "assists": 1,
+      "matchesPlayed": 3
+    },
+    "ratio": 1.5
+  },
+  "testMetadata": {
+    "testDate": "2025-10-10T12:21:29.465Z",
+    "testNumber": 49,
+    "fixesApplied": [
+      "nano-banana-image-refs",
+      "supabase-storage",
+      "veo3-with-initial-frames"
+    ],
+    "testPurpose": "Test Nano Banana → Supabase → VEO3 (3 imágenes como referencias iniciales)",
+    "feedback": {
+      "whatWorks": [],
+      "whatFails": [],
+      "severity": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "reviewedBy": "Pendiente",
+      "reviewDate": null,
+      "reviewNotes": "Test generado automáticamente. Pendiente de revisión manual."
+    },
+    "checklist": {
+      "imagenAnaFija": null,
+      "sinTransicionesCamara": null,
+      "audioSinCortes": null,
+      "vozConsistente": null,
+      "pronunciacionCorrecta": null,
+      "logoOutro": false,
+      "duracionCorrecta": null,
+      "hookSegundo3": null,
+      "ctaClaro": null
+    },
+    "qualityScore": {
+      "videoQuality": null,
+      "audioQuality": null,
+      "viralPotential": null,
+      "technicalScore": null,
+      "overallScore": null
+    },
+    "improvements": [
+      "Uso de Nano Banana para generar 3 imágenes Ana consistentes",
+      "Imágenes almacenadas en Supabase Storage (URLs persistentes)",
+      "VEO3 usa imágenes como referencias iniciales",
+      "Progresión cinematográfica: Wide → Medium → Close-up"
+    ],
+    "issues": [
+      "Concatenación con freeze frame + logo falló (error FFmpeg)",
+      "Necesita validación de identidad visual de Ana entre segmentos",
+      "Nano Banana API inestable (fallos ocasionales)"
+    ]
+  },
+  "veo3Config": {
+    "anaImageUrl": null,
+    "seed": 30001,
+    "enhanced": false,
+    "modelVersion": "veo3_fast",
+    "segmentCount": 3,
+    "totalDuration": null,
+    "nanoBananaConfig": {
+      "model": "google/nano-banana-edit",
+      "seed": 12500,
+      "promptStrength": 0.75,
+      "imageSize": "9:16",
+      "supabaseUrls": [
+        "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg1-wide-1760097275312.png",
+        "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg2-medium-1760097276265.png",
+        "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg3-close-up-1760097277647.png"
+      ]
+    }
+  },
+  "videoFiles": {
+    "seg1": "test-49-seg1-1760098889444.mp4",
+    "seg2": "test-49-seg2-1760098889444.mp4",
+    "seg3": "test-49-seg3-1760098889444.mp4",
+    "concatenated": null
+  },
+  "caption": "🔥 Pere Milla - ¡El chollo que TODOS están esperando!\n\n💰 Precio: 6.0M | ⚡ Ratio: 1.5\n\n🎯 Test #49: Nano Banana → VEO3\n\n#FantasyLaLiga #Chollos #PereMilla",
+  "viralScore": null,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-10T12:21:29.465Z",
+    "updatedAt": "2025-10-10T12:21:29.465Z",
+    "userId": "claude-code",
+    "status": "testing"
+  },
+  "notes": "Test #49: Integración Nano Banana → VEO3\n\nFLUJO:\n1. Nano Banana genera 3 imágenes Ana (Wide, Medium, Close-up)\n2. Imágenes se suben a Supabase Storage\n3. VEO3 usa las imágenes como referencias iniciales\n4. Se generan 3 segmentos de video independientes\n\nOBJETIVO:\n- Validar si Nano Banana genera imágenes consistentes de Ana\n- Verificar si VEO3 respeta las referencias de Supabase\n- Comparar con sistema anterior (frame-to-frame extraction)\n\nPENDIENTE:\n- Concatenar los 3 segmentos (error FFmpeg actual)\n- Añadir logo outro\n- Aplicar subtítulos virales"
+}

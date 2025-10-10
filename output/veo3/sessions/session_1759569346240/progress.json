@@ -1,0 +1,57 @@
+{
+  "sessionId": 1759569346240,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759569346240",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Dani Carvajal",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "526fb2993a3c761ffb4376f3e47ba4bf",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/fa1ff0f9-866e-4928-8e60-588d9010e3b6.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759569346240/segment_1_526fb2993a3c761ffb4376f3e47ba4bf.mp4",
+      "filename": "segment_1_526fb2993a3c761ffb4376f3e47ba4bf.mp4",
+      "duration": 8,
+      "dialogue": "He encontrado el chollo absoluto... Carvajal por solo cinco punto cinco millones... va a explotar.",
+      "generatedAt": "2025-10-04T09:17:35.700Z",
+      "size": 1897593
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "911f369904a3560f6192a04a20dfd48b",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/b47a5df0-f1c0-41ed-bf40-983b580a1ebc.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759569346240/segment_2_911f369904a3560f6192a04a20dfd48b.mp4",
+      "filename": "segment_2_911f369904a3560f6192a04a20dfd48b.mp4",
+      "duration": 8,
+      "dialogue": "1 goles, 0 asistencias. Su ratio valor es 1.23 veces superior. Está dando el doble de puntos.",
+      "generatedAt": "2025-10-04T09:20:15.624Z",
+      "size": 1915785
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "taskId": "086d8b8afd26dad674c9ca2200e1942c",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/7ab2d35c-ba69-4061-964b-ed65848858b4.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759569346240/segment_3_086d8b8afd26dad674c9ca2200e1942c.mp4",
+      "filename": "segment_3_086d8b8afd26dad674c9ca2200e1942c.mp4",
+      "duration": 8,
+      "dialogue": "A cinco punto cinco millones es una ganga. Nadie lo ha fichado aún. Fichad a Carvajal ahora.",
+      "generatedAt": "2025-10-04T09:23:06.296Z",
+      "size": 2042215
+    }
+  ],
+  "concatenatedVideo": {
+    "videoId": "concat_1759569346240",
+    "title": "Dani Carvajal_chollo_chollo_viral",
+    "duration": 24,
+    "sessionId": 1759569346240,
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759569346240",
+    "outputPath": "output/veo3/ana-concatenated-1759569786307.mp4"
+  },
+  "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1759569786307.mp4",
+  "completedAt": "2025-10-04T09:23:06.902Z"
+}

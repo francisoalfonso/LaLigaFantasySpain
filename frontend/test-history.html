@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 Historial de Tests - VEO3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Instagram mockup styles */
+        .instagram-phone {
+            max-width: 375px;
+            background: #000;
+            border-radius: 30px;
+            padding: 20px 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .instagram-screen {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .instagram-header {
+            background: rgba(0,0,0,0.9);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .instagram-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #e1306c;
+            object-fit: cover;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+
+        .instagram-video-container {
+            position: relative;
+            aspect-ratio: 9/16;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .instagram-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .instagram-actions {
+            position: absolute;
+            right: 12px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .instagram-action-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .instagram-action-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="testHistory()">"
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-6 px-4 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <h1 class="text-3xl font-bold">📚 Historial de Tests VEO3</h1>
+                <p class="text-purple-100 mt-2">Pila cronológica de todas las pruebas generadas</p>
+            </div>
+        </header>
+
+        <!-- Stats Banner -->
+        <div class="bg-white border-b border-gray-200 py-4 px-4">
+            <div class="max-w-7xl mx-auto grid grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="tests.length"></div>
+                    <div class="text-sm text-gray-500">Tests Totales</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" x-text="testsApproved"></div>
+                    <div class="text-sm text-gray-500">Aprobados</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600" x-text="testsTesting"></div>
+                    <div class="text-sm text-gray-500">En Pruebas</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" x-text="avgScore.toFixed(1)"></div>
+                    <div class="text-sm text-gray-500">Score Promedio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Mobile Preview + Test List -->
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="grid grid-cols-12 gap-6">
+
+                <!-- Left: Mobile Preview (Sticky) -->
+                <div class="col-span-4">
+                    <div class="sticky top-6">
+                        <div class="instagram-phone mx-auto">
+                            <div class="instagram-screen relative">
+                                <!-- Instagram Header -->
+                                <div class="instagram-header">
+                                    <div class="flex items-center gap-2">
+                                        <img src="assets/instagram/foto-perfil-FLP.png" alt="Fantasy La Liga Pro" class="instagram-avatar">
+                                        <span class="text-white text-sm font-semibold">fantasy.laliga.pro</span>
+                                    </div>
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"/>
+                                    </svg>
+                                </div>
+
+                                <!-- Video Container -->
+                                <div class="instagram-video-container">
+                                    <template x-if="selectedTest && selectedTest.videoUrl">
+                                        <video
+                                            :src="selectedTest.videoUrl"
+                                            class="instagram-video"
+                                            controls
+                                            loop
+                                            autoplay
+                                            muted>
+                                        </video>
+                                    </template>
+                                    <template x-if="!selectedTest">
+                                        <div class="text-white text-center p-8">
+                                            <div class="text-4xl mb-4">📱</div>
+                                            <div class="text-sm">Selecciona un test para ver preview</div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Instagram Actions (lado derecho) -->
+                                <div class="instagram-actions">
+                                    <div class="instagram-action-btn">❤️</div>
+                                    <div class="instagram-action-btn">💬</div>
+                                    <div class="instagram-action-btn">📤</div>
+                                    <div class="instagram-action-btn">⋯</div>
+                                </div>
+
+                                <!-- Instagram Bottom Info (MUY sutil, NO tapa video) -->
+                                <div style="position: absolute; bottom: 80px; left: 12px; pointer-events: none;">
+                                    <div class="text-white text-xs font-semibold drop-shadow-lg">
+                                        @fantasy.laliga.pro
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <style>
+                            @keyframes progress {
+                                from { width: 0%; }
+                                to { width: 100%; }
+                            }
+                        </style>
+
+                        <!-- Selected Test Info -->
+                        <template x-if="selectedTest">
+                            <div class="mt-4 bg-white rounded-lg shadow p-4">
+                                <div class="text-sm font-semibold text-gray-700 mb-2">Test Seleccionado</div>
+                                <div class="text-lg font-bold text-gray-900" x-text="`#${selectedTest.testMetadata?.testNumber || '?'} - ${selectedTest.playerData?.playerName}`"></div>
+                                <div class="text-sm text-gray-600 mt-1" x-text="formatDate(selectedTest.testMetadata?.testDate)"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Right: Test List -->
+                <div class="col-span-8">
+                    <!-- Filter & Search -->
+                    <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="grid grid-cols-3 gap-4">
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                placeholder="Buscar por jugador..."
+                                class="px-4 py-2 border rounded-lg">
+                            <select x-model="filterStatus" class="px-4 py-2 border rounded-lg">
+                                <option value="all">Todos los estados</option>
+                                <option value="testing">En pruebas</option>
+                                <option value="approved">Aprobados</option>
+                                <option value="archived">Archivados</option>
+                            </select>
+                            <select x-model="filterFix" class="px-4 py-2 border rounded-lg">
+                                <option value="all">Todos los fixes</option>
+                                <option value="imagen-ana-fija">Imagen Ana Fija</option>
+                                <option value="sin-transiciones-camara">Sin Transiciones</option>
+                                <option value="audio-fade-in-out">Audio Fade</option>
+                            </select>
+                        </div>
+                    </div>
+
+            <!-- Test Timeline (Stack View) -->
+            <div class="space-y-4">
+                <template x-for="(test, index) in filteredTests" :key="test.id">
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden border-l-4 cursor-pointer hover:shadow-xl transition-shadow"
+                         :class="{
+                             'border-green-500': test.metadata?.status === 'approved',
+                             'border-orange-500': test.metadata?.status === 'testing',
+                             'border-gray-300': test.metadata?.status === 'archived',
+                             'ring-2 ring-purple-500': selectedTest?.id === test.id
+                         }"
+                         @click="selectTest(test)">
+
+                        <!-- Test Header -->
+                        <div class="p-6" @click.stop="test.expanded = !test.expanded">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-2xl font-bold text-gray-900"
+                                              x-text="`#${test.testMetadata?.testNumber || index + 1}`"></span>
+                                        <span class="text-lg font-semibold text-gray-700"
+                                              x-text="test.playerData?.playerName"></span>
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                              :class="{
+                                                  'bg-green-100 text-green-800': test.metadata?.status === 'approved',
+                                                  'bg-orange-100 text-orange-800': test.metadata?.status === 'testing',
+                                                  'bg-gray-100 text-gray-800': test.metadata?.status === 'archived'
+                                              }"
+                                              x-text="test.metadata?.status || 'draft'"></span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 mb-2">
+                                        📅 <span x-text="formatDate(test.testMetadata?.testDate || test.timestamp)"></span>
+                                    </div>
+                                    <div class="text-sm text-gray-700 mb-3" x-text="test.testMetadata?.testPurpose || 'No purpose specified'"></div>
+
+                                    <!-- Fixes Applied Tags -->
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="fix in test.testMetadata?.fixesApplied || []" :key="fix">
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium" x-text="fix"></span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold"
+                                         :class="{
+                                             'text-green-600': (test.testMetadata?.qualityScore?.overallScore || 0) >= 8.5,
+                                             'text-orange-600': (test.testMetadata?.qualityScore?.overallScore || 0) >= 7 && (test.testMetadata?.qualityScore?.overallScore || 0) < 8.5,
+                                             'text-red-600': (test.testMetadata?.qualityScore?.overallScore || 0) < 7
+                                         }"
+                                         x-text="(test.testMetadata?.qualityScore?.overallScore || 0).toFixed(1) + '/10'"></div>
+                                    <div class="text-xs text-gray-500">Overall Score</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expanded Details -->
+                        <div x-show="test.expanded" x-collapse>
+                            <div class="border-t border-gray-200 p-6 bg-gray-50">
+
+                                <!-- Feedback Section -->
+                                <template x-if="test.testMetadata?.feedback">
+                                    <div class="grid grid-cols-2 gap-6 mb-6">
+                                        <!-- What Works -->
+                                        <div>
+                                            <h4 class="font-bold text-green-700 mb-3 flex items-center gap-2">
+                                                <span class="text-xl">✅</span>
+                                                Lo que funciona (<span x-text="(test.testMetadata.feedback.whatWorks || []).length"></span>)
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <template x-for="item in test.testMetadata.feedback.whatWorks || []" :key="item">
+                                                    <li class="text-sm text-gray-700 pl-4 border-l-2 border-green-300" x-text="item"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+
+                                        <!-- What Fails -->
+                                        <div>
+                                            <h4 class="font-bold text-red-700 mb-3 flex items-center gap-2">
+                                                <span class="text-xl">❌</span>
+                                                Lo que falla (<span x-text="(test.testMetadata.feedback.whatFails || []).length"></span>)
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <template x-for="item in test.testMetadata.feedback.whatFails || []" :key="item">
+                                                    <li class="text-sm pl-4 border-l-2"
+                                                        :class="{
+                                                            'border-red-500 text-red-900': item.severity === 'critical',
+                                                            'border-orange-500 text-orange-900': item.severity === 'major',
+                                                            'border-yellow-500 text-yellow-900': item.severity === 'minor',
+                                                            'border-red-300 text-gray-700': !item.severity
+                                                        }">
+                                                        <span class="font-semibold"
+                                                              x-text="item.severity === 'critical' ? '🔴' : item.severity === 'major' ? '🟠' : item.severity === 'minor' ? '🟡' : '❌'"></span>
+                                                        <span x-text="item.description || item"></span>
+                                                    </li>
+                                                </template>
+                                            </ul>
+                                            <template x-if="test.testMetadata.feedback.severity">
+                                                <div class="mt-3 text-xs text-gray-600">
+                                                    Críticos: <span class="font-bold text-red-600" x-text="test.testMetadata.feedback.severity.critical || 0"></span> |
+                                                    Mayores: <span class="font-bold text-orange-600" x-text="test.testMetadata.feedback.severity.major || 0"></span> |
+                                                    Menores: <span class="font-bold text-yellow-600" x-text="test.testMetadata.feedback.severity.minor || 0"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Review Info -->
+                                <template x-if="test.testMetadata?.feedback">
+                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                        <div class="text-sm text-gray-700">
+                                            <strong>Revisado por:</strong> <span x-text="test.testMetadata.feedback.reviewedBy"></span> |
+                                            <strong>Fecha:</strong> <span x-text="formatDate(test.testMetadata.feedback.reviewDate)"></span>
+                                        </div>
+                                        <template x-if="test.testMetadata.feedback.reviewNotes">
+                                            <div class="mt-2 text-sm text-gray-600 italic" x-text="test.testMetadata.feedback.reviewNotes"></div>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Quality Scores -->
+                                <div class="grid grid-cols-6 gap-4 mb-6">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="(test.testMetadata?.qualityScore?.videoQuality || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">Video</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="(test.testMetadata?.qualityScore?.audioQuality || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">Audio</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="(test.testMetadata?.qualityScore?.viralPotential || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">Viral</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="(test.testMetadata?.qualityScore?.technicalScore || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">Technical</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-purple-600" x-text="(test.testMetadata?.qualityScore?.narrativeCohesion || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">🎬 Narrative</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-purple-600" x-text="(test.testMetadata?.qualityScore?.overallScore || 0).toFixed(1)"></div>
+                                        <div class="text-xs text-gray-500">Overall</div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex gap-4">
+                                    <template x-if="test.videoUrl">
+                                        <a :href="test.videoUrl" target="_blank" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                            ▶️ Ver Video
+                                        </a>
+                                    </template>
+                                    <button @click="addFeedback(test)" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        📝 Agregar Feedback
+                                    </button>
+                                    <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                        📋 Ver JSON Completo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Feedback -->
+        <div x-show="showFeedbackModal"
+             x-cloak
+             class="fixed inset-0 bg-black bg-opacity-30 z-50 pointer-events-none">
+            <div class="absolute right-0 top-0 bottom-0 w-[500px] bg-white shadow-2xl overflow-y-auto pointer-events-auto">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 relative">
+                    <button @click="cancelFeedback()" class="absolute top-4 right-4 text-white hover:text-gray-200 text-2xl">
+                        ✕
+                    </button>
+                    <h2 class="text-2xl font-bold pr-8">📝 Agregar/Editar Feedback</h2>
+                    <p class="text-blue-100 mt-1" x-text="editingTest ? `TEST #${editingTest.testMetadata?.testNumber} - ${editingTest.playerData?.playerName}` : ''"></p>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-6">
+                    <!-- What Works Section -->
+                    <div>
+                        <h3 class="text-lg font-bold text-green-700 mb-3 flex items-center gap-2">
+                            <span class="text-xl">✅</span>
+                            Lo que funciona
+                        </h3>
+                        <div class="space-y-2 mb-3">
+                            <template x-for="(item, index) in feedbackForm.whatWorks" :key="index">
+                                <div class="flex items-center gap-2 p-2 bg-green-50 rounded border border-green-200">
+                                    <span class="flex-1 text-sm" x-text="item"></span>
+                                    <button @click="removeWhatWorks(index)" class="text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="flex gap-2">
+                            <input x-model="newWhatWorks"
+                                   @keyup.enter="addWhatWorks()"
+                                   type="text"
+                                   placeholder="Ej: ✅ Imagen Ana consistente en 3 segmentos"
+                                   class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500">
+                            <button @click="addWhatWorks()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- What Fails Section -->
+                    <div>
+                        <h3 class="text-lg font-bold text-red-700 mb-3 flex items-center gap-2">
+                            <span class="text-xl">❌</span>
+                            Lo que falla
+                        </h3>
+                        <div class="space-y-2 mb-3">
+                            <template x-for="(item, index) in feedbackForm.whatFails" :key="index">
+                                <div class="flex items-center gap-2 p-2 rounded border"
+                                     :class="{
+                                         'bg-red-50 border-red-200': item.severity === 'critical',
+                                         'bg-orange-50 border-orange-200': item.severity === 'major',
+                                         'bg-yellow-50 border-yellow-200': item.severity === 'minor'
+                                     }">
+                                    <span class="flex-1 text-sm">
+                                        <span class="font-semibold"
+                                              :class="{
+                                                  'text-red-700': item.severity === 'critical',
+                                                  'text-orange-700': item.severity === 'major',
+                                                  'text-yellow-700': item.severity === 'minor'
+                                              }"
+                                              x-text="item.severity === 'critical' ? '🔴' : item.severity === 'major' ? '🟠' : '🟡'"></span>
+                                        <span x-text="item.description || item"></span>
+                                    </span>
+                                    <button @click="removeWhatFails(index)" class="text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="flex gap-2">
+                            <select x-model="newFailSeverity" class="px-3 py-2 border rounded-lg">
+                                <option value="minor">🟡 Minor</option>
+                                <option value="major">🟠 Major</option>
+                                <option value="critical">🔴 Critical</option>
+                            </select>
+                            <input x-model="newWhatFails"
+                                   @keyup.enter="addWhatFails()"
+                                   type="text"
+                                   placeholder="Ej: Acento mexicano en lugar de español"
+                                   class="flex-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500">
+                            <button @click="addWhatFails()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Review Notes -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-700 mb-3">📋 Notas de Revisión</h3>
+                        <textarea x-model="feedbackForm.reviewNotes"
+                                  rows="4"
+                                  placeholder="Notas adicionales sobre el test..."
+                                  class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+
+                    <!-- Checklist (opcional - expandible) -->
+                    <div x-data="{ showChecklist: false }">
+                        <button @click="showChecklist = !showChecklist" class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-2">
+                            <span x-text="showChecklist ? '▼' : '▶'"></span>
+                            Checklist completo (opcional)
+                        </button>
+                        <div x-show="showChecklist" x-collapse class="mt-3 space-y-4">
+                            <!-- Técnico Visual/Audio -->
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-600 uppercase mb-2">Técnico Visual/Audio</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.imagenAnaFija" class="rounded">
+                                        <span class="text-sm">Imagen Ana Fija</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.sinTransicionesCamara" class="rounded">
+                                        <span class="text-sm">Sin Transiciones Cámara</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.continuidadFrameToFrame" class="rounded">
+                                        <span class="text-sm">Continuidad Frame-to-Frame</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.audioSinCortes" class="rounded">
+                                        <span class="text-sm">Audio Sin Cortes</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Guión Unificado (NUEVO - 8 Oct 2025) -->
+                            <div class="border-t pt-3">
+                                <h4 class="text-xs font-semibold text-purple-600 uppercase mb-2">🎬 Guión Unificado</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.guionUnificado" class="rounded">
+                                        <span class="text-sm">Guión Unificado Generado</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.cohesionNarrativa" class="rounded">
+                                        <span class="text-sm">Cohesión Narrativa ≥80</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.arcoEmocional" class="rounded">
+                                        <span class="text-sm">Arco Emocional Completo</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.sinRepeticiones" class="rounded">
+                                        <span class="text-sm">Sin Repeticiones (nombre/precio 1x)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Tonos Emocionales (NUEVO - 8 Oct 2025) -->
+                            <div class="border-t pt-3">
+                                <h4 class="text-xs font-semibold text-blue-600 uppercase mb-2">🎭 Tonos Emocionales</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.tonoIntroSusurro" class="rounded">
+                                        <span class="text-sm">INTRO: Susurro conspirativo</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.tonoMiddleAutoridad" class="rounded">
+                                        <span class="text-sm">MIDDLE: Autoridad profesional</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.tonoOutroUrgencia" class="rounded">
+                                        <span class="text-sm">OUTRO: Urgencia y escasez</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.tonosDiferenciados" class="rounded">
+                                        <span class="text-sm">Tonos Diferenciados (NO genérico)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Diálogos Pronunciables (NUEVO - 8 Oct 2025) -->
+                            <div class="border-t pt-3">
+                                <h4 class="text-xs font-semibold text-green-600 uppercase mb-2">💬 Diálogos Pronunciables</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.numerosEnTexto" class="rounded">
+                                        <span class="text-sm">Números en texto ("cuatro punto cinco")</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.ratioTexto" class="rounded">
+                                        <span class="text-sm">Ratio texto ("uno punto ocho veces")</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.pluralizacionCorrecta" class="rounded">
+                                        <span class="text-sm">Pluralización correcta ("2 goles")</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" x-model="feedbackForm.checklist.singularCorrecto" class="rounded">
+                                        <span class="text-sm">Singular correcto ("1 gol")</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Score (opcional - expandible) -->
+                    <div x-data="{ showScores: false }">
+                        <button @click="showScores = !showScores" class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-2">
+                            <span x-text="showScores ? '▼' : '▶'"></span>
+                            Puntuación de calidad (opcional)
+                        </button>
+                        <div x-show="showScores" x-collapse class="mt-3 grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm text-gray-600">Video Quality (0-10)</label>
+                                <input type="number" min="0" max="10" step="0.1" x-model.number="feedbackForm.qualityScore.videoQuality" class="w-full px-3 py-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Audio Quality (0-10)</label>
+                                <input type="number" min="0" max="10" step="0.1" x-model.number="feedbackForm.qualityScore.audioQuality" class="w-full px-3 py-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Viral Potential (0-10)</label>
+                                <input type="number" min="0" max="10" step="0.1" x-model.number="feedbackForm.qualityScore.viralPotential" class="w-full px-3 py-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-600">Technical Score (0-10)</label>
+                                <input type="number" min="0" max="10" step="0.1" x-model.number="feedbackForm.qualityScore.technicalScore" class="w-full px-3 py-2 border rounded">
+                            </div>
+                            <div class="col-span-2 border-t pt-4">
+                                <label class="text-sm text-purple-600 font-semibold">🎬 Narrative Cohesion (0-10) <span class="text-xs font-normal text-gray-500">NUEVO - 8 Oct 2025</span></label>
+                                <input type="number" min="0" max="10" step="0.1" x-model.number="feedbackForm.qualityScore.narrativeCohesion" class="w-full px-3 py-2 border rounded" placeholder="Evalúa guión unificado + tonos + diálogos">
+                                <p class="text-xs text-gray-500 mt-1">Combina: cohesión narrativa, tonos diferenciados y diálogos pronunciables</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-between sticky bottom-0">
+                    <button @click="cancelFeedback()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                        ← Cerrar
+                    </button>
+                    <button @click="saveFeedback()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        💾 Guardar Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        function testHistory() {
+            return {
+                tests: [],
+                selectedTest: null,
+                searchQuery: '',
+                filterStatus: 'all',
+                filterFix: 'all',
+                showFeedbackModal: false,
+                editingTest: null,
+                feedbackForm: {
+                    whatWorks: [],
+                    whatFails: [],
+                    reviewNotes: '',
+                    checklist: {},
+                    qualityScore: {}
+                },
+                newWhatWorks: '',
+                newWhatFails: '',
+                newFailSeverity: 'minor',
+
+                init() {
+                    this.loadTests();
+                },
+
+                async loadTests() {
+                    try {
+                        // Cargar todos los tests desde la API
+                        const response = await fetch('/api/test-history/list');
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.tests = data.tests.map(test => {
+                                // Construir videoUrl dinámicamente
+                                let videoUrl = null;
+
+                                // Si tiene video concatenado, usar ese
+                                if (test.videoFiles?.concatenated) {
+                                    videoUrl = `/output/veo3/sessions/${test.sessionId || 'unknown'}/${test.videoFiles.concatenated}`;
+                                }
+                                // Si no tiene concatenado pero tiene seg1, usar segmento 1 desde _active_testing
+                                else if (test.videoFiles?.seg1) {
+                                    videoUrl = `/data/instagram-versions/_active_testing/${test.videoFiles.seg1}`;
+                                }
+                                // Si no tiene videoFiles, buscar en ubicaciones legacy
+                                else if (test.videoUrl) {
+                                    videoUrl = test.videoUrl;
+                                }
+
+                                return {
+                                    ...test,
+                                    videoUrl: videoUrl,
+                                    expanded: false
+                                };
+                            });
+
+                            // Seleccionar automáticamente el primer test
+                            if (this.tests.length > 0) {
+                                this.selectedTest = this.tests[0];
+                            }
+                        } else {
+                            throw new Error(data.error || 'Failed to load tests');
+                        }
+                    } catch (error) {
+                        console.error('Error loading tests:', error);
+                        // Fallback a datos de ejemplo
+                        this.tests = [
+                            {
+                                id: "pere-milla-v1759519477099",
+                                timestamp: "2025-10-03T19:24:37.659Z",
+                                expanded: false,
+                                playerData: {
+                                    playerName: "Pere Milla",
+                                    team: "Espanyol",
+                                    price: 4.5
+                                },
+                                testMetadata: {
+                                    testNumber: 46,
+                                    testDate: "2025-10-03T19:24:37.659Z",
+                                    testPurpose: "BASELINE PRE-FIXES",
+                                    fixesApplied: [],
+                                feedback: {
+                                    whatWorks: [
+                                        "✅ Guión viral cumple framework 7 elementos",
+                                        "✅ Hook conspirativo efectivo (seg 0)",
+                                        "✅ Audio sin cortes en transiciones"
+                                    ],
+                                    whatFails: [
+                                        "❌ CRÍTICO: Ana cambia de imagen entre segmentos",
+                                        "❌ CRÍTICO: Transiciones de cámara presentes"
+                                    ],
+                                    severity: { critical: 2, major: 2, minor: 0 },
+                                    reviewedBy: "Claude Code",
+                                    reviewDate: "2025-10-04T09:02:00.000Z",
+                                    reviewNotes: "Baseline para comparar con versiones post-fixes"
+                                },
+                                qualityScore: {
+                                    videoQuality: 6.5,
+                                    audioQuality: 8.5,
+                                    viralPotential: 7.5,
+                                    technicalScore: 6.0,
+                                    overallScore: 7.125
+                                }
+                            },
+                            videoUrl: "http://localhost:3000/output/veo3/ana-concatenated-1759519477099.mp4",
+                            metadata: {
+                                status: "archived"
+                            }
+                        }
+                    ];
+                    }
+                },
+
+                get filteredTests() {
+                    return this.tests.filter(test => {
+                        const matchesSearch = !this.searchQuery ||
+                            test.playerData?.playerName.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesStatus = this.filterStatus === 'all' ||
+                            test.metadata?.status === this.filterStatus;
+                        const matchesFix = this.filterFix === 'all' ||
+                            (test.testMetadata?.fixesApplied || []).includes(this.filterFix);
+                        return matchesSearch && matchesStatus && matchesFix;
+                    });
+                },
+
+                get testsApproved() {
+                    return this.tests.filter(t => t.metadata?.status === 'approved').length;
+                },
+
+                get testsTesting() {
+                    return this.tests.filter(t => t.metadata?.status === 'testing').length;
+                },
+
+                get avgScore() {
+                    const scores = this.tests.map(t => t.testMetadata?.qualityScore?.overallScore || 0);
+                    return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                },
+
+                selectTest(test) {
+                    this.selectedTest = test;
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return 'N/A';
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                async addFeedback(test) {
+                    this.editingTest = test;
+                    this.showFeedbackModal = true;
+
+                    // Pre-cargar valores existentes
+                    this.feedbackForm = {
+                        whatWorks: test.testMetadata?.feedback?.whatWorks || [],
+                        whatFails: test.testMetadata?.feedback?.whatFails || [],
+                        reviewNotes: test.testMetadata?.feedback?.reviewNotes || '',
+                        checklist: test.testMetadata?.checklist || {},
+                        qualityScore: test.testMetadata?.qualityScore || {}
+                    };
+
+                    this.newWhatWorks = '';
+                    this.newWhatFails = '';
+                    this.newFailSeverity = 'minor';
+                },
+
+                addWhatWorks() {
+                    if (this.newWhatWorks.trim()) {
+                        this.feedbackForm.whatWorks.push(this.newWhatWorks.trim());
+                        this.newWhatWorks = '';
+                    }
+                },
+
+                removeWhatWorks(index) {
+                    this.feedbackForm.whatWorks.splice(index, 1);
+                },
+
+                addWhatFails() {
+                    if (this.newWhatFails.trim()) {
+                        this.feedbackForm.whatFails.push({
+                            description: this.newWhatFails.trim(),
+                            severity: this.newFailSeverity
+                        });
+                        this.newWhatFails = '';
+                        this.newFailSeverity = 'minor';
+                    }
+                },
+
+                removeWhatFails(index) {
+                    this.feedbackForm.whatFails.splice(index, 1);
+                },
+
+                async saveFeedback() {
+                    try {
+                        const response = await fetch(`/api/test-history/test/${this.editingTest.id}/feedback`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(this.feedbackForm)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Actualizar test en la lista
+                            const index = this.tests.findIndex(t => t.id === this.editingTest.id);
+                            if (index !== -1) {
+                                this.tests[index] = result.test;
+                            }
+
+                            // Cerrar modal
+                            this.showFeedbackModal = false;
+                            this.editingTest = null;
+
+                            alert('✅ Feedback guardado correctamente');
+                        } else {
+                            alert('❌ Error guardando feedback: ' + result.error);
+                        }
+                    } catch (error) {
+                        console.error('Error saving feedback:', error);
+                        alert('❌ Error guardando feedback: ' + error.message);
+                    }
+                },
+
+                cancelFeedback() {
+                    this.showFeedbackModal = false;
+                    this.editingTest = null;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

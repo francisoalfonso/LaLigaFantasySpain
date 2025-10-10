@@ -1,0 +1,177 @@
+{
+  "id": "pere-milla-v1760019966154",
+  "version": 48,
+  "timestamp": "2025-10-09T16:26:06.154Z",
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Espanyol",
+    "position": "DEL",
+    "price": 6.64,
+    "stats": {
+      "games": 6,
+      "goals": 3,
+      "assists": 0,
+      "rating": "7.0"
+    },
+    "valueRatio": 1.42
+  },
+  "testMetadata": {
+    "testDate": "2025-10-09T14:10:00.000Z",
+    "testNumber": 48,
+    "fixesApplied": [
+      "imagen-ana-fija",
+      "sin-transiciones-camara",
+      "frame-to-frame-continuity",
+      "sistema-restaurado-6oct",
+      "unified-script-generator",
+      "duracion-7s-por-segmento",
+      "audio-analyzer-recorte",
+      "subtitulos-virales-karaoke",
+      "tarjeta-jugador-segundo-3"
+    ],
+    "testPurpose": "TEST #48 - VALIDACIÓN COMPLETA POST-INVESTIGACIÓN 8 OCT - Flujo oficial: descarga + concatenación + subtítulos + tarjeta",
+    "generationDetails": {
+      "sessionId": 1760019966154,
+      "totalTimeMinutes": 1,
+      "segmentsGenerated": 2,
+      "frameExtractionUsed": false,
+      "frameToFrameMethod": "AudioAnalyzer trim + freeze frame transition",
+      "audioDurations": [7.10, 7.30],
+      "segments": [
+        {
+          "index": 1,
+          "role": "intro",
+          "dialogue": "He encontrado el chollo absoluto... Milla por solo seis punto seis cuatro millones... va a explotar.",
+          "duration": 7.15,
+          "originalDuration": 8.0,
+          "size": 1543680
+        },
+        {
+          "index": 2,
+          "role": "middle",
+          "dialogue": "3 goles, 0 asistencias. uno punto cuatro dos veces superior. Está dando el doble de puntos.",
+          "duration": 7.35,
+          "originalDuration": 8.0,
+          "size": 1511424
+        }
+      ],
+      "totalDuration": 21.07,
+      "breakdown": "7.15s intro + 7.35s middle + 0.8s freeze + 1.5s logo + subtítulos + tarjeta"
+    },
+    "feedback": {
+      "whatWorks": [],
+      "whatFails": [],
+      "severity": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0,
+        "fixed": 0,
+        "addressed": 0,
+        "pending": 0
+      },
+      "reviewedBy": "Usuario",
+      "reviewDate": null,
+      "reviewNotes": "⏳ PENDIENTE VALIDACIÓN MANUAL - Video generado, esperando feedback del usuario para completar"
+    },
+    "checklist": {
+      "imagenAnaFija": null,
+      "sinTransicionesCamara": null,
+      "audioSinCortes": null,
+      "vozConsistente": null,
+      "pronunciacionCorrecta": null,
+      "logoOutro": true,
+      "duracionCorrecta": true,
+      "hookSegundo3": null,
+      "ctaClaro": null,
+      "continuidadFrameToFrame": null,
+      "subtitulosKaraoke": true,
+      "unifiedScriptGenerator": true,
+      "numerosEnTexto": true,
+      "coolingPeriod60s": true,
+      "guionUnificado": true,
+      "cohesionNarrativa": null,
+      "arcoEmocional": null,
+      "sinRepeticiones": true,
+      "tonoIntroSusurro": null,
+      "tonoMiddleAutoridad": null,
+      "tonoOutroUrgencia": null,
+      "tonosDiferenciados": null,
+      "ratioTexto": true,
+      "pluralizacionCorrecta": true,
+      "singularCorrecto": true,
+      "audioAnalyzerRecorte": true,
+      "tarjetaJugador": true
+    },
+    "qualityScore": {
+      "videoQuality": null,
+      "audioQuality": null,
+      "viralPotential": null,
+      "technicalScore": null,
+      "narrativeCohesion": null,
+      "overallScore": 0,
+      "autoCalculated": false,
+      "calculationMethod": "Pendiente validación manual del usuario",
+      "note": "Video generado con flujo completo. Esperando feedback para calcular score."
+    },
+    "comparisonWith": "dani-carvajal-v1759569346240",
+    "improvements": [
+      "✅ Duración reducida 8s → 7s por segmento",
+      "✅ AudioAnalyzer: recorte automático al fin de audio",
+      "✅ Subtítulos virales karaoke aplicados (32 palabras)",
+      "✅ Tarjeta de jugador integrada (segundo 3, slide-in)",
+      "✅ Logo outro con freeze frame (0.8s)",
+      "✅ Flujo de validación oficial implementado"
+    ],
+    "issues": [
+      "⏳ Test parcial (2 segmentos) - outro pendiente",
+      "⏳ Pendiente validación acento español",
+      "⏳ Pendiente validación timing (cara rara)",
+      "⚠️ Foto de jugador: placeholder usado (sin foto real disponible)"
+    ],
+    "systemChanges": {
+      "date": "2025-10-09",
+      "changesApplied": [
+        "AudioAnalyzer threshold -40dB → -60dB (fix recortes agresivos)",
+        "AudioAnalyzer margin 0.1s → 0.3s (más conservador)",
+        "AudioAnalyzer min duration 0.5s → 1.0s (evita recortes extremos)",
+        "Subtítulos automáticos activados en VideoConcatenator (Test #47 formato)",
+        "Tarjeta de jugador integrada automáticamente (Test #47 formato)",
+        "Script validate-2-segments.js actualizado (elimina pasos manuales redundantes)"
+      ],
+      "fixedBugs": [
+        "Video de 3.16s → 21.07s (AudioAnalyzer threshold corregido)",
+        "Subtítulos formato incorrecto → formato aprobado Test #47 (integración automática)"
+      ],
+      "pendingValidation": [
+        "Acento español en ambos segmentos (NO mexicano)",
+        "Timing correcto sin cara rara (fix aplicado: recorte a 7.15s y 7.35s)",
+        "Sincronización subtítulos automáticos",
+        "Funcionalidad tarjeta de jugador integrada"
+      ]
+    }
+  },
+  "veo3Config": {
+    "anaImageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/ana-estudio-01.jpeg",
+    "seed": 30001,
+    "enhanced": false,
+    "modelVersion": "veo3_fast",
+    "segmentCount": 2,
+    "totalDuration": 14,
+    "frameToFrameEnabled": false,
+    "endpoint": "/api/veo3/generate-viral-chollo",
+    "preset": "chollo_viral",
+    "coolingPeriodSeconds": 60
+  },
+  "videoUrl": "http://localhost:3000/assets/preview/latest-chollo-viral.mp4",
+  "localPath": "output/veo3/ana-concatenated-1760019966154.mp4",
+  "caption": "🔥 TEST #48 - PERE MILLA VALIDACIÓN COMPLETA\n\nPere Milla a 6.64M 💰\nRatio: 1.42x\n3 goles en 6 partidos\n\n✅ Duración 7s por segmento\n✅ Subtítulos virales karaoke\n✅ Tarjeta jugador animada\n\n#FantasyLaLiga #PereMilla #Espanyol #Chollo",
+  "notes": "🎯 TEST #48 - 9 OCT 2025 (REVISIÓN POST-FIX)\n\n🔧 FIXES APLICADOS 16:26:\n✅ AudioAnalyzer threshold -40dB → -60dB\n✅ AudioAnalyzer margins aumentados (0.1s → 0.3s)\n✅ Subtítulos integrados automáticamente (Test #47 formato)\n✅ Tarjeta integrada automáticamente (Test #47 formato)\n✅ Video 3.16s → 21.07s (duración correcta)\n\n✨ FLUJO VALIDACIÓN OFICIAL:\n✅ Videos descargados desde KIE.ai (8s cada uno)\n✅ AudioAnalyzer detecta fin de audio (7.10s y 7.30s)\n✅ Recorte automático al fin de audio\n✅ Concatenados con VideoConcatenator + logo\n✅ Subtítulos virales automáticos\n✅ Tarjeta jugador automática (segundo 3)\n✅ Preview web disponible\n\n⚠️ TEST PARCIAL:\n- Solo 2 segmentos (intro + middle)\n- Outro pendiente (rate limiting)\n\n⏳ PENDIENTE VALIDACIÓN:\n- Acento español (NO mexicano)\n- Timing sin cara rara (fix aplicado)\n- Sincronización subtítulos\n- Formato subtítulos Test #47\n\n📚 DOCUMENTACIÓN:\n- STATUS/ANALISIS_PROBLEMAS_VALIDACION_PERE_MILLA.md\n- docs/VEO3_FLUJO_VALIDACION_OFICIAL.md\n- STATUS/RESUMEN_INVESTIGACION_8_OCT.md",
+  "viralScore": 0,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-09T16:26:06.154Z",
+    "updatedAt": "2025-10-09T16:26:06.154Z",
+    "userId": "system",
+    "status": "ready_for_validation"
+  }
+}

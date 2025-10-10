@@ -2,6 +2,7 @@
 // ⚠️ CONFIGURADO PARA TEMPORADA 2025-26 ⚠️
 const axios = require('axios');
 const logger = require('../utils/logger');
+const recentMatchesCache = require('./recentMatchesCache');
 
 class ApiFootballClient {
   constructor() {
@@ -1102,6 +1103,195 @@ class ApiFootballClient {
     } else {
       return awayGoals > homeGoals ? 'win' : 'loss';
     }
+  }
+
+  // ============================================
+  // FASE 1.3: OBTENER PARTIDOS RECIENTES JUGADOR
+  // Para stats DAZN reales + forma reciente
+  // ============================================
+
+  /**
+   * Obtener partidos recientes de un jugador con stats detalladas
+   * @param {number} playerId - ID del jugador
+   * @param {number} last - Número de partidos recientes (default: 5)
+   * @returns {Object} Stats agregadas de últimos partidos
+   */
+  async getPlayerRecentMatches(playerId, last = 5) {
+    // Verificar cache primero
+    const cached = recentMatchesCache.get(playerId, last);
+    if (cached) {
+      logger.debug(`[ApiFootball] Cache HIT: Jugador ${playerId} últimos ${last} partidos`);
+      return cached;
+    }
+
+    logger.info(`🔄 Obteniendo últimos ${last} partidos del jugador ${playerId}...`);
+
+    try {
+      // Obtener fixtures donde jugó el jugador (temporada actual)
+      const result = await this.makeRequest('/fixtures/players', {
+        player: playerId,
+        season: this.LEAGUES.CURRENT_SEASON,
+        league: this.LEAGUES.LA_LIGA
+      });
+
+      if (!result.success || !result.data || result.data.length === 0) {
+        logger.warn(`⚠️ No se encontraron partidos para jugador ${playerId}`);
+        return {
+          success: false,
+          matchesFound: 0,
+          stats: null
+        };
+      }
+
+      // Ordenar por fecha más reciente y tomar últimos N partidos
+      const sortedMatches = result.data
+        .sort((a, b) => new Date(b.fixture?.date) - new Date(a.fixture?.date))
+        .slice(0, last);
+
+      logger.info(`✅ ${sortedMatches.length} partidos recientes encontrados`);
+
+      // Agregar stats de todos los partidos
+      const aggregatedStats = this._aggregatePlayerMatchStats(sortedMatches);
+
+      const response = {
+        success: true,
+        matchesFound: sortedMatches.length,
+        stats: aggregatedStats,
+        matches: sortedMatches.map(m => ({
+          fixtureId: m.fixture?.id,
+          date: m.fixture?.date,
+          opponent: m.opponent?.name,
+          minutes: m.player?.statistics?.[0]?.games?.minutes || 0,
+          rating: m.player?.statistics?.[0]?.games?.rating || null,
+          goals: m.player?.statistics?.[0]?.goals?.total || 0,
+          assists: m.player?.statistics?.[0]?.goals?.assists || 0
+        }))
+      };
+
+      // Guardar en cache
+      recentMatchesCache.set(playerId, last, response);
+
+      return response;
+
+    } catch (error) {
+      logger.error(`❌ Error obteniendo partidos recientes jugador ${playerId}:`, error.message);
+      return {
+        success: false,
+        error: error.message,
+        matchesFound: 0,
+        stats: null
+      };
+    }
+  }
+
+  /**
+   * Agregar stats de múltiples partidos
+   * @private
+   */
+  _aggregatePlayerMatchStats(matches) {
+    const totalMatches = matches.length;
+    if (totalMatches === 0) return null;
+
+    // Inicializar contadores
+    const aggregated = {
+      matches: totalMatches,
+      minutes: 0,
+      goals: 0,
+      assists: 0,
+      shotsTotal: 0,
+      shotsOn: 0,
+      dribblesAttempts: 0,
+      dribblesSuccess: 0,
+      tacklesTotal: 0,
+      tacklesBlocks: 0,
+      tacklesInterceptions: 0,
+      duelsTotal: 0,
+      duelsWon: 0,
+      passesTotal: 0,
+      passesKey: 0,
+      passesAccuracy: 0, // Será promedio
+      foulsDrawn: 0,
+      foulsCommitted: 0,
+      yellowCards: 0,
+      redCards: 0,
+      // Goalkeeper specific
+      saveTotal: 0,
+      goalsConceded: 0,
+      // Ratings
+      ratings: [],
+      avgRating: 0
+    };
+
+    // Sumar stats de cada partido
+    matches.forEach(match => {
+      const stats = match.player?.statistics?.[0];
+      if (!stats) return;
+
+      aggregated.minutes += stats.games?.minutes || 0;
+      aggregated.goals += stats.goals?.total || 0;
+      aggregated.assists += stats.goals?.assists || 0;
+
+      aggregated.shotsTotal += stats.shots?.total || 0;
+      aggregated.shotsOn += stats.shots?.on || 0;
+
+      aggregated.dribblesAttempts += stats.dribbles?.attempts || 0;
+      aggregated.dribblesSuccess += stats.dribbles?.success || 0;
+
+      aggregated.tacklesTotal += stats.tackles?.total || 0;
+      aggregated.tacklesBlocks += stats.tackles?.blocks || 0;
+      aggregated.tacklesInterceptions += stats.tackles?.interceptions || 0;
+
+      aggregated.duelsTotal += stats.duels?.total || 0;
+      aggregated.duelsWon += stats.duels?.won || 0;
+
+      aggregated.passesTotal += stats.passes?.total || 0;
+      aggregated.passesKey += stats.passes?.key || 0;
+
+      // Passes accuracy (acumular para promediar después)
+      if (stats.passes?.accuracy) {
+        aggregated.passesAccuracy += parseFloat(stats.passes.accuracy) || 0;
+      }
+
+      aggregated.foulsDrawn += stats.fouls?.drawn || 0;
+      aggregated.foulsCommitted += stats.fouls?.committed || 0;
+
+      aggregated.yellowCards += stats.cards?.yellow || 0;
+      aggregated.redCards += stats.cards?.red || 0;
+
+      // Goalkeeper stats
+      aggregated.saveTotal += stats.goals?.saves || 0;
+      aggregated.goalsConceded += stats.goals?.conceded || 0;
+
+      // Rating
+      const rating = parseFloat(stats.games?.rating);
+      if (rating && !isNaN(rating)) {
+        aggregated.ratings.push(rating);
+      }
+    });
+
+    // Calcular promedios
+    aggregated.avgRating = aggregated.ratings.length > 0
+      ? (aggregated.ratings.reduce((sum, r) => sum + r, 0) / aggregated.ratings.length).toFixed(2)
+      : 0;
+
+    aggregated.passesAccuracy = totalMatches > 0
+      ? (aggregated.passesAccuracy / totalMatches).toFixed(1)
+      : 0;
+
+    // Calcular ratios
+    aggregated.dribblesSuccessRate = aggregated.dribblesAttempts > 0
+      ? ((aggregated.dribblesSuccess / aggregated.dribblesAttempts) * 100).toFixed(1)
+      : 0;
+
+    aggregated.duelsWonRate = aggregated.duelsTotal > 0
+      ? ((aggregated.duelsWon / aggregated.duelsTotal) * 100).toFixed(1)
+      : 0;
+
+    aggregated.shotsAccuracy = aggregated.shotsTotal > 0
+      ? ((aggregated.shotsOn / aggregated.shotsTotal) * 100).toFixed(1)
+      : 0;
+
+    return aggregated;
   }
 
   // Utilidad para pausas

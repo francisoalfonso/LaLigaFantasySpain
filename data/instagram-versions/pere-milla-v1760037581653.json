@@ -1,0 +1,81 @@
+{
+  "id": "pere-milla-v1760037581653",
+  "version": 1,
+  "timestamp": "2025-10-09T19:19:41.653Z",
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Espanyol",
+    "price": 6.64,
+    "ratio": 1.42,
+    "stats": {
+      "games": 6,
+      "goals": 3,
+      "assists": 0,
+      "rating": "7.00",
+      "position": "Centrocampista"
+    }
+  },
+  "previewData": {
+    "video": {
+      "url": "http://localhost:3000/output/veo3/pere-milla-chollo-FINAL.mp4",
+      "duration": "~15s",
+      "segments": 3,
+      "structure": "Hook → Desarrollo → CTA"
+    },
+    "instagram": {
+      "caption": "🔥 CHOLLO ABSOLUTO: Pere Milla\n\n💰 Solo 6.64M\n⚽ 3 goles en 6 partidos\n📊 Rating 7.00\n\n¿Os esperáis para ficharlo? 😏\n\n#FantasyLaLiga #PereMilla #Espanyol #Chollos",
+      "hashtags": [
+        "#FantasyLaLiga",
+        "#PereMilla",
+        "#Espanyol",
+        "#Chollos"
+      ],
+      "format": "9:16 vertical",
+      "estimatedReach": "5000-8000",
+      "bestTimeToPost": "18:00-20:00",
+      "captionLength": 150
+    },
+    "metadata": {
+      "viralityScore": 85,
+      "segments": [
+        {
+          "type": "hook",
+          "dialogue": "Pssst... Misters... He encontrado el chollo absoluto... Milla por solo seis punto sesenta y cuatro millones... va a explotar."
+        },
+        {
+          "type": "development",
+          "dialogue": "Tres goles, cero asistencias. Uno punto cuarenta y dos veces superior. Está dando el doble de puntos."
+        },
+        {
+          "type": "cta",
+          "dialogue": "Es una ganga total. Nadie lo ha fichado aún. Fichadlo ahora antes que suba."
+        }
+      ]
+    }
+  },
+  "segments": [
+    {
+      "type": "hook",
+      "dialogue": "Pssst... Misters... He encontrado el chollo absoluto... Milla por solo seis punto sesenta y cuatro millones... va a explotar."
+    },
+    {
+      "type": "development",
+      "dialogue": "Tres goles, cero asistencias. Uno punto cuarenta y dos veces superior. Está dando el doble de puntos."
+    },
+    {
+      "type": "cta",
+      "dialogue": "Es una ganga total. Nadie lo ha fichado aún. Fichadlo ahora antes que suba."
+    }
+  ],
+  "videoUrl": "http://localhost:3000/output/veo3/pere-milla-chollo-FINAL.mp4",
+  "caption": "🔥 CHOLLO ABSOLUTO: Pere Milla\n\n💰 Solo 6.64M\n⚽ 3 goles\n📊 Rating 7.00\n\n#FantasyLaLiga #PereMilla",
+  "notes": "✅ Video E2E completo con tarjeta. Imagen correcta desde cache.",
+  "viralScore": 85,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-09T19:19:41.653Z",
+    "updatedAt": "2025-10-09T19:19:41.653Z",
+    "userId": "system",
+    "status": "draft"
+  }
+}

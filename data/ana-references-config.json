@@ -1,0 +1,41 @@
+{
+  "uploaded_at": "2025-10-10T09:29:39.006Z",
+  "bucket": "ana-references",
+  "total_images": 5,
+  "images": [
+    {
+      "role": "body-outfit",
+      "description": "Cuerpo completo / outfit (polo FLP)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-references/ana-peinido2-03.png",
+      "path": "ana-peinido2-03.png"
+    },
+    {
+      "role": "face-frontal",
+      "description": "Rostro frontal (Face ID principal)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-references/ana-peinido2-04.png",
+      "path": "ana-peinido2-04.png"
+    },
+    {
+      "role": "face-right-profile",
+      "description": "Perfil derecho (volumen lateral)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-references/ana-peinido2-06.png",
+      "path": "ana-peinido2-06.png"
+    },
+    {
+      "role": "face-left-profile",
+      "description": "Perfil izquierdo (equilibrio facial)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-references/ana-peinido2-07.png",
+      "path": "ana-peinido2-07.png"
+    },
+    {
+      "role": "environment",
+      "description": "Entorno del estudio (luces neón + pantallas)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-references/estudio-FLP.jpg",
+      "path": "estudio-FLP.jpg"
+    }
+  ],
+  "seed": 12500,
+  "prompt_strength": 0.8,
+  "model": "google/nano-banana-edit",
+  "size": "9:16"
+}

@@ -1,0 +1,85 @@
+{
+  "testNumber": 48,
+  "date": "2025-10-04T14:34:00.000Z",
+  "playerName": "Dani Carvajal",
+  "team": "Real Madrid",
+  "price": 5.5,
+  "stats": {
+    "games": 6,
+    "goals": 1,
+    "assists": 0,
+    "rating": "7.12"
+  },
+  "valueRatio": 1.23,
+  "preset": "chollo_viral",
+  "purpose": "TEST #48 - Fix acento mexicano → español castellano (CRÍTICO)",
+  "fixes": [
+    {
+      "id": "acento-espanol-castilian-reforzado",
+      "description": "Prompt reforzado: CASTILIAN SPANISH FROM SPAIN (España peninsular accent, NOT Mexican or Latin American)",
+      "file": "promptBuilder.js",
+      "lines": [160, 175],
+      "severity": "CRITICAL",
+      "expectedImpact": "+2.0 puntos (0.0 → 2.0/10)"
+    }
+  ],
+  "videoPath": "data/instagram-versions/_active_testing/TEST_48_Carvajal_fix-acento-espanol.mp4",
+  "sessionId": "session_1759569346240",
+  "concatenatedVideoPath": "output/veo3/ana-concatenated-1759569786307.mp4",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "526fb2993a3c761ffb4376f3e47ba4bf",
+      "duration": 8,
+      "dialogue": "He encontrado el chollo absoluto... Carvajal por solo cinco punto cinco millones... va a explotar.",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/fa1ff0f9-866e-4928-8e60-588d9010e3b6.mp4"
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "taskId": "911f369904a3560f6192a04a20dfd48b",
+      "duration": 8,
+      "dialogue": "1 goles, 0 asistencias. Su ratio valor es 1.23 veces superior. Está dando el doble de puntos.",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/b47a5df0-f1c0-41ed-bf40-983b580a1ebc.mp4"
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "taskId": "086d8b8afd26dad674c9ca2200e1942c",
+      "duration": 8,
+      "dialogue": "A cinco punto cinco millones es una ganga. Nadie lo ha fichado aún. Fichad a Carvajal ahora.",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/7ab2d35c-ba69-4061-964b-ed65848858b4.mp4"
+    }
+  ],
+  "duration": 24,
+  "generatedAt": "2025-10-04T09:23:06.902Z",
+  "notes": [
+    "Video concatenado sin subtítulos ni logo Instagram (validación solo VEO3)",
+    "⚠️ IMPORTANTE: Video generado a las 09:23 AM, código modificado a las 16:13 PM",
+    "❌ VALIDACIÓN FALLIDA: Acento sigue siendo mexicano - video generado ANTES del fix",
+    "Video inválido para testing - generado con código antiguo sin fix aplicado"
+  ],
+  "validationResult": {
+    "valid": false,
+    "reason": "Video generado 7 horas ANTES de aplicar fix en código",
+    "videoGeneratedAt": "2025-10-04T09:23:06.902Z",
+    "codeFixedAt": "2025-10-04T16:13:54.000Z",
+    "accentDetected": "Mexican Spanish",
+    "accentExpected": "Castilian Spanish from Spain"
+  },
+  "pendingWork": [
+    "Agregar subtítulos karaoke Instagram",
+    "Agregar logo outro 1.5s",
+    "Implementar frame-to-frame secuencial (actualmente parallel)"
+  ],
+  "comparison": {
+    "vs_TEST_47": {
+      "same": ["playerName", "stats", "preset"],
+      "different": {
+        "prompt": "TEST #47 usaba 'SPANISH FROM SPAIN', TEST #48 usa 'CASTILIAN SPANISH FROM SPAIN (España peninsular accent, NOT Mexican or Latin American)'",
+        "expectedResult": "Acento español correcto en todos los segmentos"
+      }
+    }
+  }
+}

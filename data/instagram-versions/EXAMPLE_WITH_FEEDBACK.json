@@ -1,0 +1,108 @@
+{
+  "id": "dani-carvajal-v1759527450123",
+  "version": 5,
+  "timestamp": "2025-10-04T08:37:30.123Z",
+
+  "playerData": {
+    "playerName": "Dani Carvajal",
+    "team": "Real Madrid",
+    "position": "DEF",
+    "price": 5.5,
+    "stats": {
+      "games": 6,
+      "goals": 1,
+      "assists": 0,
+      "rating": "7.12"
+    },
+    "valueRatio": 1.23
+  },
+
+  "testMetadata": {
+    "testDate": "2025-10-04T08:37:30.123Z",
+    "testNumber": 47,
+    "fixesApplied": [
+      "imagen-ana-fija",
+      "sin-transiciones-camara"
+    ],
+    "testPurpose": "E2E post-fixes: Validar imagen Ana fija + eliminación transiciones de cámara",
+
+    "feedback": {
+      "whatWorks": [
+        "✅ Ana tiene la MISMA imagen en los 3 segmentos (pelo suelto)",
+        "✅ Cámara completamente estática, sin zooms ni dollys",
+        "✅ Iluminación consistente entre segmentos",
+        "✅ Audio sin cortes en transiciones (seg 0, 8, 16)",
+        "✅ Voz de Ana consistente en todo el video",
+        "✅ Logo outro aparece correctamente (1.5s)",
+        "✅ Pronunciación de '5.5 millones' correcta",
+        "✅ Revelación del jugador en segundo 3 (timing perfecto)",
+        "✅ CTA claro al final 'Fichad a Carvajal ahora'"
+      ],
+      "whatFails": [
+        "❌ CRÍTICO: En segmento 2, Ana gira ligeramente la cabeza hacia la izquierda",
+        "⚠️ MENOR: Iluminación en segmento 3 un poco más brillante que en seg 1-2",
+        "⚠️ MENOR: Pausa entre 'Real Madrid' y 'por solo' demasiado larga (0.8s)"
+      ],
+      "severity": {
+        "critical": 1,
+        "major": 0,
+        "minor": 2
+      },
+      "reviewedBy": "Usuario",
+      "reviewDate": "2025-10-04T08:45:12.000Z",
+      "reviewNotes": "Mucho mejor que versión anterior. El giro de cabeza en seg 2 es el único problema crítico. Considerar regenerar solo ese segmento o aceptar si no es muy notorio."
+    },
+
+    "checklist": {
+      "imagenAnaFija": true,
+      "sinTransicionesCamara": true,
+      "audioSinCortes": true,
+      "vozConsistente": true,
+      "pronunciacionCorrecta": true,
+      "logoOutro": true,
+      "duracionCorrecta": true,
+      "hookSegundo3": true,
+      "ctaClaro": true
+    },
+
+    "qualityScore": {
+      "videoQuality": 8.5,
+      "audioQuality": 9,
+      "viralPotential": 8.5,
+      "technicalScore": 9,
+      "overallScore": 8.75
+    },
+
+    "comparisonWith": "pere-milla-v1759519477099",
+    "improvements": [
+      "✅ Ana 100% consistente (antes cambiaba entre 14 imágenes diferentes)",
+      "✅ Cámara estática (antes había zoom in en hook)",
+      "✅ Iluminación más uniforme (antes variaba dramáticamente)"
+    ],
+    "issues": [
+      "Pequeño giro de cabeza en segmento 2 (no bloqueante pero notable)"
+    ]
+  },
+
+  "veo3Config": {
+    "anaImageUrl": "https://raw.githubusercontent.com/laligafantasyspainpro-ux/imagenes-presentadores/main/ana-estudio-pelo-suelto.jpg",
+    "seed": 30001,
+    "enhanced": false,
+    "modelVersion": "veo3_fast",
+    "segmentCount": 3,
+    "totalDuration": 33.5
+  },
+
+  "videoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1759527450123.mp4",
+  "caption": "🔥 CHOLLO DEL DÍA\\n\\nDani Carvajal a solo 5.5M 💰\\nRatio calidad-precio: 1.23x\\n1 gol en 6 partidos 📊\\n\\n#FantasyLaLiga #Chollos #Carvajal",
+  "notes": "🎯 TEST #47 - Primera prueba post-fixes críticos\\n✅ Imagen Ana fija\\n✅ Sin transiciones de cámara\\n⚠️ Giro de cabeza en seg 2 (revisar)",
+  "viralScore": 85,
+  "isRealVideo": true,
+
+  "metadata": {
+    "createdAt": "2025-10-04T08:37:30.123Z",
+    "updatedAt": "2025-10-04T08:45:12.000Z",
+    "userId": "system",
+    "status": "testing"
+  }
+}

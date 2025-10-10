@@ -1,0 +1,26 @@
+{
+  "id": 46759,
+  "name": "A. Espino",
+  "team": {
+    "id": 728,
+    "name": "Rayo Vallecano",
+    "logo": "https://media.api-sports.io/football/teams/728.png"
+  },
+  "position": "DEF",
+  "age": 33,
+  "nationality": "Uruguay",
+  "photo": "https://media.api-sports.io/football/players/46759.png",
+  "stats": {
+    "games": 5,
+    "minutes": 111,
+    "goals": 1,
+    "assists": 0,
+    "rating": "6.68"
+  },
+  "analysis": {
+    "estimatedPrice": 3,
+    "estimatedPoints": 4,
+    "valueRatio": 1.33,
+    "recommendation": "💡 CHOLLO INTERESANTE - A. Espino podría dar sorpresas. Rendimiento consistente con rating de 6.68."
+  }
+}

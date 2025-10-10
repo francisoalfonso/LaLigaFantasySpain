@@ -1,5 +1,6 @@
 const logger = require('../../utils/logger');
 const VEO3ErrorAnalyzer = require('./veo3ErrorAnalyzer');
+const { getInstance: getStatsTracker } = require('./veo3StatsTracker');
 
 /**
  * VEO3RetryManager - Sistema de reintentos inteligentes para VEO3
@@ -17,14 +18,22 @@ const VEO3ErrorAnalyzer = require('./veo3ErrorAnalyzer');
  * - Delay exponencial entre intentos
  * - Historial de intentos para debugging
  * - Integración completa con VEO3ErrorAnalyzer
+ * - ✅ Stats tracking automático (4 Oct 2025)
  */
 class VEO3RetryManager {
     constructor(veo3Client) {
         this.veo3Client = veo3Client;
         this.errorAnalyzer = new VEO3ErrorAnalyzer();
-        this.maxAttempts = parseInt(process.env.VEO3_MAX_RETRY_ATTEMPTS) || 5;
-        this.baseDelay = parseInt(process.env.VEO3_RETRY_BASE_DELAY) || 30000; // 30s
+        this.statsTracker = getStatsTracker(); // ✅ NUEVO: Tracking automático
+
+        // ✅ ACTUALIZADO (4 Oct 2025): Usar variables coherentes con .env
+        this.maxAttempts = parseInt(process.env.VEO3_MAX_RETRIES) || 3;
+        this.baseDelay = parseInt(process.env.VEO3_RETRY_BACKOFF_BASE) || 120000; // 2 min
+        this.backoffMultiplier = parseInt(process.env.VEO3_RETRY_BACKOFF_MULTIPLIER) || 2;
         this.useExponentialBackoff = process.env.VEO3_EXPONENTIAL_BACKOFF !== 'false';
+
+        logger.info(`[VEO3RetryManager] Configurado: ${this.maxAttempts} intentos, base delay ${this.baseDelay}ms, multiplier ${this.backoffMultiplier}x`);
+        logger.info(`[VEO3RetryManager] Stats tracking: ACTIVO`);
     }
 
     /**
@@ -41,9 +50,13 @@ class VEO3RetryManager {
         let lastError = null;
         let lastAnalysis = null;
 
+        // ✅ NUEVO: Registrar inicio en stats tracker
+        const attemptId = this.statsTracker.recordGenerationStart(context);
+
         logger.info(`[VEO3RetryManager] Iniciando generación con retry automático`);
         logger.info(`[VEO3RetryManager] Max intentos: ${this.maxAttempts}`);
         logger.info(`[VEO3RetryManager] Prompt original: "${originalPrompt.substring(0, 100)}..."`);
+        logger.info(`[VEO3RetryManager] Attempt ID: ${attemptId}`);
 
         for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
             logger.info(`\n${'─'.repeat(80)}`);
@@ -97,6 +110,12 @@ class VEO3RetryManager {
                     logger.info(`[VEO3RetryManager] 🎯 Fix exitoso aplicado: ${attemptInfo.strategy}`);
                     logger.info(`[VEO3RetryManager] 📊 Total intentos necesarios: ${attempt}`);
                 }
+
+                // ✅ NUEVO: Registrar éxito en stats tracker
+                this.statsTracker.recordSuccess(attemptId, {
+                    cost: video.cost,
+                    segmentIndex: context.segmentIndex
+                });
 
                 // Retornar resultado con metadata de retry
                 return {
@@ -152,6 +171,12 @@ class VEO3RetryManager {
                     logger.error(`${'='.repeat(80)}`);
                     logger.error(`[VEO3RetryManager] Último error: ${lastError.message}`);
 
+                    // ✅ NUEVO: Registrar fallo en stats tracker
+                    this.statsTracker.recordFailure(attemptId, {
+                        errorCategory: lastAnalysis?.errorCategory || 'unknown',
+                        segmentIndex: context.segmentIndex
+                    });
+
                     // Construir error detallado
                     const finalError = new Error(
                         `VEO3 generación falló después de ${this.maxAttempts} intentos: ${lastError.message}`
@@ -163,6 +188,8 @@ class VEO3RetryManager {
 
                 // Preparar siguiente intento con fix
                 logger.info(`\n[VEO3RetryManager] 🔄 Preparando intento ${attempt + 1}/${this.maxAttempts}...`);
+
+                let selectedStrategy = null;
 
                 if (lastAnalysis && lastAnalysis.suggestedFixes.length > 0) {
                     // Seleccionar fix con mayor confianza que aún no hayamos probado
@@ -179,6 +206,8 @@ class VEO3RetryManager {
                     }
 
                     if (selectedFix) {
+                        selectedStrategy = selectedFix.strategy;
+
                         logger.info(`[VEO3RetryManager] 🎯 Aplicando fix: ${selectedFix.strategy}`);
                         logger.info(`[VEO3RetryManager] 📝 ${selectedFix.description}`);
                         logger.info(`[VEO3RetryManager] 💪 Confianza: ${(selectedFix.confidence * 100).toFixed(0)}%`);
@@ -195,6 +224,12 @@ class VEO3RetryManager {
                     currentPrompt = originalPrompt;
                 }
 
+                // ✅ NUEVO: Registrar retry en stats tracker
+                this.statsTracker.recordRetry(attemptId, attempt, {
+                    strategy: selectedStrategy,
+                    errorCategory: lastAnalysis?.errorCategory
+                });
+
                 // Delay antes del siguiente intento
                 const delay = this.calculateDelay(attempt);
                 logger.info(`[VEO3RetryManager] ⏳ Esperando ${(delay / 1000).toFixed(0)}s antes del siguiente intento...`);
@@ -208,6 +243,8 @@ class VEO3RetryManager {
 
     /**
      * Calcular delay para siguiente intento
+     * ✅ ACTUALIZADO (4 Oct 2025): Usa backoffMultiplier configurable
+     *
      * @param {number} attempt - Número de intento actual
      * @returns {number} - Delay en milisegundos
      */
@@ -216,15 +253,15 @@ class VEO3RetryManager {
             return this.baseDelay;
         }
 
-        // Exponential backoff: baseDelay * 2^(attempt-1)
-        // Intento 1: 30s
-        // Intento 2: 60s
-        // Intento 3: 120s
-        // Intento 4: 240s
-        const exponentialDelay = this.baseDelay * Math.pow(2, attempt - 1);
+        // Exponential backoff: baseDelay * multiplier^(attempt-1)
+        // Con baseDelay=120000ms (2min), multiplier=2:
+        // Intento 1: 120s (2 min)
+        // Intento 2: 240s (4 min)
+        // Intento 3: 480s (8 min)
+        const exponentialDelay = this.baseDelay * Math.pow(this.backoffMultiplier, attempt - 1);
 
-        // Cap máximo de 5 minutos
-        return Math.min(exponentialDelay, 300000);
+        // Cap máximo de 10 minutos
+        return Math.min(exponentialDelay, 600000);
     }
 
     /**
@@ -302,14 +339,27 @@ class VEO3RetryManager {
 
     /**
      * Obtener estadísticas de retry manager
+     * ✅ ACTUALIZADO (4 Oct 2025): Incluye stats tracker completo
      */
     getStats() {
         return {
-            maxAttempts: this.maxAttempts,
-            baseDelay: this.baseDelay,
-            useExponentialBackoff: this.useExponentialBackoff,
+            configuration: {
+                maxAttempts: this.maxAttempts,
+                baseDelay: this.baseDelay,
+                backoffMultiplier: this.backoffMultiplier,
+                useExponentialBackoff: this.useExponentialBackoff
+            },
+            currentSession: this.statsTracker.getSessionReport(),
+            historical: this.statsTracker.getHistoricalReport(),
             errorAnalyzer: this.errorAnalyzer.getErrorStats()
         };
+    }
+
+    /**
+     * Log reporte completo de estadísticas
+     */
+    logStatsReport() {
+        this.statsTracker.logReport();
     }
 }
 

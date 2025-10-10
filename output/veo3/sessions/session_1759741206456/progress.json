@@ -1,0 +1,24 @@
+{
+  "sessionId": 1759741206456,
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759741206456",
+  "segmentsCompleted": 1,
+  "segmentsTotal": 2,
+  "playerName": "Dani Carvajal",
+  "contentType": "chollo",
+  "preset": "chollo_quick",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "taskId": "a0f42a3dadc353759bfa46838af885d0",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/14560ddd-97f0-4cd7-8499-c0aaac2cb8a5.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_1759741206456/segment_1_a0f42a3dadc353759bfa46838af885d0.mp4",
+      "filename": "segment_1_a0f42a3dadc353759bfa46838af885d0.mp4",
+      "duration": 7,
+      "dialogue": "He encontrado el chollo absoluto... Carvajal por solo dos punto siete millones... va a explotar.",
+      "generatedAt": "2025-10-06T09:01:45.573Z",
+      "size": 2202781
+    }
+  ],
+  "lastUpdate": "2025-10-06T09:01:45.573Z"
+}

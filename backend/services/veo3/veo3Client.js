@@ -2,7 +2,7 @@ const axios = require('axios');
 const logger = require('../../utils/logger');
 const videoManager = require('../videoManager');
 const characterRefs = require('../../config/characterReferences');
-const { ALL_ANA_IMAGES } = require('../../config/veo3/anaCharacter');
+const { ANA_IMAGE_URL } = require('../../config/veo3/anaCharacter');
 const VEO3ErrorAnalyzer = require('./veo3ErrorAnalyzer');
 const VEO3RetryManager = require('./veo3RetryManager');
 const { validateAndPrepare, updatePlayerSuccessRate } = require('../../utils/playerDictionaryValidator');
@@ -19,16 +19,24 @@ class VEO3Client {
     constructor() {
         this.apiKey = process.env.KIE_AI_API_KEY;
         this.baseUrl = 'https://api.kie.ai/api/v1/veo';
-        this.anaImageUrl = process.env.ANA_IMAGE_URL;
+        this.anaImageUrl = process.env.ANA_IMAGE_URL || ANA_IMAGE_URL;
         this.characterSeed = parseInt(process.env.ANA_CHARACTER_SEED) || 30001;
         this.defaultModel = process.env.VEO3_DEFAULT_MODEL || 'veo3_fast';
         this.defaultAspect = process.env.VEO3_DEFAULT_ASPECT || '9:16';
         this.watermark = process.env.VEO3_WATERMARK || 'Fantasy La Liga Pro';
-        this.requestDelay = parseInt(process.env.VEO3_REQUEST_DELAY) || 6000;
+        this.requestDelay = parseInt(process.env.VEO3_REQUEST_DELAY) || 15000;
+        this.coolingPeriod = parseInt(process.env.VEO3_COOLING_PERIOD) || 30000;
         this.timeout = parseInt(process.env.VEO3_TIMEOUT) || 300000;
 
+        // Sistema de Reintentos Inteligentes (4 Oct 2025)
+        this.maxRetries = parseInt(process.env.VEO3_MAX_RETRIES) || 3;
+        this.retryBackoffBase = parseInt(process.env.VEO3_RETRY_BACKOFF_BASE) || 120000; // 2 min
+        this.retryBackoffMultiplier = parseInt(process.env.VEO3_RETRY_BACKOFF_MULTIPLIER) || 2;
+
         // Sistema de rotación de imágenes Ana
-        this.anaImagePool = ALL_ANA_IMAGES;
+        // ✅ POOL CON SOLO 1 IMAGEN para desarrollo (agregar más en futuro para activar rotación)
+        // ✅ FIX: Usar this.anaImageUrl (que respeta .env) en lugar de ANA_IMAGE_URL (constante hardcodeada)
+        this.anaImagePool = [this.anaImageUrl]; // Solo ana-estudio-pelo-suelto.jpg por ahora
         this.currentImageIndex = 0;
         this.imageRotationEnabled = process.env.VEO3_IMAGE_ROTATION !== 'false';
 
@@ -57,7 +65,10 @@ class VEO3Client {
             );
         }
 
-        logger.info(`[VEO3Client] Sistema rotación imágenes Ana: ${this.imageRotationEnabled ? 'ACTIVO' : 'DESACTIVO'} (${this.anaImagePool.length} imágenes disponibles)`);
+        logger.info(`[VEO3Client] Sistema rotación imágenes Ana: ${this.imageRotationEnabled ? 'ACTIVO' : 'DESACTIVO'} (${this.anaImagePool.length} imágenes en pool)`);
+        if (this.anaImagePool.length === 1) {
+            logger.info(`[VEO3Client] ✅ Pool con 1 sola imagen (desarrollo): ${this.anaImagePool[0]}`);
+        }
     }
 
     /**
@@ -109,9 +120,14 @@ class VEO3Client {
      */
     async generateVideo(prompt, options = {}) {
         try {
-            // Usar imagen específica si se proporciona, sino usar rotación
+            // ✅ FIX (6 Oct 2025): Respetar useImageReference: false
             let selectedImage;
-            if (options.imageUrl) {
+
+            if (options.useImageReference === false) {
+                // NO usar imagen - solo descripción textual en prompt
+                selectedImage = null;
+                logger.info(`[VEO3Client] ✅ useImageReference=false - SIN imagen URL (solo descripción)`);
+            } else if (options.imageUrl) {
                 // Imagen específica proporcionada - PRIORIDAD
                 selectedImage = options.imageUrl;
                 logger.info(`[VEO3Client] Usando imagen específica: ${selectedImage}`);
@@ -121,28 +137,31 @@ class VEO3Client {
                 selectedImage = this.selectAnaImage(rotationStrategy, options.imageIndex);
             }
 
+            // ✅ PARÁMETROS OFICIALES KIE.ai VEO3 API
+            // Fuente: docs/KIE_AI_VEO3_API_OFICIAL.md
+            // ⚠️ IMPORTANTE: voice, referenceImageWeight, characterConsistency NO EXISTEN
             const params = {
                 prompt,
-                imageUrls: [selectedImage],
                 model: options.model || this.defaultModel,
                 aspectRatio: options.aspectRatio || this.defaultAspect,
-                seed: this.characterSeed, // CRÍTICO: SEED FIJO para Ana consistencia
-                waterMark: options.waterMark || this.watermark,
+                seeds: this.characterSeed, // ✅ NOTA: API usa "seeds" (plural)
+                watermark: options.watermark || this.watermark, // ✅ NOTA: "watermark" no "waterMark"
                 enableTranslation: options.enableTranslation !== false,
-                enableFallback: options.enableFallback !== false,
-                voice: {
-                    locale: process.env.ANA_VOICE_LOCALE || 'es-ES',
-                    gender: process.env.ANA_VOICE_GENDER || 'female',
-                    style: process.env.ANA_VOICE_STYLE || 'professional'
-                },
-                // Forzar consistencia absoluta
-                referenceImageWeight: 1.0, // Máximo peso a imagen referencia
-                characterConsistency: true,
-                ...options
+                enableFallback: options.enableFallback !== false
+                // ❌ ELIMINADOS parámetros no soportados:
+                // - voice: NO existe en API
+                // - referenceImageWeight: NO existe en API
+                // - characterConsistency: NO existe en API
+                // Control de idioma/acento se hace vía TEXTO DEL PROMPT (ver NORMA #3)
             };
 
+            // ✅ Solo agregar imageUrls si hay imagen
+            if (selectedImage) {
+                params.imageUrls = [selectedImage];
+            }
+
             logger.info(`[VEO3Client] Generando video con prompt: ${prompt.substring(0, 100)}...`);
-            logger.info(`[VEO3Client] Imagen Ana: ${selectedImage.split('/').pop()}`);
+            logger.info(`[VEO3Client] Imagen Ana: ${selectedImage ? selectedImage.split('/').pop() : 'NINGUNA (solo descripción)'}`);
             logger.info(
                 `[VEO3Client] Usando modelo: ${params.model}, aspect: ${params.aspectRatio}`
             );
@@ -152,12 +171,21 @@ class VEO3Client {
                     Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                timeout: 30000 // 30 segundos para request inicial
+                timeout: 120000, // 120 segundos (2 min) para request inicial
+                validateStatus: (status) => status < 500, // Aceptar 4xx para mejor manejo errores
+                maxRedirects: 5
             });
 
             const result = response.data;
 
+            // ⚠️ DEBUG TEMPORAL: Usar console.log para ver estructura completa
+            console.log('[VEO3Client] 🔍 DEBUG - Respuesta VEO3:', JSON.stringify(result, null, 2));
+            console.log('[VEO3Client] 🔍 DEBUG - result.code:', result.code);
+            console.log('[VEO3Client] 🔍 DEBUG - result.data:', result.data);
+            console.log('[VEO3Client] 🔍 DEBUG - result.data?.taskId:', result.data?.taskId);
+
             if (result.code !== 200) {
+                logger.error(`[VEO3Client] ❌ Error API - code: ${result.code}, msg: ${result.msg}`);
                 throw new Error(`Error API VEO3: ${result.msg}`);
             }
 
@@ -186,17 +214,27 @@ class VEO3Client {
      */
     async getStatus(taskId) {
         try {
+            logger.info(`[VEO3Client] 🔍 Consultando estado para taskId: ${taskId}`);
             const response = await axios.get(`${this.baseUrl}/record-info?taskId=${taskId}`, {
                 headers: {
                     Authorization: `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                timeout: 15000
+                timeout: 45000, // 45 segundos para status check (aumentado)
+                validateStatus: (status) => status < 500,
+                maxRedirects: 5
             });
+
+            logger.info(`[VEO3Client] ✅ Respuesta recibida. Status code: ${response.status}`);
+            logger.info(`[VEO3Client] 📦 Response data structure:`, Object.keys(response.data));
 
             return response.data;
         } catch (error) {
-            logger.error(`[VEO3Client] Error obteniendo estado ${taskId}:`, error.message);
+            logger.error(`[VEO3Client] ❌ Error obteniendo estado ${taskId}:`, error.message);
+            if (error.response) {
+                logger.error(`[VEO3Client] ❌ Response status: ${error.response.status}`);
+                logger.error(`[VEO3Client] ❌ Response data:`, JSON.stringify(error.response.data, null, 2));
+            }
             throw error;
         }
     }
@@ -220,24 +258,36 @@ class VEO3Client {
             try {
                 const status = await this.getStatus(taskId);
 
+                // 🔍 DEBUG: Log completo de la respuesta para investigar error
+                logger.info(`[VEO3Client] 🔍 Status attempt ${attempts} para ${taskId}:`);
+                logger.info(`[VEO3Client]    successFlag: ${status.data?.successFlag}`);
+                logger.info(`[VEO3Client]    taskStatus: ${status.data?.taskStatus}`);
+                logger.info(`[VEO3Client]    Respuesta completa:\n${JSON.stringify(status.data, null, 2)}`);
+
                 // Video completado exitosamente
                 if (status.data?.successFlag === 1) {
                     logger.info(
                         `[VEO3Client] Video completado en ${attempts} intentos (${Date.now() - startTime}ms)`
                     );
 
-                    // ✅ STACK SIMPLIFICADO: URLs VEO3 directas (sin Bunny.net)
-                    // Las URLs VEO3 son públicas por defecto con Cloudflare CDN
+                    // ✅ FIX CORRECTO (4 Oct 2025): Los campos están en status.data.response cuando successFlag=1
+                    // El objeto "response" es null cuando successFlag=0 (procesando)
+                    // El objeto "response" se popula cuando successFlag=1 (completado)
                     const veo3Url = status.data.response.resultUrls[0];
                     logger.info(`[VEO3Client] ✅ Video VEO3 disponible: ${veo3Url}`);
                     logger.info(`[VEO3Client] ✅ Usando URL VEO3 directa (sin Bunny.net)`);
+
+                    // 🔧 FIX: La API no provee duration/cost en response, calcular estimados
+                    const estimatedDuration = parseInt(process.env.VEO3_MAX_DURATION) || 7; // Duración típica VEO3 (máx 7s para evitar caras raras)
+                    const estimatedCost = 0.30; // Costo típico por video VEO3
 
                     return {
                         taskId,
                         url: veo3Url, // ✅ URL VEO3 directa - pública y con CDN
                         originalUrl: veo3Url,
-                        duration: status.data.response.duration,
-                        cost: status.data.response.cost,
+                        resultUrls: status.data.response.resultUrls, // ✅ Array completo de URLs
+                        duration: estimatedDuration, // 🔧 Estimado (API no provee)
+                        cost: estimatedCost, // 🔧 Estimado (API no provee)
                         generatedAt: new Date(),
                         success: true,
                         platform: 'veo3',
@@ -322,7 +372,12 @@ class VEO3Client {
     }
 
     /**
+     * ⚠️ LEGACY - NO SE USA EN FLUJO ACTUAL
+     * Este método es legacy. El flujo actual usa:
+     *   ThreeSegmentGenerator → UnifiedScriptGenerator → PromptBuilder.buildPrompt()
+     *
      * Crear prompt de Ana Real para chollos
+     * @deprecated Usar PromptBuilder.buildPrompt() en su lugar
      * @param {string} playerName - Nombre del jugador
      * @param {number} price - Precio del jugador
      * @param {object} options - Opciones adicionales
@@ -336,7 +391,12 @@ class VEO3Client {
     }
 
     /**
+     * ⚠️ LEGACY - NO SE USA EN FLUJO ACTUAL
+     * Este método es legacy. El flujo actual usa:
+     *   ThreeSegmentGenerator → UnifiedScriptGenerator → PromptBuilder.buildPrompt()
+     *
      * Crear prompt de Ana Real para análisis de jugadores
+     * @deprecated Usar PromptBuilder.buildPrompt() en su lugar
      * @param {string} playerName - Nombre del jugador
      * @param {number} price - Precio del jugador
      * @param {object} stats - Estadísticas del jugador
@@ -351,37 +411,53 @@ class VEO3Client {
 
     /**
      * Generar múltiples videos y concatenarlos automáticamente
+     * ✅ OPTIMIZADO: Usa sistema de reintentos + cooling periods (4 Oct 2025)
+     *
      * @param {Array} prompts - Array de prompts para generar
      * @param {object} options - Opciones para concatenación
      * @returns {Promise<object>} - Video concatenado final
      */
     async generateMultipleVideos(prompts, options = {}) {
         try {
-            logger.info(`[VEO3Client] Generando ${prompts.length} videos para concatenar`);
+            logger.info(`[VEO3Client] 🎬 Generando ${prompts.length} videos con sistema optimizado (retry + cooling periods)`);
 
             const videos = [];
             const videoIds = [];
+            const startTime = Date.now();
 
-            // Generar videos en paralelo (limitado por API)
+            // Generar videos SECUENCIALMENTE con cooling periods
             for (let i = 0; i < prompts.length; i++) {
                 const prompt = prompts[i];
                 logger.info(
-                    `[VEO3Client] Generando video ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`
+                    `[VEO3Client] 📹 Segmento ${i + 1}/${prompts.length}: ${prompt.substring(0, 50)}...`
                 );
 
-                const video = await this.generateCompleteVideo(prompt, options);
+                const segmentStartTime = Date.now();
+
+                // ✅ NUEVO: Usar generateVideoWithRetry en lugar de generateCompleteVideo
+                const video = await this.generateVideoWithRetry(prompt, options, {
+                    segmentIndex: i + 1,
+                    totalSegments: prompts.length
+                });
+
                 videos.push(video);
                 videoIds.push(video.videoId);
 
-                // Delay entre generaciones para evitar rate limiting
+                const segmentDuration = Date.now() - segmentStartTime;
+                logger.info(`[VEO3Client] ✅ Segmento ${i + 1} completado en ${(segmentDuration / 1000).toFixed(1)}s`);
+
+                // ✅ COOLING PERIOD: Esperar después de cada segmento exitoso (excepto el último)
                 if (i < prompts.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, this.requestDelay));
+                    logger.info(`[VEO3Client] ❄️ Aplicando cooling period: ${this.coolingPeriod}ms (${this.coolingPeriod / 1000}s)`);
+                    await new Promise(resolve => setTimeout(resolve, this.coolingPeriod));
                 }
             }
 
-            logger.info(`[VEO3Client] ${videos.length} videos generados, iniciando concatenación`);
+            const totalDuration = Date.now() - startTime;
+            logger.info(`[VEO3Client] 🎉 ${videos.length} videos generados exitosamente en ${(totalDuration / 1000 / 60).toFixed(1)} minutos`);
 
             // Concatenar todos los videos
+            logger.info(`[VEO3Client] 🔗 Iniciando concatenación de ${videos.length} segmentos`);
             const concatenatedVideo = await videoManager.concatenateVideos(videoIds, {
                 title: options.title || 'Video concatenado VEO3',
                 description: options.description || 'Videos de Ana Real concatenados',
@@ -390,17 +466,19 @@ class VEO3Client {
                 type: 'multi_segment'
             });
 
-            logger.info(`[VEO3Client] Video final concatenado: ${concatenatedVideo.publicUrl}`);
+            logger.info(`[VEO3Client] ✅ Video final concatenado: ${concatenatedVideo.publicUrl}`);
 
             return {
                 success: true,
                 individualVideos: videos,
                 concatenatedVideo: concatenatedVideo,
                 totalVideos: videos.length,
-                finalUrl: concatenatedVideo.publicUrl
+                finalUrl: concatenatedVideo.publicUrl,
+                totalDurationMs: totalDuration,
+                averageTimePerSegment: totalDuration / videos.length
             };
         } catch (error) {
-            logger.error('[VEO3Client] Error generando videos múltiples:', error.message);
+            logger.error('[VEO3Client] ❌ Error generando videos múltiples:', error.message);
             throw error;
         }
     }
@@ -655,6 +733,49 @@ class VEO3Client {
      */
     getRetryStats() {
         return this.retryManager.getStats();
+    }
+
+    /**
+     * Generar video con Image-to-Video para continuidad frame-to-frame
+     *
+     * Usa el último frame del video anterior como primer frame del nuevo
+     * Garantiza continuidad visual perfecta entre segmentos
+     *
+     * @param {string} prompt - Prompt para el video
+     * @param {string} previousVideoPath - Ruta al video anterior (null si es el primero)
+     * @param {object} options - Opciones adicionales
+     * @returns {Promise<object>} - Video generado con continuidad
+     */
+    async generateWithContinuity(prompt, previousVideoPath, options = {}) {
+        const frameExtractor = require('./frameExtractor');
+
+        logger.info(`[VEO3Client] Generando video con continuidad frame-to-frame`);
+
+        let imageUrl = options.imageUrl;
+
+        // Si hay video anterior, extraer último frame
+        if (previousVideoPath) {
+            logger.info(`[VEO3Client] Extrayendo último frame de: ${previousVideoPath}`);
+
+            try {
+                const lastFrame = await frameExtractor.extractLastFrame(previousVideoPath);
+                imageUrl = lastFrame;
+
+                logger.info(`[VEO3Client] ✅ Usando último frame como imagen inicial: ${lastFrame}`);
+            } catch (error) {
+                logger.warn(`[VEO3Client] ⚠️ Error extrayendo frame, usando imagen default`);
+                // Fallback a imagen Ana por defecto
+                imageUrl = options.imageUrl || process.env.ANA_IMAGE_URL;
+            }
+        }
+
+        // Generar video con imagen continuidad
+        return this.generateVideoWithRetry(prompt, {
+            ...options,
+            imageUrl, // Usar frame extraído o imagen default
+            // Mantener seed fijo para consistencia Ana
+            seed: this.characterSeed
+        });
     }
 }
 

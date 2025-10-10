@@ -2,7 +2,10 @@ const ffmpeg = require('fluent-ffmpeg');
 const logger = require('../../utils/logger');
 const path = require('path');
 const fs = require('fs');
-const ViralCaptionsGenerator = require('./viralCaptionsGenerator');
+const CaptionsService = require('../youtubeShorts/captionsService');
+const PlayerCardOverlay = require('./playerCardOverlay');
+const AudioAnalyzer = require('./audioAnalyzer');
+const { execSync } = require('child_process');
 
 /**
  * Sistema de concatenación de videos VEO3
@@ -17,8 +20,14 @@ class VideoConcatenator {
         // 🔧 FIX: Path al logo outro estático
         this.logoOutroPath = path.join(this.outputDir, 'logo-static.mp4');
 
-        // ✨ NUEVO: Generador de subtítulos virales
-        this.captionsGenerator = new ViralCaptionsGenerator();
+        // ✨ NUEVO: Generador de subtítulos virales (formato aprobado Test #47)
+        this.captionsService = new CaptionsService();
+
+        // ✨ NUEVO: Generador de tarjetas de jugador
+        this.playerCardOverlay = new PlayerCardOverlay();
+
+        // ✨ NUEVO (8 Oct 2025): Analizador de audio para detectar fin de habla
+        this.audioAnalyzer = new AudioAnalyzer();
 
         // Configuración de concatenación
         // NOTA: Con frame-to-frame transitions, crossfade de VIDEO NO es necesario
@@ -34,7 +43,7 @@ class VideoConcatenator {
             // Audio
             audio: {
                 normalize: true, // Normalizar audio entre segmentos
-                fadeInOut: true, // ✅ ACTIVADO - evita cortes de audio en transiciones
+                fadeInOut: false, // ⚠️ DESACTIVADO por defecto - evita crossfades no deseados
                 fadeDuration: 0.3 // Duración del fade (0.3s para transiciones suaves)
             },
             // Video
@@ -47,12 +56,25 @@ class VideoConcatenator {
             outro: {
                 enabled: true, // ✅ ACTIVADO - agregar logo al final
                 logoPath: null, // Se establece dinámicamente
-                duration: 1.5 // Duración del logo (1.5s)
+                duration: 1.5, // Duración del logo (1.5s)
+                // 🔧 FIX #2: Freeze frame antes del logo para transición controlada
+                freezeFrame: {
+                    enabled: true, // ✅ ACTIVADO - agregar freeze frame antes del logo
+                    duration: 0.8 // Duración del freeze frame (0.8s)
+                }
             },
             // ✨ NUEVO: Subtítulos virales automáticos
             viralCaptions: {
                 enabled: true, // ✅ ACTIVADO - agregar subtítulos virales
                 applyBeforeConcatenation: true // Aplicar a cada segmento antes de concatenar
+            },
+            // ✨ NUEVO: Tarjeta de jugador overlay
+            playerCard: {
+                enabled: false, // ⚠️ DESACTIVADO por defecto - activar cuando se pasan playerData
+                startTime: 3.0, // Aparece en el segundo 3
+                duration: 4.0, // Visible durante 4 segundos (hasta segundo 7)
+                slideInDuration: 0.5, // Animación de entrada dura 0.5s
+                applyToFirstSegment: true // Solo aplicar al primer segmento
             }
         };
 
@@ -101,8 +123,101 @@ class VideoConcatenator {
                 processedSegments = await this.applyViralCaptionsToSegments(segments);
             }
 
+            // ✨ NUEVO: Aplicar tarjeta de jugador al primer segmento si está habilitado
+            if (config.playerCard.enabled && options.playerData && processedSegments.length > 0) {
+                logger.info(`[VideoConcatenator] 🃏 Aplicando tarjeta de jugador a video final...`);
+
+                try {
+                    // Aplicar tarjeta solo al primer segmento (donde Ana menciona al jugador)
+                    const firstSegmentIndex = config.playerCard.applyToFirstSegment ? 0 : processedSegments.length - 1;
+                    const segmentToProcess = processedSegments[firstSegmentIndex];
+
+                    const videoWithCard = await this.playerCardOverlay.generateAndApplyCard(
+                        segmentToProcess.videoPath,
+                        options.playerData,
+                        {
+                            startTime: config.playerCard.startTime,
+                            duration: config.playerCard.duration,
+                            slideInDuration: config.playerCard.slideInDuration,
+                            cleanup: true // Eliminar imagen temporal después
+                        }
+                    );
+
+                    // Reemplazar video procesado
+                    processedSegments[firstSegmentIndex].videoPath = videoWithCard;
+                    logger.info(`[VideoConcatenator] ✅ Tarjeta de jugador aplicada a segmento ${firstSegmentIndex + 1}`);
+
+                } catch (error) {
+                    logger.error(`[VideoConcatenator] ❌ Error aplicando tarjeta de jugador: ${error.message}`);
+                    logger.warn(`[VideoConcatenator] ⚠️  Continuando sin tarjeta de jugador...`);
+                }
+            }
+
             // Extraer solo las rutas de video para concatenación
-            const finalVideoPaths = processedSegments.map(s => s.videoPath);
+            let finalVideoPaths = processedSegments.map(s => s.videoPath);
+
+            // ✨ NUEVO (8 Oct 2025): Detectar fin real del audio y recortar TODOS los segmentos
+            // Esto evita que Ana empiece a prepararse para hablar de nuevo al final de cada segmento
+            if (config.outro.enabled && config.outro.freezeFrame.enabled) {
+                logger.info(`[VideoConcatenator] 🎤 Analizando audio de ${finalVideoPaths.length} segmentos...`);
+
+                try {
+                    // Analizar todos los segmentos para detectar cuándo termina el audio
+                    const audioDurations = await this.audioAnalyzer.analyzeAllSegments(finalVideoPaths);
+
+                    // Recortar cada segmento a su duración real de audio
+                    const trimmedPaths = [];
+                    for (let i = 0; i < finalVideoPaths.length; i++) {
+                        const videoPath = finalVideoPaths[i];
+                        const audioDuration = audioDurations[i];
+
+                        logger.info(`[VideoConcatenator] ✂️ Segmento ${i + 1}: recortando a ${audioDuration.toFixed(2)}s (fin de audio)...`);
+
+                        try {
+                            const trimmedPath = await this.audioAnalyzer.trimToAudioEnd(
+                                videoPath,
+                                audioDuration,
+                                {
+                                    safetyMargin: 0.05, // Solo 0.05s extra (mínimo margen)
+                                    outputDir: this.tempDir
+                                }
+                            );
+                            trimmedPaths.push(trimmedPath);
+                            logger.info(`[VideoConcatenator] ✅ Segmento ${i + 1} recortado correctamente`);
+                        } catch (error) {
+                            logger.error(`[VideoConcatenator] ❌ Error recortando segmento ${i + 1}: ${error.message}`);
+                            logger.warn(`[VideoConcatenator] ⚠️  Usando segmento original...`);
+                            trimmedPaths.push(videoPath);
+                        }
+                    }
+
+                    finalVideoPaths = trimmedPaths;
+                    logger.info(`[VideoConcatenator] ✅ Todos los segmentos recortados al fin de audio`);
+
+                } catch (error) {
+                    logger.error(`[VideoConcatenator] ❌ Error en análisis de audio: ${error.message}`);
+                    logger.warn(`[VideoConcatenator] ⚠️  Continuando sin recorte automático...`);
+                }
+            }
+
+            // 🔧 FIX #2: Crear freeze frame del último segmento ANTES de agregar logo
+            let freezeFramePath = null;
+            if (config.outro.enabled && config.outro.freezeFrame.enabled && finalVideoPaths.length > 0) {
+                const lastSegmentPath = finalVideoPaths[finalVideoPaths.length - 1];
+                logger.info(`[VideoConcatenator] 🔧 Creando freeze frame del último segmento para transición controlada al logo...`);
+
+                try {
+                    freezeFramePath = await this.createFreezeFrame(
+                        lastSegmentPath,
+                        config.outro.freezeFrame.duration
+                    );
+                    logger.info(`[VideoConcatenator] ✅ Freeze frame creado: ${freezeFramePath}`);
+                    finalVideoPaths.push(freezeFramePath);
+                } catch (error) {
+                    logger.error(`[VideoConcatenator] ❌ Error creando freeze frame: ${error.message}`);
+                    logger.warn(`[VideoConcatenator] ⚠️  Continuando sin freeze frame...`);
+                }
+            }
 
             // 🔧 FIX: Agregar logo outro automáticamente si está habilitado
             if (config.outro.enabled && fs.existsSync(this.logoOutroPath)) {
@@ -198,103 +313,238 @@ class VideoConcatenator {
                 logger.info(`[VideoConcatenator] 📋 Archivo concat creado: ${concatListPath}`);
                 logger.info(`[VideoConcatenator] 📂 Videos a concatenar:\n${concatContent}`);
 
-                // Usar concat demuxer con archivo de lista
-                ffmpeg()
-                    .input(concatListPath)
-                    .inputOptions(['-f concat', '-safe 0'])
-                    .outputOptions(['-c copy']) // Copiar streams sin re-encodear
-                    .on('start', commandLine => {
-                        logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
-                    })
-                    .on('progress', progress => {
-                        if (progress.percent) {
+                // 🔧 FIX: Cuando hay freeze frame + logo, usar concat FILTER en lugar de concat DEMUXER
+                // El concat demuxer (-c copy) puede cortar audio si los streams no coinciden exactamente
+                // El concat filter re-encodea pero garantiza que TODO el audio se preserve
+                const useFilterConcat = config.outro.enabled && config.outro.freezeFrame.enabled;
+
+                if (useFilterConcat) {
+                    // Usar concat FILTER (más lento pero audio perfecto)
+                    logger.info(`[VideoConcatenator] 🎬 Usando concat filter para preservar audio completo...`);
+
+                    // Construir comando FFmpeg con concat filter
+                    const ffmpegCommand = ffmpeg();
+
+                    // Agregar cada video como input
+                    videoPaths.forEach(videoPath => {
+                        ffmpegCommand.input(videoPath);
+                    });
+
+                    // Construir filtro concat
+                    const filterInputs = videoPaths.map((_, i) => `[${i}:v][${i}:a]`).join('');
+                    const concatFilter = `${filterInputs}concat=n=${videoPaths.length}:v=1:a=1[outv][outa]`;
+
+                    ffmpegCommand
+                        .complexFilter(concatFilter)
+                        .outputOptions(['-map', '[outv]', '-map', '[outa]'])
+                        .videoCodec('libx264')
+                        .audioCodec('aac')
+                        .outputOptions([
+                            '-pix_fmt yuv420p',
+                            '-preset fast',
+                            '-movflags +faststart'
+                        ])
+                        .on('start', commandLine => {
+                            logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                        })
+                        .on('progress', progress => {
+                            if (progress.percent) {
+                                logger.info(
+                                    `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                                );
+                            }
+                        })
+                        .on('end', () => {
                             logger.info(
-                                `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                                `[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`
                             );
-                        }
-                    })
-                    .on('end', () => {
-                        logger.info(
-                            `[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`
-                        );
-                        // Limpiar archivo concat temporal
-                        try {
-                            fs.unlinkSync(concatListPath);
-                        } catch (err) {
-                            logger.warn(
-                                `[VideoConcatenator] No se pudo eliminar archivo concat temporal: ${err.message}`
+                            // Limpiar archivo concat temporal
+                            try {
+                                fs.unlinkSync(concatListPath);
+                            } catch (err) {
+                                logger.warn(
+                                    `[VideoConcatenator] No se pudo eliminar archivo concat temporal: ${err.message}`
+                                );
+                            }
+                            resolve(outputPath);
+                        })
+                        .on('error', error => {
+                            logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                            // Limpiar archivo concat temporal
+                            try {
+                                fs.unlinkSync(concatListPath);
+                                // eslint-disable-next-line no-unused-vars
+                            } catch (err) {
+                                // Ignorar error de limpieza
+                            }
+                            reject(error);
+                        })
+                        .save(outputPath);
+
+                } else {
+                    // Usar concat DEMUXER (rápido, solo para videos simples sin freeze/logo)
+                    logger.info(`[VideoConcatenator] ⚡ Copiando streams sin re-encodear (fast mode)...`);
+
+                    ffmpeg()
+                        .input(concatListPath)
+                        .inputOptions(['-f concat', '-safe 0'])
+                        .outputOptions(['-c copy'])
+                        .on('start', commandLine => {
+                            logger.info(`[VideoConcatenator] FFmpeg iniciado: ${commandLine}`);
+                        })
+                        .on('progress', progress => {
+                            if (progress.percent) {
+                                logger.info(
+                                    `[VideoConcatenator] Progreso: ${Math.round(progress.percent)}%`
+                                );
+                            }
+                        })
+                        .on('end', () => {
+                            logger.info(
+                                `[VideoConcatenator] ✅ Concatenación completada: ${outputPath}`
                             );
-                        }
-                        resolve(outputPath);
-                    })
-                    .on('error', error => {
-                        logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
-                        // Limpiar archivo concat temporal
-                        try {
-                            fs.unlinkSync(concatListPath);
-                            // eslint-disable-next-line no-unused-vars
-                        } catch (err) {
-                            // Ignorar error de limpieza
-                        }
-                        reject(error);
-                    })
-                    .save(outputPath);
+                            // Limpiar archivo concat temporal
+                            try {
+                                fs.unlinkSync(concatListPath);
+                            } catch (err) {
+                                logger.warn(
+                                    `[VideoConcatenator] No se pudo eliminar archivo concat temporal: ${err.message}`
+                                );
+                            }
+                            resolve(outputPath);
+                        })
+                        .on('error', error => {
+                            logger.error('[VideoConcatenator] ❌ Error FFmpeg:', error.message);
+                            // Limpiar archivo concat temporal
+                            try {
+                                fs.unlinkSync(concatListPath);
+                                // eslint-disable-next-line no-unused-vars
+                            } catch (err) {
+                                // Ignorar error de limpieza
+                            }
+                            reject(error);
+                        })
+                        .save(outputPath);
+                }
             }
         });
     }
 
     /**
-     * ✨ Aplicar subtítulos virales a cada segmento
-     * @param {Array} segments - Array de objetos {videoPath, dialogue}
+     * ✨ Aplicar subtítulos virales (formato Test #47 aprobado) a cada segmento
+     * Usa CaptionsService con ASS karaoke word-by-word + golden color (#FFD700)
+     * @param {Array} segments - Array de objetos {videoPath, dialogue, duration}
      * @returns {Promise<Array>} - Array de segmentos con subtítulos aplicados
      */
     async applyViralCaptionsToSegments(segments) {
         const processedSegments = [];
+        let currentTime = 0;
 
+        // Detectar duración de cada segmento
+        const segmentsWithDuration = [];
         for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
 
-            // Si el segmento no tiene diálogo, saltamos los subtítulos
-            if (!segment.dialogue || segment.dialogue.trim() === '') {
-                logger.warn(`[VideoConcatenator] ⚠️  Segmento ${i + 1} sin diálogo, omitiendo subtítulos`);
-                processedSegments.push(segment);
-                continue;
-            }
-
+            // Obtener duración real del video con ffprobe
+            let duration = segment.duration || 8;
             try {
-                logger.info(`[VideoConcatenator] 📝 Aplicando subtítulos a segmento ${i + 1}/${segments.length}...`);
-                logger.info(`[VideoConcatenator]    Diálogo: "${segment.dialogue}"`);
-
-                // Generar video con subtítulos virales
-                const videoWithCaptions = await this.captionsGenerator.generateViralCaptions(
-                    segment.videoPath,
-                    segment.dialogue,
-                    { videoDuration: 8 } // Duración estándar de segmentos VEO3
-                );
-
-                processedSegments.push({
-                    ...segment,
-                    videoPath: videoWithCaptions, // Reemplazar por video con subtítulos
-                    originalPath: segment.videoPath, // Guardar path original por si acaso
-                    captionsApplied: true
-                });
-
-                logger.info(`[VideoConcatenator] ✅ Subtítulos aplicados a segmento ${i + 1}`);
-            } catch (error) {
-                logger.error(`[VideoConcatenator] ❌ Error aplicando subtítulos a segmento ${i + 1}:`, error.message);
-                logger.warn(`[VideoConcatenator] ⚠️  Continuando sin subtítulos para este segmento...`);
-
-                // Si falla, usar video original sin subtítulos
-                processedSegments.push({
-                    ...segment,
-                    captionsApplied: false,
-                    error: error.message
-                });
+                const durationCmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${segment.videoPath}"`;
+                const durationOutput = execSync(durationCmd, { encoding: 'utf8' }).trim();
+                duration = parseFloat(durationOutput);
+            } catch (err) {
+                logger.warn(`[VideoConcatenator] No se pudo obtener duración de ${segment.videoPath}, usando 8s por defecto`);
             }
+
+            segmentsWithDuration.push({
+                index: i + 1,
+                dialogue: segment.dialogue,
+                duration: duration,
+                startTime: currentTime
+            });
+
+            currentTime += duration;
+        }
+
+        // Generar archivo ASS karaoke para todos los segmentos
+        logger.info(`[VideoConcatenator] 📝 Generando subtítulos ASS karaoke (Test #47)...`);
+
+        try {
+            const captionsResult = await this.captionsService.generateCaptions(
+                segmentsWithDuration,
+                'karaoke',  // Formato aprobado Test #47
+                'ass'       // Advanced SubStation Alpha
+            );
+
+            if (!captionsResult.success) {
+                throw new Error(captionsResult.error);
+            }
+
+            const assFilePath = captionsResult.captionsFile;
+            logger.info(`[VideoConcatenator] ✅ Archivo ASS generado: ${assFilePath}`);
+            logger.info(`[VideoConcatenator]    Total subtítulos: ${captionsResult.metadata.totalSubtitles}`);
+            logger.info(`[VideoConcatenator]    Estilo: Karaoke word-by-word golden (#FFD700)`);
+
+            // Aplicar subtítulos ASS a cada segmento individual
+            for (let i = 0; i < segments.length; i++) {
+                const segment = segments[i];
+
+                // Si el segmento no tiene diálogo, saltamos los subtítulos
+                if (!segment.dialogue || segment.dialogue.trim() === '') {
+                    logger.warn(`[VideoConcatenator] ⚠️  Segmento ${i + 1} sin diálogo, omitiendo subtítulos`);
+                    processedSegments.push(segment);
+                    continue;
+                }
+
+                try {
+                    logger.info(`[VideoConcatenator] 🎬 Aplicando subtítulos ASS a segmento ${i + 1}/${segments.length}...`);
+
+                    const outputPath = segment.videoPath.replace('.mp4', '-with-captions.mp4');
+
+                    // Aplicar subtítulos usando filtro ASS de FFmpeg
+                    const ffmpegCmd = `ffmpeg -i "${segment.videoPath}" -vf "ass='${assFilePath}'" -c:a copy "${outputPath}" -y`;
+
+                    logger.info(`[VideoConcatenator] FFmpeg: ${ffmpegCmd.substring(0, 150)}...`);
+                    execSync(ffmpegCmd, { stdio: 'pipe' });
+
+                    processedSegments.push({
+                        ...segment,
+                        videoPath: outputPath,
+                        originalPath: segment.videoPath,
+                        captionsApplied: true,
+                        captionsFormat: 'ass-karaoke'
+                    });
+
+                    logger.info(`[VideoConcatenator] ✅ Subtítulos ASS aplicados a segmento ${i + 1}`);
+
+                } catch (error) {
+                    logger.error(`[VideoConcatenator] ❌ Error aplicando subtítulos a segmento ${i + 1}:`, error.message);
+                    logger.warn(`[VideoConcatenator] ⚠️  Continuando sin subtítulos para este segmento...`);
+
+                    processedSegments.push({
+                        ...segment,
+                        captionsApplied: false,
+                        error: error.message
+                    });
+                }
+            }
+
+            // Limpiar archivo ASS temporal
+            try {
+                fs.unlinkSync(assFilePath);
+            } catch (err) {
+                logger.warn(`[VideoConcatenator] No se pudo eliminar ASS temporal: ${err.message}`);
+            }
+
+        } catch (error) {
+            logger.error(`[VideoConcatenator] ❌ Error generando subtítulos ASS:`, error.message);
+            logger.warn(`[VideoConcatenator] ⚠️  Continuando sin subtítulos...`);
+
+            // Si falla la generación ASS, devolver segmentos originales sin subtítulos
+            return segments.map(s => ({ ...s, captionsApplied: false, error: error.message }));
         }
 
         const successCount = processedSegments.filter(s => s.captionsApplied).length;
-        logger.info(`[VideoConcatenator] ✨ Subtítulos aplicados a ${successCount}/${segments.length} segmentos`);
+        logger.info(`[VideoConcatenator] ✅ Subtítulos ASS aplicados a ${successCount}/${segments.length} segmentos`);
 
         return processedSegments;
     }
@@ -532,6 +782,144 @@ class VideoConcatenator {
             logger.error('[VideoConcatenator] Error creando video largo:', error.message);
             throw error;
         }
+    }
+
+    /**
+     * 🔧 FIX #2: Crear freeze frame del último frame de un video
+     * Extrae el último frame y crea un clip de duración específica con ese frame congelado
+     * Usado para crear transición controlada al logo outro
+     * @param {string} videoPath - Ruta del video del cual extraer el último frame
+     * @param {number} duration - Duración del freeze frame en segundos
+     * @returns {Promise<string>} - Ruta del video freeze frame generado
+     */
+    async createFreezeFrame(videoPath, duration = 0.8) {
+        return new Promise((resolve, reject) => {
+            try {
+                const { execSync } = require('child_process');
+                const freezeFrameFileName = `freeze-frame-${Date.now()}.mp4`;
+                const freezeFramePath = path.join(this.tempDir, freezeFrameFileName);
+                const tempImagePath = path.join(this.tempDir, `last-frame-${Date.now()}.jpg`);
+
+                logger.info(`[VideoConcatenator] Extrayendo último frame de: ${videoPath}`);
+
+                // Paso 1: Extraer el último frame del video usando raw FFmpeg
+                try {
+                    const extractCmd = `ffmpeg -sseof -1 -i "${videoPath}" -update 1 -q:v 1 -frames:v 1 "${tempImagePath}" -y`;
+                    logger.info(`[VideoConcatenator] FFmpeg comando: ${extractCmd}`);
+                    execSync(extractCmd, { stdio: 'pipe' });
+                    logger.info(`[VideoConcatenator] ✅ Último frame extraído: ${tempImagePath}`);
+                } catch (extractError) {
+                    logger.error(`[VideoConcatenator] ❌ Error extrayendo frame: ${extractError.message}`);
+                    return reject(extractError);
+                }
+
+                // Paso 2: Crear video con audio silencioso usando raw FFmpeg
+                // Este método funciona sin lavfi: crear audio silencio desde una fuente sine muy baja
+                logger.info(`[VideoConcatenator] Creando freeze frame de ${duration}s con audio...`);
+
+                try {
+                    // Comando que funciona sin lavfi: loop imagen + generar audio silencio con sine a volumen 0
+                    const createCmd = `ffmpeg -loop 1 -i "${tempImagePath}" -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=44100" -t ${duration} -c:v libx264 -c:a aac -pix_fmt yuv420p -preset fast -shortest "${freezeFramePath}" -y`;
+
+                    logger.info(`[VideoConcatenator] FFmpeg comando: ${createCmd}`);
+                    execSync(createCmd, { stdio: 'pipe' });
+                    logger.info(`[VideoConcatenator] ✅ Freeze frame creado: ${freezeFramePath}`);
+
+                    // Limpiar imagen temporal
+                    try {
+                        fs.unlinkSync(tempImagePath);
+                    } catch (err) {
+                        logger.warn(`[VideoConcatenator] No se pudo eliminar imagen temporal: ${err.message}`);
+                    }
+
+                    resolve(freezeFramePath);
+                } catch (createError) {
+                    logger.error(`[VideoConcatenator] ❌ Error creando freeze frame: ${createError.message}`);
+
+                    // Si lavfi sigue sin funcionar, crear sin audio (fallback)
+                    logger.warn(`[VideoConcatenator] ⚠️  Intentando crear freeze frame SIN audio (fallback)...`);
+
+                    try {
+                        const fallbackCmd = `ffmpeg -loop 1 -i "${tempImagePath}" -t ${duration} -c:v libx264 -pix_fmt yuv420p -preset fast -an "${freezeFramePath}" -y`;
+                        execSync(fallbackCmd, { stdio: 'pipe' });
+                        logger.warn(`[VideoConcatenator] ⚠️  Freeze frame creado SIN audio: ${freezeFramePath}`);
+
+                        // Limpiar imagen temporal
+                        try {
+                            fs.unlinkSync(tempImagePath);
+                        } catch (err) {
+                            // Ignorar
+                        }
+
+                        resolve(freezeFramePath);
+                    } catch (fallbackError) {
+                        logger.error(`[VideoConcatenator] ❌ Error en fallback: ${fallbackError.message}`);
+
+                        // Limpiar archivos temporales
+                        try {
+                            if (fs.existsSync(tempImagePath)) {
+                                fs.unlinkSync(tempImagePath);
+                            }
+                        } catch (err) {
+                            // Ignorar error de limpieza
+                        }
+
+                        reject(fallbackError);
+                    }
+                }
+            } catch (error) {
+                logger.error(`[VideoConcatenator] ❌ Error en createFreezeFrame: ${error.message}`);
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * Recortar video a duración específica
+     * @param {string} videoPath - Ruta del video a recortar
+     * @param {number} duration - Duración objetivo en segundos
+     * @returns {Promise<string>} - Ruta del video recortado
+     */
+    async trimVideo(videoPath, duration) {
+        return new Promise((resolve, reject) => {
+            try {
+                const trimmedFileName = `trimmed-${Date.now()}.mp4`;
+                const trimmedPath = path.join(this.tempDir, trimmedFileName);
+
+                logger.info(`[VideoConcatenator] ✂️ Recortando video a ${duration}s: ${videoPath}`);
+
+                ffmpeg(videoPath)
+                    .setStartTime(0)
+                    .setDuration(duration)
+                    .videoCodec('libx264')
+                    .audioCodec('aac')
+                    .outputOptions([
+                        '-pix_fmt yuv420p',
+                        '-preset fast',
+                        '-movflags +faststart'
+                    ])
+                    .on('start', commandLine => {
+                        logger.info(`[VideoConcatenator] FFmpeg command: ${commandLine}`);
+                    })
+                    .on('progress', progress => {
+                        if (progress.percent) {
+                            logger.info(`[VideoConcatenator] Progreso recorte: ${progress.percent.toFixed(1)}%`);
+                        }
+                    })
+                    .on('end', () => {
+                        logger.info(`[VideoConcatenator] ✅ Video recortado exitosamente: ${trimmedPath}`);
+                        resolve(trimmedPath);
+                    })
+                    .on('error', error => {
+                        logger.error(`[VideoConcatenator] ❌ Error recortando video: ${error.message}`);
+                        reject(error);
+                    })
+                    .save(trimmedPath);
+            } catch (error) {
+                logger.error(`[VideoConcatenator] ❌ Error en trimVideo: ${error.message}`);
+                reject(error);
+            }
+        });
     }
 
     /**

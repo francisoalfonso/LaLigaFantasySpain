@@ -30,7 +30,7 @@ const CAPTIONS_CONFIG = {
         karaoke: {
             // Estilo word-by-word con highlighting (MÁS EFECTIVO)
             fontName: 'Arial Black',
-            fontSize: 32,
+            fontSize: 80, // Tamaño equilibrado - legible sin tapar a Ana
             primaryColor: '&H00FFFFFF', // Blanco
             secondaryColor: '&H00FFD700', // Dorado (palabra actual)
             outlineColor: '&H00000000', // Negro
@@ -38,10 +38,10 @@ const CAPTIONS_CONFIG = {
             bold: true,
             italic: false,
             underline: false,
-            outline: 3, // Borde grueso para legibilidad
-            shadow: 2,
+            outline: 6, // Borde para legibilidad
+            shadow: 4,
             alignment: 5, // Centro medio
-            marginV: 120 // Margen vertical desde abajo
+            marginV: 200 // Margen vertical desde abajo
         },
         static: {
             // Estilo estático tradicional (FALLBACK)
@@ -107,6 +107,56 @@ class CaptionsService {
         } catch (error) {
             logger.error('❌ Error creando directorio temporal:', error);
         }
+    }
+
+    /**
+     * ✅ NORMA #2: Convertir números literales a dígitos para subtítulos
+     * Audio (VEO3): "cinco punto cinco millones" → Subtítulo: "5.5M"
+     */
+    convertLiteralToNumber(text) {
+        const numberMap = {
+            'cero': '0', 'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4',
+            'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9'
+        };
+
+        const conversions = [
+            // Precios: "cinco punto cinco millones" → "5.5M"
+            {
+                pattern: /(\w+)\s+punto\s+(\w+)\s+millones/gi,
+                replace: (match, p1, p2) => {
+                    const num1 = numberMap[p1.toLowerCase()] || p1;
+                    const num2 = numberMap[p2.toLowerCase()] || p2;
+                    return `${num1}.${num2}M`;
+                }
+            },
+            // Ratios 3 dígitos: "uno punto dos tres" → "1.23"
+            {
+                pattern: /(\w+)\s+punto\s+(\w+)\s+(\w+)(?!\s+millones)/gi,
+                replace: (match, p1, p2, p3) => {
+                    const num1 = numberMap[p1.toLowerCase()] || p1;
+                    const num2 = numberMap[p2.toLowerCase()] || p2;
+                    const num3 = numberMap[p3.toLowerCase()] || p3;
+                    return `${num1}.${num2}${num3}`;
+                }
+            },
+            // Decimales simples: "siete punto uno dos" → "7.12"
+            {
+                pattern: /(\w+)\s+punto\s+(\w+)\s+(\w+)/gi,
+                replace: (match, p1, p2, p3) => {
+                    const num1 = numberMap[p1.toLowerCase()] || p1;
+                    const num2 = numberMap[p2.toLowerCase()] || p2;
+                    const num3 = numberMap[p3.toLowerCase()] || p3;
+                    return `${num1}.${num2}${num3}`;
+                }
+            }
+        ];
+
+        let result = text;
+        conversions.forEach(conv => {
+            result = result.replace(conv.pattern, conv.replace);
+        });
+
+        return result;
     }
 
     /**
@@ -177,8 +227,11 @@ class CaptionsService {
             const duration = segment.duration || 8; // Default 8s si no especificado
 
             if (style === 'karaoke') {
+                // ✅ NORMA #2: Convertir números literales a dígitos en subtítulos
+                const dialogueWithNumbers = this.convertLiteralToNumber(dialogue);
+
                 // Dividir en palabras para highlighting individual
-                const words = dialogue.split(' ');
+                const words = dialogueWithNumbers.split(' ');
                 const wordDuration = duration / words.length;
 
                 words.forEach((word, wordIndex) => {
@@ -188,7 +241,7 @@ class CaptionsService {
                         endTime: currentTime + wordDuration,
                         text: word,
                         isKaraoke: true,
-                        fullText: dialogue, // Contexto completo
+                        fullText: dialogueWithNumbers, // Contexto completo con números
                         currentWordIndex: wordIndex
                     });
                     currentTime += wordDuration;
@@ -271,13 +324,13 @@ class CaptionsService {
 
         const styleConfig = this.config.STYLES[style];
 
-        // Header ASS
+        // Header ASS - AJUSTADO PARA 720x1280 (resolución VEO3)
         let assContent = '[Script Info]\n';
         assContent += 'Title: Fantasy La Liga Shorts Captions\n';
         assContent += 'ScriptType: v4.00+\n';
         assContent += 'WrapStyle: 0\n';
-        assContent += 'PlayResX: 1080\n';
-        assContent += 'PlayResY: 1920\n';
+        assContent += 'PlayResX: 720\n';
+        assContent += 'PlayResY: 1280\n';
         assContent += 'ScaledBorderAndShadow: yes\n\n';
 
         // Styles
@@ -298,25 +351,15 @@ class CaptionsService {
 
         // Events
         if (style === 'karaoke') {
-            // Agrupar por fullText para mostrar frase completa con highlighting
-            const groupedByDialogue = this.groupKaraokeSubtitles(subtitles);
+            // Modo word-by-word: cada palabra aparece individualmente
+            subtitles.forEach((sub) => {
+                if (sub.isKaraoke) {
+                    const startTime = this.formatTimeASS(sub.startTime);
+                    const endTime = this.formatTimeASS(sub.endTime);
 
-            groupedByDialogue.forEach((group) => {
-                const startTime = this.formatTimeASS(group.startTime);
-                const endTime = this.formatTimeASS(group.endTime);
-
-                // Construir texto con highlighting usando tags ASS
-                let karaokeText = '';
-                group.words.forEach((wordObj, index) => {
-                    const word = wordObj.word;
-                    const wordStart = this.formatTimeASS(wordObj.startTime);
-
-                    // Efecto karaoke: {\k<duration>} cambia color durante duration*10ms
-                    const duration = Math.round(wordObj.duration * 100); // centésimas de segundo
-                    karaokeText += `{\\k${duration}}${word} `;
-                });
-
-                assContent += `Dialogue: 0,${startTime},${endTime},Default,,0,0,0,,${karaokeText.trim()}\n`;
+                    // Solo mostrar la palabra actual (no la frase completa)
+                    assContent += `Dialogue: 0,${startTime},${endTime},Highlight,,0,0,0,,${sub.text}\n`;
+                }
             });
         } else {
             // Subtítulos estáticos

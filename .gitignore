@@ -89,4 +89,4 @@ media/exports/
 
 # Social media content exports
 exports/
-content-exports/
+content-exports/.env.backup

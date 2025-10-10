@@ -1320,4 +1320,451 @@ router.get('/dictionary/stats', async (req, res) => {
     }
 });
 
+/**
+ * ✅ NUEVO (10 Oct 2025): @route POST /api/veo3/generate-with-nano-banana
+ * @desc Flujo completo validado: UnifiedScriptGenerator → Nano Banana → VEO3 → Concatenación
+ *
+ * Este endpoint implementa el flujo APROBADO:
+ * 1. UnifiedScriptGenerator genera guión profesional dividido en 3 segmentos (hook, development, cta)
+ * 2. Nano Banana genera 3 imágenes contextualizadas basadas en cada segmento del guión
+ * 3. VEO3 genera 3 videos usando cada imagen contextualizada como referencia
+ * 4. VideoConcatenator concatena los 3 videos + logo outro
+ *
+ * FIXES INTEGRADOS:
+ * - enableTranslation=false (evita audio en inglés)
+ * - Signed URLs de Supabase (24h expiration)
+ * - Imágenes contextualizadas con emociones y cinematografía del guión
+ */
+router.post('/generate-with-nano-banana', async (req, res) => {
+    try {
+        const {
+            contentType = 'chollo',
+            playerData,
+            viralData = {},
+            preset = 'chollo_viral',
+            options = {}
+        } = req.body;
+
+        // Validar datos requeridos
+        if (!playerData || !playerData.name) {
+            return res.status(400).json({
+                success: false,
+                message: 'playerData con name requerido'
+            });
+        }
+
+        logger.info(
+            `[VEO3 Routes] 🎨 Generando video con Nano Banana: ${contentType}, preset: ${preset}`
+        );
+
+        const startTime = Date.now();
+        const sessionId = `nanoBanana_${Date.now()}`;
+
+        // ✅ PASO 1: Validar diccionario
+        let dictionaryData = null;
+        if (playerData.name && playerData.team) {
+            logger.info(
+                `[VEO3 Routes] 📋 Validando diccionario para "${playerData.name}" del "${playerData.team}"...`
+            );
+            dictionaryData = await validateAndPrepare(playerData.name, playerData.team);
+            logger.info(
+                `[VEO3 Routes] ✅ Diccionario validado - Tasa éxito: ${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`
+            );
+        }
+
+        // ✅ PASO 2: Generar estructura de guión con UnifiedScriptGenerator
+        logger.info(`[VEO3 Routes] 📝 Generando guión profesional con UnifiedScriptGenerator...`);
+
+        const structure = multiSegmentGenerator.generateThreeSegments(
+            contentType,
+            playerData,
+            viralData,
+            {
+                preset,
+                ...options
+            }
+        );
+
+        logger.info(
+            `[VEO3 Routes] ✅ Guión generado: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`
+        );
+
+        // ✅ FIX (10 Oct 2025 21:00): structure.segments usa keys "intro", "middle", "outro" (NO hook/development/cta)
+        logger.info(
+            `[VEO3 Routes] 🔍 DEBUG - structure.segments keys: ${Object.keys(structure.segments).join(', ')}`
+        );
+
+        // Extraer array de 3 segmentos (intro, middle, outro) y agregar cinematography
+        const CinematicProgressionSystem = require('../services/veo3/cinematicProgressionSystem');
+        const cinematicSystem = new CinematicProgressionSystem();
+
+        // Generar progresión cinematográfica para contexto
+        const cinematicProgression = cinematicSystem.getFullProgression(contentType, [
+            'curiosidad',
+            'autoridad',
+            'urgencia'
+        ]);
+
+        const scriptSegments = [
+            { ...structure.segments.intro, cinematography: cinematicProgression[0].shot },
+            { ...structure.segments.middle, cinematography: cinematicProgression[1].shot },
+            { ...structure.segments.outro, cinematography: cinematicProgression[2].shot }
+        ];
+
+        // ✅ DEBUG: Verificar que los 3 segmentos existen con cinematography
+        logger.info(`[VEO3 Routes] 🔍 DEBUG - scriptSegments.length: ${scriptSegments.length}`);
+        scriptSegments.forEach((seg, idx) => {
+            logger.info(
+                `[VEO3 Routes] 🔍 DEBUG - Segmento ${idx}: ${seg ? `role=${seg.role}, shot=${seg.cinematography?.name}` : 'UNDEFINED'}`
+            );
+        });
+
+        // ✅ PASO 3: Generar imágenes Nano Banana BASADAS EN el guión
+        logger.info(
+            `[VEO3 Routes] 🖼️  Generando 3 imágenes Nano Banana contextualizadas del guión...`
+        );
+
+        const nanoBananaVeo3Integrator = require('../services/veo3/nanoBananaVeo3Integrator');
+
+        const imagesResult = await nanoBananaVeo3Integrator.generateImagesFromScript(
+            scriptSegments,
+            options
+        );
+
+        logger.info(
+            `[VEO3 Routes] ✅ ${imagesResult.images.length} imágenes contextualizadas generadas (costo: $${imagesResult.metadata.cost_usd.toFixed(3)})`
+        );
+
+        // ✅ PASO 4: Generar videos VEO3 usando imágenes como referencia
+        logger.info(
+            `[VEO3 Routes] 🎬 Generando 3 segmentos de video con VEO3 usando imágenes contextualizadas...`
+        );
+
+        // Crear directorio de sesión
+        const sessionDir = path.join(
+            __dirname,
+            '../../output/veo3/sessions',
+            `session_${sessionId}`
+        );
+        await fs.promises.mkdir(sessionDir, { recursive: true });
+
+        const progressFile = path.join(sessionDir, 'progress.json');
+        logger.info(`[VEO3 Routes] 📁 Sesión creada: ${sessionDir}`);
+
+        const generatedSegments = [];
+        const anaImageIndex = structure.metadata.anaImageIndex;
+
+        for (let i = 0; i < scriptSegments.length; i++) {
+            const segment = scriptSegments[i];
+            const image = imagesResult.images[i];
+            const segmentNum = i + 1;
+
+            logger.info(
+                `[VEO3 Routes] 📹 Generando segmento ${segmentNum}/3: ${segment.role} (${image.shot})...`
+            );
+
+            try {
+                // ✅ ACTUALIZADO (11 Oct 2025): Usar prompt MEJORADO tipo Playground para Nano Banana → VEO3
+                // Basado en prompts exitosos del playground que incluyen:
+                // - Duración explícita (8 seconds)
+                // - Acción física progresiva
+                // - Tono emocional específico
+                // - Dirección de actuación (like a TV commentator)
+                const nanoBananaPrompt = promptBuilder.buildEnhancedNanoBananaPrompt(
+                    segment.dialogue,
+                    segment.emotion,
+                    image.shot,
+                    { duration: segment.duration || 8 }
+                );
+
+                logger.info(
+                    `[VEO3 Routes] 🎬 Prompt Enhanced Nano Banana (${segment.role}): ${nanoBananaPrompt.length} chars`
+                );
+                logger.info(`[VEO3 Routes]    Emotion: ${segment.emotion}, Shot: ${image.shot}`);
+
+                const veo3Options = {
+                    imageUrl: image.supabaseUrl, // ✅ Signed URL de Supabase (24h)
+                    model: options.veo3Model || 'veo3_fast',
+                    aspectRatio: '9:16',
+                    duration: segment.duration || 8, // ✅ ACTUALIZADO: 7s → 8s
+                    enableTranslation: false, // ✅ FIX: evitar audio en inglés
+                    enableFallback: true
+                };
+
+                // Generar segmento con prompt simplificado
+                const videoResult = await veo3Client.generateCompleteVideo(
+                    nanoBananaPrompt,
+                    veo3Options
+                );
+
+                // ✅ DESCARGAR Y GUARDAR INMEDIATAMENTE
+                logger.info(`[VEO3 Routes] 💾 Descargando segmento ${segmentNum} desde VEO3...`);
+                const response = await axios.get(videoResult.url, { responseType: 'arraybuffer' });
+
+                const segmentFilename = `segment_${segmentNum}_${videoResult.taskId}.mp4`;
+                const localPath = path.join(sessionDir, segmentFilename);
+                await fs.promises.writeFile(localPath, response.data);
+
+                const segmentData = {
+                    index: i,
+                    role: segment.role,
+                    shot: image.shot,
+                    emotion: segment.emotion,
+                    taskId: videoResult.taskId,
+                    veo3Url: videoResult.url,
+                    localPath: localPath,
+                    filename: segmentFilename,
+                    duration: segment.duration,
+                    dialogue: segment.dialogue,
+                    imageContext: {
+                        supabaseUrl: image.supabaseUrl,
+                        visualContext: image.visualContext,
+                        emotion: image.emotion
+                    },
+                    generatedAt: new Date().toISOString(),
+                    size: response.data.length
+                };
+
+                generatedSegments.push(segmentData);
+
+                // Persistir progreso inmediatamente
+                const progressData = {
+                    sessionId,
+                    sessionDir,
+                    segmentsCompleted: segmentNum,
+                    segmentsTotal: 3,
+                    playerName: playerData.name || 'unknown',
+                    contentType,
+                    preset,
+                    workflow: 'nano-banana-contextual',
+                    segments: generatedSegments,
+                    lastUpdate: new Date().toISOString()
+                };
+
+                await fs.promises.writeFile(progressFile, JSON.stringify(progressData, null, 2));
+
+                logger.info(
+                    `[VEO3 Routes] ✅ Segmento ${segmentNum} guardado: ${localPath} (${(response.data.length / 1024 / 1024).toFixed(2)} MB)`
+                );
+
+                // 🔧 DELAY entre segmentos (excepto el último)
+                if (segmentNum < 3) {
+                    const delaySeconds = 30; // Cooling period VEO3
+                    logger.info(
+                        `[VEO3 Routes] ⏱️  Esperando ${delaySeconds}s antes del siguiente segmento...`
+                    );
+                    await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+                }
+            } catch (error) {
+                logger.error(`[VEO3 Routes] ❌ Error en segmento ${segmentNum}:`, error.message);
+
+                // Guardar estado de error
+                const errorData = {
+                    sessionId,
+                    sessionDir,
+                    segmentsCompleted: generatedSegments.length,
+                    segmentsTotal: 3,
+                    playerName: playerData.name || 'unknown',
+                    contentType,
+                    preset,
+                    workflow: 'nano-banana-contextual',
+                    segments: generatedSegments,
+                    error: {
+                        segmentIndex: i,
+                        segmentNumber: segmentNum,
+                        segmentRole: segment.role,
+                        message: error.message,
+                        stack: error.stack,
+                        timestamp: new Date().toISOString()
+                    },
+                    lastUpdate: new Date().toISOString()
+                };
+
+                await fs.promises.writeFile(progressFile, JSON.stringify(errorData, null, 2));
+
+                logger.error(`[VEO3 Routes] 💾 Estado de error guardado en: ${progressFile}`);
+                logger.error(
+                    `[VEO3 Routes] ✅ Segmentos exitosos antes del error: ${generatedSegments.length}/3`
+                );
+
+                throw new Error(`Fallo en segmento ${segmentNum}/3: ${error.message}`);
+            }
+        }
+
+        logger.info(
+            `[VEO3 Routes] 🎉 Todos los segmentos generados exitosamente: ${generatedSegments.length}/3`
+        );
+
+        // ✅ PASO 5: CONCATENAR VIDEOS con logo outro
+        logger.info(`[VEO3 Routes] 🔗 Concatenando 3 segmentos + logo outro...`);
+
+        let finalVideoUrl = null;
+        let concatenatedVideo = null;
+
+        try {
+            const VideoConcatenator = require('../services/veo3/videoConcatenator');
+            const concatenator = new VideoConcatenator();
+
+            const localPaths = generatedSegments.map(seg => seg.localPath);
+
+            logger.info(`[VEO3 Routes] 📂 Segmentos locales listos para concatenar:`);
+            localPaths.forEach((path, idx) => {
+                logger.info(`[VEO3 Routes]    ${idx + 1}. ${path}`);
+            });
+
+            // Concatenar videos desde archivos locales (+ logo outro automático)
+            const outputPath = await concatenator.concatenateVideos(localPaths, {
+                transition: { enabled: false }, // Sin transiciones
+                audio: { fadeInOut: false },
+                outro: {
+                    enabled: true, // ✅ Agregar logo blanco FLP al final
+                    freezeFrame: {
+                        enabled: true,
+                        duration: 0.8
+                    }
+                }
+            });
+
+            // URL del video final
+            finalVideoUrl = `http://localhost:3000/output/veo3/${path.basename(outputPath)}`;
+
+            // Metadata del video concatenado
+            concatenatedVideo = {
+                videoId: `concat_${sessionId}`,
+                title: `${playerData.name}_${contentType}_nano_banana`,
+                duration: structure.totalDuration,
+                sessionId: sessionId,
+                sessionDir: sessionDir,
+                outputPath: outputPath,
+                workflow: 'nano-banana-contextual'
+            };
+
+            // Actualizar progress con video final
+            const finalProgress = {
+                sessionId,
+                sessionDir,
+                segmentsCompleted: generatedSegments.length,
+                segmentsTotal: 3,
+                playerName: playerData.name || 'unknown',
+                contentType,
+                preset,
+                workflow: 'nano-banana-contextual',
+                segments: generatedSegments,
+                concatenatedVideo: concatenatedVideo,
+                finalVideoUrl: finalVideoUrl,
+                completedAt: new Date().toISOString()
+            };
+
+            await fs.promises.writeFile(progressFile, JSON.stringify(finalProgress, null, 2));
+
+            logger.info(`[VEO3 Routes] ✅ Videos concatenados: ${finalVideoUrl}`);
+            logger.info(`[VEO3 Routes] 📄 Progreso final guardado: ${progressFile}`);
+        } catch (error) {
+            logger.error(`[VEO3 Routes] ❌ Error concatenando:`, error.message);
+            // Fallback: usar primer segmento local
+            finalVideoUrl = `http://localhost:3000/output/veo3/sessions/session_${sessionId}/${generatedSegments[0]?.filename}`;
+            logger.warn(`[VEO3 Routes] ⚠️ Usando segmento 1 como fallback: ${finalVideoUrl}`);
+        }
+
+        // ✅ Actualizar diccionario
+        if (playerData.name && dictionaryData) {
+            const success = generatedSegments.length === 3;
+            await updatePlayerSuccessRate(playerData.name, success);
+
+            if (success) {
+                logger.info(`[VEO3 Routes] ✅ Actualizada tasa de éxito para "${playerData.name}"`);
+            }
+        }
+
+        // RESUMEN FINAL
+        const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
+        const veo3Cost = 0.3 * 3; // VEO3: $0.30 × 3 segmentos
+        const totalCost = veo3Cost + imagesResult.metadata.cost_usd; // VEO3 + Nano Banana
+
+        logger.info(`[VEO3 Routes] ✅ FLUJO COMPLETO NANO BANANA finalizado en ${totalDuration}s`);
+        logger.info(
+            `[VEO3 Routes] 💰 Costo total: $${totalCost.toFixed(3)} (VEO3: $${veo3Cost.toFixed(3)}, Nano Banana: $${imagesResult.metadata.cost_usd.toFixed(3)})`
+        );
+
+        res.json({
+            success: true,
+            message: `Video con Nano Banana (${contentType}) generado exitosamente`,
+            data: {
+                workflow: 'nano-banana-contextual',
+                contentType,
+                preset,
+                segmentCount: 3,
+                totalDuration: structure.totalDuration,
+                // PASO 1: Diccionario
+                dictionary: dictionaryData
+                    ? {
+                          playerInDictionary: true,
+                          successRate: `${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`,
+                          totalVideos: dictionaryData.player.totalVideos
+                      }
+                    : null,
+                // PASO 2: Guión
+                script: {
+                    segments: scriptSegments.map(seg => ({
+                        role: seg.role,
+                        emotion: seg.emotion,
+                        dialogue: seg.dialogue,
+                        duration: seg.duration,
+                        shot: seg.cinematography?.name || 'medium' // ✅ FIX: cinematography.name (no .shot)
+                    })),
+                    totalDuration: structure.totalDuration
+                },
+                // PASO 3: Imágenes Nano Banana
+                nanoBananaImages: imagesResult.images.map(img => ({
+                    role: img.role,
+                    shot: img.shot,
+                    emotion: img.emotion,
+                    supabaseUrl: img.supabaseUrl,
+                    visualContext: img.visualContext
+                })),
+                nanoBananaCost: imagesResult.metadata.cost_usd,
+                // PASO 4: Videos VEO3
+                segments: generatedSegments,
+                // PASO 5: Video final
+                concatenatedVideo: concatenatedVideo
+                    ? {
+                          url: finalVideoUrl,
+                          videoId: concatenatedVideo.videoId,
+                          duration: structure.totalDuration,
+                          title: concatenatedVideo.title,
+                          sessionDir: sessionDir
+                      }
+                    : null,
+                finalVideoUrl,
+                playerData: {
+                    name: playerData.name,
+                    team: playerData.team,
+                    price: playerData.price
+                },
+                // Costos
+                costs: {
+                    nanoBanana: imagesResult.metadata.cost_usd,
+                    veo3: veo3Cost,
+                    total: totalCost
+                },
+                // Performance
+                performance: {
+                    totalDuration: parseFloat(totalDuration),
+                    successRate: '100%',
+                    sessionId
+                }
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        logger.error('[VEO3 Routes] Error generando video con Nano Banana:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error generando video con Nano Banana',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 module.exports = router;

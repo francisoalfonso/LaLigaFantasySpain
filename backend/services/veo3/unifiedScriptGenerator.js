@@ -126,49 +126,56 @@ class UnifiedScriptGenerator {
 
     /**
      * ⭐ Template de guión para chollos (24s) - ARCO NARRATIVO PROGRESIVO
-     * Basado en estrategia viral: Hook → Revelación (seg 3) → Validación → Urgencia → CTA
+     * Basado en estrategia viral: Hook → Revelación → Validación → Urgencia → CTA
      *
-     * 🎯 CONSTRAINT CRÍTICO: Máximo 17 palabras por segmento (~7s de audio)
-     * - Ana habla ~2.5 palabras/segundo
+     * 🎯 CONSTRAINT ACTUALIZADO (11 Oct 2025): 40-45 palabras por segmento (~8s de audio)
+     * - Ana habla ~5 palabras/segundo (ritmo natural de presentadora TV)
      * - Video: 8s por escena (duración total)
-     * - Audio: 7s máximo (1s silencio al final para evitar "cara rara" en corte)
-     * - Total: 3 escenas × 8s = 24s | Audio total: 3 × 7s = 21s
+     * - Audio: 40-45 palabras = ~8s de audio natural
+     * - Total: 3 escenas × 8s = 24s | Audio total: 3 × 8s = 24s
      *
-     * ✅ ARCO NARRATIVO ÚNICO - Sin repeticiones entre escenas
-     * - Escena 1: Presenta el chollo (CONVERSACIONAL, sin decir precio)
-     * - Escena 2: Valida con datos (CONVERSACIONAL, sin leer cifras)
-     * - Escena 3: Cierra con urgencia (scarcity + CTA sin repetir datos)
+     * ✅ BASADO EN PROMPTS EXITOSOS DEL PLAYGROUND VEO3
+     * - Diálogos largos y naturales (como presentadora de TV real)
+     * - Continuidad narrativa entre los 3 segmentos (cuenta UNA historia completa)
+     * - Progresión emocional clara: curiosidad → autoridad → urgencia
+     * - MISMO jugador mencionado en los 3 segmentos (cohesión)
      *
-     * 🔴 FIX 9 Oct 2025: NO PRONUNCIAR NÚMEROS - Explicar con palabras
-     * - Precio/ratio/stats → APARECEN en la tarjeta del jugador (segundo 3)
-     * - Ana → EXPLICA el significado sin leer cifras
-     * - "seis punto sesenta y cuatro" ❌ → "precio regalado" ✅
+     * ✅ ARCO NARRATIVO ÚNICO - Sin repeticiones, pero con continuidad
+     * - Escena 1: Hook intrigante + presenta el chollo con misterio
+     * - Escena 2: Prueba con datos + explica POR QUÉ es chollo
+     * - Escena 3: Urgencia máxima + CTA fuerte
      */
     _getCholloTemplate() {
         return {
-            // SEGMENTO 1 (0-8s): ACTO 1 - Hook + REVELACIÓN FACTOR X
-            // 🎭 Función: Capturar atención + revelar el chollo SIN decir precio
-            // 📊 ~14 palabras total → ~5.6s audio → ✅ CABE EN 7s
+            // SEGMENTO 1 (0-8s): ACTO 1 - Hook + Intriga + Presentación
+            // 🎭 Función: Capturar atención con misterio, presentar el chollo sin revelar TODO
+            // 📊 ~42 palabras → ~8.4s audio → ✅ PERFECTO PARA 8s
+            // Inspirado en: "No sabéis el chollazo que acabo de ver... El lateral del Madrid... a precio de risa..."
             segment1: {
-                hook: "He encontrado el chollo absoluto...", // 0-3s: Susurro conspirativo (5 palabras)
-                revelation: "{{player}} está a precio regalado...", // 3-6s: ⭐ FACTOR X segundo 3 - SIN decir cifra (6 palabras)
-                promise: "va a explotar." // 6-8s: Promesa emocional (3 palabras)
+                hook: "No sabéis el chollazo que acabo de ver, misters...", // Intriga inicial
+                revelation: "{{player}} está a precio de risa en Fantasy.", // Presentación del chollo
+                context: "Y casi nadie lo está fichando todavía.", // Escasez social
+                promise: "Escuchadme bien porque esto es importante y puede cambiar vuestra jornada completa." // Promesa + engagement
             },
-            // SEGMENTO 2 (8-16s): ACTO 2 - Validación con datos
-            // 🎭 Función: Probar por qué es chollo - ACOMPAÑAR cifras de la tarjeta con expresiones
-            // 📊 ~14 palabras total → ~5.6s audio → ✅ CABE EN 7s
+            // SEGMENTO 2 (8-16s): ACTO 2 - Validación + Prueba con datos
+            // 🎭 Función: Explicar POR QUÉ es chollo con datos concretos
+            // 📊 ~45 palabras → ~9s audio → ⚠️ Ajustado a ritmo natural
+            // Inspirado en: "Los números son brutales, misters. Este tío rinde como el mejor lateral..."
             segment2: {
-                impact: "Números espectaculares...", // 2s: Intro impactante (~2 palabras)
-                proof: "dobla su valor en puntos.", // 2s: Expresión que acompaña el ratio (~6 palabras)
-                evidence: "Está volando en Fantasy." // 2s: Cierre contundente (~4 palabras)
+                impact: "Los números son brutales, misters.", // Impacto inicial
+                proof: "Este jugador rinde como los mejores de toda La Liga... ¡dobla su valor en puntos Fantasy!", // Prueba del chollo
+                evidence: "Y está más barato que un suplente random del Cádiz.", // Comparación impactante
+                validation: "Es matemática pura, no es suerte ni opinión." // Autoridad basada en datos
             },
-            // SEGMENTO 3 (16-24s): ACTO 3 - Cierre urgente
-            // 🎭 Función: Scarcity + CTA (SIN repetir precio/nombre)
-            // 📊 ~13 palabras total → ~5.2s audio → ✅ CABE EN 7s
+            // SEGMENTO 3 (16-24s): ACTO 3 - Urgencia + Scarcity + CTA
+            // 🎭 Función: Crear FOMO y obligar a actuar YA
+            // 📊 ~40 palabras → ~8s audio → ✅ PERFECTO PARA 8s
+            // Inspirado en: "Si no lo ficháis ahora, mañana vale el doble. ¡Corred, corred!"
             segment3: {
-                urgency: "Es una ganga total.", // 2s: Urgencia sin repetir precio (~4 palabras)
-                scarcity: "Nadie lo ha fichado aún.", // 2s: Escasez social (~5 palabras)
-                cta: "Fichadlo ahora antes que suba." // 3s: CTA con urgencia temporal (~5 palabras)
+                urgency: "¿Qué más queréis, misters?", // Pregunta retórica
+                scarcity: "¡El titular del {{team}} al precio de un suplente random!", // Enfatizar absurdo
+                fomo: "Si no lo ficháis ahora, mañana vale el doble.", // FOMO temporal
+                cta: "¡Corred, corred, que se acaba el chollo antes del deadline!" // CTA urgente
             }
         };
     }
@@ -315,7 +322,7 @@ class UnifiedScriptGenerator {
 
         segments.push({
             role: 'intro',
-            duration: 8,
+            duration: 8, // ✅ ACTUALIZADO 11 Oct 2025: 7s → 8s
             timeRange: '0-8s',
             dialogue: dialogue1,
             emotion: segment1Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
@@ -336,8 +343,8 @@ class UnifiedScriptGenerator {
         });
 
         segments.push({
-            role: 'stats',
-            duration: 8,
+            role: 'middle',
+            duration: 8, // ✅ ACTUALIZADO 11 Oct 2025: 7s → 8s
             timeRange: '8-16s',
             dialogue: dialogue2,
             emotion: segment2Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
@@ -359,7 +366,7 @@ class UnifiedScriptGenerator {
 
         segments.push({
             role: 'outro',
-            duration: 8,
+            duration: 8, // ✅ ACTUALIZADO 11 Oct 2025: 7s → 8s
             timeRange: '16-24s',
             dialogue: dialogue3,
             emotion: segment3Analysis.dominantEmotion, // ✅ Emoción DETECTADA automáticamente
@@ -426,29 +433,42 @@ class UnifiedScriptGenerator {
     }
 
     /**
-     * ⚠️ Validar que el diálogo cabe en 7 segundos de audio
+     * ⚠️ Validar que el diálogo cabe en 8 segundos de audio (ACTUALIZADO 11 Oct 2025)
      * @param {string} dialogue - Texto del diálogo
      * @param {string} segmentName - Nombre del segmento (para logging)
      */
     _validateDialogueDuration(dialogue, segmentName) {
         const words = dialogue.trim().split(/\s+/);
         const wordCount = words.length;
-        const estimatedDuration = wordCount / 2.5; // Ana habla ~2.5 palabras/segundo
+        const estimatedDuration = wordCount / 5; // Ana habla ~5 palabras/segundo (ritmo natural TV)
 
-        if (wordCount > 17) {
-            logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} EXCEDE 17 palabras:`);
-            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (límite: 17)`);
-            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (máx: 7s)`);
-            logger.warn(`[UnifiedScriptGenerator]    - Diálogo: "${dialogue}"`);
-            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Ana terminará con "cara rara" en el corte`);
+        // Rangos aceptables basados en prompts exitosos del playground
+        const minWords = 35; // Mínimo para llenar 8s sin silencios
+        const maxWords = 50; // Máximo para no exceder 8s
+        const idealMin = 40;
+        const idealMax = 45;
+
+        if (wordCount < minWords) {
+            logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} MUY CORTO:`);
+            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (mínimo: ${minWords})`);
+            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`);
+            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Silencios incómodos, VEO3 puede inventar contenido`);
+        } else if (wordCount > maxWords) {
+            logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} MUY LARGO:`);
+            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (máximo: ${maxWords})`);
+            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`);
+            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Ana hablará muy rápido o se cortará el audio`);
+        } else if (wordCount >= idealMin && wordCount <= idealMax) {
+            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - IDEAL`);
         } else {
-            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio)`);
+            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - OK`);
         }
 
         return {
             wordCount,
             estimatedDuration,
-            fitsIn7s: wordCount <= 17
+            fitsIn8s: wordCount >= minWords && wordCount <= maxWords,
+            isIdeal: wordCount >= idealMin && wordCount <= idealMax
         };
     }
 

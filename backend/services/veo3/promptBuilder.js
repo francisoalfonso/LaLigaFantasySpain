@@ -195,43 +195,43 @@ class PromptBuilder {
 
         const emotionalCatalog = {
             // CURIOSIDAD / INTRIGA
-            'curiosidad': 'in a conspiratorial whisper, leaning in close as if sharing a secret',
-            'intriga': 'with mysterious intrigue, raising eyebrows slightly',
-            'sorpresa': 'with genuine surprise and wide eyes, discovering something unexpected',
+            curiosidad: 'in a conspiratorial whisper, leaning in close as if sharing a secret',
+            intriga: 'with mysterious intrigue, raising eyebrows slightly',
+            sorpresa: 'with genuine surprise and wide eyes, discovering something unexpected',
 
             // REVELACIÓN / DESCUBRIMIENTO
-            'revelacion': 'with confident revelation, as if unveiling hidden truth',
-            'descubrimiento': 'with excitement of discovery, gesturing naturally',
+            revelacion: 'with confident revelation, as if unveiling hidden truth',
+            descubrimiento: 'with excitement of discovery, gesturing naturally',
 
             // AUTORIDAD / PROFESIONALIDAD
-            'autoridad': 'with confident professional authority, presenting data clearly',
-            'analisis': 'with analytical focus, explaining complex information simply',
-            'construccion': 'building the argument methodically, step by step',
+            autoridad: 'with confident professional authority, presenting data clearly',
+            analisis: 'with analytical focus, explaining complex information simply',
+            construccion: 'building the argument methodically, step by step',
 
             // VALIDACIÓN / PRUEBA
-            'validacion': 'with factual validation, backing claims with concrete data',
-            'evidencia': 'presenting evidence confidently, pointing to key facts',
+            validacion: 'with factual validation, backing claims with concrete data',
+            evidencia: 'presenting evidence confidently, pointing to key facts',
 
             // URGENCIA / ACCIÓN
-            'urgencia': 'with urgency and excitement, creating immediate need to act',
-            'escasez': 'emphasizing scarcity and time sensitivity, leaning forward',
-            'accion': 'with decisive call to action, direct and compelling',
+            urgencia: 'with urgency and excitement, creating immediate need to act',
+            escasez: 'emphasizing scarcity and time sensitivity, leaning forward',
+            accion: 'with decisive call to action, direct and compelling',
 
             // IMPACTO / SHOCK
-            'impacto': 'with impactful delivery, emphasizing magnitude',
-            'shock': 'with dramatic revelation, highlighting unexpected turn',
+            impacto: 'with impactful delivery, emphasizing magnitude',
+            shock: 'with dramatic revelation, highlighting unexpected turn',
 
             // CONCLUSIÓN / CIERRE
-            'conclusion': 'wrapping up with clear takeaway, confident summary',
-            'moraleja': 'delivering key insight with wisdom, reflective tone',
+            conclusion: 'wrapping up with clear takeaway, confident summary',
+            moraleja: 'delivering key insight with wisdom, reflective tone',
 
             // EMPATÍA / CONEXIÓN
-            'empatia': 'with empathy and understanding, connecting personally',
-            'complicidad': 'with knowing complicity, as if sharing insider knowledge',
+            empatia: 'with empathy and understanding, connecting personally',
+            complicidad: 'with knowing complicity, as if sharing insider knowledge',
 
             // ENERGÍA POSITIVA
-            'entusiasmo': 'with genuine enthusiasm and positive energy',
-            'celebracion': 'celebrating success, smiling naturally'
+            entusiasmo: 'with genuine enthusiasm and positive energy',
+            celebracion: 'celebrating success, smiling naturally'
         };
 
         // Si se especifica emoción explícita, usarla del catálogo
@@ -257,7 +257,9 @@ class PromptBuilder {
 
         const prompt = `The person from the reference image with long blonde wavy hair and green-hazel eyes speaks in CASTILIAN SPANISH FROM SPAIN with EUROPEAN SPANISH accent (CRITICAL: not Mexican, not Latin American, ONLY Castilian Spanish from Spain) ${tone}: "${dialogue}". Maintain the exact appearance and style from the reference image.`;
 
-        logger.info(`[PromptBuilder] Prompt optimizado generado (${role || 'default'}): ${prompt.length} chars`);
+        logger.info(
+            `[PromptBuilder] Prompt optimizado generado (${role || 'default'}): ${prompt.length} chars`
+        );
         return prompt;
     }
 
@@ -343,7 +345,12 @@ class PromptBuilder {
         const { stats = {}, ratio, team, enhanced = false, dictionaryData } = options;
 
         // Estructura viral de 7 elementos para chollo (10-12s)
-        const dialogue = this._buildCholloDialogue(playerName, price, { stats, ratio, team, dictionaryData });
+        const dialogue = this._buildCholloDialogue(playerName, price, {
+            stats,
+            ratio,
+            team,
+            dictionaryData
+        });
 
         // Si enhanced=true, usar prompt mejorado con comportamiento
         if (enhanced) {
@@ -417,21 +424,31 @@ class PromptBuilder {
                     number: stats.number || null
                 },
                 {
-                    avoidGeneric: true,      // Evitar "el jugador" si hay mejores opciones
-                    preferNickname: true     // Preferir apodos conocidos (más virales)
+                    avoidGeneric: true, // Evitar "el jugador" si hay mejores opciones
+                    preferNickname: true // Preferir apodos conocidos (más virales)
                 }
             );
 
-            logger.info(`[PromptBuilder] 🎨 Referencia creativa: "${playerName}" → "${safeReference}"`);
+            logger.info(
+                `[PromptBuilder] 🎨 Referencia creativa: "${playerName}" → "${safeReference}"`
+            );
         } catch (error) {
             // Fallback al sistema anterior si falla
             if (dictionaryData?.player?.safeReferences) {
                 const refs = dictionaryData.player.safeReferences;
-                safeReference = refs.find(ref => ref.includes('delantero') || ref.includes('centrocampista') || ref.includes('defensa'))
-                                || refs[1]
-                                || refs[0];
+                safeReference =
+                    refs.find(
+                        ref =>
+                            ref.includes('delantero') ||
+                            ref.includes('centrocampista') ||
+                            ref.includes('defensa')
+                    ) ||
+                    refs[1] ||
+                    refs[0];
             }
-            logger.warn(`[PromptBuilder] ⚠️ CreativeReferenceGenerator falló, usando fallback: "${safeReference}"`);
+            logger.warn(
+                `[PromptBuilder] ⚠️ CreativeReferenceGenerator falló, usando fallback: "${safeReference}"`
+            );
         }
 
         // Estructura viral: hook → contexto → conflicto → inflexión → resolución → moraleja → cta
@@ -454,7 +471,9 @@ class PromptBuilder {
 
         // 5. Resolución (7-9s) - explosive_excitement
         if (ratio) {
-            parts.push(`Vale ${ratio} veces más de lo que cuesta. ¡Está RINDIENDO como uno de 15 millones!`);
+            parts.push(
+                `Vale ${ratio} veces más de lo que cuesta. ¡Está RINDIENDO como uno de 15 millones!`
+            );
         } else {
             parts.push(`Rating de ${stats.rating || 7.0}. ¡Es un CHOLLO BRUTAL!`);
         }
@@ -577,6 +596,112 @@ class PromptBuilder {
         const dialogue = options.dialogue || transition;
 
         return this.buildPrompt({ dialogue });
+    }
+
+    /**
+     * ✅ NUEVO (10 Oct 2025): Prompt simplificado para flujo Nano Banana → VEO3
+     *
+     * Cuando usamos Nano Banana, la imagen de referencia YA incluye toda la información visual
+     * (emoción, cinematografía, expresión). Por lo tanto, NO debemos incluir descripciones físicas
+     * ni contexto visual redundante en el prompt de VEO3.
+     *
+     * Esto resuelve:
+     * - Prompts demasiado largos (> 80 palabras)
+     * - Ana trabándose al hablar
+     * - Mejor calidad de generación
+     *
+     * @param {string} dialogue - Diálogo que Ana debe decir
+     * @param {string} tone - Tono emocional (optional, simple description)
+     * @returns {string} - Prompt optimizado y minimalista
+     */
+    buildNanoBananaPrompt(dialogue, tone = '') {
+        // ✅ Prompt MINIMALISTA para Nano Banana → VEO3
+        // La imagen de referencia ya contiene toda la información visual
+        // Solo necesitamos: acento español + diálogo + preservación de imagen
+
+        // Tone opcional simplificado (máximo 5-7 palabras)
+        const toneInstruction = tone ? `${tone}, ` : '';
+
+        const prompt = `The person from the reference image ${toneInstruction}speaks in Spanish from Spain: "${dialogue}". Maintain the exact appearance and style from the reference image.`;
+
+        logger.info(
+            `[PromptBuilder] 🖼️ Nano Banana prompt generado: ${prompt.length} chars (optimizado)`
+        );
+        logger.info(`[PromptBuilder]    Diálogo: "${dialogue.substring(0, 50)}..."`);
+
+        return prompt;
+    }
+
+    /**
+     * ✅ NUEVO (11 Oct 2025): Prompt MEJORADO tipo Playground para flujo Nano Banana → VEO3
+     *
+     * Basado en prompts exitosos del playground VEO3 que incluyen:
+     * - Duración explícita (8 seconds)
+     * - Acción física clara y progresiva
+     * - Tono emocional específico
+     * - Contexto de escena (studio)
+     * - Dirección de actuación (like a TV commentator)
+     * - Diálogo largo y natural (40-50 palabras)
+     *
+     * Este método genera prompts que han demostrado alta calidad en playground.
+     *
+     * @param {string} dialogue - Diálogo completo (40-50 palabras recomendado)
+     * @param {string} emotion - Emoción del segmento (curiosidad, autoridad, urgencia)
+     * @param {string} shot - Tipo de shot (close-up, medium, medium close-up)
+     * @param {object} options - Opciones adicionales
+     * @returns {string} - Prompt estilo playground optimizado
+     */
+    buildEnhancedNanoBananaPrompt(dialogue, emotion, shot, options = {}) {
+        const duration = options.duration || 8;
+
+        // Mapeo de emociones a tonos actorales específicos (tipo playground)
+        const emotionToTone = {
+            curiosidad: 'with mysterious, intrigued energy',
+            intriga: 'with curious, engaging tone',
+            autoridad: 'with confident, authoritative tone',
+            confianza: 'with professional authority',
+            urgencia: 'with urgent, compelling energy',
+            excitacion: 'with excitement and high energy',
+            escasez: 'with urgent, time-sensitive energy',
+            revelacion: 'with dramatic revelation energy',
+            entusiasmo: 'with enthusiastic, animated energy',
+            complicidad: 'with knowing, complicit energy',
+            sorpresa: 'with surprised, amazed expression',
+            sarcastico: 'with sarcastic, frustrated energy'
+        };
+
+        // Mapeo de shots a acciones físicas progresivas (tipo playground)
+        const shotToAction = {
+            'close-up':
+                'places one hand on her chest and leans slightly forward with an intriguing expression',
+            medium: 'gestures with her hands and steps forward confidently, making strong eye contact',
+            'medium close-up': 'points directly to the camera and raises her finger urgently',
+            wide: 'moves expressively across the studio space with animated gestures'
+        };
+
+        // Obtener tone y action
+        const tone = emotionToTone[emotion] || 'with professional energy';
+        const action = shotToAction[shot] || 'gestures naturally with professional poise';
+
+        // Tipo de video (descriptivo como en playground)
+        const videoType =
+            emotion === 'urgencia' || emotion === 'escasez'
+                ? 'A high-energy'
+                : emotion === 'revelacion' || emotion === 'sarcastico'
+                  ? 'A theatrical and expressive'
+                  : 'A cinematic';
+
+        // Construcción del prompt (estructura ganadora del playground)
+        const prompt = `${videoType} ${duration}-second video. A young female sports presenter is standing in a modern fantasy football studio. She ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" She moves like a TV football commentator, making strong eye contact with the camera. Use the uploaded image of the presenter as the main reference. Do not redesign her.`;
+
+        logger.info(
+            `[PromptBuilder] 🎬 Enhanced Nano Banana prompt (playground-style): ${prompt.length} chars`
+        );
+        logger.info(`[PromptBuilder]    Emotion: ${emotion} → Tone: ${tone}`);
+        logger.info(`[PromptBuilder]    Shot: ${shot} → Action: ${action}`);
+        logger.info(`[PromptBuilder]    Dialogue length: ${dialogue.split(' ').length} words`);
+
+        return prompt;
     }
 
     /**
@@ -845,7 +970,9 @@ class PromptBuilder {
             const emotionalDirections = elementos
                 .map(elem => {
                     const emocion = EMOCIONES_POR_ELEMENTO[elem]?.[contentType];
-                    return EMOTIONAL_DIRECTIONS[emocion]?.physicality || 'natural professional energy';
+                    return (
+                        EMOTIONAL_DIRECTIONS[emocion]?.physicality || 'natural professional energy'
+                    );
                 })
                 .join(', ');
 

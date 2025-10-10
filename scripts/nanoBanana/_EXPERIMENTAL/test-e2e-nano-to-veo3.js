@@ -49,7 +49,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(58)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(58)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🎬 TEST E2E: Nano Banana → VEO3 → Video Final${' '.repeat(9)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🎬 TEST E2E: Nano Banana → VEO3 → Video Final${' '.repeat(9)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(58)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(58)}╝${colors.reset}\n`);
 
@@ -93,7 +95,9 @@ async function main() {
         // Mostrar URLs de imágenes
         console.log('\n📸 Imágenes generadas:');
         images.forEach((img, idx) => {
-            console.log(`   ${idx + 1}. ${colors.cyan}${img.shot.toUpperCase()}${colors.reset}: ${img.url.substring(0, 80)}...`);
+            console.log(
+                `   ${idx + 1}. ${colors.cyan}${img.shot.toUpperCase()}${colors.reset}: ${img.url.substring(0, 80)}...`
+            );
         });
 
         // ========================================
@@ -138,7 +142,9 @@ async function main() {
 
         console.log('\n📜 Scripts por segmento:');
         scripts.forEach((script, idx) => {
-            console.log(`   ${idx + 1}. ${colors.cyan}${script.role.toUpperCase()}${colors.reset} (${script.emotion}): "${script.text.substring(0, 60)}..."`);
+            console.log(
+                `   ${idx + 1}. ${colors.cyan}${script.role.toUpperCase()}${colors.reset} (${script.emotion}): "${script.text.substring(0, 60)}..."`
+            );
         });
 
         // ========================================
@@ -251,12 +257,20 @@ async function main() {
         const totalCost = (images.length * 0.02).toFixed(3); // Solo Nano Banana por ahora
 
         console.log(`${colors.bright}📊 ESTADÍSTICAS DEL TEST E2E:${colors.reset}\n`);
-        console.log(`   ${colors.green}✅ Fase 1 - Nano Banana:${colors.reset} ${nanoBananaDuration}s (3 imágenes)`);
-        console.log(`   ${colors.green}✅ Fase 2 - Scripts:${colors.reset} <1s (3 scripts con emociones)`);
-        console.log(`   ${colors.green}✅ Fase 3 - VEO3:${colors.reset} ${veo3Duration}s (3 segmentos) [SIMULADO]`);
+        console.log(
+            `   ${colors.green}✅ Fase 1 - Nano Banana:${colors.reset} ${nanoBananaDuration}s (3 imágenes)`
+        );
+        console.log(
+            `   ${colors.green}✅ Fase 2 - Scripts:${colors.reset} <1s (3 scripts con emociones)`
+        );
+        console.log(
+            `   ${colors.green}✅ Fase 3 - VEO3:${colors.reset} ${veo3Duration}s (3 segmentos) [SIMULADO]`
+        );
         console.log(`   ${colors.green}✅ Fase 4 - Concatenación:${colors.reset} ~3s`);
         console.log(`   ${colors.green}✅ Fase 5 - Subtítulos:${colors.reset} ~2s`);
-        console.log(`\n   ${colors.cyan}⏱️  Tiempo total:${colors.reset} ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`);
+        console.log(
+            `\n   ${colors.cyan}⏱️  Tiempo total:${colors.reset} ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`
+        );
         console.log(`   ${colors.cyan}💰 Costo total:${colors.reset} $${totalCost} (Nano Banana)`);
         console.log(`   ${colors.cyan}📁 Session ID:${colors.reset} ${sessionId}`);
 
@@ -308,19 +322,20 @@ async function main() {
             fs.mkdirSync(sessionDir, { recursive: true });
         }
 
-        fs.writeFileSync(
-            metadataPath,
-            JSON.stringify(metadata, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2), 'utf-8');
 
         log('💾', `Metadata guardada: ${metadataPath}`, colors.cyan);
 
-        console.log(`\n${colors.bright}${colors.green}🎉 TEST E2E COMPLETADO EXITOSAMENTE${colors.reset}\n`);
+        console.log(
+            `\n${colors.bright}${colors.green}🎉 TEST E2E COMPLETADO EXITOSAMENTE${colors.reset}\n`
+        );
 
-        console.log(`${colors.yellow}⚠️  NOTA: Este test está parcialmente simulado.${colors.reset}`);
-        console.log(`${colors.yellow}   Para test completo, implementar integraciones VEO3 reales.${colors.reset}\n`);
-
+        console.log(
+            `${colors.yellow}⚠️  NOTA: Este test está parcialmente simulado.${colors.reset}`
+        );
+        console.log(
+            `${colors.yellow}   Para test completo, implementar integraciones VEO3 reales.${colors.reset}\n`
+        );
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR EN TEST E2E:${colors.reset}`);
         console.error(`   ${error.message}`);

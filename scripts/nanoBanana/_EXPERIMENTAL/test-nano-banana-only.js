@@ -39,7 +39,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(58)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(58)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🎨 TEST: Nano Banana - Configuración Definitiva${' '.repeat(7)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🎨 TEST: Nano Banana - Configuración Definitiva${' '.repeat(7)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(58)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(58)}╝${colors.reset}\n`);
 
@@ -81,7 +83,9 @@ async function main() {
 
         images.forEach((img, idx) => {
             const shotColor = idx === 0 ? colors.blue : idx === 1 ? colors.cyan : colors.magenta;
-            console.log(`${shotColor}${colors.bright}   ${idx + 1}. ${img.shot.toUpperCase()} SHOT${colors.reset}`);
+            console.log(
+                `${shotColor}${colors.bright}   ${idx + 1}. ${img.shot.toUpperCase()} SHOT${colors.reset}`
+            );
             console.log(`      ${colors.cyan}URL:${colors.reset} ${img.url}`);
             console.log(`      ${colors.yellow}Seed:${colors.reset} ${img.seed}`);
             console.log(`      ${colors.green}Role:${colors.reset} ${img.segmentRole}`);
@@ -94,7 +98,9 @@ async function main() {
                 const ratio = (parseInt(width) / parseInt(height)).toFixed(2);
                 const is916 = ratio === '0.56' || ratio === '0.57';
                 const ratioIcon = is916 ? '✅' : '⚠️';
-                console.log(`      ${colors.blue}Dimensiones:${colors.reset} ${width}x${height} (ratio ${ratio}) ${ratioIcon}`);
+                console.log(
+                    `      ${colors.blue}Dimensiones:${colors.reset} ${width}x${height} (ratio ${ratio}) ${ratioIcon}`
+                );
             }
             console.log('');
         });
@@ -106,11 +112,17 @@ async function main() {
 
         console.log(`${colors.cyan}Verifica visualmente cada imagen:${colors.reset}\n`);
         console.log(`   [ ] ${colors.green}Formato vertical${colors.reset} (9:16 = 576x1024)`);
-        console.log(`   [ ] ${colors.green}Pelo rubio natural${colors.reset} sin reflejos rojizos fuertes`);
-        console.log(`   [ ] ${colors.green}Identidad de Ana${colors.reset} consistente con referencias`);
+        console.log(
+            `   [ ] ${colors.green}Pelo rubio natural${colors.reset} sin reflejos rojizos fuertes`
+        );
+        console.log(
+            `   [ ] ${colors.green}Identidad de Ana${colors.reset} consistente con referencias`
+        );
         console.log(`   [ ] ${colors.green}Contacto visual directo${colors.reset} con cámara`);
         console.log(`   [ ] ${colors.green}Integración realista${colors.reset} con estudio FLP`);
-        console.log(`   [ ] ${colors.green}Progresión cinematográfica${colors.reset} clara (Wide→Medium→Close)`);
+        console.log(
+            `   [ ] ${colors.green}Progresión cinematográfica${colors.reset} clara (Wide→Medium→Close)`
+        );
 
         // Guardar metadata
         const outputData = {
@@ -148,17 +160,15 @@ async function main() {
         }
 
         const metadataPath = path.join(outputDir, 'nano_banana_test.json');
-        fs.writeFileSync(
-            metadataPath,
-            JSON.stringify(outputData, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(metadataPath, JSON.stringify(outputData, null, 2), 'utf-8');
 
         console.log(`\n${colors.cyan}💾 Metadata guardada: ${metadataPath}${colors.reset}`);
 
         // Resumen final
         console.log(`\n${colors.bright}${colors.green}${'='.repeat(60)}${colors.reset}`);
-        console.log(`${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`);
+        console.log(
+            `${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`
+        );
         console.log(`${colors.bright}${colors.green}${'='.repeat(60)}${colors.reset}\n`);
 
         console.log(`${colors.cyan}📊 Estadísticas:${colors.reset}`);
@@ -167,9 +177,10 @@ async function main() {
         console.log(`   • Costo: $${metadata.cost_usd.toFixed(3)}`);
         console.log(`   • Promedio por imagen: ${(duration / images.length).toFixed(1)}s`);
 
-        console.log(`\n${colors.yellow}👁️  PRÓXIMO PASO: Revisar las imágenes visualmente${colors.reset}`);
+        console.log(
+            `\n${colors.yellow}👁️  PRÓXIMO PASO: Revisar las imágenes visualmente${colors.reset}`
+        );
         console.log(`   Abre las URLs en un navegador y verifica el checklist\n`);
-
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR EN TEST:${colors.reset}`);
         console.error(`   ${error.message}`);

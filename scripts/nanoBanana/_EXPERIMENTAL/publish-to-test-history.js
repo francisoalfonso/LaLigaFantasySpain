@@ -32,7 +32,9 @@ function log(emoji, message, color = colors.reset) {
 
 async function main() {
     console.log(`\n${colors.blue}╔${'═'.repeat(70)}╗${colors.reset}`);
-    console.log(`${colors.blue}║  📤 Publicar Test #${TEST_NUMBER} → Test History${' '.repeat(43)}║${colors.reset}`);
+    console.log(
+        `${colors.blue}║  📤 Publicar Test #${TEST_NUMBER} → Test History${' '.repeat(43)}║${colors.reset}`
+    );
     console.log(`${colors.blue}╚${'═'.repeat(70)}╝${colors.reset}\n`);
 
     try {
@@ -43,7 +45,8 @@ async function main() {
             throw new Error(`Sesión no encontrada: ${SESSION_ID}`);
         }
 
-        const videos = fs.readdirSync(sessionDir)
+        const videos = fs
+            .readdirSync(sessionDir)
             .filter(f => f.endsWith('.mp4') && f.startsWith('seg'))
             .sort();
 
@@ -64,7 +67,7 @@ async function main() {
         );
 
         if (!fs.existsSync(activeTestingDir)) {
-            fs.mkdirSync(activeTestingDir, { recursive: true});
+            fs.mkdirSync(activeTestingDir, { recursive: true });
         }
 
         // 3. Copiar videos con nombres estandarizados
@@ -114,7 +117,8 @@ async function main() {
                     'supabase-storage',
                     'veo3-with-initial-frames'
                 ],
-                testPurpose: 'Test Nano Banana → Supabase → VEO3 (3 imágenes como referencias iniciales)',
+                testPurpose:
+                    'Test Nano Banana → Supabase → VEO3 (3 imágenes como referencias iniciales)',
                 feedback: {
                     whatWorks: [
                         // Usuario rellenará esto al revisar
@@ -223,11 +227,7 @@ PENDIENTE:
             `${versionId}.json`
         );
 
-        fs.writeFileSync(
-            versionFilePath,
-            JSON.stringify(versionData, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(versionFilePath, JSON.stringify(versionData, null, 2), 'utf-8');
 
         log('', '', colors.reset);
         log('✅', `Archivo de versión creado: ${versionId}.json`, colors.green);
@@ -250,11 +250,7 @@ PENDIENTE:
             date: new Date().toISOString(),
             player: PLAYER_NAME,
             purpose: 'Test Nano Banana → Supabase → VEO3',
-            fixes: [
-                'nano-banana-image-refs',
-                'supabase-storage',
-                'veo3-with-initial-frames'
-            ]
+            fixes: ['nano-banana-image-refs', 'supabase-storage', 'veo3-with-initial-frames']
         });
 
         fs.writeFileSync(counterPath, JSON.stringify(counterData, null, 2), 'utf-8');
@@ -263,7 +259,9 @@ PENDIENTE:
 
         // Resumen final
         console.log(`\n${colors.green}${'='.repeat(72)}${colors.reset}`);
-        console.log(`${colors.green}  ✅ TEST #${TEST_NUMBER} PUBLICADO EXITOSAMENTE${colors.reset}`);
+        console.log(
+            `${colors.green}  ✅ TEST #${TEST_NUMBER} PUBLICADO EXITOSAMENTE${colors.reset}`
+        );
         console.log(`${colors.green}${'='.repeat(72)}${colors.reset}\n`);
 
         console.log(`${colors.cyan}📊 RESUMEN:${colors.reset}`);
@@ -283,7 +281,6 @@ PENDIENTE:
         console.log(`   3. Ver videos individuales`);
         console.log(`   4. Dejar feedback sobre qué funciona y qué falla`);
         console.log(`   5. Asignar scores de calidad\n`);
-
     } catch (error) {
         console.error(`\n${colors.yellow}❌ ERROR:${colors.reset}`);
         console.error(`   ${error.message}`);

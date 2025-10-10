@@ -33,7 +33,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(78)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🔗 TEST: Concatenar Videos VEO3 + Logo Outro${' '.repeat(32)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🔗 TEST: Concatenar Videos VEO3 + Logo Outro${' '.repeat(32)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(78)}╝${colors.reset}\n`);
 
@@ -42,7 +44,8 @@ async function main() {
     try {
         // Buscar la sesión más reciente
         const sessionsDir = path.join(process.cwd(), 'output', 'veo3', 'sessions');
-        const sessions = fs.readdirSync(sessionsDir)
+        const sessions = fs
+            .readdirSync(sessionsDir)
             .filter(dir => dir.startsWith('veo3_nano_'))
             .sort()
             .reverse();
@@ -57,7 +60,8 @@ async function main() {
         log('📂', `Usando sesión: ${latestSession}`, colors.cyan);
 
         // Buscar los 3 videos
-        const videos = fs.readdirSync(sessionDir)
+        const videos = fs
+            .readdirSync(sessionDir)
             .filter(file => file.endsWith('.mp4'))
             .sort();
 
@@ -108,7 +112,6 @@ async function main() {
         console.log(`   • Ubicación: ${concatenatedPath}`);
 
         console.log(`\n${colors.green}✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}\n`);
-
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR:${colors.reset}`);
         console.error(`   ${error.message}`);

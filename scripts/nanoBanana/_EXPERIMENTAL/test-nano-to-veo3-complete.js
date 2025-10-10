@@ -51,7 +51,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(78)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🎬 TEST E2E: Nano Banana → VEO3 → Video Completo${' '.repeat(28)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🎬 TEST E2E: Nano Banana → VEO3 → Video Completo${' '.repeat(28)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(78)}╝${colors.reset}\n`);
 
@@ -65,7 +67,11 @@ async function main() {
         // FASE 1: GENERAR IMÁGENES CON NANO BANANA
         // ========================================
         printSeparator();
-        log('🎨', 'FASE 1: Generando 3 imágenes Ana con Nano Banana...', colors.bright + colors.blue);
+        log(
+            '🎨',
+            'FASE 1: Generando 3 imágenes Ana con Nano Banana...',
+            colors.bright + colors.blue
+        );
         log('', '   • Wide Shot (hook)', colors.blue);
         log('', '   • Medium Shot (development)', colors.blue);
         log('', '   • Close-Up Shot (CTA)', colors.blue);
@@ -78,19 +84,29 @@ async function main() {
 
         const { images, metadata: imagesMetadata } = imagesResult;
 
-        log('✅', `3 imágenes generadas y subidas a Supabase (${imagesMetadata.duration_seconds}s)`, colors.green);
+        log(
+            '✅',
+            `3 imágenes generadas y subidas a Supabase (${imagesMetadata.duration_seconds}s)`,
+            colors.green
+        );
         log('💰', `Costo Nano Banana: $${imagesMetadata.cost_usd.toFixed(3)}`, colors.green);
 
         console.log(`\n${colors.cyan}📸 Imágenes procesadas:${colors.reset}`);
         images.forEach((img, idx) => {
-            console.log(`   ${idx + 1}. ${img.shot.toUpperCase()}: ${img.supabaseUrl.substring(0, 90)}...`);
+            console.log(
+                `   ${idx + 1}. ${img.shot.toUpperCase()}: ${img.supabaseUrl.substring(0, 90)}...`
+            );
         });
 
         // ========================================
         // FASE 2: GENERAR VIDEOS CON VEO3
         // ========================================
         printSeparator();
-        log('🎬', 'FASE 2: Generando 3 segmentos de video con VEO3...', colors.bright + colors.blue);
+        log(
+            '🎬',
+            'FASE 2: Generando 3 segmentos de video con VEO3...',
+            colors.bright + colors.blue
+        );
         log('⏱️ ', 'Tiempo estimado: 5-8 minutos', colors.yellow);
         console.log('');
 
@@ -105,21 +121,23 @@ async function main() {
             {
                 index: 1,
                 role: 'hook',
-                dialogue: "¡Tengo un chollo brutal para la próxima jornada!",
+                dialogue: '¡Tengo un chollo brutal para la próxima jornada!',
                 image: images[0], // Wide shot
                 duration: 5
             },
             {
                 index: 2,
                 role: 'development',
-                dialogue: "Pere Milla está en una forma increíble: 2 goles y una asistencia en los últimos 3 partidos.",
+                dialogue:
+                    'Pere Milla está en una forma increíble: 2 goles y una asistencia en los últimos 3 partidos.',
                 image: images[1], // Medium shot
                 duration: 5
             },
             {
                 index: 3,
                 role: 'cta',
-                dialogue: "Por solo 6 millones, es la mejor inversión que puedes hacer. ¡No lo dejes escapar!",
+                dialogue:
+                    'Por solo 6 millones, es la mejor inversión que puedes hacer. ¡No lo dejes escapar!',
                 image: images[2], // Close-up shot
                 duration: 5
             }
@@ -145,7 +163,9 @@ async function main() {
             });
 
             if (initResult.code !== 200 || !initResult.data?.taskId) {
-                throw new Error(`Error iniciando segmento ${i + 1}: ${initResult.msg || 'Unknown error'}`);
+                throw new Error(
+                    `Error iniciando segmento ${i + 1}: ${initResult.msg || 'Unknown error'}`
+                );
             }
 
             const taskId = initResult.data.taskId;
@@ -195,7 +215,11 @@ async function main() {
         // FASE 4: SUBTÍTULOS VIRALES
         // ========================================
         printSeparator();
-        log('📝', 'FASE 4: Aplicando subtítulos virales automáticos...', colors.bright + colors.blue);
+        log(
+            '📝',
+            'FASE 4: Aplicando subtítulos virales automáticos...',
+            colors.bright + colors.blue
+        );
 
         const finalVideoPath = await viralCaptionsGenerator.applyViralCaptions(
             concatenatedPath,
@@ -210,14 +234,18 @@ async function main() {
         // ========================================
         printSeparator();
         const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
-        const totalCost = imagesMetadata.cost_usd + (0.30 * 3); // Nano Banana + VEO3
+        const totalCost = imagesMetadata.cost_usd + 0.3 * 3; // Nano Banana + VEO3
 
         console.log(`${colors.bright}${colors.green}${'='.repeat(80)}${colors.reset}`);
-        console.log(`${colors.bright}${colors.green}  ✅ TEST E2E COMPLETADO EXITOSAMENTE${colors.reset}`);
+        console.log(
+            `${colors.bright}${colors.green}  ✅ TEST E2E COMPLETADO EXITOSAMENTE${colors.reset}`
+        );
         console.log(`${colors.bright}${colors.green}${'='.repeat(80)}${colors.reset}\n`);
 
         console.log(`${colors.cyan}📊 ESTADÍSTICAS GENERALES:${colors.reset}`);
-        console.log(`   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`);
+        console.log(
+            `   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`
+        );
         console.log(`   • Costo total: $${totalCost.toFixed(3)}`);
         console.log(`   • Session ID: ${sessionId}`);
 
@@ -247,7 +275,9 @@ async function main() {
         console.log(`   ${colors.green}✓${colors.reset} Subtítulos virales aplicados`);
         console.log(`   ${colors.green}✓${colors.reset} Video final listo para Instagram`);
 
-        console.log(`\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Validar calidad del video y publicar en Instagram\n`);
+        console.log(
+            `\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Validar calidad del video y publicar en Instagram\n`
+        );
 
         // Guardar metadata completo
         const outputData = {
@@ -265,14 +295,9 @@ async function main() {
         };
 
         const metadataPath = path.join(sessionDir, 'session-metadata.json');
-        fs.writeFileSync(
-            metadataPath,
-            JSON.stringify(outputData, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(metadataPath, JSON.stringify(outputData, null, 2), 'utf-8');
 
         log('💾', `Metadata guardada: ${metadataPath}`, colors.cyan);
-
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR EN TEST E2E:${colors.reset}`);
         console.error(`   ${error.message}`);

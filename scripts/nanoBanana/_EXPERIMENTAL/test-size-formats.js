@@ -19,7 +19,8 @@ const REFERENCE_URLS = [
     'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-FLP.jpg'
 ];
 
-const PROMPT = 'ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face with black hair in ponytail (no red tones in hair, pure black hair), red FLP polo shirt, medium shot';
+const PROMPT =
+    'ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face with black hair in ponytail (no red tones in hair, pure black hair), red FLP polo shirt, medium shot';
 
 const NEGATIVE_PROMPT = 'no 3D render, no red hair, no blonde hair, no reddish hair tones';
 
@@ -74,17 +75,13 @@ async function testSizeFormat(format) {
 
         console.log('\n📤 Enviando request...');
 
-        const createResponse = await axios.post(
-            `${BASE_URL}/playground/createTask`,
-            payload,
-            {
-                headers: {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                timeout: 30000
-            }
-        );
+        const createResponse = await axios.post(`${BASE_URL}/playground/createTask`, payload, {
+            headers: {
+                Authorization: `Bearer ${API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            timeout: 30000
+        });
 
         console.log(`✅ Status: ${createResponse.status}`);
         console.log(`📋 Response:`, JSON.stringify(createResponse.data, null, 2));
@@ -102,14 +99,11 @@ async function testSizeFormat(format) {
                 attempts++;
                 await new Promise(resolve => setTimeout(resolve, 3000));
 
-                const statusResponse = await axios.get(
-                    `${BASE_URL}/playground/recordInfo`,
-                    {
-                        params: { taskId },
-                        headers: { 'Authorization': `Bearer ${API_KEY}` },
-                        timeout: 15000
-                    }
-                );
+                const statusResponse = await axios.get(`${BASE_URL}/playground/recordInfo`, {
+                    params: { taskId },
+                    headers: { Authorization: `Bearer ${API_KEY}` },
+                    timeout: 15000
+                });
 
                 const state = statusResponse.data?.data?.state;
                 console.log(`   Intento ${attempts}/30: ${state}`);
@@ -151,7 +145,6 @@ async function testSizeFormat(format) {
                 error: createResponse.data.msg
             };
         }
-
     } catch (error) {
         console.log(`❌ Exception: ${error.message}`);
         if (error.response) {
@@ -190,9 +183,9 @@ async function main() {
     }
 
     // Resumen final
-    console.log('\n\n' + '='.repeat(60));
+    console.log(`\n\n${'='.repeat(60)}`);
     console.log('📊 RESUMEN DE RESULTADOS');
-    console.log('='.repeat(60) + '\n');
+    console.log(`${'='.repeat(60)}\n`);
 
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
@@ -200,7 +193,9 @@ async function main() {
     console.log(`✅ Exitosos: ${successful.length}`);
     successful.forEach(r => {
         console.log(`   - ${r.format}`);
-        if (r.imageUrl) console.log(`     URL: ${r.imageUrl}`);
+        if (r.imageUrl) {
+            console.log(`     URL: ${r.imageUrl}`);
+        }
     });
 
     console.log(`\n❌ Fallidos: ${failed.length}`);
@@ -208,7 +203,7 @@ async function main() {
         console.log(`   - ${r.format}: ${r.error}`);
     });
 
-    console.log('\n' + '='.repeat(60));
+    console.log(`\n${'='.repeat(60)}`);
 }
 
 main().catch(console.error);

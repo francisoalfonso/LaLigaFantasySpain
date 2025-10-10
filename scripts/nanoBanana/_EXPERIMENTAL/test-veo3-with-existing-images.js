@@ -44,7 +44,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(78)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🎬 TEST: VEO3 con Imágenes Nano Banana (Supabase)${' '.repeat(27)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🎬 TEST: VEO3 con Imágenes Nano Banana (Supabase)${' '.repeat(27)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(78)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(78)}╝${colors.reset}\n`);
 
@@ -65,28 +67,37 @@ async function main() {
             {
                 shot: 'wide',
                 role: 'hook',
-                supabaseUrl: 'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg1-wide-1760097275312.png',
-                dialogue: "¡Tengo un chollo brutal para la próxima jornada!",
+                supabaseUrl:
+                    'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg1-wide-1760097275312.png',
+                dialogue: '¡Tengo un chollo brutal para la próxima jornada!',
                 duration: 5
             },
             {
                 shot: 'medium',
                 role: 'development',
-                supabaseUrl: 'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg2-medium-1760097276265.png',
-                dialogue: "Pere Milla está en una forma increíble: 2 goles y una asistencia en los últimos 3 partidos.",
+                supabaseUrl:
+                    'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg2-medium-1760097276265.png',
+                dialogue:
+                    'Pere Milla está en una forma increíble: 2 goles y una asistencia en los últimos 3 partidos.',
                 duration: 5
             },
             {
                 shot: 'close-up',
                 role: 'cta',
-                supabaseUrl: 'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg3-close-up-1760097277647.png',
-                dialogue: "Por solo 6 millones, es la mejor inversión que puedes hacer. ¡No lo dejes escapar!",
+                supabaseUrl:
+                    'https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/ana-images/video-frames/seg3-close-up-1760097277647.png',
+                dialogue:
+                    'Por solo 6 millones, es la mejor inversión que puedes hacer. ¡No lo dejes escapar!',
                 duration: 5
             }
         ];
 
         printSeparator();
-        log('🎬', 'FASE 1: Generando 3 segmentos de video con VEO3...', colors.bright + colors.blue);
+        log(
+            '🎬',
+            'FASE 1: Generando 3 segmentos de video con VEO3...',
+            colors.bright + colors.blue
+        );
         log('', '   ✅ Usando imágenes Nano Banana previamente generadas (Supabase)', colors.cyan);
         console.log('');
 
@@ -96,7 +107,11 @@ async function main() {
         for (let i = 0; i < images.length; i++) {
             const segment = images[i];
 
-            log('🎥', `Generando segmento ${i + 1}/3 (${segment.role} - ${segment.shot})...`, colors.yellow);
+            log(
+                '🎥',
+                `Generando segmento ${i + 1}/3 (${segment.role} - ${segment.shot})...`,
+                colors.yellow
+            );
             log('', `   Referencia: ${segment.supabaseUrl.split('/').pop()}`, colors.cyan);
             log('', `   Diálogo: "${segment.dialogue.substring(0, 60)}..."`, colors.cyan);
 
@@ -111,7 +126,9 @@ async function main() {
             });
 
             if (initResult.code !== 200 || !initResult.data?.taskId) {
-                throw new Error(`Error iniciando segmento ${i + 1}: ${initResult.msg || 'Unknown error'}`);
+                throw new Error(
+                    `Error iniciando segmento ${i + 1}: ${initResult.msg || 'Unknown error'}`
+                );
             }
 
             const taskId = initResult.data.taskId;
@@ -179,14 +196,18 @@ async function main() {
         // ========================================
         printSeparator();
         const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
-        const totalCost = 0.30 * 3; // VEO3 only
+        const totalCost = 0.3 * 3; // VEO3 only
 
         console.log(`${colors.bright}${colors.green}${'='.repeat(80)}${colors.reset}`);
-        console.log(`${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`);
+        console.log(
+            `${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`
+        );
         console.log(`${colors.bright}${colors.green}${'='.repeat(80)}${colors.reset}\n`);
 
         console.log(`${colors.cyan}📊 ESTADÍSTICAS:${colors.reset}`);
-        console.log(`   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`);
+        console.log(
+            `   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`
+        );
         console.log(`   • Costo total: $${totalCost.toFixed(3)}`);
         console.log(`   • Session ID: ${sessionId}`);
 
@@ -204,12 +225,16 @@ async function main() {
         console.log(`   • Freeze frame: ✅ Transición suave`);
 
         console.log(`\n${colors.yellow}✅ VALIDACIÓN:${colors.reset}`);
-        console.log(`   ${colors.green}✓${colors.reset} 3 imágenes Nano Banana como referencia (Supabase)`);
+        console.log(
+            `   ${colors.green}✓${colors.reset} 3 imágenes Nano Banana como referencia (Supabase)`
+        );
         console.log(`   ${colors.green}✓${colors.reset} 3 segmentos de video generados con VEO3`);
         console.log(`   ${colors.green}✓${colors.reset} Videos concatenados con logo outro`);
         console.log(`   ${colors.green}✓${colors.reset} Video final listo para Instagram`);
 
-        console.log(`\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Validar calidad del video y publicar en Instagram\n`);
+        console.log(
+            `\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Validar calidad del video y publicar en Instagram\n`
+        );
 
         // Guardar metadata completo
         const outputData = {
@@ -236,14 +261,9 @@ async function main() {
         };
 
         const metadataPath = path.join(sessionDir, 'session-metadata.json');
-        fs.writeFileSync(
-            metadataPath,
-            JSON.stringify(outputData, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(metadataPath, JSON.stringify(outputData, null, 2), 'utf-8');
 
         log('💾', `Metadata guardada: ${metadataPath}`, colors.cyan);
-
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR EN TEST:${colors.reset}`);
         console.error(`   ${error.message}`);

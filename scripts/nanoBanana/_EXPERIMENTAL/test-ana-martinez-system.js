@@ -58,7 +58,6 @@ async function runHealthCheck() {
 
         console.log('\n✅ Health check completado exitosamente\n');
         return true;
-
     } catch (error) {
         console.error('\n❌ Error en health check:', error.message);
         process.exit(1);
@@ -98,10 +97,11 @@ async function runSingleImageTest() {
         console.log('   1. Abrir URL en navegador para verificar imagen');
         console.log('   2. Validar que Ana es consistente con referencias');
         console.log('   3. Verificar integración con estudio FLP');
-        console.log('   4. Ejecutar test completo: node scripts/nanoBanana/test-ana-martinez-system.js --full\n');
+        console.log(
+            '   4. Ejecutar test completo: node scripts/nanoBanana/test-ana-martinez-system.js --full\n'
+        );
 
         return result;
-
     } catch (error) {
         console.error('\n❌ Error generando imagen:', error.message);
         if (error.response) {
@@ -183,13 +183,15 @@ async function runFullProgressionTest() {
             }
         };
 
-        const resultsPath = path.join(__dirname, '../../output/veo3/test-results-ana-martinez.json');
+        const resultsPath = path.join(
+            __dirname,
+            '../../output/veo3/test-results-ana-martinez.json'
+        );
         fs.writeFileSync(resultsPath, JSON.stringify(testResults, null, 2));
 
         console.log(`✅ Resultados guardados: ${resultsPath}\n`);
 
         return images;
-
     } catch (error) {
         console.error('\n❌ Error generando progresión:', error.message);
         if (error.response) {
@@ -235,7 +237,6 @@ async function main() {
         }
 
         console.log('🎉 Test completado exitosamente!\n');
-
     } catch (error) {
         console.error('\n💥 Error fatal:', error.message);
         process.exit(1);

@@ -38,7 +38,9 @@ async function main() {
 
     console.log(`\n${colors.bright}${colors.blue}╔${'═'.repeat(70)}╗${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(70)}║${colors.reset}`);
-    console.log(`${colors.bright}${colors.blue}║  🎨 TEST: Nano Banana → Supabase Integration${' '.repeat(24)}║${colors.reset}`);
+    console.log(
+        `${colors.bright}${colors.blue}║  🎨 TEST: Nano Banana → Supabase Integration${' '.repeat(24)}║${colors.reset}`
+    );
     console.log(`${colors.bright}${colors.blue}║${' '.repeat(70)}║${colors.reset}`);
     console.log(`${colors.bright}${colors.blue}╚${'═'.repeat(70)}╝${colors.reset}\n`);
 
@@ -64,8 +66,12 @@ async function main() {
 
         images.forEach((img, idx) => {
             const shotColor = idx === 0 ? colors.blue : idx === 1 ? colors.cyan : colors.magenta;
-            console.log(`${shotColor}${colors.bright}   ${idx + 1}. ${img.shot.toUpperCase()} SHOT${colors.reset}`);
-            console.log(`      ${colors.yellow}Nano Banana URL:${colors.reset} ${img.originalUrl.substring(0, 70)}...`);
+            console.log(
+                `${shotColor}${colors.bright}   ${idx + 1}. ${img.shot.toUpperCase()} SHOT${colors.reset}`
+            );
+            console.log(
+                `      ${colors.yellow}Nano Banana URL:${colors.reset} ${img.originalUrl.substring(0, 70)}...`
+            );
             console.log(`      ${colors.green}Supabase URL:${colors.reset} ${img.supabaseUrl}`);
             console.log(`      ${colors.cyan}Seed:${colors.reset} ${img.seed}`);
             console.log(`      ${colors.cyan}Role:${colors.reset} ${img.segmentRole}`);
@@ -88,11 +94,7 @@ async function main() {
         }
 
         const metadataPath = path.join(outputDir, `integration_${Date.now()}.json`);
-        fs.writeFileSync(
-            metadataPath,
-            JSON.stringify(outputData, null, 2),
-            'utf-8'
-        );
+        fs.writeFileSync(metadataPath, JSON.stringify(outputData, null, 2), 'utf-8');
 
         log('💾', `Metadata guardada: ${metadataPath}`, colors.cyan);
 
@@ -100,12 +102,16 @@ async function main() {
         const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
 
         console.log(`\n${colors.bright}${colors.green}${'='.repeat(70)}${colors.reset}`);
-        console.log(`${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`);
+        console.log(
+            `${colors.bright}${colors.green}  ✅ TEST COMPLETADO EXITOSAMENTE${colors.reset}`
+        );
         console.log(`${colors.bright}${colors.green}${'='.repeat(70)}${colors.reset}\n`);
 
         console.log(`${colors.cyan}📊 Estadísticas:${colors.reset}`);
         console.log(`   • Imágenes procesadas: ${images.length}`);
-        console.log(`   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`);
+        console.log(
+            `   • Tiempo total: ${totalDuration}s (~${(totalDuration / 60).toFixed(1)} min)`
+        );
         console.log(`   • Costo: $${metadata.cost_usd.toFixed(3)}`);
         console.log(`   • URLs Supabase: ✅ Persistentes (ready for VEO3)`);
 
@@ -116,11 +122,12 @@ async function main() {
         console.log(`   ${colors.green}✓${colors.reset} 3 URLs públicas obtenidas`);
         console.log(`   ${colors.green}✓${colors.reset} Archivos temporales limpiados`);
 
-        console.log(`\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Usar estas URLs de Supabase como referencias en VEO3\n`);
+        console.log(
+            `\n${colors.cyan}🚀 PRÓXIMO PASO:${colors.reset} Usar estas URLs de Supabase como referencias en VEO3\n`
+        );
 
         // Cleanup
         nanoBananaVeo3Integrator.cleanupTempFiles();
-
     } catch (error) {
         console.error(`\n${colors.red}❌ ERROR EN TEST:${colors.reset}`);
         console.error(`   ${error.message}`);

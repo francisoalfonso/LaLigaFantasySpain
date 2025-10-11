@@ -47,6 +47,7 @@
     "veo3:test-phased": "node scripts/veo3/test-phased-workflow.js",
     "veo3:test-phase4": "node scripts/veo3/test-phase4-enhancements.js",
     "veo3:test-black-flashes": "node scripts/veo3/test-black-flashes.js",
+    "veo3:delete-bad-images": "node scripts/veo3/delete-problematic-ana-images.js",
     "sync:player-photos": "node scripts/sync-player-photos.js",
     "instagram:test-e2e": "node scripts/instagram/test-e2e-chollos-instagram.js",
     "n8n:check-versions": "node scripts/n8n-version-check.js",

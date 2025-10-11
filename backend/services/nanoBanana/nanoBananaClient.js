@@ -86,9 +86,9 @@ class NanoBananaClient {
      */
     async generateAnaProgression(options = {}) {
         const {
-            style = 'professional',
+            _style = 'professional',
             progression = 'wide-medium-closeup',
-            dialogue = null // Opcional: diálogo específico para cada segmento
+            _dialogue = null // Opcional: diálogo específico para cada segmento
         } = options;
 
         logger.info('[NanoBananaClient] 🎨 Iniciando generación de 3 imágenes Ana...');
@@ -98,7 +98,8 @@ class NanoBananaClient {
         // Prompt base de Ana - CONFIGURACIÓN DEFINITIVA VALIDADA (Oct 10, 2025)
         // PROMPT EXACTO DEL TEST EXITOSO - NO MODIFICAR
         // Menos texto = más realismo, menos aspecto 3D/render
-        const anaBasePrompt = `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
+        // ✅ CRÍTICO (Oct 11): "green-hazel eyes" añadido para mantener color original de Ana
+        const anaBasePrompt = `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face with green-hazel eyes, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
 
         // Negative prompt detallado para evitar reflejos rojizos en pelo
         const negativePrompt = `no red tint on hair, no red highlights on hair, no strong color reflections, no magenta tone on face, no HDR, no 3D render, no composite lighting mismatch, no overexposed red areas, no fake reflections`;
@@ -339,7 +340,7 @@ class NanoBananaClient {
     async generateSingleImage(options = {}) {
         const {
             shot = 'medium',
-            expression = 'professional confident',
+            _expression = 'professional confident',
             customPrompt = null,
             seed = this.anaConfig.seed
         } = options;
@@ -348,9 +349,10 @@ class NanoBananaClient {
 
         // Usar el MISMO prompt base que en generateAnaProgression (sin añadidos)
         // Añadir texto extra causa aspecto 3D/render
+        // ✅ CRÍTICO (Oct 11): "green-hazel eyes" añadido para mantener color original de Ana
         const basePrompt =
             customPrompt ||
-            `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
+            `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face with green-hazel eyes, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
 
         const negativePrompt = `no red tint on hair, no red highlights on hair, no strong color reflections, no magenta tone on face, no HDR, no 3D render, no composite lighting mismatch, no overexposed red areas, no fake reflections`;
 

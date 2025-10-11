@@ -40,8 +40,8 @@ const CAPTIONS_CONFIG = {
             underline: false,
             outline: 6, // Borde para legibilidad
             shadow: 4,
-            alignment: 5, // Centro medio
-            marginV: 200 // Margen vertical desde abajo
+            alignment: 2, // Centro inferior
+            marginV: 410 // ✅ Oct 11 16:15 - POSICIÓN FINAL APROBADA (410px desde borde inferior)
         },
         static: {
             // Estilo estático tradicional (FALLBACK)
@@ -115,8 +115,16 @@ class CaptionsService {
      */
     convertLiteralToNumber(text) {
         const numberMap = {
-            'cero': '0', 'uno': '1', 'dos': '2', 'tres': '3', 'cuatro': '4',
-            'cinco': '5', 'seis': '6', 'siete': '7', 'ocho': '8', 'nueve': '9'
+            cero: '0',
+            uno: '1',
+            dos: '2',
+            tres: '3',
+            cuatro: '4',
+            cinco: '5',
+            seis: '6',
+            siete: '7',
+            ocho: '8',
+            nueve: '9'
         };
 
         const conversions = [
@@ -222,7 +230,7 @@ class CaptionsService {
         const subtitles = [];
         let currentTime = 0;
 
-        segments.forEach((segment, index) => {
+        segments.forEach((segment, _index) => {
             const dialogue = segment.dialogue;
             const duration = segment.duration || 8; // Default 8s si no especificado
 
@@ -252,12 +260,14 @@ class CaptionsService {
                 const chunks = [];
 
                 for (let i = 0; i < words.length; i += this.config.TIMING.maxWordsPerSubtitle) {
-                    chunks.push(words.slice(i, i + this.config.TIMING.maxWordsPerSubtitle).join(' '));
+                    chunks.push(
+                        words.slice(i, i + this.config.TIMING.maxWordsPerSubtitle).join(' ')
+                    );
                 }
 
                 const chunkDuration = duration / chunks.length;
 
-                chunks.forEach((chunk) => {
+                chunks.forEach(chunk => {
                     subtitles.push({
                         index: subtitles.length + 1,
                         startTime: currentTime,
@@ -282,7 +292,7 @@ class CaptionsService {
 
         let srtContent = '';
 
-        subtitles.forEach((sub) => {
+        subtitles.forEach(sub => {
             if (!sub.isKaraoke) {
                 // Solo subtítulos completos en SRT (no word-by-word)
                 srtContent += `${sub.index}\n`;
@@ -304,7 +314,7 @@ class CaptionsService {
 
         let vttContent = 'WEBVTT\n\n';
 
-        subtitles.forEach((sub) => {
+        subtitles.forEach(sub => {
             if (!sub.isKaraoke) {
                 vttContent += `${this.formatTimeVTT(sub.startTime)} --> ${this.formatTimeVTT(sub.endTime)}\n`;
                 vttContent += `${sub.text}\n\n`;
@@ -335,7 +345,8 @@ class CaptionsService {
 
         // Styles
         assContent += '[V4+ Styles]\n';
-        assContent += 'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n';
+        assContent +=
+            'Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n';
 
         if (style === 'karaoke') {
             // Estilo para palabra no destacada
@@ -347,12 +358,13 @@ class CaptionsService {
         }
 
         assContent += '\n[Events]\n';
-        assContent += 'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n';
+        assContent +=
+            'Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n';
 
         // Events
         if (style === 'karaoke') {
             // Modo word-by-word: cada palabra aparece individualmente
-            subtitles.forEach((sub) => {
+            subtitles.forEach(sub => {
                 if (sub.isKaraoke) {
                     const startTime = this.formatTimeASS(sub.startTime);
                     const endTime = this.formatTimeASS(sub.endTime);
@@ -363,7 +375,7 @@ class CaptionsService {
             });
         } else {
             // Subtítulos estáticos
-            subtitles.forEach((sub) => {
+            subtitles.forEach(sub => {
                 const startTime = this.formatTimeASS(sub.startTime);
                 const endTime = this.formatTimeASS(sub.endTime);
                 assContent += `Dialogue: 0,${startTime},${endTime},Default,,0,0,0,,${sub.text}\n`;
@@ -381,8 +393,10 @@ class CaptionsService {
         const grouped = [];
         let currentGroup = null;
 
-        subtitles.forEach((sub) => {
-            if (!sub.isKaraoke) return;
+        subtitles.forEach(sub => {
+            if (!sub.isKaraoke) {
+                return;
+            }
 
             if (!currentGroup || currentGroup.fullText !== sub.fullText) {
                 // Nuevo grupo
@@ -456,7 +470,7 @@ class CaptionsService {
      * Genera subtítulos directamente desde segmentos VEO3 (wrapper simplificado)
      */
     async generateFromVEO3Segments(segments, outputFormat = 'ass') {
-        return await this.generateCaptions(segments, 'karaoke', outputFormat);
+        return this.generateCaptions(segments, 'karaoke', outputFormat);
     }
 
     /**
@@ -545,8 +559,10 @@ class CaptionsService {
     }
 
     calculateTotalDuration(subtitles) {
-        if (subtitles.length === 0) return 0;
-        return Math.max(...subtitles.map((s) => s.endTime));
+        if (subtitles.length === 0) {
+            return 0;
+        }
+        return Math.max(...subtitles.map(s => s.endTime));
     }
 
     /**

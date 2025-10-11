@@ -1,13 +1,103 @@
 # Sprint Actual - Octubre 2025
 
-**Última actualización**: 2025-10-11 13:16
+**Última actualización**: 2025-10-11 13:50
 
 ## 🎯 Objetivo Sprint
 
 Optimizar sistema VEO3 Nano Banana con prompts tipo Playground y diálogos
-extendidos para eliminar problemas de voz inventada.
+extendidos para eliminar problemas de voz inventada. **NUEVA ARQUITECTURA** en 3
+fases para evitar timeouts del servidor.
 
 ## ✅ Completado Hoy (Oct 11)
+
+### 🎉 **ARQUITECTURA EN 3 FASES IMPLEMENTADA** ⭐ **CRÍTICO**
+
+**Problema resuelto**: Servidor crasheaba al generar 3 videos consecutivamente
+debido a timeouts (10-15 minutos de operación continua).
+
+**Causa raíz identificada**:
+
+- Endpoint `/generate-with-nano-banana` generaba guión + 3 imágenes + 3 videos +
+  concatenación en UNA sola petición HTTP
+- Cliente desconectaba por timeout antes de completar (socket hang up)
+- Servidor quedaba en estado inconsistente (progress.json parcial)
+- Imposible reintentar segmentos individuales si uno fallaba
+
+**Solución implementada**: Arquitectura modular en 3 fases separadas
+
+#### FASE 1: Preparación (endpoint `/api/veo3/prepare-session`)
+
+- **Input**: `playerData`, `contentType`, `preset`, `viralData`
+- **Proceso**:
+    1. Validar diccionario de jugador
+    2. Generar guión con UnifiedScriptGenerator (3 segmentos)
+    3. Generar 3 imágenes Nano Banana contextualizadas
+    4. Guardar todo en `progress.json` con `status: "prepared"`
+- **Output**: `sessionId` + metadata del guión + URLs de imágenes
+- **Duración**: ~2-3 minutos (sin timeouts)
+- **Costo**: ~$0.06 (Nano Banana)
+
+#### FASE 2: Generación Individual (endpoint `/api/veo3/generate-segment`)
+
+- **Input**: `sessionId`, `segmentIndex` (0, 1, or 2)
+- **Proceso**:
+    1. Leer `progress.json` de la sesión
+    2. Generar UN video VEO3 con imagen contextualizada
+    3. Descargar y guardar video localmente
+    4. Actualizar `progress.json` incrementalmente
+- **Output**: Metadata del segmento + progreso de la sesión
+- **Duración**: ~3-4 minutos POR segmento (sin timeouts)
+- **Costo**: ~$0.30 por segmento
+- **Ventaja**: Ejecutar 3 veces (una por segmento) con sesiones cortas
+
+#### FASE 3: Finalización (endpoint `/api/veo3/finalize-session`)
+
+- **Input**: `sessionId`
+- **Proceso**:
+    1. Validar que los 3 segmentos estén completos
+    2. Concatenar 3 videos con VideoConcatenator
+    3. Añadir logo outro blanco FLP
+    4. Actualizar `progress.json` con `status: "finalized"`
+- **Output**: URL del video final + metadata completa
+- **Duración**: ~1 minuto (solo concatenación)
+- **Costo**: $0 (local)
+
+**Archivos creados**:
+
+- ✅ `backend/routes/veo3.js:1772-2034` - Endpoint FASE 1 (prepare-session)
+- ✅ `backend/routes/veo3.js:2036-2294` - Endpoint FASE 2 (generate-segment)
+- ✅ `backend/routes/veo3.js:2296-2493` - Endpoint FASE 3 (finalize-session)
+- ✅ `scripts/veo3/test-phased-workflow.js` - Test E2E del flujo completo
+- ✅ `package.json:47` - Script `npm run veo3:test-phased`
+
+**Ventajas arquitectura en 3 fases**:
+
+1. ✅ Sesiones cortas (2-4 min cada una) - **Sin timeouts del servidor**
+2. ✅ Progreso visible en tiempo real (`progress.json` actualizado
+   incrementalmente)
+3. ✅ Reintentar segmentos individuales si fallan (sin regenerar todo)
+4. ✅ Paralelizable (futuros: generar 3 segmentos en paralelo)
+5. ✅ Cooling periods opcionales (ya no críticos, pero disponibles)
+6. ✅ Estado persistente (progress.json sobrevive a crashes del servidor)
+
+**Compatibilidad**:
+
+- ✅ Endpoint antiguo `/generate-with-nano-banana` sigue funcionando (no rompe
+  nada existente)
+- ✅ Nuevos endpoints conviven con flujo antiguo
+- ✅ Migración gradual sin breaking changes
+
+**Testing**:
+
+- ✅ Script E2E completo: `npm run veo3:test-phased`
+- ⏳ Pendiente: Validar con sesión real (Pere Milla chollo viral)
+
+**Documentación**:
+
+- ✅ Comentarios JSDoc en cada endpoint (descripción + ventajas + uso)
+- ⏳ Pendiente: Guía completa en `docs/VEO3_ARQUITECTURA_FASES.md`
+
+---
 
 ### 🎉 **TEST E2E EXITOSO CON 3 FIXES CRÍTICOS**
 

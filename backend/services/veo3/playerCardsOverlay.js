@@ -18,19 +18,19 @@ class PlayerCardsOverlay {
             // Posición de la tarjeta de jugador (esquina inferior derecha)
             position: {
                 x: 'W-w-20', // 20px desde el borde derecho
-                y: 'H-h-20', // 20px desde el borde inferior
+                y: 'H-h-20' // 20px desde el borde inferior
             },
             // Timing del overlay
             timing: {
-                startTime: 2,    // Aparece a los 2 segundos
-                duration: 4,     // Visible por 4 segundos
-                fadeIn: 0.5,     // Fade in de 0.5 segundos
-                fadeOut: 0.5     // Fade out de 0.5 segundos
+                startTime: 2, // Aparece a los 2 segundos
+                duration: 4, // Visible por 4 segundos
+                fadeIn: 0.5, // Fade in de 0.5 segundos
+                fadeOut: 0.5 // Fade out de 0.5 segundos
             },
             // Tamaño de la tarjeta
             cardSize: {
-                width: 280,      // Ancho de la tarjeta
-                height: 180      // Alto de la tarjeta
+                width: 280, // Ancho de la tarjeta
+                height: 180 // Alto de la tarjeta
             }
         };
 
@@ -58,7 +58,7 @@ class PlayerCardsOverlay {
             price = '8.0',
             rating = '7.5',
             form = '3-2-1',
-            photo = null
+            _photo = null
         } = playerData;
 
         return `
@@ -231,7 +231,6 @@ class PlayerCardsOverlay {
 
             logger.info(`[PlayerCardsOverlay] Tarjeta generada: ${outputPath}`);
             return outputPath;
-
         } catch (error) {
             logger.error('[PlayerCardsOverlay] Error generando tarjeta:', error.message);
             throw error;
@@ -251,7 +250,10 @@ class PlayerCardsOverlay {
 
             // Generar nombre de archivos
             const videoBaseName = path.basename(videoPath, path.extname(videoPath));
-            const cardImagePath = path.join(this.tempDir, `card-${playerData.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`);
+            const cardImagePath = path.join(
+                this.tempDir,
+                `card-${playerData.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.png`
+            );
             const outputVideoPath = path.join(this.outputDir, `${videoBaseName}-with-card.mp4`);
 
             // Generar imagen de tarjeta
@@ -264,26 +266,30 @@ class PlayerCardsOverlay {
                 ffmpeg(videoPath)
                     .input(cardImagePath)
                     .complexFilter([
-                        // Aplicar fade in y fade out a la tarjeta
-                        `[1:v]fade=t=in:st=${config.timing.startTime}:d=${config.timing.fadeIn}:alpha=1[card_fadein]`,
-                        `[card_fadein]fade=t=out:st=${config.timing.startTime + config.timing.duration - config.timing.fadeOut}:d=${config.timing.fadeOut}:alpha=1[card_complete]`,
-                        // Superponer la tarjeta sobre el video
-                        `[0:v][card_complete]overlay=${config.position.x}:${config.position.y}:enable='between(t,${config.timing.startTime},${config.timing.startTime + config.timing.duration})'[output]`
+                        // Simplificar: solo overlay sin fade (más robusto)
+                        `[0:v][1:v]overlay=${config.position.x}:${config.position.y}:enable='between(t,${config.timing.startTime},${config.timing.startTime + config.timing.duration})'`
                     ])
-                    .map('[output]')
                     .videoCodec('libx264')
-                    .audioCodec('aac')
+                    .audioCodec('copy') // Copiar audio sin recodificar (más rápido y robusto)
+                    .outputOptions([
+                        '-preset ultrafast', // Encoding rápido
+                        '-crf 23' // Calidad razonable
+                    ])
                     .format('mp4')
-                    .on('start', (commandLine) => {
+                    .on('start', commandLine => {
                         logger.info(`[PlayerCardsOverlay] FFmpeg iniciado: ${commandLine}`);
                     })
-                    .on('progress', (progress) => {
+                    .on('progress', progress => {
                         if (progress.percent) {
-                            logger.info(`[PlayerCardsOverlay] Progreso: ${Math.round(progress.percent)}%`);
+                            logger.info(
+                                `[PlayerCardsOverlay] Progreso: ${Math.round(progress.percent)}%`
+                            );
                         }
                     })
                     .on('end', () => {
-                        logger.info(`[PlayerCardsOverlay] ✅ Overlay completado: ${outputVideoPath}`);
+                        logger.info(
+                            `[PlayerCardsOverlay] ✅ Overlay completado: ${outputVideoPath}`
+                        );
 
                         // Limpiar archivo temporal de tarjeta
                         if (fs.existsSync(cardImagePath)) {
@@ -292,13 +298,12 @@ class PlayerCardsOverlay {
 
                         resolve(outputVideoPath);
                     })
-                    .on('error', (error) => {
+                    .on('error', error => {
                         logger.error('[PlayerCardsOverlay] ❌ Error FFmpeg:', error.message);
                         reject(error);
                     })
                     .save(outputVideoPath);
             });
-
         } catch (error) {
             logger.error('[PlayerCardsOverlay] Error aplicando overlay:', error.message);
             throw error;
@@ -322,8 +327,8 @@ class PlayerCardsOverlay {
             for (let i = 0; i < playersData.length; i++) {
                 const playerData = playersData[i];
                 const timing = {
-                    startTime: (i * 2) + 1, // Cada tarjeta aparece 2 segundos después
-                    duration: 3,            // Cada tarjeta visible por 3 segundos
+                    startTime: i * 2 + 1, // Cada tarjeta aparece 2 segundos después
+                    duration: 3, // Cada tarjeta visible por 3 segundos
                     fadeIn: 0.3,
                     fadeOut: 0.3
                 };
@@ -347,9 +352,10 @@ class PlayerCardsOverlay {
             const finalOutputPath = path.join(this.outputDir, `${baseName}-multi-cards.mp4`);
             fs.renameSync(currentVideoPath, finalOutputPath);
 
-            logger.info(`[PlayerCardsOverlay] ✅ Múltiples overlays completados: ${finalOutputPath}`);
+            logger.info(
+                `[PlayerCardsOverlay] ✅ Múltiples overlays completados: ${finalOutputPath}`
+            );
             return finalOutputPath;
-
         } catch (error) {
             logger.error('[PlayerCardsOverlay] Error con múltiples overlays:', error.message);
             throw error;
@@ -383,7 +389,6 @@ class PlayerCardsOverlay {
                 outputPath: resultPath,
                 playerData: testPlayerData
             };
-
         } catch (error) {
             logger.error('[PlayerCardsOverlay] ❌ Test falló:', error.message);
             throw error;
@@ -406,7 +411,7 @@ class PlayerCardsOverlay {
             processingTime: operation.processingTime
         };
 
-        fs.appendFileSync(logPath, JSON.stringify(logEntry) + '\n');
+        fs.appendFileSync(logPath, `${JSON.stringify(logEntry)}\n`);
     }
 }
 

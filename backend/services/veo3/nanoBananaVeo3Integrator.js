@@ -270,62 +270,35 @@ class NanoBananaVeo3Integrator {
      * @returns {string} - Prompt para Nano Banana
      */
     buildContextualImagePrompt(segment) {
-        const ANA_CHARACTER = require('../../config/veo3/anaCharacter');
+        // ✅ FIX #3 (11 Oct 2025): NO usar descripción textual de Ana
+        // Nano Banana ya tiene 5 imágenes de referencia que definen su identidad
+        // Añadir descripción textual confunde al modelo y rompe consistencia facial
 
-        // Base: Ana character (descripción breve)
-        let prompt = `${ANA_CHARACTER.ANA_CHARACTER_BIBLE}. `;
+        // Prompt base SIMPLE (confía en las referencias de imagen)
+        let prompt =
+            'ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin';
 
         // Contexto emocional del segmento
         const emotionMap = {
-            excitement: 'excited expression with wide smile and raised eyebrows',
-            intrigue: 'focused analytical expression looking at data',
-            urgency: 'pointing at camera with urgent expression',
-            confidence: 'confident smile with direct eye contact',
-            surprise: 'surprised expression with open mouth',
-            enthusiasm: 'energetic expression with bright eyes',
-            analysis: 'thoughtful expression while analyzing',
-            concern: 'concerned expression with furrowed brows',
-            determination: 'determined expression with strong eye contact',
-            joy: 'joyful smile with genuine happiness',
-            curiosity: 'curious expression with raised eyebrows',
-            satisfaction: 'satisfied smile with relaxed posture',
-            anticipation: 'anticipatory expression with slight smile',
-            tension: 'tense expression with focused gaze',
-            resolution: 'resolved expression with calm demeanor'
+            curiosidad: ', curious expression with raised eyebrows',
+            autoridad: ', confident smile with direct eye contact',
+            urgencia: ', pointing at camera with urgent expression',
+            excitement: ', excited expression with wide smile and raised eyebrows',
+            intrigue: ', focused analytical expression looking at data',
+            confidence: ', confident smile with direct eye contact',
+            surprise: ', surprised expression with open mouth',
+            enthusiasm: ', energetic expression with bright eyes',
+            analysis: ', thoughtful expression while analyzing',
+            concern: ', concerned expression with furrowed brows',
+            determination: ', determined expression with strong eye contact',
+            joy: ', joyful smile with genuine happiness',
+            satisfaction: ', satisfied smile with relaxed posture',
+            anticipation: ', anticipatory expression with slight smile',
+            tension: ', tense expression with focused gaze',
+            resolution: ', resolved expression with calm demeanor'
         };
 
-        prompt += emotionMap[segment.emotion] || 'professional expression';
-        prompt += '. ';
-
-        // ✅ NUEVO: Shot type con descripciones ESPECÍFICAS para máxima diferenciación visual
-        const shotType = segment.cinematography?.name || 'medium';
-
-        const shotDescriptions = {
-            wide: 'Wide shot showing full body from head to feet, standing position, complete studio environment visible with Fantasy La Liga graphics in background, distant camera perspective capturing entire scene, professional broadcast setup clearly visible',
-
-            medium: 'Medium shot framing from waist up, upper body and torso visible, balanced professional composition, direct eye contact with camera, news anchor style framing, studio background slightly blurred, confident on-camera presence',
-
-            'close-up':
-                'Close-up shot of face and shoulders only, tight framing showing facial details and emotional nuances, intimate connection with viewer, eyes and expression are main focus, background heavily blurred, conversational proximity',
-
-            'medium close-up':
-                'Medium close-up from chest up, face and upper chest visible, slightly tighter than medium shot but not as intimate as close-up, professional interview framing, clear facial expression with some body language visible'
-        };
-
-        // Agregar descripción específica del shot
-        const shotDescription = shotDescriptions[shotType] || shotDescriptions['medium'];
-        prompt += shotDescription;
-        prompt += '. ';
-
-        // Contexto cinematográfico adicional si existe
-        if (segment.cinematography?.description && !shotDescriptions[shotType]) {
-            // Solo agregar si no usamos descripción predefinida
-            prompt += segment.cinematography.description;
-            prompt += '. ';
-        }
-
-        // ✅ CRÍTICO: Forzar diferenciación visual explícita
-        prompt += `Camera distance and framing must clearly match the ${shotType} specification. `;
+        prompt += emotionMap[segment.emotion] || ', confident professional expression';
 
         return prompt.trim();
     }

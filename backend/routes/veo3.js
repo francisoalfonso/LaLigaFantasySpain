@@ -2543,11 +2543,12 @@ router.post('/add-enhancements', async (req, res) => {
         const startTime = Date.now();
 
         // ✅ PASO 1: Leer progress.json de la sesión
-        const sessionDir = path.join(
-            __dirname,
-            '../../output/veo3/sessions',
-            `session_${sessionId}`
-        );
+        // Normalizar sessionId: añadir prefijo "session_" solo si no existe
+        const normalizedSessionId = sessionId.startsWith('session_')
+            ? sessionId
+            : `session_${sessionId}`;
+
+        const sessionDir = path.join(__dirname, '../../output/veo3/sessions', normalizedSessionId);
 
         const progressFile = path.join(sessionDir, 'progress.json');
 

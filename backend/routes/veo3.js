@@ -2712,7 +2712,7 @@ router.post('/add-enhancements', async (req, res) => {
 
         // ✅ PASO 5: Añadir Black Flashes (si está habilitado)
         if (enhancements.blackFlashes) {
-            logger.info(`[VEO3 Routes] ⚡ Añadiendo flashes negros entre segmentos (50ms)...`);
+            logger.info(`[VEO3 Routes] ⚡ Añadiendo flashes negros entre segmentos (70ms)...`);
 
             try {
                 const BlackFlashService = require('../services/veo3/blackFlashService');
@@ -2722,7 +2722,7 @@ router.post('/add-enhancements', async (req, res) => {
                 const flashedVideoPath = await blackFlashService.addFlashesFromSegments(
                     currentVideoPath,
                     progressData.script.segments,
-                    0.05 // 50ms
+                    0.07 // 70ms
                 );
 
                 currentVideoPath = flashedVideoPath;
@@ -2730,7 +2730,7 @@ router.post('/add-enhancements', async (req, res) => {
                     type: 'blackFlashes',
                     details: {
                         flashCount: progressData.script.segments.length - 1, // Flashes entre segmentos
-                        duration: '50ms',
+                        duration: '70ms',
                         effect: 'dramatic cuts between segments'
                     }
                 });

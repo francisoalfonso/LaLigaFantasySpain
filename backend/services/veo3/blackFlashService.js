@@ -12,7 +12,8 @@ const fs = require('fs');
  * Efectos visuales:
  * - 3ms (0.003s): Subliminal, casi imperceptible
  * - 10ms (0.01s): Sutil, efecto "beat" rápido
- * - 50ms (0.05s): Visible, corte dramático (RECOMENDADO)
+ * - 50ms (0.05s): Visible, corte dramático
+ * - 70ms (0.07s): Más marcado, dramático (CONFIGURADO)
  * - 100ms+ (0.1s): Muy marcado, estilo videoclip
  *
  * Inspiración: Trailers de cine, cortometrajes, videoclips de acción
@@ -25,14 +26,14 @@ class BlackFlashService {
 
         // Configuración por defecto
         this.config = {
-            defaultDuration: 0.05, // 50ms - balance perfecto entre visible y no disruptivo
+            defaultDuration: 0.07, // 70ms - corte dramático visible
             minDuration: 0.003, // 3ms - mínimo técnico
             maxDuration: 0.2, // 200ms - máximo recomendado
             fadeType: 'hard' // 'hard' (corte directo) o 'soft' (fade suave)
         };
 
         this.ensureDirectories();
-        logger.info('[BlackFlashService] ✅ Servicio inicializado (50ms default)');
+        logger.info('[BlackFlashService] ✅ Servicio inicializado (70ms default)');
     }
 
     ensureDirectories() {
@@ -253,7 +254,7 @@ class BlackFlashService {
             minDuration: this.config.minDuration,
             maxDuration: this.config.maxDuration,
             fadeType: this.config.fadeType,
-            description: '50ms black flashes between segments for dramatic cuts'
+            description: '70ms black flashes between segments for dramatic cuts'
         };
     }
 

@@ -1,5 +1,5 @@
 /**
- * Script de test para Black Flashes (50ms entre segmentos)
+ * Script de test para Black Flashes (70ms entre segmentos)
  *
  * Uso:
  *   node scripts/veo3/test-black-flashes.js <sessionId>
@@ -9,11 +9,11 @@
  *
  * Este script:
  * 1. Valida que la sesión esté finalizada
- * 2. Añade flashes negros de 50ms entre segmentos
+ * 2. Añade flashes negros de 70ms entre segmentos
  * 3. Muestra URL del video final con flashes
  *
  * Efecto:
- * - 50ms (0.05s) de negro entre cada segmento
+ * - 70ms (0.07s) de negro entre cada segmento
  * - Crea sensación de "corte dramático" estilo trailer/cortometraje
  * - Ejemplo: Si hay 3 segmentos, habrá 2 flashes (entre seg1-seg2, seg2-seg3)
  */
@@ -31,12 +31,12 @@ if (!SESSION_ID) {
 
 console.log('\n╔══════════════════════════════════════════════════════════════════════════════╗');
 console.log('║                                                                              ║');
-console.log('║  ⚡ Test Black Flashes - Transiciones Dramáticas (50ms)                     ║');
+console.log('║  ⚡ Test Black Flashes - Transiciones Dramáticas (70ms)                     ║');
 console.log('║                                                                              ║');
 console.log('╚══════════════════════════════════════════════════════════════════════════════╝\n');
 
 console.log(`📋 Session ID: ${SESSION_ID}`);
-console.log(`⚡ Duración flash: 50ms (0.05 segundos)`);
+console.log(`⚡ Duración flash: 70ms (0.07 segundos)`);
 console.log(`🎬 Efecto: Corte dramático estilo trailer/cortometraje`);
 console.log(`🕐 Inicio: ${new Date().toLocaleTimeString()}\n`);
 
@@ -133,7 +133,7 @@ async function main() {
         console.log(`   4. Comando para añadir todo: npm run veo3:test-phase4 ${SESSION_ID}\n`);
 
         console.log('🎬 DETALLES TÉCNICOS:');
-        console.log(`   - Flash: 50ms (0.05 segundos) de negro puro`);
+        console.log(`   - Flash: 70ms (0.07 segundos) de negro puro`);
         console.log(`   - Posición: Al FINAL de cada segmento (antes del siguiente)`);
         console.log(
             `   - Cantidad: ${flashEnhancement ? flashEnhancement.details.flashCount : 'N/A'} flashes (segmentos - 1)`

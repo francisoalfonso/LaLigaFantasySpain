@@ -34,6 +34,17 @@ extendidos para eliminar problemas de voz inventada.
       `7161c81d98731681124f550bf8ff8849`, `cc94fe23242d5d5208784fee7391f963`
     - Archivo: `nanoBananaVeo3Integrator.js:272-303`
 
+- [x] ✅ **FIX #4: Duración VEO3 Prompt** - Video `357f0aa8e9f27a4d3217c421d2808e82`
+      (09:39:49)
+    - Detectado en test evolutivo: transición no deseada en segundo 7-8
+    - Fondo con fútbol americano en lugar de soccer
+    - **Causa**: Prompt decía "7-second video" en lugar de "8-second video"
+    - **Solución**: Cambio "7-second" → "8-second" en
+      `buildEnhancedNanoBananaPrompt()`
+    - **Bonus**: Cambio "fantasy football studio" → "La Liga Fantasy studio"
+      (evita confusión con fútbol americano)
+    - Archivo: `promptBuilder.js:654-705`
+
 - [x] **Commits realizados**:
     - `efcd6d5`: Fix #1 + Fix #2 (timing + fondo studio)
     - `a45cb4f`: Fix #3 (consistencia facial Nano Banana)
@@ -42,6 +53,11 @@ extendidos para eliminar problemas de voz inventada.
 - [x] **Test E2E validado**: `npm run veo3:test-nano-banana`
     - Video generado: `segment_1_af51b3a46f87f43f3366591fde78c92b.mp4` (1.5MB)
     - Usuario confirma: "está todo ok"
+
+- [x] **Test evolutivo (Opción B)**:
+    - Video: `357f0aa8e9f27a4d3217c421d2808e82` (09:39:49)
+    - Resultado: Audio OK, pero transición no deseada (7-8s) + fondo incorrecto
+    - **Identificó Fix #4**: Prompt duration mismatch
 
 ## ✅ Completado Ayer (Oct 11)
 
@@ -157,20 +173,24 @@ inventada y textos sin sentido.
 
 **Oct 11** (hoy):
 
-- **Archivos modificados**: 2 (unifiedScriptGenerator.js,
-  nanoBananaVeo3Integrator.js)
-- **Líneas modificadas**: +255 insertions, -180 deletions
-- **Fixes críticos implementados**: 3
+- **Archivos modificados**: 3 (unifiedScriptGenerator.js,
+  nanoBananaVeo3Integrator.js, promptBuilder.js)
+- **Líneas modificadas**: ~+260 insertions, ~-185 deletions
+- **Fixes críticos implementados**: 4 ⭐
     - Fix #1: Timing diálogo (27 palabras para 8s)
     - Fix #2: Fondo TV studio (`ANA_CHARACTER_BIBLE`)
     - Fix #3: Consistencia facial Ana (prompt simplificado)
-- **Commits**: 2
+    - Fix #4: Duración VEO3 prompt (7s → 8s + "La Liga Fantasy studio")
+- **Commits**: 2 (pendiente Fix #4)
     - `efcd6d5`: Fix #1 + Fix #2
     - `a45cb4f`: Fix #3
-- **Push GitHub**: ✅ Exitoso
-- **Test E2E**: ✅ 1/1 exitoso (video `af51b3a46f87f43f3366591fde78c92b`)
-- **Imágenes Nano Banana**: 3/3 generadas con consistencia facial perfecta
-- **Costo**: ~$0.36 ($0.06 Nano Banana + $0.30 VEO3 por 1 segmento)
+- **Push GitHub**: ✅ Exitoso (pendiente Fix #4)
+- **Tests realizados**: 2
+    - Test E2E: ✅ Video `af51b3a46f87f43f3366591fde78c92b` (exitoso)
+    - Test evolutivo: ⚠️ Video `357f0aa8e9f27a4d3217c421d2808e82` (identificó Fix
+      #4)
+- **Imágenes Nano Banana**: 6/6 generadas (3 test E2E + 3 test evolutivo)
+- **Costo**: ~$0.72 ($0.12 Nano Banana + $0.60 VEO3 por 2 segmentos)
 
 **Oct 10-11**:
 

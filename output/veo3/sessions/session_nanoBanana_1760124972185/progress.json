@@ -1,0 +1,74 @@
+{
+  "sessionId": "nanoBanana_1760124972185",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760124972185",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "taskId": "871235395fdcca6952858c5ce083890e",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/8f5ca1eb-6fbf-4fe9-ac42-d18919af425a_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760124972185/segment_1_871235395fdcca6952858c5ce083890e.mp4",
+      "filename": "segment_1_871235395fdcca6952858c5ce083890e.mp4",
+      "duration": 7,
+      "dialogue": "He encontrado el chollo absoluto... Milla está a precio regalado... va a explotar.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760124998695.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAxMjQ5OTg2OTUucG5nIiwiaWF0IjoxNzYwMTI0OTk5LCJleHAiOjE3NjAyMTEzOTl9.ofw1EXlBCPweo8NPuNEbdH3ia5yB4z4c3ZDSWKd4CIU",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "generatedAt": "2025-10-10T19:39:10.168Z",
+      "size": 2006664
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "taskId": "5fed5b0a534387b841501535f40990ef",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/5356f540-b58c-4932-9e2f-694f49d87518_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760124972185/segment_2_5fed5b0a534387b841501535f40990ef.mp4",
+      "filename": "segment_2_5fed5b0a534387b841501535f40990ef.mp4",
+      "duration": 7,
+      "dialogue": "Números espectaculares... dobla su valor en puntos. Está volando en Fantasy.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760125026505.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMTI1MDI2NTA1LnBuZyIsImlhdCI6MTc2MDEyNTAyNywiZXhwIjoxNzYwMjExNDI3fQ.wg00jmq-Wf42CyYIOr3c775VfWvsMJzxVStKAzkjk1c",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "generatedAt": "2025-10-10T19:41:59.063Z",
+      "size": 1643809
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "taskId": "260b64e5626f5b907e5817ac5fee6a3d",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/9225e34b-2ada-4723-8260-363fd19c7c8c_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760124972185/segment_3_260b64e5626f5b907e5817ac5fee6a3d.mp4",
+      "filename": "segment_3_260b64e5626f5b907e5817ac5fee6a3d.mp4",
+      "duration": 7,
+      "dialogue": "Es una ganga total. Nadie lo ha fichado aún. Fichadlo ahora antes que suba.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760125051231.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAxMjUwNTEyMzEucG5nIiwiaWF0IjoxNzYwMTI1MDUyLCJleHAiOjE3NjAyMTE0NTJ9.KUi7spdPt_1gDozPSY2Guun18F8_-CEKZctq2wAGMks",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "generatedAt": "2025-10-10T19:44:17.259Z",
+      "size": 1678028
+    }
+  ],
+  "concatenatedVideo": {
+    "videoId": "concat_nanoBanana_1760124972185",
+    "title": "Pere Milla_chollo_nano_banana",
+    "duration": 21,
+    "sessionId": "nanoBanana_1760124972185",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760124972185",
+    "outputPath": "output/veo3/ana-concatenated-1760125470894.mp4",
+    "workflow": "nano-banana-contextual"
+  },
+  "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1760125470894.mp4",
+  "completedAt": "2025-10-10T19:44:39.065Z"
+}

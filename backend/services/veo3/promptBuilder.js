@@ -691,8 +691,9 @@ class PromptBuilder {
                   ? 'A theatrical and expressive'
                   : 'A cinematic';
 
+        // ✅ FIX #4 (11 Oct 2025): Cambiar "7-second" → "8-second" y "fantasy football" → "La Liga Fantasy"
         // Construcción del prompt (estructura ganadora del playground)
-        const prompt = `${videoType} ${duration}-second video. A young female sports presenter is standing in a modern fantasy football studio. She ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" She moves like a TV football commentator, making strong eye contact with the camera. Use the uploaded image of the presenter as the main reference. Do not redesign her.`;
+        const prompt = `${videoType} ${duration}-second video. A young female sports presenter is standing in a modern La Liga Fantasy studio. She ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" She moves like a TV football commentator, making strong eye contact with the camera. Use the uploaded image of the presenter as the main reference. Do not redesign her.`;
 
         logger.info(
             `[PromptBuilder] 🎬 Enhanced Nano Banana prompt (playground-style): ${prompt.length} chars`

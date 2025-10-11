@@ -185,3 +185,6 @@ echo ""
 echo "✅ Cierre de sesión completado"
 echo "📅 Próxima sesión: $(date -d '+1 day' +%Y-%m-%d)"
 
+
+
+

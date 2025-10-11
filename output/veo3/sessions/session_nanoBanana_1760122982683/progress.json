@@ -1,0 +1,64 @@
+{
+  "sessionId": "nanoBanana_1760122982683",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760122982683",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "taskId": "be62c148ac343d92fb98422ee50f354a",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/114fed43-0630-491f-a030-380a507f421e_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760122982683/segment_1_be62c148ac343d92fb98422ee50f354a.mp4",
+      "filename": "segment_1_be62c148ac343d92fb98422ee50f354a.mp4",
+      "duration": 7,
+      "dialogue": "He encontrado el chollo absoluto... Milla está a precio regalado... va a explotar.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760123013191.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAxMjMwMTMxOTEucG5nIiwiaWF0IjoxNzYwMTIzMDE0LCJleHAiOjE3NjAyMDk0MTR9.Rc8ohklr1LmGwX2uuGvw4xVpNgfFDVmO-O7TUguov00",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "generatedAt": "2025-10-10T19:05:49.488Z",
+      "size": 1759090
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "taskId": "b7ac22847f3a4914b7284d889ee7efa6",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/fe0b0815-1aba-459d-84ec-5b3a09f93c19_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760122982683/segment_2_b7ac22847f3a4914b7284d889ee7efa6.mp4",
+      "filename": "segment_2_b7ac22847f3a4914b7284d889ee7efa6.mp4",
+      "duration": 7,
+      "dialogue": "Números espectaculares... dobla su valor en puntos. Está volando en Fantasy.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760123040648.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMTIzMDQwNjQ4LnBuZyIsImlhdCI6MTc2MDEyMzA0MSwiZXhwIjoxNzYwMjA5NDQxfQ.5mljlXxtecu3ne8pwu9RBRdf3uPWdGimq_GS0_Yt-bg",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "generatedAt": "2025-10-10T19:07:57.420Z",
+      "size": 1588378
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "taskId": "464f259eb27ec48e79aefe12e96a0d00",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/918da7ac-a8f0-4a5d-8de1-173dec0b29e8_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760122982683/segment_3_464f259eb27ec48e79aefe12e96a0d00.mp4",
+      "filename": "segment_3_464f259eb27ec48e79aefe12e96a0d00.mp4",
+      "duration": 7,
+      "dialogue": "Es una ganga total. Nadie lo ha fichado aún. Fichadlo ahora antes que suba.",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760123071147.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAxMjMwNzExNDcucG5nIiwiaWF0IjoxNzYwMTIzMDcyLCJleHAiOjE3NjAyMDk0NzJ9.dl9vExJEZszxZPQIw7BhqI4fsLPnTgTyAqakLa6PkXk",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "generatedAt": "2025-10-10T19:09:55.059Z",
+      "size": 1647094
+    }
+  ],
+  "lastUpdate": "2025-10-10T19:09:55.059Z"
+}

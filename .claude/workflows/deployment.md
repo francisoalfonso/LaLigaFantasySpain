@@ -197,3 +197,6 @@ grep "VEO3 metrics" logs/server.log
 **Regla de oro**: **VERIFICAR TODO ANTES DE DEPLOY**
 
 
+
+
+

@@ -278,3 +278,6 @@ async apiRequest(endpoint, params) {
 **Última actualización**: 2025-10-09
 
 
+
+
+

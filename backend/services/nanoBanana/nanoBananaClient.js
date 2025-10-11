@@ -21,8 +21,6 @@
 
 const axios = require('axios');
 const logger = require('../../utils/logger');
-const fs = require('fs');
-const path = require('path');
 
 // Configuración FLP con estructura flp/ana/, flp/estudio/, flp/kits/
 // Generada por check-buckets-and-reorganize.js (Oct 2025)

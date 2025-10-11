@@ -174,3 +174,6 @@ curl http://localhost:3000/api/test/veo3
 **Regla de oro**: **LOG PRIMERO, DEBUG DESPUÉS**
 
 
+
+
+

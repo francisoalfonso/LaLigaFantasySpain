@@ -1,0 +1,30 @@
+{
+  "sessionId": "nanoBanana_1760180721221",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760180721221",
+  "segmentsCompleted": 1,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "taskId": "d89771b281ef1a475fe5071e344fc30c",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/51368cb5-bc0a-48fd-a4c0-2d815ef4a623_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760180721221/segment_1_d89771b281ef1a475fe5071e344fc30c.mp4",
+      "filename": "segment_1_d89771b281ef1a475fe5071e344fc30c.mp4",
+      "duration": 8,
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... Milla está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760180824848.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAxODA4MjQ4NDgucG5nIiwiaWF0IjoxNzYwMTgwODI2LCJleHAiOjE3NjAyNjcyMjZ9.sXW5KhyJxK4B1_zF6UNAEcB8F5dVXCcoxraBY57NSFE",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "generatedAt": "2025-10-11T11:09:44.022Z",
+      "size": 1928528
+    }
+  ],
+  "lastUpdate": "2025-10-11T11:09:44.022Z"
+}

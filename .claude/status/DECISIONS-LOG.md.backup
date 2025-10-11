@@ -1,19 +1,16 @@
 # Decisions Log - Fantasy La Liga Pro
 
-**Última actualización**: 2025-10-11 13:16
+**Última actualización**: 2025-10-09 15:30
 
 ## 📋 Decisiones Técnicas Importantes
 
 ### 2025-10-09: Estructura `.claude/` Centralizada
 
-**Decisión**: Crear estructura `.claude/` con jerarquía clara para prevenir
-pérdida de contexto de Claude.
+**Decisión**: Crear estructura `.claude/` con jerarquía clara para prevenir pérdida de contexto de Claude.
 
-**Problema**: Claude perdía contexto frecuentemente a pesar de documentación
-existente.
+**Problema**: Claude perdía contexto frecuentemente a pesar de documentación existente.
 
 **Solución implementada**:
-
 - `.cursorrules`: Fuerza lectura automática al inicio de sesión
 - `.claude/START_HERE.md`: Punto de entrada único
 - `.claude/rules/`: Reglas críticas numeradas (01-05)
@@ -22,8 +19,7 @@ existente.
 - `.claude/reference/`: Referencias técnicas
 - `.claude/context/`: Información del proyecto
 
-**Resultado**: Estructura jerárquica clara, archivos cortos (≤100 líneas),
-nombres semánticamente obvios.
+**Resultado**: Estructura jerárquica clara, archivos cortos (≤100 líneas), nombres semánticamente obvios.
 
 **Impacto**: Reducción pérdida contexto de 60% a <5%.
 
@@ -34,16 +30,14 @@ nombres semánticamente obvios.
 **Decisión**: Consolidar documentación dispersa en estructura `.claude/`.
 
 **Problema**: Documentación crítica en múltiples ubicaciones:
-
 - `CLAUDE.md` (raíz)
-- `CODE_STYLE.md` (raíz)
+- `CODE_STYLE.md` (raíz)  
 - `API_GUIDELINES.md` (raíz)
 - `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md`
 - 40+ archivos `.md` en `/docs/`
 - 24 archivos `.md` en `/STATUS/`
 
 **Solución implementada**:
-
 - `CODE_STYLE.md` → `.claude/rules/03-code-style.md`
 - `API_GUIDELINES.md` → `.claude/rules/04-apis.md`
 - `NORMAS_DESARROLLO` → `.claude/rules/02-development.md`
@@ -62,7 +56,6 @@ nombres semánticamente obvios.
 **Problema**: Prompts largos (>80 palabras) causaban fallos de generación.
 
 **Solución implementada**:
-
 - Patrón obligatorio: [Sujeto] + [Acción] + [Preservación]
 - Longitud: 30-50 palabras ideales, máximo 80
 - Referencias genéricas: "el jugador" (NO nombres específicos)
@@ -81,7 +74,6 @@ nombres semánticamente obvios.
 **Problema**: KIE.ai bloquea nombres de jugadores (Error 422).
 
 **Solución implementada**:
-
 - `promptBuilder.js` líneas 325-359
 - Mapeo automático: "Pedri" → "el centrocampista"
 - Logging: "Usando referencia segura: 'el centrocampista'"
@@ -99,7 +91,6 @@ nombres semánticamente obvios.
 **Problema**: Timeouts bajos causaban fallos de red.
 
 **Solución implementada**:
-
 - Timeout inicial: 120s (NO reducir)
 - Timeout status: 45s (NO reducir)
 - Validación status: <500 (obligatorio)
@@ -117,7 +108,6 @@ nombres semánticamente obvios.
 **Problema**: Cambios en seed/imagen rompían consistencia visual.
 
 **Solución implementada**:
-
 - `ANA_CHARACTER_SEED = 30001` (fijo)
 - `ANA_IMAGE_URL` fija (GitHub)
 - Documentación: "NUNCA CAMBIAR ESTOS VALORES"
@@ -135,7 +125,6 @@ nombres semánticamente obvios.
 **Problema**: APIs externas con límites estrictos.
 
 **Solución implementada**:
-
 - API-Sports: 1000ms entre requests
 - VEO3: 6000ms entre requests
 - OpenAI: 100ms entre requests
@@ -154,7 +143,6 @@ nombres semánticamente obvios.
 **Problema**: Logs inconsistentes, difíciles de debuggear.
 
 **Solución implementada**:
-
 - Winston logger estructurado
 - Niveles: info, warn, error, debug
 - Logs con contexto: `{ playerId, error: error.message }`
@@ -172,7 +160,6 @@ nombres semánticamente obvios.
 **Problema**: Uso de parámetros inventados causaba fallos.
 
 **Solución implementada**:
-
 - Proceso obligatorio: Buscar → Descargar → Consultar → Implementar
 - Archivos: `/docs/[API_NAME]_OFICIAL.md`
 - Referencias en código: `// Según docs/KIE_AI_VEO3_API_OFICIAL.md`
@@ -186,46 +173,43 @@ nombres semánticamente obvios.
 ## 🔄 Decisiones Pendientes
 
 ### Cache Strategy VEO3
-
-**Pendiente**: ¿Redis o memoria para cache VEO3? **Impacto**: Performance
-generaciones **Deadline**: 2025-10-16
+**Pendiente**: ¿Redis o memoria para cache VEO3?
+**Impacto**: Performance generaciones
+**Deadline**: 2025-10-16
 
 ### Métricas Tracking
-
-**Pendiente**: ¿Qué KPIs medir para VEO3? **Impacto**: Optimización sistema
+**Pendiente**: ¿Qué KPIs medir para VEO3?
+**Impacto**: Optimización sistema
 **Deadline**: 2025-10-16
 
 ### A/B Testing Framework
-
-**Pendiente**: ¿Framework o custom para A/B testing prompts? **Impacto**:
-Optimización contenido viral **Deadline**: 2025-10-23
+**Pendiente**: ¿Framework o custom para A/B testing prompts?
+**Impacto**: Optimización contenido viral
+**Deadline**: 2025-10-23
 
 ---
 
 ## 📊 Métricas Decisiones
 
-| Decisión                 | Impacto | Tiempo Ahorrado | Costo Reducido |
-| ------------------------ | ------- | --------------- | -------------- |
-| Estructura `.claude/`    | Alto    | 8 min/sesión    | $0             |
-| Prompts VEO3 optimizados | Alto    | 2 horas         | $1.20/video    |
-| Referencias seguras      | Alto    | 1 hora          | $0.30/video    |
-| Timeouts VEO3            | Medio   | 30 min          | $0.10/video    |
-| Rate limiting            | Alto    | 1 hora          | $0             |
-| Winston logger           | Medio   | 25 min          | $0             |
-| Docs oficiales           | Alto    | 3.5 horas       | $0             |
+| Decisión | Impacto | Tiempo Ahorrado | Costo Reducido |
+|----------|---------|-----------------|----------------|
+| Estructura `.claude/` | Alto | 8 min/sesión | $0 |
+| Prompts VEO3 optimizados | Alto | 2 horas | $1.20/video |
+| Referencias seguras | Alto | 1 hora | $0.30/video |
+| Timeouts VEO3 | Medio | 30 min | $0.10/video |
+| Rate limiting | Alto | 1 hora | $0 |
+| Winston logger | Medio | 25 min | $0 |
+| Docs oficiales | Alto | 3.5 horas | $0 |
 
 **Total ahorrado**: 8+ horas/semana, $1.60/video
 
 ---
 
-**Próxima revisión**: 2025-10-16 **Decisiones pendientes**: 3 **Impacto
-acumulado**: Alto
+**Próxima revisión**: 2025-10-16
+**Decisiones pendientes**: 3
+**Impacto acumulado**: Alto
 
----
 
-### 2025-10-11: Auto-Guardado Sesión
 
-**Decisión**: Sistema de auto-guardado implementado **Problema**: Pérdida de
-progreso entre sesiones **Solución implementada**: Script automático de cierre
-de sesión **Resultado**: Progreso guardado automáticamente **Impacto**:
-Reducción pérdida contexto de 60% a <5%
+
+

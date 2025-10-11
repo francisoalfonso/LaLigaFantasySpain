@@ -34,20 +34,34 @@ extendidos para eliminar problemas de voz inventada.
       `7161c81d98731681124f550bf8ff8849`, `cc94fe23242d5d5208784fee7391f963`
     - Archivo: `nanoBananaVeo3Integrator.js:272-303`
 
-- [x] ✅ **FIX #4: Duración VEO3 Prompt** - Video `357f0aa8e9f27a4d3217c421d2808e82`
-      (09:39:49)
+- [x] ✅ **FIX #4.1: Duración VEO3 Prompt** - Video
+      `357f0aa8e9f27a4d3217c421d2808e82` (09:39:49)
     - Detectado en test evolutivo: transición no deseada en segundo 7-8
     - Fondo con fútbol americano en lugar de soccer
-    - **Causa**: Prompt decía "7-second video" en lugar de "8-second video"
-    - **Solución**: Cambio "7-second" → "8-second" en
-      `buildEnhancedNanoBananaPrompt()`
+    - **Causa ROOT**: Preset `chollo_viral` tenía durations = 7s (no 8s)
+    - **Solución #1**: Preset durations 7s → 8s en `threeSegmentGenerator.js`
+    - **Solución #2**: Prompt text "7-second" → "8-second" en `promptBuilder.js`
     - **Bonus**: Cambio "fantasy football studio" → "La Liga Fantasy studio"
       (evita confusión con fútbol americano)
-    - Archivo: `promptBuilder.js:654-705`
+    - Archivos: `promptBuilder.js:654-705`, `threeSegmentGenerator.js:48-57`
+
+- [x] ✅ **FIX #4.2: Diálogo Optimizado** - Video
+      `661a21bd90498895bc18a2b2940b73f2` (10:18:27)
+    - Detectado en test E2E: Ana cortaba palabras al final del segmento
+    - **Causa**: 27 palabras = 7.9s audio → Ana cortaba últimas palabras
+    - **Solución**: Reducir segment1 template a 25 palabras (hook más conciso)
+    - **Validación**: Rangos actualizados min 24, max 26, ideal 24-25 palabras
+    - **Basado en tests reales**:
+        - Test 1 (08:40): 7s = 24 palabras ✅ fluido, sin cortes
+        - Test 2 (10:18): 8s = 27 palabras ❌ Ana cortaba al final
+        - Rango óptimo: 24-25 palabras para 8s sin cortes
+    - Archivo: `unifiedScriptGenerator.js:158-163, 459-466`
 
 - [x] **Commits realizados**:
     - `efcd6d5`: Fix #1 + Fix #2 (timing + fondo studio)
     - `a45cb4f`: Fix #3 (consistencia facial Nano Banana)
+    - `3d56713`: Fix #4.1 (duración 8s en prompt)
+    - `37ac6c8`: Fix #4 completo (duración 8s + diálogo 25 palabras)
     - ✅ Push a GitHub main exitoso
 
 - [x] **Test E2E validado**: `npm run veo3:test-nano-banana`
@@ -187,8 +201,8 @@ inventada y textos sin sentido.
 - **Push GitHub**: ✅ Exitoso (pendiente Fix #4)
 - **Tests realizados**: 2
     - Test E2E: ✅ Video `af51b3a46f87f43f3366591fde78c92b` (exitoso)
-    - Test evolutivo: ⚠️ Video `357f0aa8e9f27a4d3217c421d2808e82` (identificó Fix
-      #4)
+    - Test evolutivo: ⚠️ Video `357f0aa8e9f27a4d3217c421d2808e82` (identificó
+      Fix #4)
 - **Imágenes Nano Banana**: 6/6 generadas (3 test E2E + 3 test evolutivo)
 - **Costo**: ~$0.72 ($0.12 Nano Banana + $0.60 VEO3 por 2 segmentos)
 

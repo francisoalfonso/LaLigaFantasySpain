@@ -105,7 +105,7 @@
     }
   ],
   "preparedAt": "2025-10-11T13:14:54.654Z",
-  "lastUpdate": "2025-10-11T14:17:51.431Z",
+  "lastUpdate": "2025-10-11T14:52:00.717Z",
   "concatenatedVideo": {
     "videoId": "concat_nanoBanana_1760188257300",
     "title": "Pere Milla_chollo_nano_banana",
@@ -118,8 +118,8 @@
   "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1760188831031.mp4",
   "finalizedAt": "2025-10-11T13:20:40.110Z",
   "enhancedVideo": {
-    "path": "output/veo3/video-with-card-1760192245832-with-captions.mp4",
-    "url": "http://localhost:3000/output/veo3/video-with-card-1760192245832-with-captions.mp4",
+    "path": "output/veo3/video-with-card-1760194295397-with-captions-with-flashes.mp4",
+    "url": "http://localhost:3000/output/veo3/video-with-card-1760194295397-with-captions-with-flashes.mp4",
     "appliedEnhancements": [
       {
         "type": "playerCard",
@@ -137,8 +137,16 @@
           "format": "ass",
           "totalDuration": 24.00000000000005
         }
+      },
+      {
+        "type": "blackFlashes",
+        "details": {
+          "flashCount": 2,
+          "duration": "70ms",
+          "effect": "dramatic cuts between segments"
+        }
       }
     ],
-    "enhancedAt": "2025-10-11T14:17:51.431Z"
+    "enhancedAt": "2025-10-11T14:52:00.717Z"
   }
 }

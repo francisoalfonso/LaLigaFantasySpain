@@ -14,8 +14,7 @@
  */
 
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const CreativeReferenceGenerator = require('../../backend/services/creativeReferenceGenerator');
 
 const BASE_URL = 'http://localhost:3000';
 
@@ -71,51 +70,34 @@ async function main() {
             '════════════════════════════════════════════════════════════════════════════════\\n'
         );
 
-        const dictionaryPath = path.join(__dirname, '../../data/player-dictionary.json');
-        let dictionary = {};
+        const refGenerator = new CreativeReferenceGenerator();
+        const dictionary = refGenerator.dictionary;
 
-        if (fs.existsSync(dictionaryPath)) {
-            dictionary = JSON.parse(fs.readFileSync(dictionaryPath, 'utf-8'));
-            console.log(`📖 Diccionario cargado: ${Object.keys(dictionary).length} jugadores`);
-        } else {
-            console.log('📖 Diccionario no existe, se creará uno nuevo');
-        }
+        const playerCount = Object.keys(dictionary.players || {}).length;
+        console.log(`📖 Diccionario cargado: ${playerCount} jugadores registrados`);
 
-        const playerKey = topBargain.name.toLowerCase().replace(/\s+/g, '_');
+        // Verificar si el jugador ya existe
+        const playerExists = dictionary.players && dictionary.players[topBargain.name];
 
-        if (!dictionary[playerKey]) {
+        if (!playerExists) {
             console.log(`\\n⚠️  ${topBargain.name} NO está en el diccionario`);
-            console.log('📝 Creando entrada automática...\\n');
+            console.log('📝 Generando referencias creativas automáticas...\\n');
 
-            // Crear entrada base (el script puede enriquecerse manualmente después)
-            dictionary[playerKey] = {
-                name: topBargain.name,
+            // Usar CreativeReferenceGenerator para crear entrada completa
+            const playerEntry = refGenerator.updatePlayerInDictionary(topBargain.name, {
                 team: topBargain.team,
                 position: topBargain.position,
-                nicknames: [
-                    topBargain.name.split(' ')[0], // Primer nombre
-                    topBargain.name.split(' ').pop() // Apellido
-                ],
-                references: [
-                    `el ${topBargain.position.toLowerCase()}`,
-                    `el jugador del ${topBargain.team}`,
-                    'el futbolista',
-                    'este crack'
-                ],
-                context: {
-                    style: 'versatile defender' // Genérico, puede enriquecerse
-                },
-                addedAt: new Date().toISOString(),
-                source: 'auto-generated from bargain analyzer'
-            };
+                number: topBargain.number || null
+            });
 
-            fs.writeFileSync(dictionaryPath, JSON.stringify(dictionary, null, 2), 'utf-8');
-            console.log(`✅ Entrada creada para \${topBargain.name}`);
-            console.log(
-                '   Se puede enriquecer manualmente con apodos y referencias específicas\\n'
-            );
+            console.log(`✅ Entrada creada para ${topBargain.name}`);
+            console.log(`   Referencias generadas: ${playerEntry.safeReferences.length}`);
+            console.log(`   → ${playerEntry.safeReferences.slice(0, 5).join(', ')}...\\n`);
         } else {
-            console.log(`✅ \${topBargain.name} ya está en el diccionario\\n`);
+            console.log(`✅ ${topBargain.name} ya está en el diccionario`);
+            const refs = dictionary.players[topBargain.name].safeReferences || [];
+            console.log(`   Referencias disponibles: ${refs.length}`);
+            console.log(`   → ${refs.slice(0, 5).join(', ')}${refs.length > 5 ? '...' : ''}\\n`);
         }
 
         // ════════════════════════════════════════════════════════════════════════════════

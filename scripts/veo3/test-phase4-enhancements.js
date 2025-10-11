@@ -1,5 +1,5 @@
 /**
- * Script de test para FASE 4 (enhancements): Player Card + Subtítulos Virales
+ * Script de test para FASE 4 (enhancements): Player Card + Subtítulos Virales + Black Flashes
  *
  * Uso:
  *   node scripts/veo3/test-phase4-enhancements.js <sessionId>
@@ -9,9 +9,10 @@
  *
  * Este script:
  * 1. Valida que la sesión esté finalizada (FASE 3 completa)
- * 2. Añade player card overlay (segundos 3-6)
- * 3. Añade subtítulos virales
- * 4. Muestra URL del video final mejorado
+ * 2. Añade black flashes (70ms) entre segmentos
+ * 3. Añade player card overlay (segundos 3-6)
+ * 4. Añade subtítulos virales
+ * 5. Muestra URL del video final mejorado
  */
 
 const axios = require('axios');
@@ -27,7 +28,7 @@ if (!SESSION_ID) {
 
 console.log('\n╔══════════════════════════════════════════════════════════════════════════════╗');
 console.log('║                                                                              ║');
-console.log('║  🎨 Test FASE 4 - Añadir Player Card + Subtítulos Virales                  ║');
+console.log('║  🎨 Test FASE 4 - Black Flashes + Player Card + Subtítulos Virales         ║');
 console.log('║                                                                              ║');
 console.log('╚══════════════════════════════════════════════════════════════════════════════╝\n');
 
@@ -61,6 +62,7 @@ async function main() {
                     }
                 },
                 enhancements: {
+                    blackFlashes: true,
                     playerCard: true,
                     viralSubtitles: true
                 }
@@ -133,9 +135,10 @@ async function main() {
 
         console.log('💡 PRÓXIMOS PASOS:');
         console.log(`   1. Visualizar video en: ${data.enhancedVideo.url}`);
-        console.log(`   2. Validar player card (segundos 3-6)`);
-        console.log(`   3. Validar subtítulos virales`);
-        console.log(`   4. Publicar en Instagram/TikTok\n`);
+        console.log(`   2. Validar black flashes (70ms entre segmentos)`);
+        console.log(`   3. Validar player card (segundos 3-6)`);
+        console.log(`   4. Validar subtítulos virales`);
+        console.log(`   5. Publicar en Instagram/TikTok\n`);
 
         console.log(
             '════════════════════════════════════════════════════════════════════════════════\n'

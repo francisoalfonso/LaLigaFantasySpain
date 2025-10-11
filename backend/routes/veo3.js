@@ -2499,16 +2499,18 @@ router.post('/finalize-session', async (req, res) => {
 
 /**
  * ✨ NUEVO (11 Oct 2025): @route POST /api/veo3/add-enhancements
- * @desc FASE 4 (OPCIONAL): Añadir mejoras al video final (player card + subtítulos virales)
+ * @desc FASE 4 (OPCIONAL): Añadir mejoras al video final (player card + subtítulos virales + black flashes)
  *
  * Este endpoint añade elementos opcionales al video concatenado:
  * 1. Player card overlay (segundos 3-6) con stats del jugador
  * 2. Subtítulos virales automáticos optimizados para Instagram/TikTok
+ * 3. Black flashes (50ms) entre segmentos para transiciones dramáticas
  *
  * VENTAJAS:
  * - Sesión corta (~30-60s, solo post-producción local)
- * - Mejoras opcionales (puedes elegir solo card, solo subtítulos, o ambos)
+ * - Mejoras opcionales (puedes elegir cualquier combinación)
  * - Video final listo para publicar en redes sociales
+ * - Efecto profesional estilo trailer/cortometraje con black flashes
  */
 router.post('/add-enhancements', async (req, res) => {
     try {
@@ -2522,11 +2524,15 @@ router.post('/add-enhancements', async (req, res) => {
             });
         }
 
-        if (!enhancements.playerCard && !enhancements.viralSubtitles) {
+        if (
+            !enhancements.playerCard &&
+            !enhancements.viralSubtitles &&
+            !enhancements.blackFlashes
+        ) {
             return res.status(400).json({
                 success: false,
                 message:
-                    'Al menos un enhancement requerido: playerCard o viralSubtitles debe ser true'
+                    'Al menos un enhancement requerido: playerCard, viralSubtitles o blackFlashes debe ser true'
             });
         }
 
@@ -2703,7 +2709,44 @@ router.post('/add-enhancements', async (req, res) => {
             }
         }
 
-        // ✅ PASO 5: Actualizar progress.json con video mejorado
+        // ✅ PASO 5: Añadir Black Flashes (si está habilitado)
+        if (enhancements.blackFlashes) {
+            logger.info(`[VEO3 Routes] ⚡ Añadiendo flashes negros entre segmentos (50ms)...`);
+
+            try {
+                const BlackFlashService = require('../services/veo3/blackFlashService');
+                const blackFlashService = new BlackFlashService();
+
+                // Calcular y aplicar flashes automáticamente desde el script
+                const flashedVideoPath = await blackFlashService.addFlashesFromSegments(
+                    currentVideoPath,
+                    progressData.script.segments,
+                    0.05 // 50ms
+                );
+
+                currentVideoPath = flashedVideoPath;
+                appliedEnhancements.push({
+                    type: 'blackFlashes',
+                    details: {
+                        flashCount: progressData.script.segments.length - 1, // Flashes entre segmentos
+                        duration: '50ms',
+                        effect: 'dramatic cuts between segments'
+                    }
+                });
+
+                logger.info(`[VEO3 Routes] ✅ Black flashes añadidos: ${flashedVideoPath}`);
+            } catch (error) {
+                logger.error(`[VEO3 Routes] ❌ Error añadiendo black flashes:`, error.message);
+                // No fallar completamente
+                appliedEnhancements.push({
+                    type: 'blackFlashes',
+                    error: error.message,
+                    status: 'failed'
+                });
+            }
+        }
+
+        // ✅ PASO 6: Actualizar progress.json con video mejorado
         const enhancedVideoUrl = `http://localhost:3000/${currentVideoPath.replace(/^.*output/, 'output')}`;
 
         progressData.enhancedVideo = {

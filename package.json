@@ -46,6 +46,7 @@
     "veo3:test-nano-banana": "node scripts/veo3/test-nano-banana-flow-e2e.js",
     "veo3:test-phased": "node scripts/veo3/test-phased-workflow.js",
     "veo3:test-phase4": "node scripts/veo3/test-phase4-enhancements.js",
+    "veo3:test-black-flashes": "node scripts/veo3/test-black-flashes.js",
     "sync:player-photos": "node scripts/sync-player-photos.js",
     "instagram:test-e2e": "node scripts/instagram/test-e2e-chollos-instagram.js",
     "n8n:check-versions": "node scripts/n8n-version-check.js",

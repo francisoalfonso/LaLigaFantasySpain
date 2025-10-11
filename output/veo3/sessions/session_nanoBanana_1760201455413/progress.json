@@ -1,0 +1,152 @@
+{
+  "sessionId": "nanoBanana_1760201455413",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413",
+  "status": "enhanced",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "D. Blind",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "dialogue": "Misters, tengo un chollazo que no os vais a creer... el jugador gironí está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "dialogue": "Los números son brutales, misters. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "dialogue": "¿Qué más queréis, misters? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760201485244.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAyMDE0ODUyNDQucG5nIiwiaWF0IjoxNzYwMjAxNDg2LCJleHAiOjE3NjAyODc4ODZ9.YKTKXdiMsyhWIVeYWaRCj4s1pMYHBKPpuD8DZYP68YY",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760201535389.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMjAxNTM1Mzg5LnBuZyIsImlhdCI6MTc2MDIwMTUzNiwiZXhwIjoxNzYwMjg3OTM2fQ.K5lJBvXtXEMdM5I59Nw8WsU1kpi5sHhR7spgIMDWXhE",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760201591629.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAyMDE1OTE2MjkucG5nIiwiaWF0IjoxNzYwMjAxNTkzLCJleHAiOjE3NjAyODc5OTN9.qFRBYP46qris67LE8CCSSOyuWfjdywmAkgyO8rJ9AUg",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... el jugador gironí está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760201485244.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAyMDE0ODUyNDQucG5nIiwiaWF0IjoxNzYwMjAxNDg2LCJleHAiOjE3NjAyODc4ODZ9.YKTKXdiMsyhWIVeYWaRCj4s1pMYHBKPpuD8DZYP68YY",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "taskId": "b166b971c638444a7d28749822954711",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/da63e403-a95b-4e46-955e-008cc69470cc_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413/segment_1_b166b971c638444a7d28749822954711.mp4",
+      "filename": "segment_1_b166b971c638444a7d28749822954711.mp4",
+      "generatedAt": "2025-10-11T17:17:33.419Z",
+      "size": 1839586
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "dialogue": "Los números son brutales, misters. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760201535389.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMjAxNTM1Mzg5LnBuZyIsImlhdCI6MTc2MDIwMTUzNiwiZXhwIjoxNzYwMjg3OTM2fQ.K5lJBvXtXEMdM5I59Nw8WsU1kpi5sHhR7spgIMDWXhE",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "taskId": "af8f2e1efa09b32f25c20a7f2deba1a1",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/38c3fbb3-a128-4817-b43d-3766ec34499a_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413/segment_2_af8f2e1efa09b32f25c20a7f2deba1a1.mp4",
+      "filename": "segment_2_af8f2e1efa09b32f25c20a7f2deba1a1.mp4",
+      "generatedAt": "2025-10-11T17:20:18.468Z",
+      "size": 1706621
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "dialogue": "¿Qué más queréis, misters? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760201591629.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAyMDE1OTE2MjkucG5nIiwiaWF0IjoxNzYwMjAxNTkzLCJleHAiOjE3NjAyODc5OTN9.qFRBYP46qris67LE8CCSSOyuWfjdywmAkgyO8rJ9AUg",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "taskId": "2f48266ea1c8b815568ca59ceb8d09d1",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/2d73d851-29c6-43d0-8add-76be50ea98b0_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413/segment_3_2f48266ea1c8b815568ca59ceb8d09d1.mp4",
+      "filename": "segment_3_2f48266ea1c8b815568ca59ceb8d09d1.mp4",
+      "generatedAt": "2025-10-11T17:23:26.165Z",
+      "size": 1726610
+    }
+  ],
+  "preparedAt": "2025-10-11T16:53:12.600Z",
+  "lastUpdate": "2025-10-11T17:30:02.235Z",
+  "concatenatedVideo": {
+    "videoId": "concat_nanoBanana_1760201455413",
+    "title": "D. Blind_chollo_nano_banana",
+    "duration": 24,
+    "sessionId": "nanoBanana_1760201455413",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413",
+    "outputPath": "output/veo3/ana-concatenated-1760203463507.mp4",
+    "workflow": "nano-banana-contextual"
+  },
+  "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1760203463507.mp4",
+  "finalizedAt": "2025-10-11T17:24:32.545Z",
+  "enhancedVideo": {
+    "path": "output/veo3/video-with-card-1760203780915-with-captions-with-flashes.mp4",
+    "url": "http://localhost:3000/output/veo3/video-with-card-1760203780915-with-captions-with-flashes.mp4",
+    "appliedEnhancements": [
+      {
+        "type": "playerCard",
+        "details": {
+          "player": "D. Blind",
+          "timing": "3-6s",
+          "position": "top-right"
+        }
+      },
+      {
+        "type": "viralSubtitles",
+        "details": {
+          "captionsCount": 76,
+          "style": "karaoke",
+          "format": "ass",
+          "totalDuration": 24.000000000000007
+        }
+      },
+      {
+        "type": "blackFlashes",
+        "details": {
+          "flashCount": 2,
+          "duration": "70ms",
+          "effect": "dramatic cuts between segments"
+        }
+      }
+    ],
+    "enhancedAt": "2025-10-11T17:30:02.235Z"
+  }
+}

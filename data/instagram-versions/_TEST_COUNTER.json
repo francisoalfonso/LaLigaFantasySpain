@@ -1,5 +1,5 @@
 {
-  "lastTestNumber": 49,
+  "lastTestNumber": 51,
   "history": [
     {
       "testNumber": 46,
@@ -13,44 +13,63 @@
       "date": "2025-10-04T09:23:06.902Z",
       "player": "Dani Carvajal",
       "purpose": "Frame-to-frame + fixes post-baseline",
-      "fixes": [
-        "imagen-ana-fija",
-        "sin-transiciones-camara",
-        "frame-to-frame-continuity"
-      ]
+      "fixes": ["imagen-ana-fija", "sin-transiciones-camara", "frame-to-frame-continuity"]
     },
     {
       "testNumber": 48,
       "date": "2025-10-04T14:34:00.000Z",
       "player": "Dani Carvajal",
       "purpose": "Fix acento mexicano → español castellano (CRÍTICO)",
-      "fixes": [
-        "acento-espanol-castilian-reforzado"
-      ]
+      "fixes": ["acento-espanol-castilian-reforzado"]
     },
     {
       "testNumber": 49,
       "date": "2025-10-10T12:21:29.466Z",
       "player": "Pere Milla",
       "purpose": "Test Nano Banana → Supabase → VEO3",
+      "fixes": ["nano-banana-image-refs", "supabase-storage", "veo3-with-initial-frames"]
+    },
+    {
+      "testNumber": 50,
+      "date": "2025-10-11T17:30:06.235Z",
+      "player": "D. Blind",
+      "purpose": "E2E COMPLETO: Workflow Nano Banana → VEO3 con Full Enhancements",
       "fixes": [
-        "nano-banana-image-refs",
-        "supabase-storage",
-        "veo3-with-initial-frames"
+        "nano-banana-contextual",
+        "supabase-frame-storage",
+        "frame-to-frame-continuity",
+        "player-card-overlay",
+        "viral-subtitles-karaoke",
+        "black-flashes-70ms"
+      ]
+    },
+    {
+      "testNumber": 51,
+      "date": "2025-10-11T19:25:53.810Z",
+      "player": "Pere Milla",
+      "purpose": "CONTROL/BASELINE: Pere Milla + Player card transparency 50% fix",
+      "fixes": [
+        "nano-banana-contextual",
+        "supabase-frame-storage",
+        "frame-to-frame-continuity",
+        "player-card-overlay-50percent-transparency",
+        "viral-subtitles-karaoke",
+        "black-flashes-70ms"
       ]
     }
   ],
   "nextTest": {
-    "testNumber": 49,
-    "expectedDate": "2025-10-05T09:00:00.000Z",
+    "testNumber": 52,
+    "expectedDate": "2025-10-12T09:00:00.000Z",
     "player": "TBD",
-    "purpose": "Validar frame-to-frame secuencial + subtítulos karaoke",
+    "purpose": "Implementar P0 fixes de estrategia viral en script generator",
     "plannedFixes": [
-      "frame-to-frame-secuencial",
-      "subtitulos-karaoke-instagram",
-      "logo-outro-1.5s"
+      "creative-references-audio",
+      "tts-friendly-numbers",
+      "surname-in-outro",
+      "exact-data-visual-card"
     ]
   },
-  "currentTest": 4,
-  "lastUpdated": "2025-10-10T12:21:29.466Z"
+  "currentTest": 6,
+  "lastUpdated": "2025-10-11T19:25:53.810Z"
 }

@@ -43,21 +43,25 @@ async function main() {
 
         console.log('📊 Llamando a /api/bargains/top...');
         const bargainsResponse = await axios.get(`${BASE_URL}/api/bargains/top`, {
-            timeout: 60000 // 60s para API-Sports
+            timeout: 120000 // 2 minutos (31 páginas API-Sports)
         });
 
-        if (!bargainsResponse.data.success || bargainsResponse.data.bargains.length === 0) {
+        if (
+            !bargainsResponse.data.success ||
+            !bargainsResponse.data.data ||
+            bargainsResponse.data.data.length === 0
+        ) {
             throw new Error('No se encontraron chollos');
         }
 
-        const topBargain = bargainsResponse.data.bargains[0];
+        const topBargain = bargainsResponse.data.data[0];
         console.log(`\\n✅ CHOLLO IDENTIFICADO: ${topBargain.name}`);
-        console.log(`   Equipo: ${topBargain.team}`);
+        console.log(`   Equipo: ${topBargain.team.name}`);
         console.log(`   Posición: ${topBargain.position}`);
-        console.log(`   Precio: €${topBargain.price}M`);
-        console.log(`   Rating: ${topBargain.rating}`);
-        console.log(`   Puntos Fantasy: ${topBargain.fantasyPoints}`);
-        console.log(`   Ratio Valor: ${topBargain.valueRatio.toFixed(2)}\\n`);
+        console.log(`   Precio: €${topBargain.analysis.estimatedPrice}M`);
+        console.log(`   Rating: ${topBargain.stats.rating}`);
+        console.log(`   Puntos Fantasy: ${topBargain.analysis.estimatedPoints}`);
+        console.log(`   Ratio Valor: ${topBargain.analysis.valueRatio.toFixed(2)}\\n`);
 
         // ════════════════════════════════════════════════════════════════════════════════
         // FASE 1: VERIFICAR Y ACTUALIZAR DICCIONARIO
@@ -85,7 +89,7 @@ async function main() {
 
             // Usar CreativeReferenceGenerator para crear entrada completa
             const playerEntry = refGenerator.updatePlayerInDictionary(topBargain.name, {
-                team: topBargain.team,
+                team: topBargain.team.name,
                 position: topBargain.position,
                 number: topBargain.number || null
             });
@@ -117,17 +121,17 @@ async function main() {
             preset: 'chollo_viral',
             playerData: {
                 name: topBargain.name,
-                team: topBargain.team,
+                team: topBargain.team.name,
                 position: topBargain.position,
-                price: topBargain.price,
-                rating: topBargain.rating,
+                price: topBargain.analysis.estimatedPrice,
+                rating: topBargain.stats.rating,
                 stats: {
-                    goals: topBargain.goals || 0,
-                    assists: topBargain.assists || 0,
-                    rating: topBargain.rating
+                    goals: topBargain.stats.goals || 0,
+                    assists: topBargain.stats.assists || 0,
+                    rating: topBargain.stats.rating
                 },
-                fantasyPoints: topBargain.fantasyPoints,
-                valueRatio: topBargain.valueRatio
+                fantasyPoints: topBargain.analysis.estimatedPoints,
+                valueRatio: topBargain.analysis.valueRatio
             }
         };
 
@@ -136,37 +140,126 @@ async function main() {
         console.log('');
 
         // ════════════════════════════════════════════════════════════════════════════════
-        // FASE 3: GENERAR VIDEO COMPLETO (Nano Banana → VEO3 → Concatenación)
+        // FASE 3: GENERAR VIDEO COMPLETO (3 sub-fases)
         // ════════════════════════════════════════════════════════════════════════════════
+        const phase3Start = Date.now();
+        let sessionId = null;
+
+        // ────────────────────────────────────────────────────────────────────────────────
+        // FASE 3A: PREPARAR SESIÓN (guión + 3 imágenes Nano Banana)
+        // ────────────────────────────────────────────────────────────────────────────────
         console.log(
             '════════════════════════════════════════════════════════════════════════════════'
         );
-        console.log('FASE 3: GENERANDO VIDEO COMPLETO (3 SEGMENTOS)');
+        console.log('FASE 3A: PREPARANDO SESIÓN (guión + Nano Banana)');
         console.log(
             '════════════════════════════════════════════════════════════════════════════════\\n'
         );
 
-        const phase3Start = Date.now();
-
-        const videoResponse = await axios.post(
-            `\${BASE_URL}/api/veo3/generate-phased-video`,
-            workflowPayload,
+        const prepareResponse = await axios.post(
+            `${BASE_URL}/api/veo3/prepare-session`,
             {
-                timeout: 600000 // 10 minutos para generación completa
+                contentType: 'chollo',
+                playerData: workflowPayload.playerData,
+                preset: 'chollo_viral'
+            },
+            {
+                timeout: 600000 // 10 minutos (script + 3 imágenes Nano Banana)
             }
         );
 
-        const phase3Duration = ((Date.now() - phase3Start) / 1000).toFixed(1);
-
-        if (!videoResponse.data.success) {
-            throw new Error(`Generación falló: \${videoResponse.data.message}`);
+        if (!prepareResponse.data.success) {
+            throw new Error(`FASE 3A falló: ${prepareResponse.data.message}`);
         }
 
-        const sessionId = videoResponse.data.data.sessionId;
-        const concatenatedVideo = videoResponse.data.data.concatenatedVideo;
+        sessionId = prepareResponse.data.data.sessionId;
 
-        console.log(`\\n✅ FASE 3 COMPLETADA en \${phase3Duration}s`);
-        console.log(`📹 Video concatenado: \${concatenatedVideo.url}\\n`);
+        console.log(`✅ FASE 3A COMPLETADA`);
+        console.log(`📁 Session ID: ${sessionId}`);
+        console.log(`📝 Guión: ${prepareResponse.data.data.script.segments.length} segmentos`);
+        console.log(
+            `🖼️  Imágenes Nano Banana: ${prepareResponse.data.data.nanoBananaImages.length}`
+        );
+        console.log(
+            `💰 Costo Nano Banana: $${prepareResponse.data.data.costs.nanoBanana.toFixed(3)}\\n`
+        );
+
+        // ────────────────────────────────────────────────────────────────────────────────
+        // FASE 3B: GENERAR SEGMENTOS INDIVIDUALES (3 veces)
+        // ────────────────────────────────────────────────────────────────────────────────
+        console.log(
+            '════════════════════════════════════════════════════════════════════════════════'
+        );
+        console.log('FASE 3B: GENERANDO 3 SEGMENTOS DE VIDEO');
+        console.log(
+            '════════════════════════════════════════════════════════════════════════════════\\n'
+        );
+
+        for (let segmentIndex = 0; segmentIndex < 3; segmentIndex++) {
+            console.log(`🎬 Generando segmento ${segmentIndex + 1}/3...`);
+
+            const segmentResponse = await axios.post(
+                `${BASE_URL}/api/veo3/generate-segment`,
+                {
+                    sessionId: sessionId,
+                    segmentIndex: segmentIndex
+                },
+                {
+                    timeout: 300000 // 5 minutos
+                }
+            );
+
+            if (!segmentResponse.data.success) {
+                throw new Error(
+                    `Segmento ${segmentIndex + 1} falló: ${segmentResponse.data.message}`
+                );
+            }
+
+            const segment = segmentResponse.data.data.segment;
+            console.log(`✅ Segmento ${segmentIndex + 1} completado - Task ID: ${segment.taskId}`);
+            console.log(`   Progreso: ${segmentResponse.data.data.session.progress}\\n`);
+
+            // Delay entre segmentos (excepto el último)
+            if (segmentIndex < 2) {
+                console.log('⏱️  Esperando 10s antes del siguiente segmento...\\n');
+                await new Promise(resolve => setTimeout(resolve, 10000));
+            }
+        }
+
+        console.log('✅ FASE 3B COMPLETADA - 3/3 segmentos generados\\n');
+
+        // ────────────────────────────────────────────────────────────────────────────────
+        // FASE 3C: FINALIZAR SESIÓN (concatenación + logo outro)
+        // ────────────────────────────────────────────────────────────────────────────────
+        console.log(
+            '════════════════════════════════════════════════════════════════════════════════'
+        );
+        console.log('FASE 3C: FINALIZANDO SESIÓN (concatenación)');
+        console.log(
+            '════════════════════════════════════════════════════════════════════════════════\\n'
+        );
+
+        const finalizeResponse = await axios.post(
+            `${BASE_URL}/api/veo3/finalize-session`,
+            {
+                sessionId: sessionId
+            },
+            {
+                timeout: 120000 // 2 minutos
+            }
+        );
+
+        if (!finalizeResponse.data.success) {
+            throw new Error(`FASE 3C falló: ${finalizeResponse.data.message}`);
+        }
+
+        const phase3Duration = ((Date.now() - phase3Start) / 1000).toFixed(1);
+
+        console.log(`✅ FASE 3C COMPLETADA`);
+        console.log(`📹 Video concatenado: ${finalizeResponse.data.data.finalVideo.url}`);
+        console.log(
+            `\\n✅ FASE 3 COMPLETA en ${phase3Duration}s (${(phase3Duration / 60).toFixed(1)} min)\\n`
+        );
 
         // ════════════════════════════════════════════════════════════════════════════════
         // FASE 4: AÑADIR ENHANCEMENTS (Black Flashes + Player Card + Subtítulos)
@@ -182,15 +275,15 @@ async function main() {
         const phase4Start = Date.now();
 
         const enhancementsResponse = await axios.post(
-            `\${BASE_URL}/api/veo3/add-enhancements`,
+            `${BASE_URL}/api/veo3/add-enhancements`,
             {
                 sessionId: sessionId,
                 playerData: {
                     name: topBargain.name,
                     stats: {
-                        goals: topBargain.goals || 0,
-                        assists: topBargain.assists || 0,
-                        rating: topBargain.rating
+                        goals: topBargain.stats.goals || 0,
+                        assists: topBargain.stats.assists || 0,
+                        rating: topBargain.stats.rating
                     }
                 },
                 enhancements: {
@@ -207,10 +300,10 @@ async function main() {
         const phase4Duration = ((Date.now() - phase4Start) / 1000).toFixed(1);
 
         if (!enhancementsResponse.data.success) {
-            throw new Error(`Enhancements fallaron: \${enhancementsResponse.data.message}`);
+            throw new Error(`Enhancements fallaron: ${enhancementsResponse.data.message}`);
         }
 
-        console.log(`\\n✅ FASE 4 COMPLETADA en \${phase4Duration}s\\n`);
+        console.log(`\\n✅ FASE 4 COMPLETADA en ${phase4Duration}s\\n`);
 
         const finalData = enhancementsResponse.data.data;
         const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -229,43 +322,43 @@ async function main() {
         console.log('📊 RESUMEN:\\n');
 
         console.log('🎯 CHOLLO:');
-        console.log(`   Jugador:                  \${topBargain.name}`);
-        console.log(`   Equipo:                   \${topBargain.team}`);
-        console.log(`   Posición:                 \${topBargain.position}`);
-        console.log(`   Precio:                   €\${topBargain.price}M`);
-        console.log(`   Ratio Valor:              \${topBargain.valueRatio.toFixed(2)}\\n`);
+        console.log(`   Jugador:                  ${topBargain.name}`);
+        console.log(`   Equipo:                   ${topBargain.team.name}`);
+        console.log(`   Posición:                 ${topBargain.position}`);
+        console.log(`   Precio:                   €${topBargain.analysis.estimatedPrice}M`);
+        console.log(`   Ratio Valor:              ${topBargain.analysis.valueRatio.toFixed(2)}\\n`);
 
         console.log('⏱️  TIEMPOS:');
-        console.log(`   FASE 3 (Video):           \${phase3Duration}s`);
-        console.log(`   FASE 4 (Enhancements):    \${phase4Duration}s`);
-        console.log(`   TOTAL:                    \${totalDuration}s\\n`);
+        console.log(`   FASE 3 (Video):           ${phase3Duration}s`);
+        console.log(`   FASE 4 (Enhancements):    ${phase4Duration}s`);
+        console.log(`   TOTAL:                    ${totalDuration}s\\n`);
 
         console.log('🎨 ENHANCEMENTS:');
         console.log(
-            `   Aplicadas:                \${finalData.enhancements.successful.length}/\${finalData.enhancements.total}`
+            `   Aplicadas:                ${finalData.enhancements.successful.length}/${finalData.enhancements.total}`
         );
         if (finalData.enhancements.successful.length > 0) {
             finalData.enhancements.successful.forEach((enh, idx) => {
-                console.log(`   \${idx + 1}. \${enh.type}`);
+                console.log(`   ${idx + 1}. ${enh.type}`);
             });
         }
         console.log('');
 
         console.log('📹 VIDEO FINAL:');
-        console.log(`   URL: \${finalData.enhancedVideo.url}`);
-        console.log(`   Base: \${finalData.enhancedVideo.baseVideo}`);
-        console.log(`   Session ID: \${sessionId}\\n`);
+        console.log(`   URL: ${finalData.enhancedVideo.url}`);
+        console.log(`   Base: ${finalData.enhancedVideo.baseVideo}`);
+        console.log(`   Session ID: ${sessionId}\\n`);
 
         console.log('📂 ARCHIVOS:');
         console.log(`   Diccionario: data/player-dictionary.json`);
-        console.log(`   Session: output/veo3/sessions/session_\${sessionId}/\\n`);
+        console.log(`   Session: output/veo3/sessions/session_${sessionId}/\\n`);
 
         console.log('💡 PRÓXIMOS PASOS:');
-        console.log(`   1. Ver video en: \${finalData.enhancedVideo.url}`);
+        console.log(`   1. Ver video en: ${finalData.enhancedVideo.url}`);
         console.log(`   2. Validar black flashes (70ms entre segmentos)`);
         console.log(`   3. Validar player card (segundos 3-6, top-right)`);
         console.log(`   4. Validar subtítulos virales (karaoke style)`);
-        console.log(`   5. Si hay términos futbolísticos específicos de \${topBargain.name}:`);
+        console.log(`   5. Si hay términos futbolísticos específicos de ${topBargain.name}:`);
         console.log(`      → Editar data/player-dictionary.json manualmente`);
         console.log(`      → Añadir apodos, referencias, contexto específico`);
         console.log(`   6. Publicar en Instagram/TikTok\\n`);

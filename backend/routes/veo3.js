@@ -2167,7 +2167,10 @@ router.post('/generate-segment', async (req, res) => {
 
         // ✅ PASO 3: Descargar y guardar video
         logger.info(`[VEO3 Routes] 💾 Descargando segmento desde VEO3...`);
-        const response = await axios.get(videoResult.url, { responseType: 'arraybuffer' });
+        const response = await axios.get(videoResult.url, {
+            responseType: 'arraybuffer',
+            timeout: 60000 // 60s timeout para descarga
+        });
 
         const segmentFilename = `segment_${segmentNum}_${videoResult.taskId}.mp4`;
         const localPath = path.join(sessionDir, segmentFilename);

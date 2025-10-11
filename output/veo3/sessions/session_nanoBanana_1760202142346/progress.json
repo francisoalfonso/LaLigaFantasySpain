@@ -1,0 +1,109 @@
+{
+  "sessionId": "nanoBanana_1760202142346",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760202142346",
+  "status": "prepared",
+  "segmentsCompleted": 0,
+  "segmentsTotal": 3,
+  "playerName": "D. Blind",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "dialogue": "Misters, tengo un chollazo que no os vais a creer... Blind está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "dialogue": "Los números son brutales, misters. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "dialogue": "¿Qué más queréis, misters? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760202179865.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAyMDIxNzk4NjUucG5nIiwiaWF0IjoxNzYwMjAyMTgxLCJleHAiOjE3NjAyODg1ODF9.Z6962DBVa0Rhn0vbE5svk5vZQekxXK7QlrT_j0pPSMY",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760202224406.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMjAyMjI0NDA2LnBuZyIsImlhdCI6MTc2MDIwMjIyNSwiZXhwIjoxNzYwMjg4NjI1fQ.XNxy8hU0c5en9-F4gTQ1qKYBnhb0AF2egZ8P8TRPaDg",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760202267803.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAyMDIyNjc4MDMucG5nIiwiaWF0IjoxNzYwMjAyMjY5LCJleHAiOjE3NjAyODg2Njl9.IY0uJDWGETtlHvf3ISIHgKhT2n_5WEwYcqbTSE_kAIo",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... Blind está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760202179865.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAyMDIxNzk4NjUucG5nIiwiaWF0IjoxNzYwMjAyMTgxLCJleHAiOjE3NjAyODg1ODF9.Z6962DBVa0Rhn0vbE5svk5vZQekxXK7QlrT_j0pPSMY",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "dialogue": "Los números son brutales, misters. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760202224406.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMjAyMjI0NDA2LnBuZyIsImlhdCI6MTc2MDIwMjIyNSwiZXhwIjoxNzYwMjg4NjI1fQ.XNxy8hU0c5en9-F4gTQ1qKYBnhb0AF2egZ8P8TRPaDg",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "dialogue": "¿Qué más queréis, misters? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760202267803.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAyMDIyNjc4MDMucG5nIiwiaWF0IjoxNzYwMjAyMjY5LCJleHAiOjE3NjAyODg2Njl9.IY0uJDWGETtlHvf3ISIHgKhT2n_5WEwYcqbTSE_kAIo",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    }
+  ],
+  "preparedAt": "2025-10-11T17:04:28.710Z",
+  "lastUpdate": "2025-10-11T17:04:28.710Z"
+}

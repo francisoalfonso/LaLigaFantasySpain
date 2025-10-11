@@ -281,7 +281,7 @@ class PlayerCardOverlay {
             width: ${this.cardWidth}px;
             height: ${this.cardHeight}px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: rgba(255, 255, 255, 0.50);
+            background: rgba(255, 255, 255, 0.40);
             display: flex;
             align-items: center;
             padding: 12px;

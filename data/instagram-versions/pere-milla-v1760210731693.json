@@ -1,0 +1,125 @@
+{
+  "id": "pere-milla-v1760210731693",
+  "version": 3,
+  "timestamp": "2025-10-11T19:25:53.810Z",
+  "playerData": {
+    "playerName": "Pere Milla",
+    "team": "Valencia",
+    "price": 6.5,
+    "stats": {
+      "goals": 1,
+      "assists": 0,
+      "rating": "6.50"
+    },
+    "ratio": 4.38,
+    "fantasyPoints": 28.47,
+    "position": "FWD"
+  },
+  "testMetadata": {
+    "testDate": "2025-10-11T19:25:53.810Z",
+    "testNumber": 51,
+    "fixesApplied": [
+      "nano-banana-contextual",
+      "supabase-frame-storage",
+      "frame-to-frame-continuity",
+      "player-card-overlay-50percent-transparency",
+      "viral-subtitles-karaoke",
+      "black-flashes-70ms"
+    ],
+    "testPurpose": "CONTROL/BASELINE: Test #51 sirve como control antes de implementar P0 fixes en código. Permite comparación directa con Test #49 (Pere Milla baseline) y Test #50 (D. Blind con análisis crítico). Mismo jugador, misma arquitectura, sin cambios en script generator. Player card con transparencia 50% corregida.",
+    "feedback": {
+      "whatWorks": [
+        "✅ Player card con transparencia 50% perfecta: Fondo semi-transparente muestra video debajo",
+        "✅ Elementos técnicos impecables (8.5/10): Player card 3-6s, 74 subtítulos karaoke, black flashes 70ms",
+        "✅ Frame-to-frame continuity perfecta: Transiciones invisibles entre segmentos",
+        "✅ Duración óptima (24s): Perfecta para Instagram Reels",
+        "✅ Tono español castellano consistente: Sin acento mexicano",
+        "✅ Workflow E2E completamente automatizado: ~12 minutos total"
+      ],
+      "whatFails": [
+        {
+          "description": "repite misters un par de veces",
+          "severity": "minor"
+        }
+      ],
+      "severity": {
+        "critical": 0,
+        "major": 0,
+        "minor": 1
+      },
+      "reviewedBy": "Usuario",
+      "reviewDate": "2025-10-11T19:39:38.257Z",
+      "reviewNotes": "Test #51 - Control/baseline. Validar transparencia player card 50% y comparar con Test #49 (Pere Milla pre-Nano Banana) y Test #50 (D. Blind con críticas). P0 fixes de estrategia viral NO implementados todavía en script generator, score esperado similar a Test #50 (~7.6/10)."
+    },
+    "checklist": {
+      "imagenAnaFija": null,
+      "sinTransicionesCamara": null,
+      "audioSinCortes": null,
+      "vozConsistente": null,
+      "pronunciacionCorrecta": null,
+      "logoOutro": null,
+      "duracionCorrecta": null,
+      "hookSegundo3": null,
+      "ctaClaro": null
+    },
+    "qualityScore": {
+      "videoQuality": null,
+      "audioQuality": null,
+      "viralPotential": null,
+      "technicalScore": null,
+      "overallScore": 10,
+      "autoCalculated": true,
+      "calculationMethod": "Base 10.0 - (0 critical × 2.0) - (0 major × 0.5) - (1 minor × 0.2) + (6 works × 0.3)"
+    },
+    "comparisonWith": ["pere-milla-v1760085935754", "d.-blind-v1760203806235"],
+    "improvements": [
+      "Player card transparency fix: 50% opaque (vs 78% en tests anteriores)",
+      "Puppeteer omitBackground: true para capturar canal alpha PNG",
+      "Mismo workflow que Test #50 pero con transparencia corregida"
+    ],
+    "issues": []
+  },
+  "veo3Config": {
+    "anaImageUrl": "https://raw.githubusercontent.com/laligafantasyspainpro-ux/LaLigaFantasySpain/main/frontend/assets/ana-character-base.png",
+    "seed": 30001,
+    "enhanced": true,
+    "modelVersion": "veo3",
+    "segmentCount": 3,
+    "totalDuration": 24,
+    "workflow": "nano-banana-contextual",
+    "nanoBananaImages": 3,
+    "enhancements": {
+      "playerCard": true,
+      "viralSubtitles": true,
+      "blackFlashes": true
+    }
+  },
+  "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760210731693-with-captions-with-flashes.mp4",
+  "previewData": {
+    "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760210731693-with-captions-with-flashes.mp4",
+    "sessionId": "nanoBanana_1760209729776",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760209729776"
+  },
+  "caption": "🔥 CHOLLAZO VALENCIA 🔥\n\nPere Milla está REGALADO misters... €6.5M y casi nadie lo está fichando 👀\n\n📊 Los números hablan:\n✅ Rating: 6.50\n✅ Puntos Fantasy: 28.47\n✅ Ratio valor: 4.38 (¡BESTIAL!)\n\nRinde como los mejores de La Liga pero está más barato que muchos suplentes 😱\n\n¿Qué más queréis misters? Si no lo ficháis ahora, mañana vale el doble 📈\n\n#FantasyLaLiga #Valencia #Chollos #FLP",
+  "notes": "Test #51 - Control/baseline antes de implementar P0 fixes en código. Pere Milla elegido para comparación directa con Test #49 (baseline pre-Nano Banana). Player card transparency fix aplicado: 50% opaque con omitBackground: true en Puppeteer. Score esperado: ~7.6/10 (similar a Test #50), P0 fixes de estrategia viral pendientes de implementación en script generator.",
+  "viralScore": null,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-11T19:25:53.810Z",
+    "updatedAt": "2025-10-11T19:39:38.257Z",
+    "userId": "claude-code",
+    "status": "testing",
+    "costs": {
+      "nanoBanana": 0,
+      "veo3": 0.9,
+      "total": 0.9
+    },
+    "performance": {
+      "prepareSession": "123.8s (Nano Banana x3 reutilizadas)",
+      "generateSegments": "275.3s (88.4s + 99s + 87.9s)",
+      "finalizeSession": "21.2s (concatenación)",
+      "addEnhancements": "59.4s (FFmpeg)",
+      "totalWorkflow": "730.4s (~12.2 min)"
+    }
+  }
+}

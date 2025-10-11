@@ -1,0 +1,155 @@
+{
+  "id": "d.-blind-v1760203806235",
+  "version": 3,
+  "timestamp": "2025-10-11T17:30:06.235Z",
+  "playerData": {
+    "playerName": "D. Blind",
+    "team": "Girona",
+    "price": 4.54,
+    "stats": {
+      "goals": 0,
+      "assists": 0,
+      "rating": "6.48"
+    },
+    "ratio": 1.74,
+    "fantasyPoints": 7.91,
+    "position": "DEF"
+  },
+  "testMetadata": {
+    "testDate": "2025-10-11T17:30:06.235Z",
+    "testNumber": 50,
+    "fixesApplied": [
+      "nano-banana-contextual",
+      "supabase-frame-storage",
+      "frame-to-frame-continuity",
+      "player-card-overlay",
+      "viral-subtitles-karaoke",
+      "black-flashes-70ms"
+    ],
+    "testPurpose": "E2E COMPLETO: Workflow Nano Banana → VEO3 con Full Enhancements",
+    "feedback": {
+      "whatWorks": [
+        "✅ Hook conspirativo efectivo (7/10): 'chollazo que no os vais a creer' genera curiosidad inmediata",
+        "✅ Elementos técnicos impecables (8.5/10): Player card 3-6s, 76 subtítulos karaoke, black flashes 70ms",
+        "✅ Frame-to-frame continuity perfecta: No hay 'reset' visual entre segmentos",
+        "✅ Duración óptima (26s): Perfecta para Instagram Reels",
+        "✅ Call to action con urgencia: 'mañana vale el doble'",
+        "✅ Tono español castellano consistente: Sin acento mexicano",
+        "✅ Estructura narrativa completa: Arco Hook → Prueba → CTA"
+      ],
+      "whatFails": [
+        {
+          "description": "NO menciona el NOMBRE del jugador en audio (dice 'el jugador gironí' en vez de 'D. Blind'). Usuario no puede buscar después. Solo aparece en player card visual.",
+          "severity": "critical"
+        },
+        {
+          "description": "Datos VAGOS en vez de específicos: Dice 'dobla su valor' pero NO dice ratio 1.74. Dice 'a precio de risa' pero NO dice €4.54. Reduce credibilidad y memorabilidad.",
+          "severity": "critical"
+        },
+        {
+          "description": "Falta elemento visual explosivo: Solo player card estático. NO hay gráfico comparativo (D. Blind vs otros defensas). Reduce scroll-stop rate.",
+          "severity": "major"
+        },
+        {
+          "description": "Diálogos repetitivos: 'Misters' x3, concepto 'barato' repetido 3 veces. Falta variedad léxica.",
+          "severity": "major"
+        },
+        {
+          "description": "CTA vago: Dice 'fichadlo' pero NO dice dónde/cómo. NO menciona 'LaLigaFantasy' o 'link en bio'. Reduce conversión.",
+          "severity": "minor"
+        },
+        {
+          "description": "Falta social proof: NO menciona 'solo 2% de managers lo tienen'. Falta FOMO real.",
+          "severity": "minor"
+        }
+      ],
+      "severity": {
+        "critical": 2,
+        "major": 2,
+        "minor": 2
+      },
+      "reviewedBy": "Claude Code - Análisis Viral Crítico",
+      "reviewDate": "2025-10-11T17:50:00.000Z",
+      "reviewNotes": "Score 7.6/10 - Base técnica impecable pero contenido menos explosivo que competencia top (8.5-9.5). GAP de -1.9 puntos vs creators como Manolo Lama/DjMariio. P0 críticos: 1) Mencionar nombre jugador en audio, 2) Datos específicos (€4.5, ratio 1.74), 3) Gráfico comparativo visual."
+    },
+    "checklist": {
+      "imagenAnaFija": null,
+      "sinTransicionesCamara": null,
+      "audioSinCortes": null,
+      "vozConsistente": null,
+      "pronunciacionCorrecta": null,
+      "logoOutro": null,
+      "duracionCorrecta": null,
+      "hookSegundo3": null,
+      "ctaClaro": null
+    },
+    "qualityScore": {
+      "videoQuality": 8.5,
+      "audioQuality": 8.0,
+      "viralPotential": 6.5,
+      "technicalScore": 8.0,
+      "narrativeCohesion": 7.0,
+      "overallScore": 7.6
+    },
+    "comparisonWith": "pere-milla-v1760085935754",
+    "improvements": [
+      "3 imágenes Nano Banana contextualizadas por rol (intro/middle/outro)",
+      "Frame-to-frame continuity entre segmentos",
+      "Player card overlay automático (segundos 3-6, top-right)",
+      "Subtítulos virales karaoke con 76 captions",
+      "Black flashes de 70ms entre segmentos (dramatic cuts)",
+      "Workflow completamente automatizado: script → imágenes → videos → enhancements"
+    ],
+    "issues": [
+      "🔴 P0 CRÍTICO: No menciona nombre jugador en audio ('D. Blind' solo aparece visual, dice 'el jugador gironí')",
+      "🔴 P0 CRÍTICO: Datos vagos en vez de específicos (no dice €4.54, ratio 1.74, rating 6.48)",
+      "🟠 P1 MAYOR: Falta elemento visual explosivo (gráfico comparativo D. Blind vs otros defensas)",
+      "🟠 P1 MAYOR: Diálogos repetitivos ('Misters' x3, 'barato' x3)",
+      "🟡 P2 MENOR: CTA vago (no menciona 'LaLigaFantasy' o 'link en bio')",
+      "🟡 P2 MENOR: Falta social proof ('solo 2% de managers lo tienen')"
+    ]
+  },
+  "veo3Config": {
+    "anaImageUrl": "https://raw.githubusercontent.com/laligafantasyspainpro-ux/LaLigaFantasySpain/main/frontend/assets/ana-character-base.png",
+    "seed": 30001,
+    "enhanced": true,
+    "modelVersion": "veo3",
+    "segmentCount": 3,
+    "totalDuration": 24,
+    "workflow": "nano-banana-contextual",
+    "nanoBananaImages": 3,
+    "enhancements": {
+      "playerCard": true,
+      "viralSubtitles": true,
+      "blackFlashes": true
+    }
+  },
+  "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760203780915-with-captions-with-flashes.mp4",
+  "previewData": {
+    "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760203780915-with-captions-with-flashes.mp4",
+    "sessionId": "nanoBanana_1760201455413",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760201455413"
+  },
+  "caption": "🔥 CHOLLAZO GIRONA 🔥\n\nD. Blind está REGALADO misters... €4.5M y casi nadie lo está fichando 👀\n\n📊 Los números hablan:\n✅ Rating: 6.48\n✅ Puntos Fantasy: 7.91\n✅ Ratio valor: 1.74 (¡BRUTAL!)\n\nRinde como los mejores de La Liga pero está más barato que un suplente del Cádiz 😱\n\n¿Qué más queréis misters? Si no lo ficháis ahora, mañana vale el doble 📈\n\n#FantasyLaLiga #Girona #Chollos #FLP",
+  "notes": "Test #50 - E2E completo con Nano Banana workflow. Primera vez usando imágenes contextualizadas por rol (Close-Up intro, Medium Shot middle, Medium Close-Up outro). Enhancements completos aplicados: player card overlay, subtítulos virales karaoke, black flashes 70ms. SCORE VIRAL: 7.6/10 - Base técnica impecable pero contenido menos explosivo que competencia top. GAP de -1.9 puntos vs DjMariio/Manolo Lama.",
+  "viralScore": 7.6,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-11T17:30:06.235Z",
+    "updatedAt": "2025-10-11T17:30:06.235Z",
+    "userId": "claude-code",
+    "status": "testing",
+    "costs": {
+      "nanoBanana": 0,
+      "veo3": 0.9,
+      "total": 0.9
+    },
+    "performance": {
+      "prepareSession": "252s (Nano Banana x3)",
+      "generateSegments": "327s (VEO3 x3)",
+      "finalizeSession": "25s (concatenación)",
+      "addEnhancements": "24s (FFmpeg)",
+      "totalWorkflow": "628s (~10.5 min)"
+    }
+  }
+}

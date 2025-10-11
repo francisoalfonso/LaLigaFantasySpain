@@ -28,6 +28,17 @@ class UnifiedScriptGenerator {
     constructor() {
         this.emotionAnalyzer = new EmotionAnalyzer();
         this.creativeRefGenerator = new CreativeReferenceGenerator();
+
+        // ✨ Variedad léxica: Banco de sinónimos para evitar repeticiones
+        // Basado en VEO3_CONTENIDO_VIRAL_ESTRATEGIA.md
+        this.synonymBank = {
+            greeting: {
+                intro: ['Misters'], // Siempre "Misters" en intro (identidad de marca)
+                middle: ['Managers', 'Cracks', 'Jefes'], // Variar en middle
+                outro: ['Tíos', 'Equipo', 'Gente'] // Variar en outro
+            }
+        };
+
         // Estructura de arcos narrativos por tipo de contenido
         this.narrativeArcs = {
             chollo: {
@@ -166,7 +177,7 @@ class UnifiedScriptGenerator {
             // 🎭 Función: Explicar POR QUÉ es chollo con datos concretos
             // 📊 27 palabras → 8s audio → ✅ CALCULADO
             segment2: {
-                impact: 'Los números son brutales, misters.', // Impacto inicial
+                impact: 'Los números son brutales, {{greetingMiddle}}.', // ✨ Variedad léxica: Managers/Cracks/Jefes
                 proof: 'Rinde como los mejores de La Liga... ¡dobla su valor en puntos!', // Prueba del chollo
                 evidence: 'Y está más barato que un suplente del Cádiz.' // Comparación (27 palabras TOTAL)
             },
@@ -174,7 +185,7 @@ class UnifiedScriptGenerator {
             // 🎭 Función: Crear FOMO y obligar a actuar YA
             // 📊 27 palabras → 8s audio → ✅ CALCULADO
             segment3: {
-                urgency: '¿Qué más queréis, misters?', // Pregunta retórica
+                urgency: '¿Qué más queréis, {{greetingOutro}}?', // ✨ Variedad léxica: Tíos/Equipo/Gente
                 scarcity: 'Titular del {{team}} al precio de un suplente random.', // Enfatizar absurdo
                 fomo: 'Si no lo ficháis ahora, mañana vale el doble.' // FOMO temporal (27 palabras TOTAL)
             }
@@ -279,6 +290,11 @@ class UnifiedScriptGenerator {
         const ratioValue = playerData.ratio || playerData.valueRatio || 1.0;
         const valueRatioText = this._numberToSpanishText(ratioValue);
 
+        // ✨ VARIEDAD LÉXICA: Seleccionar saludos aleatorios para cada segmento
+        // Intro siempre "Misters" (identidad de marca), middle y outro varían
+        const greetingMiddle = this._selectRandomGreeting('middle'); // Managers/Cracks/Jefes
+        const greetingOutro = this._selectRandomGreeting('outro'); // Tíos/Equipo/Gente
+
         const data = {
             player: playerLastName, // ✅ Solo apellido para optimizar con diccionario
             team: playerData.team || 'su equipo',
@@ -288,6 +304,8 @@ class UnifiedScriptGenerator {
             games: playerData.stats?.games || 0,
             valueRatio: ratioValue, // Número para uso en lógica
             valueRatioText, // ✅ Texto pronunciable (ej: "uno punto ocho")
+            greetingMiddle, // ✨ Variedad léxica: Managers/Cracks/Jefes
+            greetingOutro, // ✨ Variedad léxica: Tíos/Equipo/Gente
             jornada: viralData.gameweek || 'jornada 5',
             xgIncrease: viralData.xgIncrease || '30',
             newsContent: viralData.newsContent || 'cambio en la alineación titular',
@@ -504,6 +522,24 @@ class UnifiedScriptGenerator {
             fitsIn8s: wordCount >= minWords && wordCount <= maxWords,
             isIdeal: wordCount >= idealMin && wordCount <= idealMax
         };
+    }
+
+    /**
+     * ✨ Seleccionar saludo aleatorio según el rol del segmento (VARIEDAD LÉXICA)
+     * @param {string} role - Rol del segmento (intro, middle, outro)
+     * @returns {string} - Saludo seleccionado del banco de sinónimos
+     * @private
+     */
+    _selectRandomGreeting(role) {
+        const greetings = this.synonymBank.greeting[role] || ['Misters'];
+        const randomIndex = Math.floor(Math.random() * greetings.length);
+        const selected = greetings[randomIndex];
+
+        logger.info(
+            `[UnifiedScriptGenerator] ✨ Variedad léxica [${role}]: "${selected}" (de ${greetings.length} opciones)`
+        );
+
+        return selected;
     }
 
     /**

@@ -1,0 +1,307 @@
+{
+  "description": "Referencias de equipos La Liga 2025-26 para guiones virales con argot futbolístico real",
+  "version": "1.0.0",
+  "lastUpdated": "2025-10-11",
+  "teams": {
+    "Real Madrid": {
+      "officialName": "Real Madrid",
+      "apiId": 541,
+      "shortNames": ["el Madrid", "el Real", "el R. Madrid"],
+      "nicknames": ["los Blancos", "los Merengues", "la Casa Blanca", "los Vikingos"],
+      "fanNicknames": ["madridista", "blanco", "merengue"],
+      "stadium": "el Bernabéu",
+      "references": [
+        "el conjunto blanco",
+        "el gigante blanco",
+        "el equipo de la capital",
+        "el conjunto madridista",
+        "el equipo blanco"
+      ]
+    },
+    "Barcelona": {
+      "officialName": "FC Barcelona",
+      "apiId": 529,
+      "shortNames": ["el Barça", "el Barcelona", "el Barca"],
+      "nicknames": ["los Azulgranas", "los Culés", "los Blaugranas"],
+      "fanNicknames": ["azulgrana", "culé", "barcelonista"],
+      "stadium": "el Camp Nou",
+      "references": [
+        "el conjunto catalán",
+        "el equipo del Camp Nou",
+        "el gigante catalán",
+        "el conjunto azulgrana",
+        "el equipo barcelonista"
+      ]
+    },
+    "Atlético Madrid": {
+      "officialName": "Atlético de Madrid",
+      "apiId": 530,
+      "shortNames": ["el Atleti", "el Atlético", "el Atlético Madrid"],
+      "nicknames": ["los Colchoneros", "los Rojiblancos", "los Indios"],
+      "fanNicknames": ["colchonero", "rojiblanco", "atlético"],
+      "stadium": "el Metropolitano",
+      "references": [
+        "el conjunto colchonero",
+        "el equipo del Cholo",
+        "el Atleti de Simeone",
+        "el conjunto rojiblanco",
+        "el equipo del Metropolitano"
+      ]
+    },
+    "Athletic Club": {
+      "officialName": "Athletic Club",
+      "apiId": 531,
+      "shortNames": ["el Athletic", "el Bilbao", "el Athletic Club"],
+      "nicknames": ["los Leones", "los Rojiblancos", "los de San Mamés"],
+      "fanNicknames": ["rojiblanco", "león", "athleticzale"],
+      "stadium": "San Mamés",
+      "references": [
+        "el conjunto vasco",
+        "el equipo de Bilbao",
+        "la cantera vasca",
+        "los Leones de San Mamés",
+        "el equipo bilbaíno"
+      ]
+    },
+    "Real Sociedad": {
+      "officialName": "Real Sociedad",
+      "apiId": 548,
+      "shortNames": ["la Real", "la Sociedad", "la Real Sociedad"],
+      "nicknames": ["los Txuri-Urdin", "los Realistas", "los de Anoeta"],
+      "fanNicknames": ["txuri-urdin", "realista", "donostiarra"],
+      "stadium": "Anoeta",
+      "references": [
+        "el conjunto donostiarra",
+        "el equipo vasco",
+        "la Real de San Sebastián",
+        "los Txuri-Urdin",
+        "el equipo de Anoeta"
+      ]
+    },
+    "Villarreal": {
+      "officialName": "Villarreal CF",
+      "apiId": 533,
+      "shortNames": ["el Villarreal", "el Submarino", "el Villarreal CF"],
+      "nicknames": ["el Submarino Amarillo", "los Groguets", "el Submarino"],
+      "fanNicknames": ["groguet", "amarillo", "villarrealense"],
+      "stadium": "La Cerámica",
+      "references": [
+        "el conjunto amarillo",
+        "el equipo castellonense",
+        "el Submarino",
+        "el Villarreal de La Cerámica",
+        "los Groguets"
+      ]
+    },
+    "Real Betis": {
+      "officialName": "Real Betis Balompié",
+      "apiId": 543,
+      "shortNames": ["el Betis", "el Real Betis", "el R. Betis"],
+      "nicknames": ["los Verdiblancos", "los Béticos", "el Glorioso"],
+      "fanNicknames": ["verdiblanco", "bético", "beticismo"],
+      "stadium": "el Benito Villamarín",
+      "references": [
+        "el conjunto verdiblanco",
+        "el equipo sevillano",
+        "el Betis de Sevilla",
+        "el Glorioso Betis",
+        "los Verdiblancos"
+      ]
+    },
+    "Sevilla": {
+      "officialName": "Sevilla FC",
+      "apiId": 536,
+      "shortNames": ["el Sevilla", "el Sevillismo", "el Sevilla FC"],
+      "nicknames": ["los Nervionenses", "los Palanganas", "los Rojiblancos"],
+      "fanNicknames": ["sevillista", "nervionense", "palangana"],
+      "stadium": "el Sánchez-Pizjuán",
+      "references": [
+        "el conjunto nervionense",
+        "el equipo andaluz",
+        "el Sevilla FC",
+        "los Nervionenses",
+        "el equipo del Pizjuán"
+      ]
+    },
+    "Valencia": {
+      "officialName": "Valencia CF",
+      "apiId": 532,
+      "shortNames": ["el Valencia", "el Che", "el Valencia CF"],
+      "nicknames": ["los Che", "los Murciélagos", "el Equipo del Pueblo"],
+      "fanNicknames": ["valencianista", "che", "valenciano"],
+      "stadium": "Mestalla",
+      "references": [
+        "el conjunto che",
+        "el equipo valenciano",
+        "el Valencia de Mestalla",
+        "los Che",
+        "el equipo de Mestalla"
+      ]
+    },
+    "Celta de Vigo": {
+      "officialName": "RC Celta de Vigo",
+      "apiId": 538,
+      "shortNames": ["el Celta", "el Celtiña", "el Celta de Vigo"],
+      "nicknames": ["los Celestes", "los Olívicos", "el Celtiña"],
+      "fanNicknames": ["celtista", "celeste", "vigués"],
+      "stadium": "Balaídos",
+      "references": [
+        "el conjunto celeste",
+        "el equipo gallego",
+        "el Celta de Balaídos",
+        "los Celestes",
+        "el equipo vigués"
+      ]
+    },
+    "Getafe": {
+      "officialName": "Getafe CF",
+      "apiId": 546,
+      "shortNames": ["el Getafe", "el Geta", "el Getafe CF"],
+      "nicknames": ["los Azulones", "el Equipo del Sur", "el Geta"],
+      "fanNicknames": ["azulón", "getafense", "azulón"],
+      "stadium": "el Coliseum Alfonso Pérez",
+      "references": [
+        "el conjunto azulón",
+        "el equipo del sur de Madrid",
+        "el Getafe CF",
+        "los Azulones",
+        "el Geta"
+      ]
+    },
+    "Osasuna": {
+      "officialName": "CA Osasuna",
+      "apiId": 727,
+      "shortNames": ["Osasuna", "el Osasuna", "el CA Osasuna"],
+      "nicknames": ["los Rojillos", "el Osasuna", "los de El Sadar"],
+      "fanNicknames": ["rojillo", "osasunista", "navarro"],
+      "stadium": "El Sadar",
+      "references": [
+        "el conjunto navarro",
+        "el equipo de Pamplona",
+        "Osasuna de El Sadar",
+        "los Rojillos",
+        "el equipo navarro"
+      ]
+    },
+    "Rayo Vallecano": {
+      "officialName": "Rayo Vallecano",
+      "apiId": 728,
+      "shortNames": ["el Rayo", "el Vallecas", "el Rayo Vallecano"],
+      "nicknames": ["los Franjirrojos", "el Rayo de Vallecas", "los Rayistas"],
+      "fanNicknames": ["rayista", "franjirrojo", "vallecano"],
+      "stadium": "Vallecas",
+      "references": [
+        "el conjunto franjirrojo",
+        "el equipo de Vallecas",
+        "el Rayo vallecano",
+        "los Franjirrojos",
+        "el Rayo de Vallecas"
+      ]
+    },
+    "Mallorca": {
+      "officialName": "RCD Mallorca",
+      "apiId": 798,
+      "shortNames": ["el Mallorca", "el Bermellón", "el RCD Mallorca"],
+      "nicknames": ["los Bermellones", "los Piratas", "el Equipo Balear"],
+      "fanNicknames": ["bermellón", "mallorquinista", "balear"],
+      "stadium": "Son Moix",
+      "references": [
+        "el conjunto balear",
+        "el equipo de Mallorca",
+        "el Mallorca isleño",
+        "los Bermellones",
+        "el equipo mallorquín"
+      ]
+    },
+    "Girona": {
+      "officialName": "Girona FC",
+      "apiId": 547,
+      "shortNames": ["el Girona", "els Gironins", "el Girona FC"],
+      "nicknames": ["els Gironins", "els Blanc-i-vermells", "el Equipo Revelación"],
+      "fanNicknames": ["gironí", "gironista", "blanc-i-vermell"],
+      "stadium": "Montilivi",
+      "references": [
+        "el conjunto catalán",
+        "el equipo gerundense",
+        "el Girona de Montilivi",
+        "els Gironins",
+        "el equipo de Girona"
+      ]
+    },
+    "Alavés": {
+      "officialName": "Deportivo Alavés",
+      "apiId": 542,
+      "shortNames": ["el Alavés", "el Deportivo", "el D. Alavés"],
+      "nicknames": ["los Babazorros", "el Glorioso", "el Equipo de Mendizorroza"],
+      "fanNicknames": ["babazorro", "alavesista", "vitoriano"],
+      "stadium": "Mendizorroza",
+      "references": [
+        "el conjunto vitoriano",
+        "el equipo vasco",
+        "el Alavés de Vitoria",
+        "los Babazorros",
+        "el Glorioso"
+      ]
+    },
+    "Espanyol": {
+      "officialName": "RCD Espanyol",
+      "apiId": 540,
+      "shortNames": ["el Espanyol", "el Perico", "el RCD Espanyol"],
+      "nicknames": ["los Pericos", "los Blanquiazules", "los Periquitos"],
+      "fanNicknames": ["perico", "espanyolista", "blanquiazul"],
+      "stadium": "el RCDE Stadium",
+      "references": [
+        "el conjunto perico",
+        "el equipo barcelonés",
+        "el Espanyol de Barcelona",
+        "los Pericos",
+        "el equipo blanquiazul"
+      ]
+    },
+    "Levante": {
+      "officialName": "Levante UD",
+      "apiId": 539,
+      "shortNames": ["el Levante", "el Granota", "el Levante UD"],
+      "nicknames": ["los Granotas", "los Azulgranas", "el Equipo del Poble Nou"],
+      "fanNicknames": ["granota", "levantinista", "valenciano"],
+      "stadium": "el Ciutat de València",
+      "references": [
+        "el conjunto granota",
+        "el equipo levantino",
+        "el Levante valenciano",
+        "los Granotas",
+        "el equipo del Ciutat"
+      ]
+    },
+    "Elche": {
+      "officialName": "Elche CF",
+      "apiId": 797,
+      "shortNames": ["el Elche", "el Franjiverda", "el Elche CF"],
+      "nicknames": ["los Franjiverdes", "el Equipo Ilicitano", "los del Martínez Valero"],
+      "fanNicknames": ["franjiverde", "ilicitano", "elchista"],
+      "stadium": "el Martínez Valero",
+      "references": [
+        "el conjunto franjiverde",
+        "el equipo alicantino",
+        "el Elche ilicitano",
+        "los Franjiverdes",
+        "el equipo del Martínez Valero"
+      ]
+    },
+    "Oviedo": {
+      "officialName": "Real Oviedo",
+      "apiId": 718,
+      "shortNames": ["el Oviedo", "el Real Oviedo", "el R. Oviedo"],
+      "nicknames": ["los Azules", "los Carbayones", "el Oviedismo"],
+      "fanNicknames": ["azul", "oviedista", "carbayón"],
+      "stadium": "Carlos Tartiere",
+      "references": [
+        "el conjunto asturiano",
+        "el equipo de Oviedo",
+        "los Carbayones",
+        "el Real Oviedo",
+        "el equipo azul"
+      ]
+    }
+  }
+}

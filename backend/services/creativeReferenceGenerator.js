@@ -15,26 +15,58 @@ class CreativeReferenceGenerator {
     constructor() {
         this.dictionaryPath = path.join(__dirname, '../../data/player-dictionary.json');
         this.dictionary = this.loadDictionary();
+        this.teamReferencesPath = path.join(__dirname, '../../data/team-references.json');
+        this.teamReferences = this.loadTeamReferences();
 
         // Base de conocimiento de apodos populares
         this.popularNicknames = {
-            'Vinicius Junior': ['Vini', 'Vinicius Jr', 'el brasileño', 'el 7 madridista', 'el extremo del Madrid'],
+            'Vinicius Junior': [
+                'Vini',
+                'Vinicius Jr',
+                'el brasileño',
+                'el 7 madridista',
+                'el extremo del Madrid'
+            ],
             'Vinicius Jr': ['Vini', 'el brasileño', 'el 7 madridista', 'el extremo'],
-            'Lamine Yamal': ['Lamine', 'el chaval', 'la joya azulgrana', 'el 19 del Barça', 'el extremo español'],
-            'Kylian Mbappé': ['Mbappé', 'Kylian', 'el francés', 'el 9 madridista', 'la estrella francesa'],
-            'Robert Lewandowski': ['Lewandowski', 'Lewy', 'el polaco', 'el 9 azulgrana', 'el killer'],
-            'Jude Bellingham': ['Bellingham', 'Jude', 'el inglés', 'el 5 madridista', 'el centrocampista'],
-            'Pedri': ['Pedri', 'el canario', 'el 8 azulgrana', 'el centrocampista del Barça'],
-            'Gavi': ['Gavi', 'el canterano', 'la perla azulgrana', 'el 6 del Barça'],
+            'Lamine Yamal': [
+                'Lamine',
+                'el chaval',
+                'la joya azulgrana',
+                'el 19 del Barça',
+                'el extremo español'
+            ],
+            'Kylian Mbappé': [
+                'Mbappé',
+                'Kylian',
+                'el francés',
+                'el 9 madridista',
+                'la estrella francesa'
+            ],
+            'Robert Lewandowski': [
+                'Lewandowski',
+                'Lewy',
+                'el polaco',
+                'el 9 azulgrana',
+                'el killer'
+            ],
+            'Jude Bellingham': [
+                'Bellingham',
+                'Jude',
+                'el inglés',
+                'el 5 madridista',
+                'el centrocampista'
+            ],
+            Pedri: ['Pedri', 'el canario', 'el 8 azulgrana', 'el centrocampista del Barça'],
+            Gavi: ['Gavi', 'el canterano', 'la perla azulgrana', 'el 6 del Barça'],
             'Iago Aspas': ['Aspas', 'el moañés', 'el capitán celeste', 'el 10 del Celta'],
             'Antoine Griezmann': ['Griezmann', 'Grizi', 'el francés', 'el 7 colchonero'],
             'Nico Williams': ['Nico', 'Williams', 'el 11 del Athletic', 'el extremo español'],
-            'Rodri': ['Rodri', 'el 16 colchonero', 'el centrocampista'],
+            Rodri: ['Rodri', 'el 16 colchonero', 'el centrocampista'],
             'Alvaro Morata': ['Morata', 'el 9 colchonero', 'el delantero español'],
-            'Joselu': ['Joselu', 'el 9', 'el delantero'],
+            Joselu: ['Joselu', 'el 9', 'el delantero'],
             'Dani Carvajal': ['Carvajal', 'el lateral madridista', 'el 2 del Madrid'],
             'Ferran Torres': ['Ferran', 'Torres', 'el 11 azulgrana', 'el extremo español'],
-            'Raphinha': ['Raphinha', 'el brasileño', 'el extremo azulgrana', 'el 11 del Barça'],
+            Raphinha: ['Raphinha', 'el brasileño', 'el extremo azulgrana', 'el 11 del Barça'],
             'Jules Koundé': ['Koundé', 'el francés', 'el central azulgrana'],
             'Ronald Araujo': ['Araujo', 'el uruguayo', 'el central azulgrana'],
             'Frenkie de Jong': ['De Jong', 'Frenkie', 'el holandés', 'el centrocampista azulgrana']
@@ -42,8 +74,20 @@ class CreativeReferenceGenerator {
 
         // Mapeo de números de dorsal + equipo
         this.dorsalMapping = {
-            'Real Madrid': { 1: 'Courtois', 7: 'Vinicius', 9: 'Mbappé', 5: 'Bellingham', 2: 'Carvajal' },
-            'Barcelona': { 1: 'Ter Stegen', 9: 'Lewandowski', 8: 'Pedri', 6: 'Gavi', 19: 'Lamine Yamal' },
+            'Real Madrid': {
+                1: 'Courtois',
+                7: 'Vinicius',
+                9: 'Mbappé',
+                5: 'Bellingham',
+                2: 'Carvajal'
+            },
+            Barcelona: {
+                1: 'Ter Stegen',
+                9: 'Lewandowski',
+                8: 'Pedri',
+                6: 'Gavi',
+                19: 'Lamine Yamal'
+            },
             'Atlético Madrid': { 7: 'Griezmann', 9: 'Morata', 16: 'Rodri' },
             'Athletic Club': { 11: 'Nico Williams' }
         };
@@ -52,7 +96,7 @@ class CreativeReferenceGenerator {
         this.nationalityMapping = {
             'Vinicius Junior': 'brasileño',
             'Vinicius Jr': 'brasileño',
-            'Raphinha': 'brasileño',
+            Raphinha: 'brasileño',
             'Kylian Mbappé': 'francés',
             'Antoine Griezmann': 'francés',
             'Jules Koundé': 'francés',
@@ -63,16 +107,16 @@ class CreativeReferenceGenerator {
             'Lamine Yamal': 'español',
             'Nico Williams': 'español',
             'Ferran Torres': 'español',
-            'Pedri': 'español',
-            'Gavi': 'español'
+            Pedri: 'español',
+            Gavi: 'español'
         };
 
         // Mapeo de posiciones genéricas
         this.positionMapping = {
-            'Goalkeeper': ['el portero', 'el guardameta', 'el cancerbero'],
-            'Defender': ['el defensa', 'el central', 'el lateral'],
-            'Midfielder': ['el centrocampista', 'el mediocentro', 'el volante'],
-            'Attacker': ['el delantero', 'el extremo', 'el ariete', 'el killer']
+            Goalkeeper: ['el portero', 'el guardameta', 'el cancerbero'],
+            Defender: ['el defensa', 'el central', 'el lateral'],
+            Midfielder: ['el centrocampista', 'el mediocentro', 'el volante'],
+            Attacker: ['el delantero', 'el extremo', 'el ariete', 'el killer']
         };
     }
 
@@ -98,6 +142,24 @@ class CreativeReferenceGenerator {
         }
     }
 
+    loadTeamReferences() {
+        try {
+            if (fs.existsSync(this.teamReferencesPath)) {
+                const data = fs.readFileSync(this.teamReferencesPath, 'utf8');
+                const parsed = JSON.parse(data);
+                return parsed.teams || {};
+            }
+            logger.warn('[CreativeReferenceGenerator] team-references.json not found');
+            return {};
+        } catch (error) {
+            logger.error(
+                '[CreativeReferenceGenerator] Error loading team references:',
+                error.message
+            );
+            return {};
+        }
+    }
+
     /**
      * Genera referencias creativas para un jugador
      * @param {string} playerName - Nombre completo del jugador
@@ -107,13 +169,17 @@ class CreativeReferenceGenerator {
     generateCreativeReferences(playerName, playerData = {}) {
         const { team, position, number } = playerData;
 
-        logger.info(`[CreativeReferenceGenerator] 🎨 Generando referencias para "${playerName}"...`);
+        logger.info(
+            `[CreativeReferenceGenerator] 🎨 Generando referencias para "${playerName}"...`
+        );
 
         // 1. Verificar si ya existe en diccionario
         if (this.dictionary.players[playerName]) {
             const existing = this.dictionary.players[playerName].safeReferences || [];
             if (existing.length > 0) {
-                logger.info(`[CreativeReferenceGenerator] 📖 Usando referencias existentes: ${existing.join(', ')}`);
+                logger.info(
+                    `[CreativeReferenceGenerator] 📖 Usando referencias existentes: ${existing.join(', ')}`
+                );
                 return existing;
             }
         }
@@ -159,7 +225,9 @@ class CreativeReferenceGenerator {
         }
 
         const finalReferences = Array.from(references);
-        logger.info(`[CreativeReferenceGenerator] ✅ ${finalReferences.length} referencias generadas:`);
+        logger.info(
+            `[CreativeReferenceGenerator] ✅ ${finalReferences.length} referencias generadas:`
+        );
         logger.info(`   ${finalReferences.join(', ')}`);
 
         return finalReferences;
@@ -193,14 +261,18 @@ class CreativeReferenceGenerator {
                 addedAt: new Date().toISOString()
             };
 
-            logger.info(`[CreativeReferenceGenerator] 📝 Nueva entrada creada para "${playerName}"`);
+            logger.info(
+                `[CreativeReferenceGenerator] 📝 Nueva entrada creada para "${playerName}"`
+            );
         } else {
             // Actualizar referencias si hay nuevas
             const current = this.dictionary.players[playerName].safeReferences || [];
             const merged = Array.from(new Set([...current, ...creativeRefs]));
 
             this.dictionary.players[playerName].safeReferences = merged;
-            this.dictionary.players[playerName].safeNicknames = merged.filter(ref => ref !== 'el jugador');
+            this.dictionary.players[playerName].safeNicknames = merged.filter(
+                ref => ref !== 'el jugador'
+            );
 
             logger.info(`[CreativeReferenceGenerator] 🔄 Entrada actualizada para "${playerName}"`);
         }
@@ -231,12 +303,13 @@ class CreativeReferenceGenerator {
 
         // Filtrar genéricas si se solicita
         if (avoidGeneric) {
-            const filtered = references.filter(ref =>
-                ref !== 'el jugador' &&
-                ref !== 'el delantero' &&
-                ref !== 'el centrocampista' &&
-                ref !== 'el defensa' &&
-                ref !== 'el portero'
+            const filtered = references.filter(
+                ref =>
+                    ref !== 'el jugador' &&
+                    ref !== 'el delantero' &&
+                    ref !== 'el centrocampista' &&
+                    ref !== 'el defensa' &&
+                    ref !== 'el portero'
             );
 
             if (filtered.length > 0) {
@@ -261,7 +334,9 @@ class CreativeReferenceGenerator {
      * Extrae apellido del nombre completo
      */
     extractSurname(fullName) {
-        if (!fullName) return 'el jugador';
+        if (!fullName) {
+            return 'el jugador';
+        }
         const parts = fullName.trim().split(' ');
         return parts[parts.length - 1];
     }
@@ -271,38 +346,80 @@ class CreativeReferenceGenerator {
      */
     getPositionReference(position) {
         const posMap = {
-            'Goalkeeper': 'portero',
-            'Defender': 'defensa',
-            'Midfielder': 'centrocampista',
-            'Attacker': 'delantero'
+            Goalkeeper: 'portero',
+            Defender: 'defensa',
+            Midfielder: 'centrocampista',
+            Attacker: 'delantero'
         };
         return posMap[position] || 'jugador';
     }
 
     /**
-     * Obtiene nombre corto del equipo
+     * Obtiene nombre corto del equipo desde team-references.json
      */
     getTeamShortName(team) {
-        const shortNames = {
+        const teamData = this.teamReferences[team];
+        if (teamData && teamData.fanNicknames && teamData.fanNicknames.length > 0) {
+            // Retorna el primer fanNickname (más común)
+            return teamData.fanNicknames[0];
+        }
+
+        // Fallback a nombres básicos si no existe en referencias
+        const fallbackNames = {
             'Real Madrid': 'madridista',
-            'Barcelona': 'azulgrana',
+            Barcelona: 'azulgrana',
             'Atlético Madrid': 'colchonero',
             'Athletic Club': 'del Athletic',
             'Celta de Vigo': 'celeste',
-            'Sevilla': 'del Sevilla',
-            'Valencia': 'del Valencia',
+            Sevilla: 'del Sevilla',
+            Valencia: 'del Valencia',
             'Real Sociedad': 'txuri-urdin',
             'Real Betis': 'del Betis',
-            'Villarreal': 'del Villarreal'
+            Villarreal: 'del Villarreal'
         };
-        return shortNames[team] || `del ${team}`;
+        return fallbackNames[team] || `del ${team}`;
+    }
+
+    /**
+     * Obtiene referencia aleatoria de un equipo
+     * @param {string} team - Nombre del equipo
+     * @param {string} type - Tipo de referencia: 'short', 'nickname', 'reference'
+     * @returns {string} - Referencia del equipo
+     */
+    getTeamReference(team, type = 'reference') {
+        const teamData = this.teamReferences[team];
+        if (!teamData) {
+            return team;
+        }
+
+        let options = [];
+        switch (type) {
+            case 'short':
+                options = teamData.shortNames || [];
+                break;
+            case 'nickname':
+                options = teamData.nicknames || [];
+                break;
+            case 'reference':
+                options = teamData.references || [];
+                break;
+            default:
+                options = [...(teamData.shortNames || []), ...(teamData.references || [])];
+        }
+
+        if (options.length === 0) {
+            return team;
+        }
+        return options[Math.floor(Math.random() * options.length)];
     }
 
     /**
      * Genera combinaciones a evitar
      */
     generateAvoidCombinations(playerName, team) {
-        if (!team) return [];
+        if (!team) {
+            return [];
+        }
 
         const surname = this.extractSurname(playerName);
         return [
@@ -321,7 +438,9 @@ class CreativeReferenceGenerator {
      * @returns {string} - Guión mejorado
      */
     enrichScriptWithCreativeReferences(script, playerName, playerData = {}) {
-        logger.info('[CreativeReferenceGenerator] 📝 Enriqueciendo guión con referencias creativas...');
+        logger.info(
+            '[CreativeReferenceGenerator] 📝 Enriqueciendo guión con referencias creativas...'
+        );
 
         // Asegurar entrada en diccionario
         if (!this.dictionary.players[playerName]) {
@@ -347,7 +466,7 @@ class CreativeReferenceGenerator {
         });
 
         let count = 0;
-        enriched = enriched.replace(surnameRegex, (match) => {
+        enriched = enriched.replace(surnameRegex, match => {
             count++;
             // Alternar entre referencias
             return count % 2 === 0 ? alternativeRef : match;

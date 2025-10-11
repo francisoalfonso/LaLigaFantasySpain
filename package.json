@@ -43,6 +43,7 @@
     "veo3:test-retry-v3": "node scripts/veo3/test-conservative-strategy-v3.js",
     "veo3:test-optimized": "node scripts/veo3/test-optimized-prompt-builder.js",
     "veo3:test-google-vs-kie": "node scripts/veo3/test-google-vertex-vs-kie.js",
+    "veo3:test-nano-banana": "node scripts/veo3/test-nano-banana-flow-e2e.js",
     "sync:player-photos": "node scripts/sync-player-photos.js",
     "instagram:test-e2e": "node scripts/instagram/test-e2e-chollos-instagram.js",
     "n8n:check-versions": "node scripts/n8n-version-check.js",

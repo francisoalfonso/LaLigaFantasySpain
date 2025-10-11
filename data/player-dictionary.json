@@ -36,8 +36,8 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "testedSuccessRate": 1,
-      "lastTested": "2025-10-06T05:59:45.239Z",
-      "totalVideos": 19,
+      "lastTested": "2025-10-10T22:30:05.258Z",
+      "totalVideos": 23,
       "addedAt": "2025-10-03T05:11:21.386Z"
     },
     "Pepelu": {
@@ -261,6 +261,15 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-04T16:15:24.309Z"
+    },
+    "Valencia CF": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-10T18:48:30.065Z"
     }
   }
 }

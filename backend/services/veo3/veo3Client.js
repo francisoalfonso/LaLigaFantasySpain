@@ -146,13 +146,15 @@ class VEO3Client {
                 aspectRatio: options.aspectRatio || this.defaultAspect,
                 seeds: this.characterSeed, // ✅ NOTA: API usa "seeds" (plural)
                 watermark: options.watermark || this.watermark, // ✅ NOTA: "watermark" no "waterMark"
-                enableTranslation: options.enableTranslation !== false,
+                enableTranslation: false, // ✅ FIX (10 Oct 2025): NUNCA traducir - elimina "speaks in Spanish from Spain"
                 enableFallback: options.enableFallback !== false
                 // ❌ ELIMINADOS parámetros no soportados:
                 // - voice: NO existe en API
                 // - referenceImageWeight: NO existe en API
                 // - characterConsistency: NO existe en API
                 // Control de idioma/acento se hace vía TEXTO DEL PROMPT (ver NORMA #3)
+                // ⚠️ IMPORTANTE: enableTranslation=true causa que KIE.ai "traduzca" el prompt,
+                //    eliminando la instrucción "speaks in Spanish from Spain" → audio en INGLÉS
             };
 
             // ✅ Solo agregar imageUrls si hay imagen

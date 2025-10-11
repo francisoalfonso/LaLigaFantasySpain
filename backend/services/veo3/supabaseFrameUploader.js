@@ -19,9 +19,10 @@ class SupabaseFrameUploader {
      * Subir frame a Supabase Storage y obtener URL pública
      * @param {string} localFramePath - Ruta local del frame extraído
      * @param {string} segmentName - Nombre descriptivo (ej: 'seg1-end', 'seg2-end')
-     * @returns {Promise<string>} - URL pública del frame en Supabase
+     * @param {object} options - Opciones de upload
+     * @returns {Promise<string>} - URL pública o signed URL del frame en Supabase
      */
-    async uploadFrame(localFramePath, segmentName = 'frame') {
+    async uploadFrame(localFramePath, segmentName = 'frame', options = {}) {
         try {
             logger.info(`[SupabaseFrameUploader] Subiendo frame: ${localFramePath}`);
 
@@ -45,14 +46,40 @@ class SupabaseFrameUploader {
                 throw new Error(`Error subiendo frame: ${error.message}`);
             }
 
-            // Obtener URL pública
+            // ✅ FIX (10 Oct 2025): Generar Signed URL para VEO3
+            // VEO3/KIE.ai no puede acceder a URLs públicas de Supabase
+            // Usar signed URLs con expiración larga (24h)
+            const useSignedUrl = options.useSignedUrl !== false; // Default: true
+
+            if (useSignedUrl) {
+                const { data: signedData, error: signedError } = await supabaseAdmin.storage
+                    .from(this.bucketName)
+                    .createSignedUrl(fileName, 86400); // 24 horas (86400 segundos)
+
+                if (signedError) {
+                    logger.warn(`[SupabaseFrameUploader] ⚠️ Error generando signed URL: ${signedError.message}`);
+                    logger.warn(`[SupabaseFrameUploader] Fallback a URL pública`);
+
+                    // Fallback: URL pública
+                    const { data: publicUrlData } = supabaseAdmin.storage
+                        .from(this.bucketName)
+                        .getPublicUrl(fileName);
+
+                    return publicUrlData.publicUrl;
+                }
+
+                logger.info(`[SupabaseFrameUploader] ✅ Frame subido con signed URL (24h): ${signedData.signedUrl.substring(0, 80)}...`);
+                return signedData.signedUrl;
+            }
+
+            // URL pública (original)
             const { data: publicUrlData } = supabaseAdmin.storage
                 .from(this.bucketName)
                 .getPublicUrl(fileName);
 
             const publicUrl = publicUrlData.publicUrl;
 
-            logger.info(`[SupabaseFrameUploader] ✅ Frame subido: ${publicUrl}`);
+            logger.info(`[SupabaseFrameUploader] ✅ Frame subido con URL pública: ${publicUrl}`);
 
             return publicUrl;
 

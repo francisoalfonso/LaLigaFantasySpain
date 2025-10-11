@@ -496,6 +496,124 @@ class NanoBananaClient {
             referenceCount: this.anaReferenceUrls.length
         };
     }
+
+    /**
+     * ✅ NUEVO (10 Oct 2025): Generar imagen contextualizada con prompt personalizado
+     * Para integración con UnifiedScriptGenerator → Nano Banana → VEO3
+     *
+     * @param {string} customPrompt - Prompt con contexto del segmento
+     * @param {string} shotType - wide, medium, close-up
+     * @param {object} options - Opciones adicionales
+     * @returns {Promise<object>} - Imagen generada
+     */
+    async generateContextualImage(customPrompt, shotType, options = {}) {
+        try {
+            logger.info(`[NanoBananaClient] 🎨 Generando imagen contextualizada (${shotType})...`);
+            logger.info(`[NanoBananaClient] Prompt: "${customPrompt.substring(0, 100)}..."`);
+
+            const seed = options.seed || this.anaConfig.seed;
+
+            // Negative prompt para evitar reflejos rojizos y aspecto 3D
+            const negativePrompt = `no red tint on hair, no red highlights on hair, no strong color reflections, no magenta tone on face, no HDR, no 3D render, no composite lighting mismatch, no overexposed red areas, no fake reflections`;
+
+            const payload = {
+                model: this.anaConfig.model,
+                input: {
+                    prompt: customPrompt,
+                    negative_prompt: negativePrompt,
+                    image_urls: this.anaReferenceUrls,
+                    output_format: this.anaConfig.outputFormat,
+                    image_size: this.anaConfig.imageSize, // "9:16" vertical 576x1024
+                    seed: seed,
+                    prompt_strength: this.anaConfig.promptStrength,
+                    transparent_background: false,
+                    n: 1
+                }
+            };
+
+            // 1. Crear tarea
+            const createResponse = await axios.post(
+                `${this.baseUrl}${this.createTaskEndpoint}`,
+                payload,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    timeout: 30000
+                }
+            );
+
+            const taskId = createResponse.data?.data?.taskId;
+
+            if (!taskId) {
+                logger.error('[NanoBananaClient] ❌ No se recibió taskId');
+                logger.error('[NanoBananaClient] Response:', JSON.stringify(createResponse.data, null, 2));
+                throw new Error('No se recibió task_id en respuesta de createTask');
+            }
+
+            logger.info(`[NanoBananaClient] Task creada: ${taskId}, esperando generación...`);
+
+            // 2. Polling hasta que complete
+            let imageUrl = null;
+            let attempts = 0;
+            const maxAttempts = 40;
+
+            while (!imageUrl && attempts < maxAttempts) {
+                attempts++;
+
+                if (attempts > 1) {
+                    await this.sleep(3000);
+                }
+
+                const statusResponse = await axios.get(
+                    `${this.baseUrl}${this.recordInfoEndpoint}`,
+                    {
+                        params: { taskId: taskId },
+                        headers: {
+                            'Authorization': `Bearer ${this.apiKey}`
+                        },
+                        timeout: 15000
+                    }
+                );
+
+                const data = statusResponse.data?.data;
+                const state = data?.state;
+
+                logger.info(`[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`);
+
+                if (state === 'success') {
+                    const result = JSON.parse(data.resultJson);
+                    imageUrl = result?.resultUrls?.[0];
+
+                    if (!imageUrl) {
+                        throw new Error('No se encontró URL en resultJson');
+                    }
+                    break;
+                } else if (state === 'failed' || state === 'fail') {
+                    const errorMsg = data?.failMsg || 'Generación de imagen falló en servidor';
+                    throw new Error(errorMsg);
+                }
+            }
+
+            if (!imageUrl) {
+                throw new Error(`Timeout esperando generación después de ${maxAttempts} intentos`);
+            }
+
+            logger.info(`[NanoBananaClient] ✅ Imagen generada: ${imageUrl.substring(0, 80)}...`);
+
+            return {
+                url: imageUrl,
+                shot: shotType,
+                seed: seed,
+                generatedAt: new Date().toISOString()
+            };
+
+        } catch (error) {
+            logger.error('[NanoBananaClient] ❌ Error generando imagen contextualizada:', error.message);
+            throw error;
+        }
+    }
 }
 
 module.exports = NanoBananaClient;

@@ -57,9 +57,10 @@ class NanoBananaVeo3Integrator {
             logger.info(`[NanoBananaVeo3Integrator] ✅ Imagen descargada: ${localPath}`);
 
             return localPath;
-
         } catch (error) {
-            logger.error(`[NanoBananaVeo3Integrator] ❌ Error descargando imagen: ${error.message}`);
+            logger.error(
+                `[NanoBananaVeo3Integrator] ❌ Error descargando imagen: ${error.message}`
+            );
             throw error;
         }
     }
@@ -88,7 +89,9 @@ class NanoBananaVeo3Integrator {
             for (let i = 0; i < nanoBananaImages.length; i++) {
                 const nanoImage = nanoBananaImages[i];
 
-                logger.info(`[NanoBananaVeo3Integrator] 🔄 Procesando imagen ${i + 1}/3 (${nanoImage.shot})...`);
+                logger.info(
+                    `[NanoBananaVeo3Integrator] 🔄 Procesando imagen ${i + 1}/3 (${nanoImage.shot})...`
+                );
 
                 try {
                     // Descargar imagen desde URL temporal de Nano Banana
@@ -97,9 +100,13 @@ class NanoBananaVeo3Integrator {
 
                     // Subir a Supabase Storage con signed URL para VEO3
                     const segmentName = `seg${i + 1}-${nanoImage.shot}`;
-                    const supabaseUrl = await supabaseFrameUploader.uploadFrame(localPath, segmentName, {
-                        useSignedUrl: true // ✅ Usar signed URL para VEO3
-                    });
+                    const supabaseUrl = await supabaseFrameUploader.uploadFrame(
+                        localPath,
+                        segmentName,
+                        {
+                            useSignedUrl: true // ✅ Usar signed URL para VEO3
+                        }
+                    );
 
                     // Limpiar archivo local
                     fs.unlinkSync(localPath);
@@ -109,15 +116,19 @@ class NanoBananaVeo3Integrator {
                         shot: nanoImage.shot,
                         segmentRole: nanoImage.segmentRole,
                         originalUrl: nanoImage.url, // URL temporal de Nano Banana
-                        supabaseUrl: supabaseUrl,   // Signed URL de Supabase (para VEO3)
+                        supabaseUrl: supabaseUrl, // Signed URL de Supabase (para VEO3)
                         seed: nanoImage.seed,
                         generatedAt: nanoImage.generatedAt
                     });
 
-                    logger.info(`[NanoBananaVeo3Integrator] ✅ Imagen ${i + 1} procesada: ${supabaseUrl.substring(0, 80)}...`);
-
+                    logger.info(
+                        `[NanoBananaVeo3Integrator] ✅ Imagen ${i + 1} procesada: ${supabaseUrl.substring(0, 80)}...`
+                    );
                 } catch (error) {
-                    logger.error(`[NanoBananaVeo3Integrator] ❌ Error procesando imagen ${i + 1}:`, error);
+                    logger.error(
+                        `[NanoBananaVeo3Integrator] ❌ Error procesando imagen ${i + 1}:`,
+                        error
+                    );
                     throw error;
                 }
             }
@@ -126,8 +137,12 @@ class NanoBananaVeo3Integrator {
             const totalCost = nanoBananaImages.length * 0.02; // Nano Banana costo
 
             logger.info(`[NanoBananaVeo3Integrator] ✅ Procesamiento completado en ${duration}s`);
-            logger.info(`[NanoBananaVeo3Integrator] 💰 Costo Nano Banana: $${totalCost.toFixed(3)}`);
-            logger.info(`[NanoBananaVeo3Integrator] 📊 ${processedImages.length} imágenes listas para VEO3`);
+            logger.info(
+                `[NanoBananaVeo3Integrator] 💰 Costo Nano Banana: $${totalCost.toFixed(3)}`
+            );
+            logger.info(
+                `[NanoBananaVeo3Integrator] 📊 ${processedImages.length} imágenes listas para VEO3`
+            );
 
             return {
                 images: processedImages,
@@ -138,7 +153,6 @@ class NanoBananaVeo3Integrator {
                     processedAt: new Date().toISOString()
                 }
             };
-
         } catch (error) {
             logger.error('[NanoBananaVeo3Integrator] ❌ Error en generación:', error);
             throw error;
@@ -155,7 +169,9 @@ class NanoBananaVeo3Integrator {
      */
     async generateImagesFromScript(scriptSegments, options = {}) {
         try {
-            logger.info('[NanoBananaVeo3Integrator] 🎨 Generando 3 imágenes contextualizadas del guión...');
+            logger.info(
+                '[NanoBananaVeo3Integrator] 🎨 Generando 3 imágenes contextualizadas del guión...'
+            );
 
             if (!scriptSegments || scriptSegments.length !== 3) {
                 throw new Error('Se requieren exactamente 3 segmentos del script');
@@ -168,12 +184,16 @@ class NanoBananaVeo3Integrator {
                 // scriptSegments es un array de 3 segmentos [hook, development, cta]
                 const segment = scriptSegments[i];
 
-                logger.info(`[NanoBananaVeo3Integrator] 🖼️  Generando imagen ${i + 1}/3 (${segment.role})...`);
+                logger.info(
+                    `[NanoBananaVeo3Integrator] 🖼️  Generando imagen ${i + 1}/3 (${segment.role})...`
+                );
 
                 // Construir prompt contextualizado para Nano Banana
                 const imagePrompt = this.buildContextualImagePrompt(segment);
 
-                logger.info(`[NanoBananaVeo3Integrator] 📝 Prompt: "${imagePrompt.substring(0, 100)}..."`);
+                logger.info(
+                    `[NanoBananaVeo3Integrator] 📝 Prompt: "${imagePrompt.substring(0, 100)}..."`
+                );
 
                 // ✅ FIX (10 Oct 2025 21:05): cinematography.name (no cinematography.shot)
                 const shotType = segment.cinematography?.name || 'medium';
@@ -190,9 +210,13 @@ class NanoBananaVeo3Integrator {
                 const localPath = await this.downloadImage(nanoImage.url, fileName);
 
                 const segmentName = `seg${i + 1}-${segment.role}`;
-                const supabaseUrl = await supabaseFrameUploader.uploadFrame(localPath, segmentName, {
-                    useSignedUrl: true // ✅ Signed URL para VEO3
-                });
+                const supabaseUrl = await supabaseFrameUploader.uploadFrame(
+                    localPath,
+                    segmentName,
+                    {
+                        useSignedUrl: true // ✅ Signed URL para VEO3
+                    }
+                );
 
                 fs.unlinkSync(localPath); // Limpiar archivo local
 
@@ -207,13 +231,17 @@ class NanoBananaVeo3Integrator {
                     generatedAt: new Date().toISOString()
                 });
 
-                logger.info(`[NanoBananaVeo3Integrator] ✅ Imagen ${i + 1} procesada: ${supabaseUrl.substring(0, 80)}...`);
+                logger.info(
+                    `[NanoBananaVeo3Integrator] ✅ Imagen ${i + 1} procesada: ${supabaseUrl.substring(0, 80)}...`
+                );
             }
 
             const duration = ((Date.now() - startTime) / 1000).toFixed(1);
             const totalCost = processedImages.length * 0.02; // Nano Banana costo
 
-            logger.info(`[NanoBananaVeo3Integrator] ✅ ${processedImages.length} imágenes contextualizadas generadas en ${duration}s`);
+            logger.info(
+                `[NanoBananaVeo3Integrator] ✅ ${processedImages.length} imágenes contextualizadas generadas en ${duration}s`
+            );
             logger.info(`[NanoBananaVeo3Integrator] 💰 Costo: $${totalCost.toFixed(3)}`);
 
             return {
@@ -224,7 +252,6 @@ class NanoBananaVeo3Integrator {
                     processedAt: new Date().toISOString()
                 }
             };
-
         } catch (error) {
             logger.error('[NanoBananaVeo3Integrator] ❌ Error generando imágenes:', error);
             throw error;
@@ -246,53 +273,55 @@ class NanoBananaVeo3Integrator {
         const ANA_CHARACTER = require('../../config/veo3/anaCharacter');
 
         // Base: Ana character (descripción breve)
-        let prompt = `${ANA_CHARACTER.PHYSICAL_DESCRIPTION}. `;
+        let prompt = `${ANA_CHARACTER.ANA_CHARACTER_BIBLE}. `;
 
         // Contexto emocional del segmento
         const emotionMap = {
-            excitement: "excited expression with wide smile and raised eyebrows",
-            intrigue: "focused analytical expression looking at data",
-            urgency: "pointing at camera with urgent expression",
-            confidence: "confident smile with direct eye contact",
-            surprise: "surprised expression with open mouth",
-            enthusiasm: "energetic expression with bright eyes",
-            analysis: "thoughtful expression while analyzing",
-            concern: "concerned expression with furrowed brows",
-            determination: "determined expression with strong eye contact",
-            joy: "joyful smile with genuine happiness",
-            curiosity: "curious expression with raised eyebrows",
-            satisfaction: "satisfied smile with relaxed posture",
-            anticipation: "anticipatory expression with slight smile",
-            tension: "tense expression with focused gaze",
-            resolution: "resolved expression with calm demeanor"
+            excitement: 'excited expression with wide smile and raised eyebrows',
+            intrigue: 'focused analytical expression looking at data',
+            urgency: 'pointing at camera with urgent expression',
+            confidence: 'confident smile with direct eye contact',
+            surprise: 'surprised expression with open mouth',
+            enthusiasm: 'energetic expression with bright eyes',
+            analysis: 'thoughtful expression while analyzing',
+            concern: 'concerned expression with furrowed brows',
+            determination: 'determined expression with strong eye contact',
+            joy: 'joyful smile with genuine happiness',
+            curiosity: 'curious expression with raised eyebrows',
+            satisfaction: 'satisfied smile with relaxed posture',
+            anticipation: 'anticipatory expression with slight smile',
+            tension: 'tense expression with focused gaze',
+            resolution: 'resolved expression with calm demeanor'
         };
 
-        prompt += emotionMap[segment.emotion] || "professional expression";
-        prompt += ". ";
+        prompt += emotionMap[segment.emotion] || 'professional expression';
+        prompt += '. ';
 
         // ✅ NUEVO: Shot type con descripciones ESPECÍFICAS para máxima diferenciación visual
         const shotType = segment.cinematography?.name || 'medium';
 
         const shotDescriptions = {
-            'wide': "Wide shot showing full body from head to feet, standing position, complete studio environment visible with Fantasy La Liga graphics in background, distant camera perspective capturing entire scene, professional broadcast setup clearly visible",
+            wide: 'Wide shot showing full body from head to feet, standing position, complete studio environment visible with Fantasy La Liga graphics in background, distant camera perspective capturing entire scene, professional broadcast setup clearly visible',
 
-            'medium': "Medium shot framing from waist up, upper body and torso visible, balanced professional composition, direct eye contact with camera, news anchor style framing, studio background slightly blurred, confident on-camera presence",
+            medium: 'Medium shot framing from waist up, upper body and torso visible, balanced professional composition, direct eye contact with camera, news anchor style framing, studio background slightly blurred, confident on-camera presence',
 
-            'close-up': "Close-up shot of face and shoulders only, tight framing showing facial details and emotional nuances, intimate connection with viewer, eyes and expression are main focus, background heavily blurred, conversational proximity",
+            'close-up':
+                'Close-up shot of face and shoulders only, tight framing showing facial details and emotional nuances, intimate connection with viewer, eyes and expression are main focus, background heavily blurred, conversational proximity',
 
-            'medium close-up': "Medium close-up from chest up, face and upper chest visible, slightly tighter than medium shot but not as intimate as close-up, professional interview framing, clear facial expression with some body language visible"
+            'medium close-up':
+                'Medium close-up from chest up, face and upper chest visible, slightly tighter than medium shot but not as intimate as close-up, professional interview framing, clear facial expression with some body language visible'
         };
 
         // Agregar descripción específica del shot
         const shotDescription = shotDescriptions[shotType] || shotDescriptions['medium'];
         prompt += shotDescription;
-        prompt += ". ";
+        prompt += '. ';
 
         // Contexto cinematográfico adicional si existe
         if (segment.cinematography?.description && !shotDescriptions[shotType]) {
             // Solo agregar si no usamos descripción predefinida
             prompt += segment.cinematography.description;
-            prompt += ". ";
+            prompt += '. ';
         }
 
         // ✅ CRÍTICO: Forzar diferenciación visual explícita
@@ -311,9 +340,13 @@ class NanoBananaVeo3Integrator {
                 const filePath = path.join(this.tempDir, file);
                 fs.unlinkSync(filePath);
             });
-            logger.info(`[NanoBananaVeo3Integrator] 🧹 ${files.length} archivos temporales eliminados`);
+            logger.info(
+                `[NanoBananaVeo3Integrator] 🧹 ${files.length} archivos temporales eliminados`
+            );
         } catch (error) {
-            logger.error(`[NanoBananaVeo3Integrator] ⚠️  Error limpiando archivos: ${error.message}`);
+            logger.error(
+                `[NanoBananaVeo3Integrator] ⚠️  Error limpiando archivos: ${error.message}`
+            );
         }
     }
 }

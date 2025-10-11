@@ -105,7 +105,9 @@ class UnifiedScriptGenerator {
         // Validar cohesión narrativa
         const validation = this._validateNarrativeCohesion(segments);
 
-        logger.info(`[UnifiedScriptGenerator] ✅ Guión unificado generado: ${segments.length} segmentos`);
+        logger.info(
+            `[UnifiedScriptGenerator] ✅ Guión unificado generado: ${segments.length} segmentos`
+        );
         logger.info(`[UnifiedScriptGenerator] Cohesión narrativa: ${validation.score}/100`);
 
         return {
@@ -128,17 +130,19 @@ class UnifiedScriptGenerator {
      * ⭐ Template de guión para chollos (24s) - ARCO NARRATIVO PROGRESIVO
      * Basado en estrategia viral: Hook → Revelación → Validación → Urgencia → CTA
      *
-     * 🎯 CONSTRAINT ACTUALIZADO (11 Oct 2025): 40-45 palabras por segmento (~8s de audio)
-     * - Ana habla ~5 palabras/segundo (ritmo natural de presentadora TV)
-     * - Video: 8s por escena (duración total)
-     * - Audio: 40-45 palabras = ~8s de audio natural
+     * 🎯 CONSTRAINT ACTUALIZADO (11 Oct 2025 - Fix Timing): 27 palabras por segmento (~8s de audio)
+     * - Ana habla ~3.43 palabras/segundo (ritmo REAL medido en test E2E)
+     * - Video: 8s por escena (duración total VEO3 estándar playground)
+     * - Audio: 27 palabras = ~7.9s de audio natural SIN cortes
      * - Total: 3 escenas × 8s = 24s | Audio total: 3 × 8s = 24s
      *
-     * ✅ BASADO EN PROMPTS EXITOSOS DEL PLAYGROUND VEO3
-     * - Diálogos largos y naturales (como presentadora de TV real)
-     * - Continuidad narrativa entre los 3 segmentos (cuenta UNA historia completa)
-     * - Progresión emocional clara: curiosidad → autoridad → urgencia
-     * - MISMO jugador mencionado en los 3 segmentos (cohesión)
+     * ⚠️ PROBLEMA RESUELTO: Diálogos de 36 palabras se cortaban en segundo 6.8
+     * ✅ SOLUCIÓN CALCULADA: 7s = 24 palabras → 8s = 27 palabras (extrapolación lineal)
+     *
+     * ✅ BASADO EN TEST E2E REAL (11 Oct 2025, 08:40)
+     * - Test: 7s = 24 palabras (fluido, sin cortes)
+     * - Velocidad real: 24 / 7 = 3.43 palabras/segundo
+     * - Extrapolación: 8s × 3.43 = 27.4 palabras → 27 palabras
      *
      * ✅ ARCO NARRATIVO ÚNICO - Sin repeticiones, pero con continuidad
      * - Escena 1: Hook intrigante + presenta el chollo con misterio
@@ -149,33 +153,28 @@ class UnifiedScriptGenerator {
         return {
             // SEGMENTO 1 (0-8s): ACTO 1 - Hook + Intriga + Presentación
             // 🎭 Función: Capturar atención con misterio, presentar el chollo sin revelar TODO
-            // 📊 ~42 palabras → ~8.4s audio → ✅ PERFECTO PARA 8s
-            // Inspirado en: "No sabéis el chollazo que acabo de ver... El lateral del Madrid... a precio de risa..."
+            // 📊 27 palabras → 8s audio → ✅ CALCULADO (7s=24 palabras medido en test)
             segment1: {
-                hook: "No sabéis el chollazo que acabo de ver, misters...", // Intriga inicial
-                revelation: "{{player}} está a precio de risa en Fantasy.", // Presentación del chollo
-                context: "Y casi nadie lo está fichando todavía.", // Escasez social
-                promise: "Escuchadme bien porque esto es importante y puede cambiar vuestra jornada completa." // Promesa + engagement
+                hook: 'No sabéis el chollazo que acabo de ver, misters...', // Intriga inicial
+                revelation: '{{player}} está a precio de risa en Fantasy.', // Presentación del chollo
+                context: 'Y casi nadie lo está fichando todavía.', // Escasez social
+                promise: 'Esto puede cambiar vuestra jornada.' // Promesa (27 palabras TOTAL)
             },
             // SEGMENTO 2 (8-16s): ACTO 2 - Validación + Prueba con datos
             // 🎭 Función: Explicar POR QUÉ es chollo con datos concretos
-            // 📊 ~45 palabras → ~9s audio → ⚠️ Ajustado a ritmo natural
-            // Inspirado en: "Los números son brutales, misters. Este tío rinde como el mejor lateral..."
+            // 📊 27 palabras → 8s audio → ✅ CALCULADO
             segment2: {
-                impact: "Los números son brutales, misters.", // Impacto inicial
-                proof: "Este jugador rinde como los mejores de toda La Liga... ¡dobla su valor en puntos Fantasy!", // Prueba del chollo
-                evidence: "Y está más barato que un suplente random del Cádiz.", // Comparación impactante
-                validation: "Es matemática pura, no es suerte ni opinión." // Autoridad basada en datos
+                impact: 'Los números son brutales, misters.', // Impacto inicial
+                proof: 'Rinde como los mejores de La Liga... ¡dobla su valor en puntos!', // Prueba del chollo
+                evidence: 'Y está más barato que un suplente del Cádiz.' // Comparación (27 palabras TOTAL)
             },
             // SEGMENTO 3 (16-24s): ACTO 3 - Urgencia + Scarcity + CTA
             // 🎭 Función: Crear FOMO y obligar a actuar YA
-            // 📊 ~40 palabras → ~8s audio → ✅ PERFECTO PARA 8s
-            // Inspirado en: "Si no lo ficháis ahora, mañana vale el doble. ¡Corred, corred!"
+            // 📊 27 palabras → 8s audio → ✅ CALCULADO
             segment3: {
-                urgency: "¿Qué más queréis, misters?", // Pregunta retórica
-                scarcity: "¡El titular del {{team}} al precio de un suplente random!", // Enfatizar absurdo
-                fomo: "Si no lo ficháis ahora, mañana vale el doble.", // FOMO temporal
-                cta: "¡Corred, corred, que se acaba el chollo antes del deadline!" // CTA urgente
+                urgency: '¿Qué más queréis, misters?', // Pregunta retórica
+                scarcity: 'Titular del {{team}} al precio de un suplente random.', // Enfatizar absurdo
+                fomo: 'Si no lo ficháis ahora, mañana vale el doble.' // FOMO temporal (27 palabras TOTAL)
             }
         };
     }
@@ -186,21 +185,25 @@ class UnifiedScriptGenerator {
     _getAnalisisTemplate() {
         return {
             segment1: {
-                hook: "Análisis táctico: {{player}}.", // 2s
-                contexto: "En los últimos {{games}} partidos, ha cambiado su rol en el {{team}}. Y los números lo confirman.", // 6s
-                transition: "Vamos a los datos."
+                hook: 'Análisis táctico: {{player}}.', // 2s
+                contexto:
+                    'En los últimos {{games}} partidos, ha cambiado su rol en el {{team}}. Y los números lo confirman.', // 6s
+                transition: 'Vamos a los datos.'
             },
             segment2: {
-                conflicto: "{{goals}} goles, {{assists}} asistencias. Pero lo importante es DÓNDE los hace.", // 6s
-                inflexion_start: "Mirad su mapa de calor..." // 2s
+                conflicto:
+                    '{{goals}} goles, {{assists}} asistencias. Pero lo importante es DÓNDE los hace.', // 6s
+                inflexion_start: 'Mirad su mapa de calor...' // 2s
             },
             segment3: {
-                inflexion_continue: "Está recibiendo el balón en zonas de finalización. Su xG ha subido un {{xgIncrease}}%.", // 4s
-                resolucion: "El entrenador lo ha adelantado en el campo. Más cerca del gol = más puntos Fantasy.", // 4s
+                inflexion_continue:
+                    'Está recibiendo el balón en zonas de finalización. Su xG ha subido un {{xgIncrease}}%.', // 4s
+                resolucion:
+                    'El entrenador lo ha adelantado en el campo. Más cerca del gol = más puntos Fantasy.' // 4s
             },
             segment4: {
-                moraleja: "A {{price}} millones, con este nuevo rol, es una inversión inteligente.", // 4s
-                cta: "Los datos no mienten. Fichalo antes que suba.", // 4s
+                moraleja: 'A {{price}} millones, con este nuevo rol, es una inversión inteligente.', // 4s
+                cta: 'Los datos no mienten. Fichalo antes que suba.' // 4s
             }
         };
     }
@@ -211,20 +214,23 @@ class UnifiedScriptGenerator {
     _getBreakingTemplate() {
         return {
             segment1: {
-                hook: "ÚLTIMA HORA: {{player}}.", // 1.5s
-                contexto: "Acabo de confirmar información que cambia TODO para Fantasy. Escuchadme bien.", // 6.5s
+                hook: 'ÚLTIMA HORA: {{player}}.', // 1.5s
+                contexto:
+                    'Acabo de confirmar información que cambia TODO para Fantasy. Escuchadme bien.' // 6.5s
             },
             segment2: {
-                conflicto: "{{newsContent}}. Esto afecta directamente a su valor Fantasy.", // 6s
-                inflexion_start: "¿Qué significa esto para vosotros?" // 2s
+                conflicto: '{{newsContent}}. Esto afecta directamente a su valor Fantasy.', // 6s
+                inflexion_start: '¿Qué significa esto para vosotros?' // 2s
             },
             segment3: {
-                inflexion_continue: "{{impact}}. Los puntos que puede dar se multiplican.", // 4s
-                resolucion: "He hecho los cálculos: su proyección pasa de {{oldProjection}} a {{newProjection}} puntos.", // 4s
+                inflexion_continue: '{{impact}}. Los puntos que puede dar se multiplican.', // 4s
+                resolucion:
+                    'He hecho los cálculos: su proyección pasa de {{oldProjection}} a {{newProjection}} puntos.' // 4s
             },
             segment4: {
-                moraleja: "Esta información aún no la tiene todo el mundo. Ventana de oportunidad pequeña.", // 4s
-                cta: "Actúa AHORA o te quedarás fuera. Tu decides.", // 4s
+                moraleja:
+                    'Esta información aún no la tiene todo el mundo. Ventana de oportunidad pequeña.', // 4s
+                cta: 'Actúa AHORA o te quedarás fuera. Tu decides.' // 4s
             }
         };
     }
@@ -247,12 +253,14 @@ class UnifiedScriptGenerator {
                 number: playerData.number || null
             },
             {
-                avoidGeneric: true,      // Evitar "el jugador" si hay alternativas mejores
-                preferNickname: true     // Preferir apodos conocidos
+                avoidGeneric: true, // Evitar "el jugador" si hay alternativas mejores
+                preferNickname: true // Preferir apodos conocidos
             }
         );
 
-        logger.info(`[UnifiedScriptGenerator] 🎨 Referencia creativa: "${playerName}" → "${creativeRef}"`);
+        logger.info(
+            `[UnifiedScriptGenerator] 🎨 Referencia creativa: "${playerName}" → "${creativeRef}"`
+        );
 
         const playerLastName = creativeRef; // Usar referencia creativa en lugar de solo apellido
 
@@ -270,14 +278,14 @@ class UnifiedScriptGenerator {
         const valueRatioText = this._numberToSpanishText(ratioValue);
 
         const data = {
-            player: playerLastName,  // ✅ Solo apellido para optimizar con diccionario
+            player: playerLastName, // ✅ Solo apellido para optimizar con diccionario
             team: playerData.team || 'su equipo',
-            price: priceText,  // ✅ Precio en texto (ej: "cuatro punto cinco")
-            goals: goalsText,  // ✅ Con pluralización correcta ("2 goles" o "1 gol")
-            assists: assistsText,  // ✅ Con pluralización correcta ("1 asistencia" o "2 asistencias")
+            price: priceText, // ✅ Precio en texto (ej: "cuatro punto cinco")
+            goals: goalsText, // ✅ Con pluralización correcta ("2 goles" o "1 gol")
+            assists: assistsText, // ✅ Con pluralización correcta ("1 asistencia" o "2 asistencias")
             games: playerData.stats?.games || 0,
             valueRatio: ratioValue, // Número para uso en lógica
-            valueRatioText,  // ✅ Texto pronunciable (ej: "uno punto ocho")
+            valueRatioText, // ✅ Texto pronunciable (ej: "uno punto ocho")
             jornada: viralData.gameweek || 'jornada 5',
             xgIncrease: viralData.xgIncrease || '30',
             newsContent: viralData.newsContent || 'cambio en la alineación titular',
@@ -375,7 +383,7 @@ class UnifiedScriptGenerator {
             transitionTo: null
         });
 
-        // ⚠️ VALIDACIÓN: Verificar que cada diálogo cabe en 7s de audio (~17 palabras máx)
+        // ⚠️ VALIDACIÓN: Verificar que cada diálogo cabe en 8s de audio (~27 palabras óptimo)
         this._validateDialogueDuration(dialogue1, 'Segmento 1');
         this._validateDialogueDuration(dialogue2, 'Segmento 2');
         this._validateDialogueDuration(dialogue3, 'Segmento 3');
@@ -400,10 +408,10 @@ class UnifiedScriptGenerator {
         // Check 1: Cada segmento tiene diálogo
         segments.forEach((seg, i) => {
             if (!seg.dialogue || seg.dialogue.length < 10) {
-                checks.push({ check: `Segmento ${i+1} diálogo`, passed: false });
+                checks.push({ check: `Segmento ${i + 1} diálogo`, passed: false });
                 score -= 25;
             } else {
-                checks.push({ check: `Segmento ${i+1} diálogo`, passed: true });
+                checks.push({ check: `Segmento ${i + 1} diálogo`, passed: true });
             }
         });
 
@@ -411,10 +419,10 @@ class UnifiedScriptGenerator {
         for (let i = 0; i < segments.length - 1; i++) {
             const hasTransition = segments[i].transitionTo === `segment${i + 2}`;
             if (!hasTransition) {
-                checks.push({ check: `Transición ${i+1}→${i+2}`, passed: false });
+                checks.push({ check: `Transición ${i + 1}→${i + 2}`, passed: false });
                 score -= 15;
             } else {
-                checks.push({ check: `Transición ${i+1}→${i+2}`, passed: true });
+                checks.push({ check: `Transición ${i + 1}→${i + 2}`, passed: true });
             }
         }
 
@@ -422,46 +430,69 @@ class UnifiedScriptGenerator {
         const emotions = segments.map(s => s.emotion);
         const hasProgression = emotions.length === 4;
         checks.push({ check: 'Arco emocional', passed: hasProgression });
-        if (!hasProgression) score -= 20;
+        if (!hasProgression) {
+            score -= 20;
+        }
 
         return {
             score: Math.max(0, score),
             checks,
             cohesive: score >= 70,
-            recommendations: score < 70 ? ['Revisar transiciones entre segmentos', 'Verificar continuidad narrativa'] : []
+            recommendations:
+                score < 70
+                    ? ['Revisar transiciones entre segmentos', 'Verificar continuidad narrativa']
+                    : []
         };
     }
 
     /**
-     * ⚠️ Validar que el diálogo cabe en 8 segundos de audio (ACTUALIZADO 11 Oct 2025)
+     * ⚠️ Validar que el diálogo cabe en 8 segundos de audio (ACTUALIZADO 11 Oct 2025 - Fix Timing)
      * @param {string} dialogue - Texto del diálogo
      * @param {string} segmentName - Nombre del segmento (para logging)
      */
     _validateDialogueDuration(dialogue, segmentName) {
         const words = dialogue.trim().split(/\s+/);
         const wordCount = words.length;
-        const estimatedDuration = wordCount / 5; // Ana habla ~5 palabras/segundo (ritmo natural TV)
+        const estimatedDuration = wordCount / 3.43; // Ana habla ~3.43 palabras/segundo (MEDIDO en test E2E real: 24 palabras / 7s)
 
-        // Rangos aceptables basados en prompts exitosos del playground
-        const minWords = 35; // Mínimo para llenar 8s sin silencios
-        const maxWords = 50; // Máximo para no exceder 8s
-        const idealMin = 40;
-        const idealMax = 45;
+        // Rangos aceptables basados en TEST E2E REAL (11 Oct 2025, 08:40)
+        // Test: 7s = 24 palabras (fluido, sin cortes)
+        // Extrapolación: 8s = 27 palabras (calculado: 8 × 3.43 = 27.4)
+        const minWords = 25; // Mínimo para llenar 8s sin silencios (25 / 3.43 = 7.3s)
+        const maxWords = 29; // Máximo para no exceder 8s (29 / 3.43 = 8.5s con margen)
+        const idealMin = 26;
+        const idealMax = 28;
 
         if (wordCount < minWords) {
             logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} MUY CORTO:`);
-            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (mínimo: ${minWords})`);
-            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`);
-            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Silencios incómodos, VEO3 puede inventar contenido`);
+            logger.warn(
+                `[UnifiedScriptGenerator]    - Palabras: ${wordCount} (mínimo: ${minWords})`
+            );
+            logger.warn(
+                `[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`
+            );
+            logger.warn(
+                `[UnifiedScriptGenerator]    - RIESGO: Silencios incómodos, VEO3 puede inventar contenido`
+            );
         } else if (wordCount > maxWords) {
             logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} MUY LARGO:`);
-            logger.warn(`[UnifiedScriptGenerator]    - Palabras: ${wordCount} (máximo: ${maxWords})`);
-            logger.warn(`[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`);
-            logger.warn(`[UnifiedScriptGenerator]    - RIESGO: Ana hablará muy rápido o se cortará el audio`);
+            logger.warn(
+                `[UnifiedScriptGenerator]    - Palabras: ${wordCount} (máximo: ${maxWords})`
+            );
+            logger.warn(
+                `[UnifiedScriptGenerator]    - Duración estimada: ${estimatedDuration.toFixed(1)}s (objetivo: 8s)`
+            );
+            logger.warn(
+                `[UnifiedScriptGenerator]    - RIESGO: Se cortará el audio (medido en test E2E)`
+            );
         } else if (wordCount >= idealMin && wordCount <= idealMax) {
-            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - IDEAL`);
+            logger.info(
+                `[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - IDEAL`
+            );
         } else {
-            logger.info(`[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - OK`);
+            logger.info(
+                `[UnifiedScriptGenerator] ✅ ${segmentName}: ${wordCount} palabras (~${estimatedDuration.toFixed(1)}s audio) - OK`
+            );
         }
 
         return {
@@ -477,7 +508,9 @@ class UnifiedScriptGenerator {
      * @private
      */
     _numberToSpanishText(number) {
-        if (!number) return 'cero';
+        if (!number) {
+            return 'cero';
+        }
         const num = parseFloat(number);
 
         // Separar parte entera y decimal
@@ -486,9 +519,42 @@ class UnifiedScriptGenerator {
         const decimalPart = parts[1] ? parts[1] : null;
 
         // Números básicos
-        const ones = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-        const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
-        const tens = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+        const ones = [
+            '',
+            'uno',
+            'dos',
+            'tres',
+            'cuatro',
+            'cinco',
+            'seis',
+            'siete',
+            'ocho',
+            'nueve'
+        ];
+        const teens = [
+            'diez',
+            'once',
+            'doce',
+            'trece',
+            'catorce',
+            'quince',
+            'dieciséis',
+            'diecisiete',
+            'dieciocho',
+            'diecinueve'
+        ];
+        const tens = [
+            '',
+            '',
+            'veinte',
+            'treinta',
+            'cuarenta',
+            'cincuenta',
+            'sesenta',
+            'setenta',
+            'ochenta',
+            'noventa'
+        ];
 
         let result = '';
 
@@ -500,16 +566,19 @@ class UnifiedScriptGenerator {
         } else if (integerPart < 20) {
             result = teens[integerPart - 10];
         } else if (integerPart < 30) {
-            result = integerPart === 20 ? 'veinte' : 'veinti' + ones[integerPart - 20];
+            result = integerPart === 20 ? 'veinte' : `veinti${ones[integerPart - 20]}`;
         } else if (integerPart < 100) {
             const ten = Math.floor(integerPart / 10);
             const one = integerPart % 10;
-            result = tens[ten] + (one > 0 ? ' y ' + ones[one] : '');
+            result = tens[ten] + (one > 0 ? ` y ${ones[one]}` : '');
         }
 
         // Agregar parte decimal si existe
         if (decimalPart) {
-            result += ' punto ' + decimalPart.split('').map(d => ones[parseInt(d)] || 'cero').join(' ');
+            result += ` punto ${decimalPart
+                .split('')
+                .map(d => ones[parseInt(d)] || 'cero')
+                .join(' ')}`;
         }
 
         return result;

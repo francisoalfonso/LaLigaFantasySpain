@@ -239,7 +239,7 @@ class PlayerCardOverlay {
 
             await page.screenshot({
                 path: cardPath,
-                omitBackground: false // Incluir fondo
+                omitBackground: true // ✅ CRÍTICO: Capturar con canal alpha para transparencia real
             });
 
             await browser.close();
@@ -281,7 +281,7 @@ class PlayerCardOverlay {
             width: ${this.cardWidth}px;
             height: ${this.cardHeight}px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: rgba(255, 255, 255, 0.20);
+            background: rgba(255, 255, 255, 0.50);
             display: flex;
             align-items: center;
             padding: 12px;

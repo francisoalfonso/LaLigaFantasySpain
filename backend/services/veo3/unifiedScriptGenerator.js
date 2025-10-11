@@ -130,19 +130,20 @@ class UnifiedScriptGenerator {
      * ⭐ Template de guión para chollos (24s) - ARCO NARRATIVO PROGRESIVO
      * Basado en estrategia viral: Hook → Revelación → Validación → Urgencia → CTA
      *
-     * 🎯 CONSTRAINT ACTUALIZADO (11 Oct 2025 - Fix Timing): 27 palabras por segmento (~8s de audio)
+     * 🎯 CONSTRAINT ACTUALIZADO (11 Oct 2025 - Fix #4.2): 24-25 palabras por segmento (~8s de audio)
      * - Ana habla ~3.43 palabras/segundo (ritmo REAL medido en test E2E)
      * - Video: 8s por escena (duración total VEO3 estándar playground)
-     * - Audio: 27 palabras = ~7.9s de audio natural SIN cortes
+     * - Audio: 24-25 palabras = ~7.0-7.3s de audio natural SIN cortes
      * - Total: 3 escenas × 8s = 24s | Audio total: 3 × 8s = 24s
      *
-     * ⚠️ PROBLEMA RESUELTO: Diálogos de 36 palabras se cortaban en segundo 6.8
-     * ✅ SOLUCIÓN CALCULADA: 7s = 24 palabras → 8s = 27 palabras (extrapolación lineal)
+     * ⚠️ PROBLEMA RESUELTO (Fix #4.2): Diálogos de 27 palabras cortaban al final (video 661a21bd)
+     * ✅ SOLUCIÓN FINAL: Reducir a 24-25 palabras para dar margen de seguridad
      *
-     * ✅ BASADO EN TEST E2E REAL (11 Oct 2025, 08:40)
-     * - Test: 7s = 24 palabras (fluido, sin cortes)
+     * ✅ BASADO EN TESTS E2E REALES (11 Oct 2025)
+     * - Test 1 (08:40): 7s = 24 palabras (fluido, sin cortes) ✅
+     * - Test 2 (10:18): 8s = 27 palabras (Ana cortaba al final) ❌
      * - Velocidad real: 24 / 7 = 3.43 palabras/segundo
-     * - Extrapolación: 8s × 3.43 = 27.4 palabras → 27 palabras
+     * - Conclusión: 24-25 palabras es el rango óptimo para 8s sin cortes
      *
      * ✅ ARCO NARRATIVO ÚNICO - Sin repeticiones, pero con continuidad
      * - Escena 1: Hook intrigante + presenta el chollo con misterio
@@ -153,12 +154,13 @@ class UnifiedScriptGenerator {
         return {
             // SEGMENTO 1 (0-8s): ACTO 1 - Hook + Intriga + Presentación
             // 🎭 Función: Capturar atención con misterio, presentar el chollo sin revelar TODO
-            // 📊 27 palabras → 8s audio → ✅ CALCULADO (7s=24 palabras medido en test)
+            // 📊 25 palabras → 8s audio → ✅ FIX #4.2 (11 Oct 2025): Reducido de 27 a 25 palabras
+            // MEDIDO: Video 661a21bd con 27 palabras cortaba al final, reducido a 25 para dar margen
             segment1: {
-                hook: 'No sabéis el chollazo que acabo de ver, misters...', // Intriga inicial
-                revelation: '{{player}} está a precio de risa en Fantasy.', // Presentación del chollo
-                context: 'Y casi nadie lo está fichando todavía.', // Escasez social
-                promise: 'Esto puede cambiar vuestra jornada.' // Promesa (27 palabras TOTAL)
+                hook: 'Misters, tengo un chollazo que no os vais a creer...', // Intriga inicial (11 palabras)
+                revelation: '{{player}} está a precio de risa en Fantasy.', // Presentación del chollo (9 palabras)
+                context: 'Y casi nadie lo está fichando todavía.', // Escasez social (8 palabras)
+                promise: '' // Sin promesa para mantener 26 palabras TOTAL
             },
             // SEGMENTO 2 (8-16s): ACTO 2 - Validación + Prueba con datos
             // 🎭 Función: Explicar POR QUÉ es chollo con datos concretos
@@ -455,13 +457,14 @@ class UnifiedScriptGenerator {
         const wordCount = words.length;
         const estimatedDuration = wordCount / 3.43; // Ana habla ~3.43 palabras/segundo (MEDIDO en test E2E real: 24 palabras / 7s)
 
-        // Rangos aceptables basados en TEST E2E REAL (11 Oct 2025, 08:40)
-        // Test: 7s = 24 palabras (fluido, sin cortes)
-        // Extrapolación: 8s = 27 palabras (calculado: 8 × 3.43 = 27.4)
-        const minWords = 25; // Mínimo para llenar 8s sin silencios (25 / 3.43 = 7.3s)
-        const maxWords = 29; // Máximo para no exceder 8s (29 / 3.43 = 8.5s con margen)
-        const idealMin = 26;
-        const idealMax = 28;
+        // ✅ FIX #4.2 (11 Oct 2025): Rangos actualizados tras video 661a21bd
+        // Test anterior: 7s = 24 palabras (fluido, sin cortes)
+        // Test 661a21bd: 8s = 27 palabras → Ana cortaba al final
+        // Solución: Reducir a 25-26 palabras para dar margen de seguridad
+        const minWords = 24; // Mínimo para llenar 8s sin silencios (24 / 3.43 = 7.0s)
+        const maxWords = 26; // Máximo para no exceder 8s y evitar cortes (26 / 3.43 = 7.6s)
+        const idealMin = 24;
+        const idealMax = 25;
 
         if (wordCount < minWords) {
             logger.warn(`[UnifiedScriptGenerator] ⚠️ ${segmentName} MUY CORTO:`);

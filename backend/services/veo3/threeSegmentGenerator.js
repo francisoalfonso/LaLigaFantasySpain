@@ -45,16 +45,15 @@ class ThreeSegmentGenerator {
                 outro: 8,
                 total: 24
             },
-            // ⭐ OPTIMIZADO: Chollo viral (3 segmentos = 21s) - ESTRATEGIA REVELACIÓN SEGUNDO 3
-            // 🔧 FIX (8 Oct 2025): Reducido de 8s a 7s por segmento para evitar "cara rara" al final
-            // Problema: Ana termina de hablar a los ~6s pero video dura 8s → queda congelada 2s
-            // Solución: 7s por segmento da margen perfecto (audio 6s + 1s silencio natural)
+            // ⭐ OPTIMIZADO: Chollo viral (3 segmentos = 24s) - ESTRATEGIA REVELACIÓN SEGUNDO 3
+            // ✅ FIX #4 (11 Oct 2025): Aumentado de 7s a 8s para evitar transiciones no deseadas
+            // El diálogo de 27 palabras necesita 8 segundos completos (3.4 palabras/segundo)
             chollo_viral: {
                 segments: 3,
-                intro: 7, // Hook + REVELACIÓN (segundo 3) + Precio
-                stats: 7, // Validación con datos
-                outro: 7, // Urgencia + CTA
-                total: 21
+                intro: 8, // Hook + REVELACIÓN (segundo 3) + Precio
+                stats: 8, // Validación con datos
+                outro: 8, // Urgencia + CTA
+                total: 24
             },
             // Análisis profundo (4 segmentos = 32s)
             analisis_deep: {
@@ -522,23 +521,23 @@ class ThreeSegmentGenerator {
         const cholloContext =
             contentType === 'chollo'
                 ? {
-                    reason: `Precio bajo para ${playerData.position} de ${playerData.team}`,
-                    valueProposition: `${playerData.valueRatio}x valor vs precio`,
-                    urgency: 'Precio puede subir pronto'
-                }
+                      reason: `Precio bajo para ${playerData.position} de ${playerData.team}`,
+                      valueProposition: `${playerData.valueRatio}x valor vs precio`,
+                      urgency: 'Precio puede subir pronto'
+                  }
                 : null;
 
         const statsCardResult = cholloContext
             ? this.statsCardBuilder.buildCholloStatsSegment(playerData, cholloContext, {
-                duration,
-                style,
-                emphasizeStats
-            })
+                  duration,
+                  style,
+                  emphasizeStats
+              })
             : this.statsCardBuilder.buildStatsCardPrompt(playerData, {
-                duration,
-                style,
-                emphasizeStats
-            });
+                  duration,
+                  style,
+                  emphasizeStats
+              });
 
         return {
             type: 'stats_card',

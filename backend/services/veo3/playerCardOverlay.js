@@ -35,33 +35,33 @@ class PlayerCardOverlay {
         this.bargainsService = new BargainsDataService();
 
         // Dimensiones de la tarjeta (basado en mockup)
-        this.cardWidth = 320;  // Reducido de 380 a 320
+        this.cardWidth = 320; // Reducido de 380 a 320
         this.cardHeight = 100; // Reducido de 120 a 100
 
         // Posición en el video (parte inferior izquierda)
         // NOTA: Videos VEO3 son 720x1280 (no 1080x1920)
         this.cardPosition = {
-            x: 0,   // Pegado al borde izquierdo (sin margen)
-            y: 1280 - 100 - 310  // 310px desde el fondo (ajustado: +180px arriba total)
+            x: 0, // Pegado al borde izquierdo (sin margen)
+            y: 1280 - 100 - 310 // 310px desde el fondo (ajustado: +180px arriba total)
             // Resultado: y = 870px (para videos 720x1280)
         };
 
         // Timing de la animación
         this.animation = {
-            startTime: 3.0,      // Aparece en el segundo 3
-            duration: 4.0,       // Visible durante 4 segundos (hasta segundo 7)
+            startTime: 3.0, // Aparece en el segundo 3
+            duration: 4.0, // Visible durante 4 segundos (hasta segundo 7)
             slideInDuration: 0.5 // Animación de entrada dura 0.5s
         };
 
         // Tipografía y colores
         this.design = {
-            backgroundColor: 0xF5F5F5FF,  // Gris claro con opacidad
-            textColor: 0x000000FF,         // Negro para texto
-            accentColor: 0x3B82F6FF,       // Azul para números
-            photoSize: 100,                 // Tamaño de la foto circular
-            borderRadius: 12,               // Bordes redondeados de la tarjeta
-            padding: 10,                    // Padding interno
-            shadowColor: 0x00000040        // Sombra suave
+            backgroundColor: 0xf5f5f5ff, // Gris claro con opacidad
+            textColor: 0x000000ff, // Negro para texto
+            accentColor: 0x3b82f6ff, // Azul para números
+            photoSize: 100, // Tamaño de la foto circular
+            borderRadius: 12, // Bordes redondeados de la tarjeta
+            padding: 10, // Padding interno
+            shadowColor: 0x00000040 // Sombra suave
         };
 
         this.ensureDirectories();
@@ -107,7 +107,11 @@ class PlayerCardOverlay {
         try {
             // 1. Intentar foto local (si tenemos player_id)
             if (playerData.id) {
-                const localPhotoPath = path.join(__dirname, '../../../data/player-photos', `${playerData.id}.jpg`);
+                const localPhotoPath = path.join(
+                    __dirname,
+                    '../../../data/player-photos',
+                    `${playerData.id}.jpg`
+                );
                 logger.info(`[PlayerCardOverlay] 🔍 Buscando foto en: ${localPhotoPath}`);
 
                 if (fs.existsSync(localPhotoPath)) {
@@ -117,7 +121,9 @@ class PlayerCardOverlay {
                     const base64Image = imageBuffer.toString('base64');
                     return `data:image/jpeg;base64,${base64Image}`;
                 } else {
-                    logger.warn(`[PlayerCardOverlay] ⚠️  Foto local NO encontrada en: ${localPhotoPath}`);
+                    logger.warn(
+                        `[PlayerCardOverlay] ⚠️  Foto local NO encontrada en: ${localPhotoPath}`
+                    );
                 }
             } else {
                 logger.warn(`[PlayerCardOverlay] ⚠️  playerData.id no proporcionado`);
@@ -138,7 +144,6 @@ class PlayerCardOverlay {
             // 3. Placeholder (círculo gris con "?")
             logger.info(`[PlayerCardOverlay] ⚪ Usando placeholder para ${playerData.name}`);
             return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0NDQ0NDQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjQwIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+PzwvdGV4dD48L3N2Zz4=';
-
         } catch (error) {
             logger.error(`[PlayerCardOverlay] Error obteniendo foto: ${error.message}`);
             // Fallback a placeholder
@@ -166,11 +171,17 @@ class PlayerCardOverlay {
             let enrichedPlayerData = playerData;
 
             if (!playerData.id || !playerData.photo) {
-                logger.info(`[PlayerCardOverlay] Datos incompletos - buscando en caché de bargains...`);
-                const bargainData = await this.bargainsService.getBargainByPlayerName(playerData.name);
+                logger.info(
+                    `[PlayerCardOverlay] Datos incompletos - buscando en caché de bargains...`
+                );
+                const bargainData = await this.bargainsService.getBargainByPlayerName(
+                    playerData.name
+                );
 
                 if (bargainData) {
-                    logger.info(`[PlayerCardOverlay] ✅ Datos encontrados en caché (id: ${bargainData.id})`);
+                    logger.info(
+                        `[PlayerCardOverlay] ✅ Datos encontrados en caché (id: ${bargainData.id})`
+                    );
                     enrichedPlayerData = {
                         ...playerData,
                         id: bargainData.id,
@@ -179,7 +190,9 @@ class PlayerCardOverlay {
                         position: bargainData.position || playerData.position
                     };
                 } else {
-                    logger.warn(`[PlayerCardOverlay] ⚠️ Jugador no encontrado en caché de bargains`);
+                    logger.warn(
+                        `[PlayerCardOverlay] ⚠️ Jugador no encontrado en caché de bargains`
+                    );
                 }
             }
 
@@ -233,7 +246,6 @@ class PlayerCardOverlay {
 
             logger.info(`[PlayerCardOverlay] ✅ Tarjeta generada: ${cardPath}`);
             return cardPath;
-
         } catch (error) {
             if (browser) {
                 await browser.close();
@@ -249,7 +261,9 @@ class PlayerCardOverlay {
      */
     generateCardHTML(playerData) {
         // Si no hay foto, usamos un placeholder SVG embebido
-        const photoUrl = playerData.photo || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0NDQ0NDQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjQwIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+PzwvdGV4dD48L3N2Zz4=';
+        const photoUrl =
+            playerData.photo ||
+            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0NDQ0NDQyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjQwIiBmaWxsPSIjRkZGRkZGIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+PzwvdGV4dD48L3N2Zz4=';
 
         return `
 <!DOCTYPE html>
@@ -267,7 +281,7 @@ class PlayerCardOverlay {
             width: ${this.cardWidth}px;
             height: ${this.cardHeight}px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.20);
             display: flex;
             align-items: center;
             padding: 12px;
@@ -401,7 +415,6 @@ class PlayerCardOverlay {
         `.trim();
     }
 
-
     /**
      * Aplica overlay de tarjeta a un video con FFmpeg
      * Incluye animación slide-in desde la izquierda
@@ -438,7 +451,8 @@ class PlayerCardOverlay {
                 // - overlay=x=... : Posición X calculada dinámicamente
                 // - if(between(t,START,END), ...) : Solo visible entre START y END
                 // - Animación lineal desde initialX hasta finalX durante slideInDuration
-                const overlayFilter = `[0:v][1:v]overlay=` +
+                const overlayFilter =
+                    `[0:v][1:v]overlay=` +
                     `x='if(between(t,${startTime},${startTime + slideInDuration}),` +
                     `${initialX}+((${finalX}-${initialX})*((t-${startTime})/${slideInDuration})),` +
                     `if(between(t,${startTime + slideInDuration},${startTime + duration}),${finalX},-${this.cardWidth}))':` +
@@ -449,30 +463,26 @@ class PlayerCardOverlay {
                     .input(videoPath)
                     .input(cardImagePath)
                     .complexFilter([overlayFilter])
-                    .outputOptions([
-                        '-c:v libx264',
-                        '-preset fast',
-                        '-crf 23',
-                        '-c:a copy'
-                    ])
-                    .on('start', (commandLine) => {
+                    .outputOptions(['-c:v libx264', '-preset fast', '-crf 23', '-c:a copy'])
+                    .on('start', commandLine => {
                         logger.info(`[PlayerCardOverlay] FFmpeg iniciado: ${commandLine}`);
                     })
-                    .on('progress', (progress) => {
+                    .on('progress', progress => {
                         if (progress.percent) {
-                            logger.info(`[PlayerCardOverlay] Progreso: ${Math.round(progress.percent)}%`);
+                            logger.info(
+                                `[PlayerCardOverlay] Progreso: ${Math.round(progress.percent)}%`
+                            );
                         }
                     })
                     .on('end', () => {
                         logger.info(`[PlayerCardOverlay] ✅ Overlay aplicado: ${outputPath}`);
                         resolve(outputPath);
                     })
-                    .on('error', (error) => {
+                    .on('error', error => {
                         logger.error(`[PlayerCardOverlay] ❌ Error FFmpeg: ${error.message}`);
                         reject(error);
                     })
                     .save(outputPath);
-
             } catch (error) {
                 logger.error(`[PlayerCardOverlay] Error aplicando overlay: ${error.message}`);
                 reject(error);
@@ -499,14 +509,17 @@ class PlayerCardOverlay {
             if (options.cleanup !== false) {
                 try {
                     fs.unlinkSync(cardImagePath);
-                    logger.info(`[PlayerCardOverlay] 🗑️  Imagen temporal eliminada: ${cardImagePath}`);
+                    logger.info(
+                        `[PlayerCardOverlay] 🗑️  Imagen temporal eliminada: ${cardImagePath}`
+                    );
                 } catch (error) {
-                    logger.warn(`[PlayerCardOverlay] No se pudo eliminar imagen temporal: ${error.message}`);
+                    logger.warn(
+                        `[PlayerCardOverlay] No se pudo eliminar imagen temporal: ${error.message}`
+                    );
                 }
             }
 
             return videoWithCard;
-
         } catch (error) {
             logger.error(`[PlayerCardOverlay] Error en generateAndApplyCard: ${error.message}`);
             throw error;

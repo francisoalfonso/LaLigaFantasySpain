@@ -1548,10 +1548,12 @@ router.post('/generate-with-nano-banana', async (req, res) => {
                 );
 
                 // 🔧 DELAY entre segmentos (excepto el último)
+                // ✅ ACTUALIZADO (11 Oct 2025 - Fix #5): 30s → 90s para mayor seguridad
+                // Permite que VEO3 complete la generación sin presión de rate limiting
                 if (segmentNum < 3) {
-                    const delaySeconds = 30; // Cooling period VEO3
+                    const delaySeconds = 90; // Cooling period extendido para seguridad
                     logger.info(
-                        `[VEO3 Routes] ⏱️  Esperando ${delaySeconds}s antes del siguiente segmento...`
+                        `[VEO3 Routes] ⏱️  Esperando ${delaySeconds}s antes del siguiente segmento (enfriamiento seguro)...`
                     );
                     await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
                 }

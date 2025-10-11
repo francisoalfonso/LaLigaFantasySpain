@@ -136,7 +136,9 @@ class NanoBananaClient {
             const { index, shot, segmentRole, prompt, seed } = prompts[i];
 
             try {
-                logger.info(`[NanoBananaClient] 📸 Generando imagen ${index}/3 (${shot} - ${segmentRole})...`);
+                logger.info(
+                    `[NanoBananaClient] 📸 Generando imagen ${index}/3 (${shot} - ${segmentRole})...`
+                );
                 logger.info(`[NanoBananaClient]    Seed: ${seed}`);
 
                 // DEBUG: Log del payload que vamos a enviar
@@ -178,7 +180,7 @@ class NanoBananaClient {
                     },
                     {
                         headers: {
-                            'Authorization': `Bearer ${this.apiKey}`,
+                            Authorization: `Bearer ${this.apiKey}`,
                             'Content-Type': 'application/json'
                         },
                         timeout: 30000
@@ -192,7 +194,10 @@ class NanoBananaClient {
                 console.log('=====================================\n');
 
                 logger.info('[NanoBananaClient] 📋 Response status:', createResponse.status);
-                logger.info('[NanoBananaClient] 📋 Response data:', JSON.stringify(createResponse.data, null, 2));
+                logger.info(
+                    '[NanoBananaClient] 📋 Response data:',
+                    JSON.stringify(createResponse.data, null, 2)
+                );
 
                 // Extraer taskId
                 const taskId = createResponse.data?.data?.taskId;
@@ -204,7 +209,10 @@ class NanoBananaClient {
                     console.error('==========================\n');
 
                     logger.error('[NanoBananaClient] ❌ No se encontró task_id');
-                    logger.error('[NanoBananaClient] Response data:', JSON.stringify(createResponse.data, null, 2));
+                    logger.error(
+                        '[NanoBananaClient] Response data:',
+                        JSON.stringify(createResponse.data, null, 2)
+                    );
                     throw new Error('No se recibió task_id en respuesta de createTask');
                 }
 
@@ -213,7 +221,7 @@ class NanoBananaClient {
                 // 2. Polling para esperar que la imagen se genere
                 let imageUrl = null;
                 let attempts = 0;
-                const maxAttempts = 40; // 40 intentos × 3s = 120s max
+                const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
 
                 while (!imageUrl && attempts < maxAttempts) {
                     attempts++;
@@ -228,7 +236,7 @@ class NanoBananaClient {
                         {
                             params: { taskId: taskId },
                             headers: {
-                                'Authorization': `Bearer ${this.apiKey}`
+                                Authorization: `Bearer ${this.apiKey}`
                             },
                             timeout: 15000
                         }
@@ -238,7 +246,9 @@ class NanoBananaClient {
                     const state = data?.state;
                     const resultJson = data?.resultJson;
 
-                    logger.info(`[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`);
+                    logger.info(
+                        `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
+                    );
 
                     if (state === 'success') {
                         // Parsear resultJson para obtener URL
@@ -257,7 +267,9 @@ class NanoBananaClient {
                 }
 
                 if (!imageUrl) {
-                    throw new Error(`Timeout esperando generación después de ${maxAttempts} intentos`);
+                    throw new Error(
+                        `Timeout esperando generación después de ${maxAttempts} intentos`
+                    );
                 }
 
                 images.push({
@@ -279,17 +291,23 @@ class NanoBananaClient {
                     logger.info('[NanoBananaClient] ⏳ Cooling 3s antes de siguiente imagen...');
                     await this.sleep(3000);
                 }
-
             } catch (error) {
                 console.error('\n=== ERROR CAPTURADO ===');
                 console.error('Message:', error.message);
                 console.error('Response Status:', error.response?.status);
                 console.error('Response Data:', JSON.stringify(error.response?.data, null, 2));
-                console.error('Request Config:', JSON.stringify({
-                    url: error.config?.url,
-                    method: error.config?.method,
-                    headers: error.config?.headers
-                }, null, 2));
+                console.error(
+                    'Request Config:',
+                    JSON.stringify(
+                        {
+                            url: error.config?.url,
+                            method: error.config?.method,
+                            headers: error.config?.headers
+                        },
+                        null,
+                        2
+                    )
+                );
                 console.error('========================\n');
 
                 logger.error(`[NanoBananaClient] ❌ Error generando imagen ${index}:`, {
@@ -330,14 +348,16 @@ class NanoBananaClient {
 
         // Usar el MISMO prompt base que en generateAnaProgression (sin añadidos)
         // Añadir texto extra causa aspecto 3D/render
-        const basePrompt = customPrompt || `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
+        const basePrompt =
+            customPrompt ||
+            `ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin, confident professional expression`;
 
         const negativePrompt = `no red tint on hair, no red highlights on hair, no strong color reflections, no magenta tone on face, no HDR, no 3D render, no composite lighting mismatch, no overexposed red areas, no fake reflections`;
 
         // DEBUG
         console.log('\n=== GENERATE SINGLE IMAGE - PAYLOAD ===');
         console.log('Modelo:', this.anaConfig.model);
-        console.log('Prompt:', basePrompt.substring(0, 100) + '...');
+        console.log('Prompt:', `${basePrompt.substring(0, 100)}...`);
         console.log('Referencias:', this.anaReferenceUrls.length);
         console.log('Seed:', seed);
         console.log('========================================\n');
@@ -361,7 +381,7 @@ class NanoBananaClient {
                 },
                 {
                     headers: {
-                        'Authorization': `Bearer ${this.apiKey}`,
+                        Authorization: `Bearer ${this.apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     timeout: 30000
@@ -385,17 +405,19 @@ class NanoBananaClient {
             // Polling
             let imageUrl = null;
             let attempts = 0;
-            const maxAttempts = 40;
+            const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
 
             while (!imageUrl && attempts < maxAttempts) {
                 attempts++;
-                if (attempts > 1) await this.sleep(3000);
+                if (attempts > 1) {
+                    await this.sleep(3000);
+                }
 
                 const statusResponse = await axios.get(
                     `${this.baseUrl}${this.recordInfoEndpoint}`,
                     {
                         params: { taskId },
-                        headers: { 'Authorization': `Bearer ${this.apiKey}` },
+                        headers: { Authorization: `Bearer ${this.apiKey}` },
                         timeout: 15000
                     }
                 );
@@ -425,7 +447,6 @@ class NanoBananaClient {
                 prompt: basePrompt,
                 generatedAt: new Date().toISOString()
             };
-
         } catch (error) {
             console.error('\n=== ERROR EN SINGLE IMAGE ===');
             console.error('Message:', error.message);
@@ -471,7 +492,6 @@ class NanoBananaClient {
                 imageSize: this.anaConfig.imageSize,
                 pricing: '$0.020/imagen'
             };
-
         } catch (error) {
             logger.error('[NanoBananaClient] ❌ Health check falló:', error.message);
             return {
@@ -535,7 +555,7 @@ class NanoBananaClient {
                 payload,
                 {
                     headers: {
-                        'Authorization': `Bearer ${this.apiKey}`,
+                        Authorization: `Bearer ${this.apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     timeout: 30000
@@ -546,7 +566,10 @@ class NanoBananaClient {
 
             if (!taskId) {
                 logger.error('[NanoBananaClient] ❌ No se recibió taskId');
-                logger.error('[NanoBananaClient] Response:', JSON.stringify(createResponse.data, null, 2));
+                logger.error(
+                    '[NanoBananaClient] Response:',
+                    JSON.stringify(createResponse.data, null, 2)
+                );
                 throw new Error('No se recibió task_id en respuesta de createTask');
             }
 
@@ -555,7 +578,7 @@ class NanoBananaClient {
             // 2. Polling hasta que complete
             let imageUrl = null;
             let attempts = 0;
-            const maxAttempts = 40;
+            const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
 
             while (!imageUrl && attempts < maxAttempts) {
                 attempts++;
@@ -569,7 +592,7 @@ class NanoBananaClient {
                     {
                         params: { taskId: taskId },
                         headers: {
-                            'Authorization': `Bearer ${this.apiKey}`
+                            Authorization: `Bearer ${this.apiKey}`
                         },
                         timeout: 15000
                     }
@@ -578,7 +601,9 @@ class NanoBananaClient {
                 const data = statusResponse.data?.data;
                 const state = data?.state;
 
-                logger.info(`[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`);
+                logger.info(
+                    `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
+                );
 
                 if (state === 'success') {
                     const result = JSON.parse(data.resultJson);
@@ -606,9 +631,11 @@ class NanoBananaClient {
                 seed: seed,
                 generatedAt: new Date().toISOString()
             };
-
         } catch (error) {
-            logger.error('[NanoBananaClient] ❌ Error generando imagen contextualizada:', error.message);
+            logger.error(
+                '[NanoBananaClient] ❌ Error generando imagen contextualizada:',
+                error.message
+            );
             throw error;
         }
     }

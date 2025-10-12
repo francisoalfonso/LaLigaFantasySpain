@@ -21,20 +21,27 @@ class YouTubeMonitor {
     /**
      * Obtener últimos videos de un canal
      *
-     * @param {string} channelUrl - URL del canal (@username o /channel/UCxxx)
+     * @param {string} channelUrlOrId - URL del canal, @username, o channel ID directo (UCxxx)
      * @param {number} maxResults - Número máximo de videos a obtener
      * @returns {Promise<Array>} Lista de videos
      */
-    async getLatestVideos(channelUrl, maxResults = 10) {
+    async getLatestVideos(channelUrlOrId, maxResults = 10) {
         try {
             logger.info('[YouTubeMonitor] Obteniendo videos del canal', {
-                channelUrl,
+                input: channelUrlOrId,
                 maxResults,
                 method: this.useRSS ? 'RSS' : 'API'
             });
 
-            // Extraer channel ID o username
-            const channelId = this._extractChannelId(channelUrl);
+            // Si ya es un channel ID válido, usarlo directamente
+            let channelId;
+            if (channelUrlOrId.startsWith('UC') && !channelUrlOrId.includes('/')) {
+                channelId = channelUrlOrId;
+                logger.info('[YouTubeMonitor] Usando channel ID directo', { channelId });
+            } else {
+                // Extraer channel ID de URL o username
+                channelId = await this._extractChannelId(channelUrlOrId);
+            }
 
             if (this.useRSS) {
                 // Método RSS (sin API key necesaria)
@@ -46,7 +53,7 @@ class YouTubeMonitor {
         } catch (error) {
             logger.error('[YouTubeMonitor] Error obteniendo videos', {
                 error: error.message,
-                channelUrl
+                channelUrlOrId
             });
 
             throw new Error(`Failed to get videos: ${error.message}`);
@@ -132,11 +139,44 @@ class YouTubeMonitor {
             channelName: item.snippet.channelTitle
         }));
 
-        logger.info('[YouTubeMonitor] ✅ Videos obtenidos vía API', {
-            count: videos.length
+        // Obtener estadísticas (views, likes, comments) de cada video
+        const videoIds = videos.map(v => v.videoId).join(',');
+
+        const statsResponse = await axios.get(`${this.baseUrl}/videos`, {
+            params: {
+                key: this.apiKey,
+                id: videoIds,
+                part: 'statistics,contentDetails'
+            }
         });
 
-        return videos;
+        // Combinar videos con sus estadísticas
+        const videosWithStats = videos.map(video => {
+            const stats = statsResponse.data.items.find(item => item.id === video.videoId);
+
+            return {
+                ...video,
+                views: parseInt(stats?.statistics?.viewCount || 0),
+                likes: parseInt(stats?.statistics?.likeCount || 0),
+                comments: parseInt(stats?.statistics?.commentCount || 0),
+                duration: stats?.contentDetails?.duration
+                    ? this._parseDuration(stats.contentDetails.duration)
+                    : 0
+            };
+        });
+
+        logger.info('[YouTubeMonitor] ✅ Videos obtenidos vía API con estadísticas', {
+            count: videosWithStats.length,
+            sampleStats: videosWithStats[0]
+                ? {
+                      title: videosWithStats[0].title,
+                      views: videosWithStats[0].views,
+                      likes: videosWithStats[0].likes
+                  }
+                : null
+        });
+
+        return videosWithStats;
     }
 
     /**
@@ -199,22 +239,13 @@ class YouTubeMonitor {
      *
      * @private
      * @param {string} channelUrl - URL del canal
-     * @returns {string} Channel ID
+     * @returns {Promise<string>} Channel ID
      */
-    _extractChannelId(channelUrl) {
+    async _extractChannelId(channelUrl) {
         // Casos:
-        // https://www.youtube.com/@JoseCarrasco_98
         // https://www.youtube.com/channel/UCxxxxxxxxxxx
-        // https://www.youtube.com/c/CustomName
-
         if (channelUrl.includes('/channel/')) {
             return channelUrl.split('/channel/')[1].split('/')[0];
-        }
-
-        if (channelUrl.includes('/@')) {
-            // Para @username, necesitamos hacer un request extra
-            // Por ahora, retornar el username
-            return channelUrl.split('/@')[1].split('/')[0];
         }
 
         // Si ya es un channel ID directo
@@ -222,7 +253,53 @@ class YouTubeMonitor {
             return channelUrl;
         }
 
+        // Para @username, necesitamos resolverlo a channel ID real
+        if (channelUrl.includes('/@')) {
+            const username = channelUrl.split('/@')[1].split('/')[0];
+            return this._resolveUsernameToChannelId(username, channelUrl);
+        }
+
         throw new Error('No se pudo extraer channel ID de la URL');
+    }
+
+    /**
+     * Resolver @username a channel ID real usando yt-dlp
+     *
+     * @private
+     * @param {string} username - Username del canal
+     * @param {string} fullUrl - URL completa del canal
+     * @returns {Promise<string>} Channel ID real
+     */
+    async _resolveUsernameToChannelId(username, fullUrl) {
+        const { exec } = require('child_process');
+        const { promisify } = require('util');
+        const execAsync = promisify(exec);
+
+        try {
+            logger.info('[YouTubeMonitor] Resolviendo @username a channel ID', { username });
+
+            // Usar yt-dlp para obtener el channel ID de un video del canal
+            const command = `yt-dlp --playlist-items 1 --print "%(channel_id)s" "${fullUrl}" 2>/dev/null`;
+
+            const { stdout } = await execAsync(command, { timeout: 15000 });
+            const channelId = stdout.trim();
+
+            if (channelId && channelId.startsWith('UC')) {
+                logger.info('[YouTubeMonitor] ✅ Channel ID resuelto', { username, channelId });
+                return channelId;
+            }
+
+            throw new Error('No se pudo resolver channel ID');
+        } catch (error) {
+            logger.error('[YouTubeMonitor] Error resolviendo username', {
+                error: error.message,
+                username
+            });
+
+            // Fallback: intentar con el username directamente (puede fallar)
+            logger.warn('[YouTubeMonitor] ⚠️ Usando username como fallback (puede fallar)');
+            return username;
+        }
     }
 
     /**
@@ -266,8 +343,8 @@ class YouTubeMonitor {
                 throw new Error('yt-dlp no está instalado. Instalar con: brew install yt-dlp');
             }
 
-            // Descargar video
-            const command = `yt-dlp -f 'bestvideo[height<=1080]+bestaudio/best' -o "${outputPath}" "${videoUrl}"`;
+            // Descargar video (usar Android player client para Shorts)
+            const command = `yt-dlp --extractor-args "youtube:player_client=android,web" -o "${outputPath}" "${videoUrl}"`;
 
             await execAsync(command, {
                 timeout: 120000 // 2 minutos max
@@ -306,11 +383,11 @@ class YouTubeMonitor {
                 audioPath
             });
 
-            // Usar FFmpeg para extraer audio
-            const command = `ffmpeg -i "${videoPath}" -vn -acodec libmp3lame -ab 128k -ar 44100 "${audioPath}"`;
+            // Usar FFmpeg para extraer audio (32kbps para videos largos, mantener <25MB para Whisper)
+            const command = `ffmpeg -i "${videoPath}" -vn -acodec libmp3lame -ab 32k -ar 22050 "${audioPath}"`;
 
             await execAsync(command, {
-                timeout: 60000 // 1 minuto max
+                timeout: 300000 // 5 minutos max (para videos largos)
             });
 
             logger.info('[YouTubeMonitor] ✅ Audio extraído', {

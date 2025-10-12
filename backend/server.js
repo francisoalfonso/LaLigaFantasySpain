@@ -55,10 +55,17 @@ const youtubeShortsRoutes = require('./routes/youtubeShorts');
 const carouselsRoutes = require('./routes/carousels');
 const testHistoryRoutes = require('./routes/testHistory');
 const nanoBananaRoutes = require('./routes/nanoBanana');
+const presentersRoutes = require('./routes/presenters');
+const editorialPlanningRoutes = require('./routes/editorialPlanning');
 
 // ✨ NEW: Competitive YouTube Analyzer Routes
 const contentAnalysisRoutes = require('./routes/contentAnalysis');
 const competitiveChannelsRoutes = require('./routes/competitiveChannels');
+
+// ✨ NEW: Automation System
+const videoOrchestrator = require('./services/videoOrchestrator');
+const recommendationEngine = require('./services/contentAnalysis/recommendationEngine');
+const tempCleaner = require('./services/contentAnalysis/tempCleaner');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -172,6 +179,8 @@ app.use('/api/content-preview', contentPreviewRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/carousels', carouselsRoutes);
 app.use('/api/test-history', testHistoryRoutes);
+app.use('/api/presenters', presentersRoutes);
+app.use('/api/planning', generalLimiter, editorialPlanningRoutes);
 
 // ✨ NEW: Competitive YouTube Analyzer
 // Content Analysis - operaciones pesadas (transcripción + análisis AI)
@@ -272,6 +281,26 @@ app.get('/competitive-channels', (req, res) => {
 // Ruta alternativa más corta
 app.get('/competitive', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/competitive-channels.html'));
+});
+
+// Ruta para dashboard de inteligencia competitiva
+app.get('/competitive-intelligence-dashboard', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/competitive-intelligence-dashboard.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/intel', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/competitive-intelligence-dashboard.html'));
+});
+
+// Ruta para planning editorial
+app.get('/editorial-planning', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/editorial-planning.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/planning', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/editorial-planning.html'));
 });
 
 /**
@@ -375,15 +404,87 @@ logger.info('⏱️  Timeouts del servidor configurados para VEO3', {
     headers: '15 min + 10s'
 });
 
+// ============================================================================
+// 🎬 SISTEMA DE AUTOMATIZACIÓN CENTRALIZADO
+// ============================================================================
+
+// Iniciar TempCleaner para limpiar archivos temporales de videos
+(async () => {
+    try {
+        await tempCleaner.start();
+        logger.info('🧹 TempCleaner iniciado - Limpieza automática cada 1h');
+    } catch (error) {
+        logger.error('❌ Error iniciando TempCleaner', {
+            error: error.message
+        });
+    }
+})();
+
+// Iniciar VideoOrchestrator para procesar cola automáticamente
+(async () => {
+    try {
+        await videoOrchestrator.start();
+        logger.info('🎬 VideoOrchestrator iniciado - Procesando cola cada 10s', {
+            providers: ['veo3', 'openai', 'instagram'],
+            rateLimits: {
+                veo3: { maxConcurrent: 2, minInterval: '10s' },
+                openai: { maxConcurrent: 5, minInterval: '1s' },
+                instagram: { maxConcurrent: 3, minInterval: '5s' }
+            }
+        });
+    } catch (error) {
+        logger.error('❌ Error iniciando VideoOrchestrator', {
+            error: error.message
+        });
+    }
+})();
+
+// Generar recomendaciones automáticamente cada hora
+const RECOMMENDATION_INTERVAL = 60 * 60 * 1000; // 1 hora
+
+setInterval(async () => {
+    try {
+        logger.info('🎯 Generando recomendaciones automáticas desde análisis competitivo...');
+        const recommendations = await recommendationEngine.generateRecommendations({
+            lookbackDays: 7
+        });
+        logger.info('✅ Recomendaciones generadas automáticamente', {
+            count: recommendations.length,
+            nextRun: new Date(Date.now() + RECOMMENDATION_INTERVAL).toISOString()
+        });
+    } catch (error) {
+        logger.error('❌ Error generando recomendaciones automáticas', {
+            error: error.message
+        });
+    }
+}, RECOMMENDATION_INTERVAL);
+
+logger.info('⏰ Cron de recomendaciones configurado', {
+    interval: '1 hora',
+    lookbackDays: 7
+});
+
+// ============================================================================
+
 // Manejo graceful de cierre
 process.on('SIGTERM', () => {
     logger.info('🛑 Señal SIGTERM recibida - Cerrando servidor gracefully...');
-    process.exit(0);
+    videoOrchestrator.stop();
+    tempCleaner.stop();
+    server.close(() => {
+        logger.info('✅ Servidor cerrado correctamente');
+        process.exit(0);
+    });
 });
 
 process.on('SIGINT', () => {
     logger.info('🛑 Señal SIGINT recibida - Cerrando servidor gracefully...');
-    process.exit(0);
+    videoOrchestrator.stop();
+    tempCleaner.stop();
+    server.close(() => {
+        logger.info('✅ Servidor cerrado correctamente');
+        process.exit(0);
+    });
 });
 
 module.exports = app;

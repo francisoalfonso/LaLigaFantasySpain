@@ -3,10 +3,10 @@
   "bucket": "flp",
   "structure": {
     "ana": 4,
-    "estudio": 1,
+    "estudio": 2,
     "kits": 13
   },
-  "total_images": 18,
+  "total_images": 19,
   "ana_references": [
     {
       "role": "body-outfit",
@@ -33,11 +33,40 @@
       "path": "ana/ana-peinido2-07.png"
     }
   ],
-  "estudio": {
-    "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-FLP.jpg",
-    "path": "estudio/estudio-FLP.jpg",
-    "description": "Entorno del estudio (luces neón + pantallas) - VA AL FINAL en el array de referencias"
-  },
+  "carlos_references": [
+    {
+      "role": "frontal-variant-1",
+      "description": "Carlos frontal variante 1 (con polo FLP)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-gonzalez-00.jpg",
+      "path": "carlos/carlos-gonzalez-00.jpg"
+    },
+    {
+      "role": "frontal-variant-2",
+      "description": "Carlos frontal variante 2 (con polo FLP)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-gonzalez-01.jpg",
+      "path": "carlos/carlos-gonzalez-01.jpg"
+    },
+    {
+      "role": "plano-general",
+      "description": "Carlos plano general (cuerpo completo, visión amplia)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-plano-general.jpg",
+      "path": "carlos/carlos-plano-general.jpg"
+    }
+  ],
+  "estudio_references": [
+    {
+      "role": "estudio-base",
+      "description": "Estudio FLP sin mesa (visión amplia)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-FLP.jpg",
+      "path": "estudio/estudio-FLP.jpg"
+    },
+    {
+      "role": "estudio-primer-plano",
+      "description": "Estudio FLP primer plano (para variedad de encuadres)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-primer-plano-FLP.jpg",
+      "path": "estudio/estudio-primer-plano-FLP.jpg"
+    }
+  ],
   "kits": [
     {
       "team": "Bilbao",

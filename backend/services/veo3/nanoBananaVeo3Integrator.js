@@ -20,6 +20,9 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 
+// Cargar config FLP para referencias de estudio
+const FLP_CONFIG = require('../../../data/flp-nano-banana-config.json');
+
 class NanoBananaVeo3Integrator {
     constructor() {
         this.nanoBananaClient = new NanoBananaClient();
@@ -188,8 +191,11 @@ class NanoBananaVeo3Integrator {
                     `[NanoBananaVeo3Integrator] 🖼️  Generando imagen ${i + 1}/3 (${segment.role})...`
                 );
 
-                // Construir prompt contextualizado para Nano Banana
-                const imagePrompt = this.buildContextualImagePrompt(segment);
+                // Construir prompt contextualizado para Nano Banana con characterBible
+                const imagePrompt = this.buildContextualImagePrompt(
+                    segment,
+                    options.characterBible
+                );
 
                 logger.info(
                     `[NanoBananaVeo3Integrator] 📝 Prompt: "${imagePrompt.substring(0, 100)}..."`
@@ -198,11 +204,21 @@ class NanoBananaVeo3Integrator {
                 // ✅ FIX (10 Oct 2025 21:05): cinematography.name (no cinematography.shot)
                 const shotType = segment.cinematography?.name || 'medium';
 
+                // ✅ FIX (12 Oct 2025): Pasar image URLs dinámicas según presentador
+                // Carlos: 3 imágenes Carlos + 2 estudios = 5 referencias (carga desde carlos_references config)
+                // Ana: undefined → usa 4 Ana + 2 estudios = 6 referencias (default en nanoBananaClient)
+                const imageUrls = options.imageUrl
+                    ? [
+                          ...FLP_CONFIG.carlos_references.map(ref => ref.url), // 3 imágenes Carlos desde config
+                          ...FLP_CONFIG.estudio_references.map(ref => ref.url) // 2 estudios dinámicos
+                      ]
+                    : undefined;
+
                 // Generar imagen con Nano Banana usando el contexto del segmento
                 const nanoImage = await this.nanoBananaClient.generateContextualImage(
                     imagePrompt,
                     shotType, // wide, medium, close-up
-                    options
+                    { ...options, imageUrls }
                 );
 
                 // Descargar y subir a Supabase
@@ -259,7 +275,7 @@ class NanoBananaVeo3Integrator {
     }
 
     /**
-     * ✅ MEJORADO (10 Oct 2025): Construir prompt contextualizado para Nano Banana con diferenciación visual clara
+     * ✅ MEJORADO (12 Oct 2025): Construir prompt contextualizado para Nano Banana con soporte multi-presentador
      *
      * Cada shot type tiene descripciones específicas para crear diferencias visuales marcadas:
      * - wide: Full body, environment visible, distant perspective
@@ -267,16 +283,17 @@ class NanoBananaVeo3Integrator {
      * - close-up: Face and shoulders, emotional detail, intimate connection
      *
      * @param {object} segment - Segmento del UnifiedScriptGenerator
+     * @param {string} characterBible - Descripción del presentador (Ana o Carlos)
      * @returns {string} - Prompt para Nano Banana
      */
-    buildContextualImagePrompt(segment) {
-        // ✅ FIX #3 (11 Oct 2025): NO usar descripción textual de Ana
-        // Nano Banana ya tiene 5 imágenes de referencia que definen su identidad
-        // Añadir descripción textual confunde al modelo y rompe consistencia facial
+    buildContextualImagePrompt(segment, characterBible) {
+        // Si no se proporciona characterBible, usar default de Ana (backward compatibility)
+        const defaultAnaBible =
+            'A 32-year-old Spanish sports analyst Ana Martínez with short black curly hair, wearing a red Fantasy La Liga polo shirt';
+        const bible = characterBible || defaultAnaBible;
 
-        // Prompt base SIMPLE (confía en las referencias de imagen)
-        let prompt =
-            'ultra realistic cinematic portrait of Ana Martínez presenting inside the FLP studio, same woman as in the reference images, same face, hairstyle and red FLP polo shirt, integrated with the studio lighting and reflections, very soft red neon glow from the FLP sign behind her, reflecting faintly on the right edge of her face only, no red color cast on hair, maintain natural blonde hair color, balanced neutral white balance, gentle blue monitor reflections on left side, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin';
+        // Prompt base usando el character bible dinámicamente
+        let prompt = `ultra realistic cinematic portrait, ${bible}, presenting inside the FLP studio, same person as in the reference images, same face, hairstyle and clothing, integrated with the studio lighting and reflections, balanced neutral white balance, realistic soft shadows and light diffusion, cinematic tone, Canon EOS R5 85mm f1.4 lens, shallow depth of field, film grain, authentic human skin texture, no CGI, no render, no plastic skin`;
 
         // Contexto emocional del segmento
         const emotionMap = {

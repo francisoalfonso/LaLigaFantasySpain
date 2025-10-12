@@ -1,0 +1,260 @@
+{
+  "version": "1.0",
+  "updated_at": "2025-10-12T18:34:22.890Z",
+  "planning": {
+    "scheduled": [
+      {
+        "id": "item_1760293580278_kpsqzl",
+        "source": "manual",
+        "contentType": "chollos",
+        "topic": "Top 3 Chollos Jornada 8",
+        "platform": "instagram",
+        "presenter": "ana",
+        "assignment_category": "engagement",
+        "scheduledDate": "2025-10-13T10:00:00.000Z",
+        "priority": "high",
+        "status": "scheduled",
+        "createdAt": "2025-10-12T18:26:20.278Z",
+        "updatedAt": "2025-10-12T18:26:20.278Z"
+      }
+    ],
+    "triggers": [
+      {
+        "id": "demo_trigger_1_chollos",
+        "source": "trigger_competitive",
+        "trigger_type": "player_spotlight",
+        "contentType": "chollos",
+        "topic": "ANÁLISIS: Chollos Jornada 8 - Respuesta con Datos API-Sports",
+        "platform": "instagram",
+        "presenter": "ana",
+        "assignment_category": "chollos",
+        "priority": "p1",
+        "deadline": "2025-10-10T12:00:00Z",
+        "viralScore": 75,
+        "status": "trigger_pending",
+        "expired": true,
+        "demo": true,
+        "writer_brief": {
+          "what_to_do": {
+            "video_type": "Análisis Profundo de Chollos con Datos Oficiales",
+            "title": "ANÁLISIS CHOLLOS Jornada 8 - Los DATOS REALES",
+            "description": "Competidor publicó video de chollos con 11 jugadores. Crear análisis profundo usando datos oficiales API-Sports para contrastar.",
+            "segments": 3,
+            "duration": "24 segundos (8s por segmento)",
+            "presenter": "ana"
+          },
+          "why": {
+            "rationale": "Video competidor: '⭐️ MI ALINEACIÓN DE CHOLLOS FANTASY PARA LA JORNADA 8' (26,172 views). Menciona 11 jugadores sin datos oficiales. Oportunidad para video autoritativo con API-Sports.",
+            "competitor_claim": "Chesney, Tolbian, Riedel, Jon Pacheco como chollos baratos",
+            "viral_potential_original": 6,
+            "viral_potential_ours": 7,
+            "estimated_views": 13086,
+            "urgency": "DEMO CADUCADO - Alta prioridad en su momento"
+          },
+          "data_to_use": {
+            "players": [
+              {
+                "name": "C. Riedel",
+                "team": "Espanyol",
+                "position": "Defensa",
+                "playerId": 282054
+              },
+              {
+                "name": "Jon Pacheco",
+                "team": "Real Sociedad",
+                "position": "Defensa",
+                "playerId": 182546
+              },
+              {
+                "name": "E. Camavinga",
+                "team": "Real Madrid",
+                "position": "Centrocampista",
+                "playerId": 2207
+              },
+              {
+                "name": "Carlos Álvarez",
+                "team": "Levante",
+                "position": "Centrocampista",
+                "playerId": 182770
+              },
+              {
+                "name": "T. Dolan",
+                "team": "Espanyol",
+                "position": "Delantero",
+                "playerId": 273732
+              },
+              {
+                "name": "Sergio Gómez",
+                "team": "Real Sociedad",
+                "position": "Delantero",
+                "playerId": 23
+              }
+            ],
+            "api_endpoints": [
+              "GET /api/players/{id}/stats - Estadísticas jugador",
+              "GET /api/bargains/position/defender - Chollos defensas",
+              "GET /api/bargains/position/midfielder - Chollos medios",
+              "GET /api/bargains/position/forward - Chollos delanteros",
+              "GET /api/fixtures/{teamId}/next - Próximos rivales"
+            ],
+            "data_points": [
+              "Precio actual de cada jugador mencionado",
+              "Fantasy points últimos 5 partidos",
+              "Value ratio (points/price) para validar si son chollos REALES",
+              "Próximos rivales y difficulty",
+              "Minutos jugados (titularidad confirmada)",
+              "Comparativa con promedio de posición",
+              "Form reciente del equipo"
+            ]
+          },
+          "content_ideas": {
+            "hooks": [
+              "¿Has visto el video de José Carrasco sobre chollos Jornada 8?",
+              "11 jugadores recomendados... ¿pero son CHOLLOS REALES según API-Sports?",
+              "ATENCIÓN: Validando chollos Jornada 8 con DATOS OFICIALES"
+            ],
+            "key_messages": [
+              "Video competidor menciona 11 jugadores como chollos",
+              "Nosotros validamos cada uno con datos oficiales API-Sports",
+              "Value ratio (points/price) es la métrica clave para chollos reales",
+              "No todos los jugadores baratos son chollos - necesitas datos"
+            ],
+            "cta_suggestions": [
+              "Descarga Fantasy La Liga Pro para ver value ratios actualizados",
+              "Sígueme para chollos verificados con datos oficiales",
+              "¿Ya fichaste alguno? Cuéntame en comentarios",
+              "Guarda para consultarlo antes del deadline Jornada 8"
+            ],
+            "viral_elements": [
+              "11 jugadores = muchos datos que validar (contenido denso)",
+              "Usar gráficos de value ratio para visualizar chollos reales",
+              "Contrastar expectativa vs realidad con datos"
+            ],
+            "tone": "Educativo y analítico. Ana presenta datos de forma clara y directa. Enfoque: ayudar a tomar decisiones basadas en hechos."
+          },
+          "competitor_context": {
+            "channel": "José Carrasco",
+            "video_title": "⭐️ MI ALINEACIÓN DE CHOLLOS FANTASY PARA LA JORNADA 8 | LaLiga 25/26 #laligafantasy #fantasy",
+            "video_url": "https://www.youtube.com/watch?v=YXsbx1GJ9tU",
+            "views": 26172,
+            "engagement_rate": 3.54,
+            "published_at": "2025-09-30T16:10:48Z"
+          }
+        },
+        "original_trigger": {
+          "video_title": "Chollos Jornada 8",
+          "channel": "José Carrasco"
+        },
+        "createdAt": "2025-10-10T08:00:00Z",
+        "updatedAt": "2025-10-10T08:00:00Z"
+      },
+      {
+        "id": "demo_trigger_2_prediccion",
+        "source": "trigger_competitive",
+        "trigger_type": "viral_response",
+        "contentType": "prediccion",
+        "topic": "🔥 CONTRAARGUMENTO: Yuri, Brais Méndez, Dan Juman - Validación con Datos",
+        "platform": "instagram",
+        "presenter": "carlos",
+        "assignment_category": "analysis",
+        "priority": "p0",
+        "deadline": "2025-10-11T18:00:00Z",
+        "viralScore": 85,
+        "status": "trigger_pending",
+        "expired": true,
+        "demo": true,
+        "writer_brief": {
+          "what_to_do": {
+            "video_type": "Contraargumento con Análisis Estadístico Profundo",
+            "title": "🎯 PREDICCIÓN: Yuri, Brais, Dan Juman - Los DATOS DICEN...",
+            "description": "Competidor predice +10 puntos para 3 jugadores. Carlos analiza con estadísticas oficiales si es realista.",
+            "segments": 3,
+            "duration": "24 segundos (8s por segmento)",
+            "presenter": "carlos"
+          },
+          "why": {
+            "rationale": "Video competidor: '🚀 TRES JUGADORES QUE HARÁN MÁS DE 10 PUNTOS EN LA JORNADA 8' (26,245 views, 4.44% engagement). Predicción bold sin datos estadísticos. Oportunidad para Carlos de validar con números.",
+            "competitor_claim": "Yuri, Bryce Méndez y Dan Juman harán más de 10 puntos en Jornada 8",
+            "viral_potential_original": 6,
+            "viral_potential_ours": 8,
+            "estimated_views": 13123,
+            "urgency": "DEMO CADUCADO - Era crítico por ser predicción pre-jornada"
+          },
+          "data_to_use": {
+            "players": [
+              { "name": "Yuri", "team": "Athletic Club", "position": "Defensa", "playerId": 47273 },
+              {
+                "name": "Brais Méndez",
+                "team": "Real Sociedad",
+                "position": "Centrocampista",
+                "playerId": 47440
+              }
+            ],
+            "api_endpoints": [
+              "GET /api/players/47273/stats - Stats Yuri",
+              "GET /api/players/47440/stats - Stats Brais Méndez",
+              "GET /api/fixtures/Athletic/next - Rivales Athletic",
+              "GET /api/fixtures/RealSociedad/next - Rivales Real Sociedad",
+              "GET /api/teams/form - Form últimos partidos"
+            ],
+            "data_points": [
+              "Promedio puntos últimos 5 partidos de cada jugador",
+              "% de veces que superaron 10 puntos en temporada",
+              "Difficulty del rival (Mallorca para Yuri, Rayo para Brais)",
+              "xG, xA y minutos esperados",
+              "Clean sheet probability para defensas",
+              "Form del equipo en casa/fuera"
+            ]
+          },
+          "content_ideas": {
+            "hooks": [
+              "José Carrasco predice +10 puntos para 3 jugadores... ¿Qué dicen los DATOS?",
+              "🚨 VALIDANDO predicción viral: Yuri, Brais, Dan Juman",
+              "Predicción bold de +10 puntos... Aquí están las PROBABILIDADES REALES"
+            ],
+            "key_messages": [
+              "Predicción del competidor: 3 jugadores harán +10 puntos",
+              "Carlos analiza probabilidad basada en histórico + rival",
+              "xG, xA, clean sheet odds y form son factores clave",
+              "Predicción vs Probabilidad: diferencia entre opinión y datos"
+            ],
+            "cta_suggestions": [
+              "Sígueme para análisis estadísticos pre-jornada",
+              "¿Fichaste alguno de estos 3? Cuéntame cómo les fue",
+              "Comenta si prefieres opiniones o datos para decidir",
+              "Guarda para comparar predicción vs resultado real"
+            ],
+            "viral_elements": [
+              "Validar predicciones es contenido de alto engagement",
+              "Mostrar probabilidades % genera debate en comentarios",
+              "Follow-up post-jornada: ¿Acertó o fallaron?"
+            ],
+            "tone": "Analítico y técnico. Carlos presenta números, gráficos, probabilidades. Objetivo sin ser arrogante. Enfoque: ayudar con decisiones informadas."
+          },
+          "competitor_context": {
+            "channel": "José Carrasco",
+            "video_title": "🚀 TRES JUGADORES QUE HARÁN MÁS DE 10 PUNTOS EN LA JORNADA 8 DE LA LIGA FANTASY 25/26 #laligafantasy",
+            "video_url": "https://www.youtube.com/watch?v=MMRwgYXYLEU",
+            "views": 26245,
+            "engagement_rate": 4.44,
+            "published_at": "2025-10-01T17:41:40Z"
+          }
+        },
+        "original_trigger": {
+          "video_title": "Predicción +10 puntos",
+          "channel": "José Carrasco"
+        },
+        "createdAt": "2025-10-09T10:00:00Z",
+        "updatedAt": "2025-10-09T10:00:00Z"
+      }
+    ],
+    "in_production": [],
+    "published": []
+  },
+  "metadata": {
+    "total_scheduled": 1,
+    "total_triggers": 2,
+    "total_in_production": 0,
+    "total_published": 0
+  }
+}

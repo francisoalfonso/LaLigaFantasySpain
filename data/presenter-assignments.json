@@ -1,0 +1,109 @@
+{
+  "version": "2.0",
+  "updated_at": "2025-10-12T18:34:22.889Z",
+  "distribution": {
+    "ana": 0.7,
+    "carlos": 0.3
+  },
+  "history": {
+    "ana": 5,
+    "carlos": 1
+  },
+  "assignments": {
+    "chollos": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Reels de chollos y oportunidades de mercado",
+      "format": ["reel", "story"]
+    },
+    "bargains": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Análisis de jugadores baratos con alto valor",
+      "format": ["reel", "story"]
+    },
+    "alineaciones": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Recomendaciones de alineación para la jornada",
+      "format": ["reel", "carousel"]
+    },
+    "tips": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Tips rápidos y consejos fantasy",
+      "format": ["story", "reel"]
+    },
+    "match_preview": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Previews de partidos y jornadas",
+      "format": ["reel"]
+    },
+    "player_spotlight": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Spotlight de jugadores individuales",
+      "format": ["reel", "story"]
+    },
+    "news": {
+      "presenter": "ana",
+      "category": "engagement",
+      "description": "Noticias y actualizaciones de última hora",
+      "format": ["story"]
+    },
+    "stats": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Estadísticas y análisis de datos",
+      "format": ["carousel", "reel"]
+    },
+    "analysis": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Análisis profundo de equipos y tendencias",
+      "format": ["carousel", "reel"]
+    },
+    "team_analysis": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Análisis detallado por equipo",
+      "format": ["carousel"]
+    },
+    "data_insights": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Insights basados en datos y métricas",
+      "format": ["carousel"]
+    },
+    "weekly_roundup": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Resumen semanal con estadísticas",
+      "format": ["carousel", "reel"]
+    },
+    "top_performers": {
+      "presenter": "carlos",
+      "category": "analytical",
+      "description": "Top 10 mejores/peores de la jornada",
+      "format": ["carousel"]
+    },
+    "daily_insights": {
+      "presenter": "auto",
+      "category": "flexible",
+      "description": "Insights diarios generales",
+      "format": ["story", "reel"]
+    },
+    "fantasy_tips": {
+      "presenter": "auto",
+      "category": "flexible",
+      "description": "Consejos fantasy generales",
+      "format": ["story"]
+    }
+  },
+  "metadata": {
+    "total_assignments": 6,
+    "presenters": ["ana", "carlos"],
+    "content_types": 15
+  }
+}

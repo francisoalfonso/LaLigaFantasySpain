@@ -1,12 +1,15 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with
+code in this repository.
 
 ---
 
 ## ⚡ Quick Start (Read This First)
 
-**Fantasy La Liga Dashboard** - Automated Instagram influencer system for La Liga Fantasy Football using VEO3 video generation, API-Sports data, and n8n workflows.
+**Fantasy La Liga Dashboard** - Automated Instagram influencer system for La
+Liga Fantasy Football using VEO3 video generation, API-Sports data, and n8n
+workflows.
 
 ### Mandatory Session Start (3 minutes)
 
@@ -17,34 +20,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 4. Health check: npm run dev && curl http://localhost:3000/api/test/ping
 ```
 
-**Why**: Without this context, you'll duplicate work or violate critical system constraints.
+**Why**: Without this context, you'll duplicate work or violate critical system
+constraints.
 
-**Then**: Work on P0 tasks from PRIORITIES.md. Update CURRENT-SPRINT.md when done.
+**Then**: Work on P0 tasks from PRIORITIES.md. Update CURRENT-SPRINT.md when
+done.
 
 ---
 
 ## 🚨 Critical Rules - Never Break
 
 ### VEO3 Video System (Most Important)
-- ❌ **NEVER** change `ANA_CHARACTER_SEED=30001` or `ANA_IMAGE_URL` → Ana's identity breaks
-- ❌ **NEVER** use player names in prompts → Error 422 (system auto-uses "el jugador", "el centrocampista")
+
+- ❌ **NEVER** change `ANA_CHARACTER_SEED=30001` or `ANA_IMAGE_URL` → Ana's
+  identity breaks
+- ❌ **NEVER** use player names in prompts → Error 422 (system auto-uses "el
+  jugador", "el centrocampista")
 - ❌ **NEVER** create prompts >80 words → High failure rate
-- ✅ **ALWAYS** use "speaks in Spanish from Spain" (lowercase) → Prevents Mexican accent
+- ✅ **ALWAYS** use "speaks in Spanish from Spain" (lowercase) → Prevents
+  Mexican accent
 - ✅ **ALWAYS** keep timeouts ≥120s (initial), ≥45s (status) → Network stability
 
 ### File Creation
-- ❌ **NEVER** create files without checking `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md`
-- ✅ **ALWAYS** search existing files first: `ls backend/services/ | grep -i [keyword]`
+
+- ❌ **NEVER** create files without checking
+  `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md`
+- ✅ **ALWAYS** search existing files first:
+  `ls backend/services/ | grep -i [keyword]`
 
 ### API-Sports & La Liga Data
+
 - ❌ **NEVER** use `season != 2025` → Wrong data (2025-26 season uses ID 2025)
 - ✅ **ALWAYS** verify in `backend/config/constants.js`
 
 ### Database
-- ❌ **NEVER** modify schema without updating BOTH `database/supabase-schema.sql` AND `database/init-database.js`
+
+- ❌ **NEVER** modify schema without updating BOTH
+  `database/supabase-schema.sql` AND `database/init-database.js`
 - ✅ **ALWAYS** run `npm run db:init` after changes
 
 ### Code Quality
+
 - ❌ **NEVER** use `console.log` (use Winston logger, except server startup)
 - ❌ **NEVER** hardcode secrets (use .env)
 - ✅ **ALWAYS** validate inputs with Joi
@@ -91,9 +107,11 @@ npm run db:keep-alive                          # Keep Supabase connection alive
 ## 🏗️ Architecture Overview
 
 ### Tech Stack
-- **Backend**: Express.js + Node.js
+
+- **Backend**: Express.js + Node.js (15min timeouts for VEO3)
 - **Database**: Supabase PostgreSQL
-- **APIs**: API-Sports (La Liga data), VEO3/KIE.ai (video), AEMET (weather)
+- **APIs**: API-Sports (La Liga data), VEO3/KIE.ai (video), Nano Banana
+  (contextual images), AEMET (weather)
 - **Frontend**: Alpine.js + Tailwind CSS (no build process, static files)
 - **Automation**: n8n workflows + Instagram Graph API
 
@@ -104,67 +122,179 @@ API-Sports (rate limited) → apiFootball.js → dataProcessor.js (Fantasy point
          ↓
 Supabase PostgreSQL (persistent storage)
          ↓
-BargainAnalyzer (identify chollos) → VEO3Client (generate Ana videos)
+BargainAnalyzer (identify chollos) → VEO3 3-Phase System (generate Ana videos)
          ↓
 n8n Workflows (scheduled) → Instagram Graph API (publish)
 ```
 
-### VEO3 System Architecture (Most Complex Part)
+### VEO3 3-Phase Architecture (NEW - Oct 2025) ⭐ **MOST IMPORTANT**
 
-**Location**: `backend/services/veo3/` (19 services)
+**Problem Solved**: Server crashes eliminated by splitting video generation into
+separate short HTTP requests.
+
+**Location**: `backend/services/veo3/` (22 services) + `backend/routes/veo3.js`
+(3-phase endpoints)
+
+**The 3 Phases**:
+
+#### Phase 1: Preparation (`/api/veo3/prepare-session`)
+
+- **Duration**: ~2-3 minutes
+- **Process**:
+    1. Generate 3-segment script (UnifiedScriptGenerator)
+    2. Generate 3 contextual Nano Banana images
+    3. Save to `progress.json` with `status: "prepared"`
+- **Output**: `sessionId` + script metadata + image URLs
+- **Cost**: ~$0.06 (Nano Banana only)
+
+#### Phase 2: Individual Generation (`/api/veo3/generate-segment`)
+
+- **Duration**: ~3-4 minutes per segment
+- **Process**: Generate ONE VEO3 video using contextual image
+- **Call 3 times**: Once per segment (0, 1, 2)
+- **Advantage**: Short sessions, no server timeouts, retriable
+- **Cost**: ~$0.30 per segment
+
+#### Phase 3: Finalization (`/api/veo3/finalize-session`)
+
+- **Duration**: ~1 minute
+- **Process**: Concatenate 3 videos + add logo outro
+- **Output**: Final video + complete metadata
+- **Cost**: $0 (local FFmpeg)
+
+**Why 3 Phases**:
+
+- ✅ No server timeouts (each phase <5 min)
+- ✅ Visible progress (`progress.json` updates)
+- ✅ Retry individual segments without regenerating all
+- ✅ Persistent state survives server restarts
+
+**Test Command**: `npm run veo3:test-phased`
+
+### VEO3 Core Services
 
 **Core Services**:
-- `veo3Client.js` - KIE.ai API client with Ana character consistency (120s timeout)
-- `promptBuilder.js` - Viral framework + **automatic player name removal** (bypasses Error 422)
+
+- `veo3Client.js` - KIE.ai API client with Ana character consistency (120s
+  timeout)
+- `promptBuilder.js` - Viral framework + **automatic player name removal**
+  (bypasses Error 422)
 - `unifiedScriptGenerator.js` - Cohesive narrative arcs across segments
-- `viralVideoBuilder.js` - Multi-segment generation with frame-to-frame transitions
+- `viralVideoBuilder.js` - Multi-segment generation with frame-to-frame
+  transitions
 - `videoConcatenator.js` - FFmpeg concatenation + logo outro
 - `viralCaptionsGenerator.js` - Automatic viral Instagram/TikTok captions
 - `playerCardOverlay.js` - Player stats overlay (seconds 3-6)
 
 **Intelligent Systems**:
-- `emotionAnalyzer.js` - 18 emotions, 4 algorithms (keywords 50%, grammar 20%, intent 20%, context 10%)
-- `cinematicProgressionSystem.js` - 5 progression patterns, 4 shot types (prevents "reset" look between segments)
-- `audioAnalyzer.js` - FFmpeg silence detection + auto-trimming (prevents "cara rara")
+
+- `emotionAnalyzer.js` - 18 emotions, 4 algorithms (keywords 50%, grammar 20%,
+  intent 20%, context 10%)
+- `cinematicProgressionSystem.js` - 5 progression patterns, 4 shot types
+  (prevents "reset" look between segments)
+- `audioAnalyzer.js` - FFmpeg silence detection + auto-trimming (prevents "cara
+  rara")
 - `veo3RetryManager.js` - Smart retry with 30s cooling periods
 
 **Ana Character Consistency**:
-- Fixed seed: `ANA_CHARACTER_SEED=30001` (locked to Ana's identity in VEO3 model)
-- Fixed image: `ANA_IMAGE_URL` (32-year-old Spanish analyst, short black curly hair, navy blazer)
-- Spanish from Spain accent: MUST include "speaks in Spanish from Spain" (lowercase) in all prompts
+
+- Fixed seed: `ANA_CHARACTER_SEED=30001` (locked to Ana's identity in VEO3
+  model)
+- Fixed image: `ANA_IMAGE_URL` (32-year-old Spanish analyst, short black curly
+  hair, navy blazer)
+- Spanish from Spain accent: MUST include "speaks in Spanish from Spain"
+  (lowercase) in all prompts
 - **WHY**: Changing seed/image breaks visual consistency across all videos
 
 **VEO3 Error 422 Solution** (CRITICAL):
-- **Root cause**: KIE.ai blocks ALL player names (Pedri, Lewandowski, etc.) due to image rights
-- **Automatic fix**: `promptBuilder.js:325-359` replaces names with generic references ("el jugador", "el centrocampista")
-- **Verification**: Check logs for `"[PromptBuilder] 🔧 Usando referencia segura: 'el centrocampista'"`
+
+- **Root cause**: KIE.ai blocks ALL player names (Pedri, Lewandowski, etc.) due
+  to image rights
+- **Automatic fix**: `promptBuilder.js:325-359` replaces names with generic
+  references ("el jugador", "el centrocampista")
+- **Verification**: Check logs for
+  `"[PromptBuilder] 🔧 Usando referencia segura: 'el centrocampista'"`
 - **Success rate**: 100% when using generic references vs 0% with player names
 - **See**: `docs/VEO3_FIX_REGRESION_OCTUBRE_2025.md`
 
 **Frame-to-Frame Transitions**:
+
 - Last frame of Segment N = First frame of Segment N+1 (exhaustive description)
 - Result: Invisible transitions, no crossfade needed
 - Implementation: `videoConcatenator.js` + `promptBuilder.js`
+
+### Nano Banana Integration
+
+**Location**: `backend/services/nanoBanana/nanoBananaClient.js`
+
+**Purpose**: Generate contextual Ana images for each video segment with
+consistent character appearance.
+
+**How it works**:
+
+- Takes 6 reference images of Ana + context description
+- Generates contextual image (e.g., "Ana in TV studio with stats overlay")
+- Seed: 12500 (fixed for consistency)
+- Cost: ~$0.02 per image
+- Used in Phase 1 of 3-Phase VEO3 workflow
+
+**Why critical**: Without Nano Banana, VEO3 would use generic images and Ana's
+appearance would be inconsistent across segments.
 
 ### BargainAnalyzer System
 
 **Location**: `backend/services/bargainAnalyzer.js`
 
 **Algorithm**:
+
 - Identifies undervalued Fantasy players (high points potential, low price)
 - Points estimation + value ratio (points/price) > 1.2
 - Constraints: Max price €8.0, min 3 games, min 90 minutes
 
+### Competitive YouTube Analyzer (NEW - Oct 2025)
+
+**Location**: `backend/services/contentAnalysis/` (11 services)
+
+**Purpose**: Automated system to analyze competitor YouTube channels for content
+ideas and viral patterns.
+
+**Key Services**:
+
+- `youtubeMonitor.js` - Tracks competitor channels
+- `transcriptionService.js` - Whisper API transcription
+- `contentAnalyzer.js` - AI-powered content analysis
+- `recommendationEngine.js` - Generates content recommendations
+- `automaticVideoProcessor.js` - Auto-process queue
+- `viralInsightsIntegration.js` - Extract viral patterns
+
+**How it works**:
+
+1. Monitor competitor channels (onboarding system)
+2. Download and transcribe new videos
+3. Analyze content with OpenAI GPT-5 Mini
+4. Extract players, topics, and viral hooks
+5. Generate recommendations for FLP content
+
+**Cost**: ~$0.01 per video (Whisper transcription)
+
+**Endpoints**:
+
+- `/api/competitive/*` - Channel management
+- `/api/content-analysis/*` - Video processing
+
 ### Instagram Automation Strategy
 
 **Content Mix** (70/20/10 strategy):
+
 - 70% Reels (5/week) - VEO3-generated Ana videos
 - 20% Carousels (1-2/week) - ContentDrips API
 - 10% Stories (daily) - Engagement
 
 **Workflows**:
+
 - n8n: 8 total (2 active, 6 pending)
-- Version tracking: `data/instagram-versions/` (test metadata with feedback loop)
+- Version tracking: `data/instagram-versions/` (test metadata with feedback
+  loop)
 
 ---
 
@@ -225,11 +355,12 @@ Fantasy la liga/
 ## 🏆 La Liga 2025-26 Season Data
 
 **ALWAYS USE**:
+
 - **Season ID**: 2025 (API-Sports uses 2025 for 2025-26 season, NOT 2024)
 - **Liga ID**: 140
 - **Teams**: 20 total
-  - ✅ NEW: Levante (539), Elche (797), Real Oviedo (718)
-  - ❌ EXCLUDED: Valladolid, Las Palmas, Leganés (relegated)
+    - ✅ NEW: Levante (539), Elche (797), Real Oviedo (718)
+    - ❌ EXCLUDED: Valladolid, Las Palmas, Leganés (relegated)
 - **Dates**: Aug 15, 2025 - May 24, 2026
 
 **Configuration**: `backend/config/constants.js` → `SEASON_2025_26: 2025`
@@ -243,23 +374,26 @@ Fantasy la liga/
 ```javascript
 // Centralized client with caching, rate limiting, error handling
 class ServiceClient {
-  constructor() {
-    this.apiKey = process.env.API_KEY;
-    this.baseUrl = 'https://api.example.com';
-  }
-
-  async makeRequest(endpoint, options) {
-    try {
-      // 1. Rate limiting check
-      // 2. Cache check
-      const response = await axios.get(`${this.baseUrl}${endpoint}`, options);
-      // 3. Cache write
-      return response.data;
-    } catch (error) {
-      logger.error('ServiceClient error', { error, endpoint });
-      throw error;
+    constructor() {
+        this.apiKey = process.env.API_KEY;
+        this.baseUrl = 'https://api.example.com';
     }
-  }
+
+    async makeRequest(endpoint, options) {
+        try {
+            // 1. Rate limiting check
+            // 2. Cache check
+            const response = await axios.get(
+                `${this.baseUrl}${endpoint}`,
+                options
+            );
+            // 3. Cache write
+            return response.data;
+        } catch (error) {
+            logger.error('ServiceClient error', { error, endpoint });
+            throw error;
+        }
+    }
 }
 ```
 
@@ -270,9 +404,15 @@ class ServiceClient {
 // Each domain gets its own route file
 
 // routes/bargains.js
-router.get('/test', rateLimiter, async (req, res) => { /* test endpoint */ });
-router.get('/top', rateLimiter, async (req, res) => { /* main endpoint */ });
-router.get('/position/:pos', rateLimiter, async (req, res) => { /* filtered */ });
+router.get('/test', rateLimiter, async (req, res) => {
+    /* test endpoint */
+});
+router.get('/top', rateLimiter, async (req, res) => {
+    /* main endpoint */
+});
+router.get('/position/:pos', rateLimiter, async (req, res) => {
+    /* filtered */
+});
 
 // Registered in server.js with appropriate rate limiter
 app.use('/api/bargains', apiSportsLimiter, bargainsRoutes);
@@ -281,10 +421,12 @@ app.use('/api/bargains', apiSportsLimiter, bargainsRoutes);
 ### Database Changes Workflow
 
 **ALWAYS update BOTH files**:
+
 1. `database/supabase-schema.sql` - PostgreSQL DDL
 2. `database/init-database.js` - Initialization logic
 
 **Then run**:
+
 ```bash
 npm run db:init     # Apply changes
 npm run db:test     # Verify connectivity
@@ -305,42 +447,51 @@ npm run db:test     # Verify connectivity
 ## 🐛 Common Issues & Solutions
 
 ### VEO3 Error 422 "failed" / "Names not allowed"
-**Symptom**: Video generation fails with Error 422
-**Cause**: KIE.ai blocks ALL player names due to image rights
-**Solution**: System auto-uses generic references via `promptBuilder.js:325-359`
-**Verify**: Check logs for `"[PromptBuilder] 🔧 Usando referencia segura: 'el centrocampista'"`
-**If missing**: Verify `playerNameOptimizer` is imported in `promptBuilder.js`
+
+**Symptom**: Video generation fails with Error 422 **Cause**: KIE.ai blocks ALL
+player names due to image rights **Solution**: System auto-uses generic
+references via `promptBuilder.js:325-359` **Verify**: Check logs for
+`"[PromptBuilder] 🔧 Usando referencia segura: 'el centrocampista'"` **If
+missing**: Verify `playerNameOptimizer` is imported in `promptBuilder.js`
 **See**: `docs/VEO3_FIX_REGRESION_OCTUBRE_2025.md`
 
 ### Ana has Mexican accent
+
 **Cause**: Missing or incorrect "speaks in Spanish from Spain" in prompt
 **Solution**: Verify `promptBuilder.js` uses lowercase "speaks" (not "SPEAKING")
 **Pattern**: "The person from the reference image speaks in Spanish from Spain"
 
 ### VEO3 timeouts
+
 **Cause**: Axios timeout too short for video generation (4-6 minutes)
-**Solution**: Verify `veo3Client.js` has `timeout: 120000` (initial) and `timeout: 45000` (status)
-**Note**: Server timeout already set to 15min in `server.js:339`
+**Solution**: Verify `veo3Client.js` has `timeout: 120000` (initial) and
+`timeout: 45000` (status) **Note**: Server timeout already set to 15min in
+`server.js:339`
 
 ### API-Sports returns wrong teams
-**Cause**: Using wrong season ID
-**Solution**: Always use `season=2025` for 2025-26 season (not 2024)
+
+**Cause**: Using wrong season ID **Solution**: Always use `season=2025` for
+2025-26 season (not 2024)
 
 ### Duplicate files created
-**Cause**: Not checking `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` before creating files
-**Solution**: ALWAYS search existing files first, follow NORMA #1 checklist
+
+**Cause**: Not checking `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` before
+creating files **Solution**: ALWAYS search existing files first, follow NORMA #1
+checklist
 
 ---
 
 ## 📚 Documentation Index
 
 **Quick References** (`.claude/reference/`):
+
 - `endpoints.md` - All API endpoints
 - `services.md` - Service layer architecture
 - `commands.md` - npm scripts reference
 - `troubleshooting.md` - Common issues
 
 **Critical Rules** (`.claude/rules/`):
+
 - `01-CRITICAL-RULES.md` - Unbreakable rules ⚠️
 - `02-development.md` - Development guidelines
 - `03-code-style.md` - Code style standards
@@ -348,28 +499,34 @@ npm run db:test     # Verify connectivity
 - `05-veo3.md` - VEO3-specific rules
 
 **Status Tracking** (`.claude/status/`):
+
 - `CURRENT-SPRINT.md` - Current state, yesterday/today plan
 - `PRIORITIES.md` - P0/P1/P2 tasks with blockers
 - `DECISIONS-LOG.md` - Historical technical decisions
 
 **VEO3 Deep Dives** (`docs/`):
+
 - `VEO3_FIX_REGRESION_OCTUBRE_2025.md` - Error 422 troubleshooting
 - `VEO3_GUIA_COMPLETA.md` - Complete VEO3 guide
 - `VEO3_SISTEMA_EMOCIONES_INTELIGENTE.md` - Emotion analyzer system
 - `VEO3_CINEMATOGRAFIA_PROGRESIVA_SISTEMA.md` - Cinematic progression
 
 **Instagram** (`docs/`):
+
 - `INSTAGRAM_ESTRATEGIA_CONTENIDO_2025.md` - 70/20/10 strategy
 - `INSTAGRAM_CARRUSELES_AUTOMATIZACION.md` - Carousel automation
 
 **File Creation Rules**:
-- `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` - CRITICAL: Read before creating ANY file
+
+- `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` - CRITICAL: Read before creating
+  ANY file
 
 ---
 
 ## ⚙️ Environment Variables
 
 **Required** (`.env`):
+
 ```bash
 # API-Sports (La Liga data)
 API_FOOTBALL_KEY=your_api_key
@@ -386,6 +543,7 @@ HOST=localhost
 ```
 
 **Database** (`.env.supabase`):
+
 ```bash
 SUPABASE_PROJECT_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_key
@@ -394,6 +552,7 @@ DATABASE_URL=postgresql://postgres:[password]@db.your-project.supabase.co:5432/p
 ```
 
 **Optional** (`.env`):
+
 ```bash
 CONTENTDRIPS_API_KEY=your_key  # Instagram carousels
 AEMET_API_KEY=your_key         # Weather integration
@@ -404,6 +563,7 @@ AEMET_API_KEY=your_key         # Weather integration
 ## 🚀 Quick Links
 
 **Local Dashboards**:
+
 - http://localhost:3000 - Main dashboard
 - http://localhost:3000/viral-preview - Instagram video preview (OFICIAL)
 - http://localhost:3000/staging - Content validation
@@ -411,6 +571,7 @@ AEMET_API_KEY=your_key         # Weather integration
 - http://localhost:3000/test-history - Video feedback tracking
 
 **External Services**:
+
 - n8n: https://n8n-n8n.6ld9pv.easypanel.host
 - Supabase: https://supabase.com/dashboard
 - KIE.ai: https://kie.ai
@@ -421,6 +582,7 @@ AEMET_API_KEY=your_key         # Weather integration
 ## 💰 Cost Tracking
 
 **Monthly Costs**:
+
 - API-Sports Ultra: $29/mo (75k req/day)
 - VEO3 (KIE.ai): ~$6/mo (20 videos × $0.30)
 - Supabase: $0 (free tier)
@@ -434,53 +596,69 @@ AEMET_API_KEY=your_key         # Weather integration
 ## 🎯 TL;DR - Critical Knowledge
 
 **VEO3 Video Generation**:
+
 - Ana seed 30001 + fixed image URL (NEVER change)
 - Prompts: 30-50 words, "speaks in Spanish from Spain" (lowercase)
 - Player names: Auto-replaced with generic references ("el jugador")
 - Timeouts: ≥120s (initial), ≥45s (status)
 
 **La Liga Data**:
+
 - Season 2025-26 = ID 2025 (not 2024)
 - 20 teams (includes Levante, Elche, Oviedo)
 
 **File Creation**:
+
 - Check `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` FIRST
 - Search existing files before creating new ones
 
 **Database**:
+
 - Update BOTH `supabase-schema.sql` AND `init-database.js`
 - Run `npm run db:init` after schema changes
 
 **Session Workflow**:
-1. Read `.claude/rules/01-CRITICAL-RULES.md` + `.claude/status/CURRENT-SPRINT.md`
+
+1. Read `.claude/rules/01-CRITICAL-RULES.md` +
+   `.claude/status/CURRENT-SPRINT.md`
 2. Work on P0 tasks from `.claude/status/PRIORITIES.md`
 3. Update `CURRENT-SPRINT.md` when done
 
 ---
 
-**Last Updated**: 2025-10-10
-**Version**: 2.2.0
-**Maintained by**: Claude Code
+**Last Updated**: 2025-10-12 **Version**: 2.3.0 **Maintained by**: Claude Code
 
 ## 🆕 Recent Critical Updates
 
+### Oct 12, 2025 - Architecture Documentation Updated
+
+- Documented 3-Phase VEO3 Architecture (critical Oct 11 update)
+- Added Nano Banana Integration explanation
+- Added Competitive YouTube Analyzer system
+- Clarified relationship between systems
+
 ### Oct 10, 2025 - CLAUDE.md Streamlined
+
 - Reduced redundancy with `.claude/` documentation
 - Emphasized VEO3 Error 422 solution (most common issue)
 - Focused on high-level architecture vs implementation details
 - Removed generic development advice per `/init` guidelines
 
 ### Oct 9, 2025 - Modular .claude/ Structure
-- Split documentation into `.claude/rules/`, `.claude/workflows/`, `.claude/reference/`
+
+- Split documentation into `.claude/rules/`, `.claude/workflows/`,
+  `.claude/reference/`
 - Created `START_HERE.md` master index
 - Better separation of concerns
 
 ### Oct 8, 2025 - Intelligent VEO3 Systems
+
 - EmotionAnalyzer: 18 emotions, content-based detection
 - CinematicProgressionSystem: 5 progression patterns, prevents "reset" look
 - AudioAnalyzer: FFmpeg silence detection, auto-trimming
 
 ### Oct 6, 2025 - VEO3 Critical Fix
+
 - Fixed 100% failure → 100% success rate
 - Timeout increase: 60s → 120s (initial), 15s → 45s (status)
 - Automatic generic player references (bypasses Error 422)

@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Competitive Intelligence Dashboard - Fantasy La Liga</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+            .stat-card {
+                transition: all 0.3s ease;
+            }
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            }
+            .video-card {
+                transition: all 0.2s ease;
+            }
+            .video-card:hover {
+                background-color: #f9fafb;
+            }
+            .processing-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen" x-data="dashboardApp()" x-init="init()">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            Competitive Intelligence Dashboard
+                        </h1>
+                        <p class="text-blue-100 mt-1">
+                            Sistema de análisis de contenido competitivo
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-blue-100">Última actualización</div>
+                        <div class="text-lg font-semibold" x-text="lastUpdate"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Loading State -->
+            <div x-show="loading" x-cloak class="text-center py-20">
+                <i class="fas fa-spinner fa-spin text-6xl text-blue-500 mb-4"></i>
+                <p class="text-gray-600 text-xl">Cargando dashboard...</p>
+            </div>
+
+            <!-- Error State -->
+            <div
+                x-show="error"
+                x-cloak
+                class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded"
+            >
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 text-2xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold text-red-800">Error cargando dashboard</p>
+                        <p class="text-red-700" x-text="error"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div x-show="!loading && !error" x-cloak>
+                <!-- Global Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm uppercase tracking-wide">
+                                    Canales Monitorizados
+                                </p>
+                                <p
+                                    class="text-3xl font-bold text-blue-600 mt-1"
+                                    x-text="globalStats.total_channels"
+                                ></p>
+                            </div>
+                            <i class="fas fa-tv text-blue-500 text-4xl opacity-20"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm uppercase tracking-wide">
+                                    Videos Totales
+                                </p>
+                                <p
+                                    class="text-3xl font-bold text-purple-600 mt-1"
+                                    x-text="globalStats.total_videos"
+                                ></p>
+                            </div>
+                            <i class="fas fa-video text-purple-500 text-4xl opacity-20"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm uppercase tracking-wide">
+                                    Videos Procesados
+                                </p>
+                                <p
+                                    class="text-3xl font-bold text-green-600 mt-1"
+                                    x-text="globalStats.total_completed"
+                                ></p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <span
+                                        x-text="globalStats.completion_rate + '%'"
+                                        class="font-semibold"
+                                    ></span>
+                                    completado
+                                </p>
+                            </div>
+                            <i class="fas fa-check-circle text-green-500 text-4xl opacity-20"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-card bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm uppercase tracking-wide">
+                                    Videos Pendientes
+                                </p>
+                                <p
+                                    class="text-3xl font-bold text-orange-600 mt-1"
+                                    x-text="globalStats.total_pending"
+                                ></p>
+                            </div>
+                            <i class="fas fa-clock text-orange-500 text-4xl opacity-20"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processor Status -->
+                <div class="bg-white rounded-lg shadow mb-8 p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">
+                                <i class="fas fa-robot mr-2"></i>
+                                Estado del Procesador Automático
+                            </h2>
+                        </div>
+                        <div class="flex gap-2">
+                            <button
+                                @click="startProcessing()"
+                                :disabled="processorStatus.isProcessing"
+                                class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            >
+                                <i class="fas fa-play mr-1"></i>
+                                Iniciar
+                            </button>
+                            <button
+                                @click="stopProcessing()"
+                                :disabled="!processorStatus.isProcessing"
+                                class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                            >
+                                <i class="fas fa-stop mr-1"></i>
+                                Detener
+                            </button>
+                            <button
+                                @click="refreshDashboard()"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                            >
+                                <i class="fas fa-sync mr-1"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border rounded p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <div
+                                    :class="processorStatus.isProcessing ? 'bg-green-500 processing-pulse' : 'bg-gray-400'"
+                                    class="w-3 h-3 rounded-full"
+                                ></div>
+                                <span class="font-semibold text-gray-700">Estado</span>
+                            </div>
+                            <p
+                                class="text-lg"
+                                :class="processorStatus.isProcessing ? 'text-green-600 font-bold' : 'text-gray-500'"
+                                x-text="processorStatus.isProcessing ? 'Procesando...' : 'Inactivo'"
+                            ></p>
+                        </div>
+
+                        <div class="border rounded p-4" x-show="processorStatus.currentVideo">
+                            <div class="font-semibold text-gray-700 mb-2">Video Actual</div>
+                            <p
+                                class="text-sm text-gray-600 truncate"
+                                x-text="processorStatus.currentVideo?.title || 'N/A'"
+                            ></p>
+                        </div>
+
+                        <div class="border rounded p-4">
+                            <div class="font-semibold text-gray-700 mb-2">Estadísticas</div>
+                            <p class="text-sm text-gray-600">
+                                Procesados:
+                                <span
+                                    class="font-semibold"
+                                    x-text="processorStatus.stats?.totalProcessed || 0"
+                                ></span>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Errores:
+                                <span
+                                    class="font-semibold text-red-600"
+                                    x-text="processorStatus.stats?.totalFailed || 0"
+                                ></span>
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                Costo:
+                                <span
+                                    class="font-semibold"
+                                    x-text="'$' + (processorStatus.stats?.totalCost || 0).toFixed(4)"
+                                ></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Channels Section -->
+                <div class="space-y-8">
+                    <template x-for="channel in channels" :key="channel.id">
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <!-- Channel Header -->
+                            <div
+                                class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-4">
+                                        <i class="fas fa-youtube text-4xl"></i>
+                                        <div>
+                                            <h3
+                                                class="text-2xl font-bold"
+                                                x-text="channel.channel_name || 'Canal sin nombre'"
+                                            ></h3>
+                                            <a
+                                                :href="channel.channel_url"
+                                                target="_blank"
+                                                class="text-blue-100 hover:text-white text-sm"
+                                            >
+                                                <i class="fas fa-external-link-alt mr-1"></i>
+                                                Ver en YouTube
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="bg-white bg-opacity-20 rounded-lg px-4 py-2 text-center"
+                                    >
+                                        <div class="text-3xl font-bold" x-text="channel.priority"></div>
+                                        <div class="text-xs uppercase">Prioridad</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Channel Stats -->
+                            <div class="p-6 border-b bg-gray-50">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="text-center">
+                                        <div
+                                            class="text-2xl font-bold text-gray-800"
+                                            x-text="channel.stats.total_videos"
+                                        ></div>
+                                        <div class="text-xs text-gray-500 uppercase">
+                                            Total Videos
+                                        </div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div
+                                            class="text-2xl font-bold text-green-600"
+                                            x-text="channel.stats.completed"
+                                        ></div>
+                                        <div class="text-xs text-gray-500 uppercase">Completados</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div
+                                            class="text-2xl font-bold text-orange-600"
+                                            x-text="channel.stats.pending"
+                                        ></div>
+                                        <div class="text-xs text-gray-500 uppercase">Pendientes</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div
+                                            class="text-2xl font-bold text-purple-600"
+                                            x-text="channel.stats.avg_quality"
+                                        ></div>
+                                        <div class="text-xs text-gray-500 uppercase">
+                                            Calidad Media
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Insights Section -->
+                            <div
+                                x-show="channel.insights && (channel.insights.keywords.length > 0 || channel.insights.topics.length > 0)"
+                                class="p-6 border-b bg-blue-50"
+                            >
+                                <h4 class="font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-lightbulb mr-2"></i>
+                                    Insights del Canal
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Top Jugadores Mencionados -->
+                                    <div x-show="channel.insights.keywords.length > 0">
+                                        <div class="font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-user-circle mr-1"></i>
+                                            Jugadores Más Mencionados
+                                        </div>
+                                        <div class="flex flex-wrap gap-2">
+                                            <template
+                                                x-for="kw in channel.insights.keywords.slice(0, 12)"
+                                                :key="kw.keyword"
+                                            >
+                                                <span
+                                                    class="px-3 py-1 bg-white rounded-full text-sm border-2 border-blue-300 shadow-sm"
+                                                >
+                                                    <span
+                                                        class="font-semibold text-blue-700"
+                                                        x-text="kw.keyword"
+                                                    ></span>
+                                                    <span
+                                                        class="ml-1 text-xs font-bold text-blue-500"
+                                                        x-text="'×' + kw.count"
+                                                    ></span>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Top Tipos de Contenido -->
+                                    <div x-show="channel.insights.topics.length > 0">
+                                        <div class="font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-tags mr-1"></i>
+                                            Tipos de Contenido
+                                        </div>
+                                        <div class="flex flex-wrap gap-2">
+                                            <template
+                                                x-for="topic in channel.insights.topics.slice(0, 8)"
+                                                :key="topic.topic"
+                                            >
+                                                <span
+                                                    class="px-4 py-2 bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg text-sm border border-purple-200 shadow-sm"
+                                                >
+                                                    <span
+                                                        class="font-semibold text-purple-700 capitalize"
+                                                        x-text="topic.topic"
+                                                    ></span>
+                                                    <span
+                                                        class="ml-2 px-2 py-0.5 bg-purple-500 text-white rounded-full text-xs font-bold"
+                                                        x-text="topic.count"
+                                                    ></span>
+                                                </span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Videos List -->
+                            <div class="p-6">
+                                <h4 class="font-bold text-gray-800 mb-4">
+                                    <i class="fas fa-list mr-2"></i>
+                                    Videos (<span x-text="channel.videos.length"></span>)
+                                </h4>
+
+                                <div class="space-y-3 max-h-96 overflow-y-auto">
+                                    <template x-for="video in channel.videos" :key="video.id">
+                                        <div class="video-card border rounded-lg p-4">
+                                            <div class="flex gap-4">
+                                                <!-- Thumbnail -->
+                                                <div class="flex-shrink-0">
+                                                    <img
+                                                        :src="video.thumbnail_url"
+                                                        :alt="video.title"
+                                                        class="w-32 h-20 object-cover rounded"
+                                                    />
+                                                    <div
+                                                        class="text-center mt-1 text-xs font-semibold px-2 py-1 rounded"
+                                                        :class="{
+                                                            'bg-green-100 text-green-800': video.processing_status === 'completed',
+                                                            'bg-yellow-100 text-yellow-800': video.processing_status === 'analyzing',
+                                                            'bg-gray-100 text-gray-800': video.processing_status === 'onboarding_analyzed'
+                                                        }"
+                                                        x-text="video.processing_status === 'completed' ? 'Completado' : video.processing_status === 'analyzing' ? 'Analizando' : 'Pendiente'"
+                                                    ></div>
+                                                </div>
+
+                                                <!-- Video Info -->
+                                                <div class="flex-grow">
+                                                    <a
+                                                        :href="video.video_url"
+                                                        target="_blank"
+                                                        class="font-semibold text-blue-600 hover:text-blue-800 line-clamp-2"
+                                                        x-text="video.title"
+                                                    ></a>
+
+                                                    <div
+                                                        class="flex gap-4 mt-2 text-sm text-gray-500"
+                                                    >
+                                                        <span
+                                                            ><i class="fas fa-eye mr-1"></i
+                                                            ><span
+                                                                x-text="formatNumber(video.views)"
+                                                            ></span
+                                                        ></span>
+                                                        <span
+                                                            ><i class="fas fa-thumbs-up mr-1"></i
+                                                            ><span
+                                                                x-text="formatNumber(video.likes)"
+                                                            ></span
+                                                        ></span>
+                                                        <span
+                                                            ><i class="fas fa-chart-line mr-1"></i
+                                                            ><span
+                                                                x-text="video.engagement_rate.toFixed(2) + '%'"
+                                                            ></span
+                                                        ></span>
+                                                        <span
+                                                            x-show="video.quality_score"
+                                                            class="font-semibold"
+                                                            :class="{
+                                                                'text-green-600': video.quality_score >= 70,
+                                                                'text-yellow-600': video.quality_score >= 50 && video.quality_score < 70,
+                                                                'text-red-600': video.quality_score < 50
+                                                            }"
+                                                            ><i class="fas fa-star mr-1"></i
+                                                            ><span
+                                                                x-text="video.quality_score + '/100'"
+                                                            ></span
+                                                        ></span>
+                                                    </div>
+
+                                                    <!-- Transcription Preview -->
+                                                    <div
+                                                        x-show="video.transcription && video.transcription.text"
+                                                        class="mt-3 p-3 bg-gray-50 rounded text-sm"
+                                                    >
+                                                        <div class="flex items-center gap-2 mb-2">
+                                                            <i class="fas fa-quote-left text-gray-400"></i>
+                                                            <span class="font-semibold text-gray-700"
+                                                                >Transcripción
+                                                                <span
+                                                                    class="text-xs font-normal text-gray-500"
+                                                                    x-text="'(' + (video.transcription.duration || 0).toFixed(1) + 's)'"
+                                                                ></span
+                                                            ></span>
+                                                        </div>
+                                                        <p
+                                                            class="text-gray-600 line-clamp-3"
+                                                            x-text="video.transcription.text"
+                                                        ></p>
+                                                    </div>
+
+                                                    <!-- Analysis Preview -->
+                                                    <div
+                                                        x-show="video.analysis"
+                                                        class="mt-3 p-3 bg-blue-50 rounded text-sm"
+                                                        x-data="{expanded: false}"
+                                                    >
+                                                        <div class="flex items-center gap-2 mb-2">
+                                                            <i class="fas fa-brain text-blue-500"></i>
+                                                            <span class="font-semibold text-blue-700"
+                                                                >Análisis</span
+                                                            >
+                                                            <span
+                                                                x-show="video.analysis.viralPotential"
+                                                                class="ml-auto px-2 py-0.5 rounded text-xs font-bold"
+                                                                :class="{
+                                                                    'bg-green-200 text-green-800': video.analysis.viralPotential >= 7,
+                                                                    'bg-yellow-200 text-yellow-800': video.analysis.viralPotential >= 5 && video.analysis.viralPotential < 7,
+                                                                    'bg-red-200 text-red-800': video.analysis.viralPotential < 5
+                                                                }"
+                                                            >
+                                                                <i class="fas fa-fire mr-1"></i>
+                                                                <span
+                                                                    x-text="'Viral: ' + video.analysis.viralPotential + '/10'"
+                                                                ></span>
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Content Type -->
+                                                        <div
+                                                            x-show="video.analysis.contentType"
+                                                            class="mb-2"
+                                                        >
+                                                            <span class="text-xs text-gray-600"
+                                                                >Tipo: </span
+                                                            >
+                                                            <span
+                                                                class="px-2 py-0.5 bg-purple-100 rounded text-xs font-semibold text-purple-700"
+                                                                x-text="video.analysis.contentType"
+                                                            ></span>
+                                                        </div>
+
+                                                        <!-- Players Mencionados -->
+                                                        <div
+                                                            x-show="video.analysis.players && video.analysis.players.length > 0"
+                                                            class="mt-2"
+                                                        >
+                                                            <div class="text-xs text-gray-600 mb-1">
+                                                                Jugadores:
+                                                            </div>
+                                                            <div class="flex flex-wrap gap-1">
+                                                                <template
+                                                                    x-for="player in video.analysis.players.slice(0, 6)"
+                                                                    :key="player.name"
+                                                                >
+                                                                    <span
+                                                                        class="px-2 py-0.5 bg-white rounded text-xs border border-blue-200"
+                                                                    >
+                                                                        <span x-text="player.name"></span>
+                                                                        <span
+                                                                            class="text-gray-400 ml-1"
+                                                                            x-text="'(' + (player.position || 'N/A') + ')'"
+                                                                        ></span>
+                                                                    </span>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Context (Jornada, Rival) -->
+                                                        <div
+                                                            x-show="video.analysis.context && (video.analysis.context.gameweek || video.analysis.context.opponent)"
+                                                            class="mt-2 text-xs text-gray-600"
+                                                        >
+                                                            <span
+                                                                x-show="video.analysis.context.gameweek && video.analysis.context.gameweek !== 'N/A'"
+                                                            >
+                                                                Jornada
+                                                                <span
+                                                                    class="font-semibold"
+                                                                    x-text="video.analysis.context.gameweek"
+                                                                ></span>
+                                                            </span>
+                                                            <span
+                                                                x-show="video.analysis.context.opponent && video.analysis.context.opponent !== 'N/A'"
+                                                                class="ml-2"
+                                                            >
+                                                                vs
+                                                                <span
+                                                                    class="font-semibold"
+                                                                    x-text="video.analysis.context.opponent"
+                                                                ></span>
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Claims -->
+                                                        <div
+                                                            x-show="video.analysis.claims && video.analysis.claims.length > 0"
+                                                            class="mt-2 text-xs text-gray-700"
+                                                        >
+                                                            <div class="font-semibold mb-1">Claims:</div>
+                                                            <ul class="list-disc list-inside space-y-0.5">
+                                                                <template
+                                                                    x-for="claim in video.analysis.claims.slice(0, 2)"
+                                                                    :key="claim"
+                                                                >
+                                                                    <li
+                                                                        class="line-clamp-1"
+                                                                        x-text="typeof claim === 'string' ? claim : claim.text"
+                                                                    ></li>
+                                                                </template>
+                                                            </ul>
+                                                        </div>
+
+                                                        <!-- Botón Ver Oportunidades (solo videos completados) -->
+                                                        <div x-show="video.processing_status === 'completed'" class="mt-3 pt-3 border-t border-blue-200">
+                                                            <button
+                                                                @click="expanded = !expanded"
+                                                                class="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition font-semibold text-sm flex items-center justify-center gap-2"
+                                                            >
+                                                                <i class="fas fa-lightbulb"></i>
+                                                                <span x-show="!expanded">📊 Ver Oportunidades de Contenido</span>
+                                                                <span x-show="expanded">🔼 Ocultar Oportunidades</span>
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Sección Expandible: Oportunidades -->
+                                                        <div x-show="expanded" x-cloak x-collapse class="mt-4 space-y-4">
+                                                            <!-- 1. INSIGHTS -->
+                                                            <div class="bg-white rounded-lg p-4 border-2 border-blue-300">
+                                                                <h5 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                                                    <i class="fas fa-search"></i>
+                                                                    1. INSIGHTS del Video Competidor
+                                                                </h5>
+
+                                                                <div class="grid grid-cols-2 gap-4 text-xs">
+                                                                    <div>
+                                                                        <div class="text-gray-600 font-semibold mb-1">Tipo Contenido:</div>
+                                                                        <div class="px-3 py-1 bg-purple-100 rounded inline-block font-semibold text-purple-700" x-text="video.analysis.contentType || 'N/A'"></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="text-gray-600 font-semibold mb-1">Potencial Viral:</div>
+                                                                        <div class="px-3 py-1 bg-red-100 rounded inline-block font-bold text-red-700">
+                                                                            <i class="fas fa-fire"></i>
+                                                                            <span x-text="(video.analysis.viralPotential || 0) + '/10'"></span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="text-gray-600 font-semibold mb-1">Views Actuales:</div>
+                                                                        <div class="font-bold text-gray-800" x-text="formatNumber(video.views)"></div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <div class="text-gray-600 font-semibold mb-1">Engagement Rate:</div>
+                                                                        <div class="font-bold text-gray-800" x-text="video.engagement_rate.toFixed(2) + '%'"></div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-3" x-show="video.analysis.players && video.analysis.players.length > 0">
+                                                                    <div class="text-gray-600 font-semibold mb-2">Jugadores Mencionados:</div>
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        <template x-for="player in video.analysis.players" :key="player.name">
+                                                                            <span class="px-3 py-1 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+                                                                                <span class="font-semibold" x-text="player.name"></span>
+                                                                                <span class="text-gray-500 ml-1" x-text="'(' + (player.position || 'N/A') + ')'"></span>
+                                                                            </span>
+                                                                        </template>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-3" x-show="video.analysis.claims && video.analysis.claims.length > 0">
+                                                                    <div class="text-gray-600 font-semibold mb-2">Claims Detectados:</div>
+                                                                    <ul class="list-disc list-inside space-y-1 text-xs text-gray-700">
+                                                                        <template x-for="claim in video.analysis.claims" :key="claim">
+                                                                            <li x-text="typeof claim === 'string' ? claim : (claim.claim || claim.text)"></li>
+                                                                        </template>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- 2. OUTPUTS PROPUESTOS -->
+                                                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-300">
+                                                                <h5 class="font-bold text-green-800 mb-3 flex items-center gap-2">
+                                                                    <i class="fas fa-video"></i>
+                                                                    2. OUTPUTS Propuestos (Nuestros Videos)
+                                                                </h5>
+
+                                                                <div class="space-y-3">
+                                                                    <!-- Counter Argument (si viralPotential >= 7 y tiene claims) -->
+                                                                    <div x-show="video.analysis.viralPotential >= 7 && video.analysis.claims && video.analysis.claims.length > 0" class="bg-white rounded p-3 border border-green-200">
+                                                                        <div class="flex items-start gap-3">
+                                                                            <div class="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                                                                <i class="fas fa-reply"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow">
+                                                                                <div class="font-bold text-gray-800 mb-1">🎯 CONTRAARGUMENTO con Datos Reales</div>
+                                                                                <div class="text-xs text-gray-600 mb-2">
+                                                                                    Video viral detectado. Crear contraargumento basado en datos oficiales API-Sports.
+                                                                                </div>
+                                                                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-2 text-xs">
+                                                                                    <span class="font-semibold">Ángulo:</span> "¿Has visto el video de <span x-text="channel.channel_name"></span>? Aquí están los datos REALES de API-Sports..."
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Player Spotlight (si players >= 3) -->
+                                                                    <div x-show="video.analysis.players && video.analysis.players.length >= 3" class="bg-white rounded p-3 border border-green-200">
+                                                                        <div class="flex items-start gap-3">
+                                                                            <div class="w-10 h-10 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                                                                <i class="fas fa-star"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow">
+                                                                                <div class="font-bold text-gray-800 mb-1">⭐ SPOTLIGHT de Jugador Trending</div>
+                                                                                <div class="text-xs text-gray-600 mb-2">
+                                                                                    Múltiples jugadores mencionados. Crear análisis profundo con estadísticas completas.
+                                                                                </div>
+                                                                                <div class="bg-purple-50 border-l-4 border-purple-400 p-2 text-xs">
+                                                                                    <span class="font-semibold">Jugador principal:</span> <span x-text="video.analysis.players[0]?.name || 'N/A'"></span> - Análisis exhaustivo con proyección próximas jornadas
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Viral Response (si viralPotential >= 8 y <24h) -->
+                                                                    <div x-show="video.analysis.viralPotential >= 8" class="bg-white rounded p-3 border border-green-200">
+                                                                        <div class="flex items-start gap-3">
+                                                                            <div class="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                                                                                <i class="fas fa-bolt"></i>
+                                                                            </div>
+                                                                            <div class="flex-grow">
+                                                                                <div class="font-bold text-gray-800 mb-1">🚨 RESPUESTA VIRAL Urgente</div>
+                                                                                <div class="text-xs text-gray-600 mb-2">
+                                                                                    Alto potencial viral. Responder en próximas 12-24h para capturar audiencia.
+                                                                                </div>
+                                                                                <div class="bg-red-50 border-l-4 border-red-400 p-2 text-xs">
+                                                                                    <span class="font-semibold">Urgencia:</span> CRÍTICA - Publicar antes de que pierda relevancia
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Mensaje si no hay outputs claros -->
+                                                                    <div x-show="!(video.analysis.viralPotential >= 7 || (video.analysis.players && video.analysis.players.length >= 3))" class="text-center py-4 text-gray-500 text-xs">
+                                                                        <i class="fas fa-info-circle text-2xl mb-2"></i>
+                                                                        <div>Video de bajo impacto. Monitorizar pero no priorizar respuesta.</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- 3. BENEFICIOS ESPERADOS -->
+                                                            <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg p-4 border-2 border-yellow-300">
+                                                                <h5 class="font-bold text-yellow-800 mb-3 flex items-center gap-2">
+                                                                    <i class="fas fa-chart-line"></i>
+                                                                    3. BENEFICIOS Esperados
+                                                                </h5>
+
+                                                                <div class="grid grid-cols-3 gap-4">
+                                                                    <div class="bg-white rounded-lg p-3 text-center">
+                                                                        <div class="text-2xl font-bold text-green-600" x-text="Math.round(video.views * 0.5).toLocaleString()"></div>
+                                                                        <div class="text-xs text-gray-600 mt-1">Views Estimadas</div>
+                                                                        <div class="text-xs text-gray-500">(50% del original)</div>
+                                                                    </div>
+                                                                    <div class="bg-white rounded-lg p-3 text-center">
+                                                                        <div class="text-2xl font-bold text-purple-600">
+                                                                            <span x-text="Math.min(10, (video.analysis.viralPotential || 0) + 1)"></span>
+                                                                            <span class="text-sm">/10</span>
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-600 mt-1">Nuestro Viral Potential</div>
+                                                                        <div class="text-xs text-gray-500">(+1 con datos reales)</div>
+                                                                    </div>
+                                                                    <div class="bg-white rounded-lg p-3 text-center">
+                                                                        <div class="text-2xl font-bold text-blue-600" x-text="(video.engagement_rate * 1.2).toFixed(2) + '%'"></div>
+                                                                        <div class="text-xs text-gray-600 mt-1">Engagement Esperado</div>
+                                                                        <div class="text-xs text-gray-500">(+20% con datos)</div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-3 bg-white rounded-lg p-3">
+                                                                    <div class="text-xs font-semibold text-gray-700 mb-2">💰 ROI Estimado:</div>
+                                                                    <div class="text-xs text-gray-600">
+                                                                        • Costo producción: ~$0.30 (VEO3)<br>
+                                                                        • Views estimadas: <span class="font-bold" x-text="Math.round(video.views * 0.5).toLocaleString()"></span><br>
+                                                                        • Engagement: Alto (contraargumento con datos oficiales)<br>
+                                                                        • <span class="font-bold text-green-600">ROI: Positivo</span> - Bajo costo, alto impacto educacional
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- 4. PRIORIZACIÓN EN CALENDARIO -->
+                                                            <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 border-2 border-red-300">
+                                                                <h5 class="font-bold text-red-800 mb-3 flex items-center gap-2">
+                                                                    <i class="fas fa-calendar-alt"></i>
+                                                                    4. CALENDARIO & Priorización
+                                                                </h5>
+
+                                                                <div class="grid grid-cols-2 gap-4">
+                                                                    <!-- Prioridad Automática -->
+                                                                    <div class="bg-white rounded-lg p-3">
+                                                                        <div class="text-xs text-gray-600 mb-2 font-semibold">Prioridad Asignada:</div>
+                                                                        <div class="flex items-center gap-2">
+                                                                            <span
+                                                                                class="px-4 py-2 rounded-lg font-bold text-lg"
+                                                                                :class="{
+                                                                                    'bg-red-600 text-white': video.analysis.viralPotential >= 8,
+                                                                                    'bg-orange-500 text-white': video.analysis.viralPotential >= 7 && video.analysis.viralPotential < 8,
+                                                                                    'bg-yellow-500 text-white': video.analysis.viralPotential >= 5 && video.analysis.viralPotential < 7,
+                                                                                    'bg-gray-400 text-white': video.analysis.viralPotential < 5
+                                                                                }"
+                                                                                x-text="video.analysis.viralPotential >= 8 ? 'P0' : (video.analysis.viralPotential >= 7 ? 'P1' : (video.analysis.viralPotential >= 5 ? 'P2' : 'P3'))"
+                                                                            ></span>
+                                                                            <div class="text-xs">
+                                                                                <div class="font-semibold" x-text="video.analysis.viralPotential >= 8 ? 'CRÍTICO' : (video.analysis.viralPotential >= 7 ? 'ALTA' : (video.analysis.viralPotential >= 5 ? 'MEDIA' : 'BAJA'))"></div>
+                                                                                <div class="text-gray-500" x-text="video.analysis.viralPotential >= 8 ? '(<24h)' : (video.analysis.viralPotential >= 7 ? '(<48h)' : (video.analysis.viralPotential >= 5 ? '(<5 días)' : '(>5 días)'))"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Deadline Recomendado -->
+                                                                    <div class="bg-white rounded-lg p-3">
+                                                                        <div class="text-xs text-gray-600 mb-2 font-semibold">Deadline Recomendado:</div>
+                                                                        <div class="text-sm font-bold text-gray-800">
+                                                                            <i class="fas fa-clock text-red-500"></i>
+                                                                            <span x-text="calculateDeadline(video)"></span>
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-500 mt-1">
+                                                                            Basado en urgencia y viral potential
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Acción Recomendada -->
+                                                                <div class="mt-3 bg-white rounded-lg p-3">
+                                                                    <div class="text-xs font-semibold text-gray-700 mb-2">📋 Próximos Pasos:</div>
+                                                                    <ol class="list-decimal list-inside text-xs text-gray-600 space-y-1">
+                                                                        <li>Obtener datos actualizados de API-Sports para jugadores mencionados</li>
+                                                                        <li>Generar guión VEO3 basado en contraargumento/spotlight</li>
+                                                                        <li>Producir video con Ana (3 segmentos, ~24s total)</li>
+                                                                        <li>Programar publicación según deadline</li>
+                                                                        <li>Monitorizar engagement primeras 24h</li>
+                                                                    </ol>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function dashboardApp() {
+                return {
+                    loading: true,
+                    error: null,
+                    channels: [],
+                    globalStats: {
+                        total_channels: 0,
+                        total_videos: 0,
+                        total_completed: 0,
+                        total_pending: 0,
+                        completion_rate: 0
+                    },
+                    processorStatus: {
+                        isProcessing: false,
+                        currentVideo: null,
+                        stats: {
+                            totalProcessed: 0,
+                            totalFailed: 0,
+                            totalCost: 0
+                        }
+                    },
+                    lastUpdate: '',
+                    refreshInterval: null,
+
+                    async init() {
+                        await this.loadDashboard();
+
+                        // Auto-refresh cada 30 segundos
+                        this.refreshInterval = setInterval(() => {
+                            this.loadDashboard(true);
+                        }, 30000);
+                    },
+
+                    async loadDashboard(silent = false) {
+                        if (!silent) {
+                            this.loading = true;
+                        }
+                        this.error = null;
+
+                        try {
+                            const response = await fetch('/api/competitive/dashboard');
+                            const result = await response.json();
+
+                            if (!result.success) {
+                                throw new Error(result.error || 'Error desconocido');
+                            }
+
+                            this.channels = result.data.channels;
+                            this.globalStats = result.data.global_stats;
+                            this.processorStatus = result.data.processor_status;
+
+                            this.lastUpdate = new Date().toLocaleTimeString('es-ES');
+                        } catch (err) {
+                            this.error = err.message;
+                            console.error('Error loading dashboard:', err);
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    async refreshDashboard() {
+                        await this.loadDashboard(false);
+                    },
+
+                    async startProcessing() {
+                        try {
+                            const response = await fetch('/api/competitive/process/auto-start', {
+                                method: 'POST'
+                            });
+                            const result = await response.json();
+
+                            if (result.success) {
+                                alert('✅ Procesamiento automático iniciado');
+                                await this.loadDashboard(true);
+                            } else {
+                                alert('❌ Error: ' + result.error);
+                            }
+                        } catch (err) {
+                            alert('❌ Error iniciando procesamiento: ' + err.message);
+                        }
+                    },
+
+                    async stopProcessing() {
+                        try {
+                            const response = await fetch('/api/competitive/process/auto-stop', {
+                                method: 'POST'
+                            });
+                            const result = await response.json();
+
+                            if (result.success) {
+                                alert('✅ Procesamiento automático detenido');
+                                await this.loadDashboard(true);
+                            } else {
+                                alert('❌ Error: ' + result.error);
+                            }
+                        } catch (err) {
+                            alert('❌ Error deteniendo procesamiento: ' + err.message);
+                        }
+                    },
+
+                    formatNumber(num) {
+                        if (!num) return '0';
+                        if (num >= 1000000) {
+                            return (num / 1000000).toFixed(1) + 'M';
+                        }
+                        if (num >= 1000) {
+                            return (num / 1000).toFixed(1) + 'K';
+                        }
+                        return num.toString();
+                    },
+
+                    calculateDeadline(video) {
+                        if (!video.published_at) return 'N/A';
+
+                        const publishedDate = new Date(video.published_at);
+                        const now = new Date();
+                        const hoursAgo = Math.round((now - publishedDate) / (60 * 60 * 1000));
+
+                        const viralPotential = video.analysis?.viralPotential || 0;
+
+                        // P0: <24h (viralPotential >= 8)
+                        if (viralPotential >= 8) {
+                            const deadline = new Date(publishedDate);
+                            deadline.setHours(deadline.getHours() + 24);
+                            const hoursRemaining = Math.round((deadline - now) / (60 * 60 * 1000));
+                            if (hoursRemaining > 0) {
+                                return `${hoursRemaining}h restantes`;
+                            } else {
+                                return 'URGENTE - Ya pasó deadline';
+                            }
+                        }
+
+                        // P1: <48h (viralPotential >= 7)
+                        if (viralPotential >= 7) {
+                            const deadline = new Date(publishedDate);
+                            deadline.setHours(deadline.getHours() + 48);
+                            const hoursRemaining = Math.round((deadline - now) / (60 * 60 * 1000));
+                            if (hoursRemaining > 0) {
+                                return `${Math.round(hoursRemaining / 24)}d ${hoursRemaining % 24}h`;
+                            } else {
+                                return 'Ya pasó deadline';
+                            }
+                        }
+
+                        // P2: <5 días (viralPotential >= 5)
+                        if (viralPotential >= 5) {
+                            const deadline = new Date(publishedDate);
+                            deadline.setDate(deadline.getDate() + 5);
+                            const daysRemaining = Math.round((deadline - now) / (24 * 60 * 60 * 1000));
+                            if (daysRemaining > 0) {
+                                return `${daysRemaining} días`;
+                            } else {
+                                return 'Ya pasó deadline';
+                            }
+                        }
+
+                        // P3: >5 días
+                        return 'Baja prioridad - Sin deadline urgente';
+                    }
+                };
+            }
+        </script>
+    </body>
+</html>

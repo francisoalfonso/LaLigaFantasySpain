@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Editorial | Fantasy La Liga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        [x-cloak] { display: none !important; }
+
+        .status-badge {
+            @apply px-3 py-1 rounded-full text-xs font-semibold;
+        }
+
+        .status-scheduled { @apply bg-blue-100 text-blue-800; }
+        .status-trigger { @apply bg-red-100 text-red-800 animate-pulse; }
+        .status-production { @apply bg-yellow-100 text-yellow-800; }
+        .status-published { @apply bg-green-100 text-green-800; }
+
+        .presenter-badge {
+            @apply px-2 py-1 rounded text-xs font-bold;
+        }
+
+        .presenter-ana { @apply bg-purple-500 text-white; }
+        .presenter-carlos { @apply bg-cyan-500 text-white; }
+
+        .priority-high { @apply border-l-4 border-red-500; }
+        .priority-normal { @apply border-l-4 border-blue-500; }
+        .priority-low { @apply border-l-4 border-gray-500; }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="editorialPlanning()">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold flex items-center gap-3">
+                        <i class="fas fa-calendar-alt"></i>
+                        Planning Editorial
+                    </h1>
+                    <p class="text-purple-100 mt-1">
+                        Gestión inteligente de contenidos con asignación automática de presentadores
+                    </p>
+                </div>
+                <a href="/" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Loading State -->
+        <div x-show="loading" x-cloak class="text-center py-12">
+            <i class="fas fa-spinner fa-spin text-4xl text-purple-600"></i>
+            <p class="mt-4 text-gray-600">Cargando planning...</p>
+        </div>
+
+        <!-- Content -->
+        <div x-show="!loading" x-cloak>
+            <!-- Stats Header -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                <!-- Total Scheduled -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Planificados</p>
+                            <p class="text-3xl font-bold text-blue-600" x-text="stats.scheduled"></p>
+                        </div>
+                        <i class="fas fa-calendar-check text-3xl text-blue-200"></i>
+                    </div>
+                </div>
+
+                <!-- Triggers -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Triggers Activos</p>
+                            <p class="text-3xl font-bold text-red-600" x-text="stats.triggers"></p>
+                        </div>
+                        <i class="fas fa-bolt text-3xl text-red-200 animate-pulse"></i>
+                    </div>
+                </div>
+
+                <!-- In Production -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-500">
+                    <div>
+                        <p class="text-gray-500 text-sm">En Producción</p>
+                        <p class="text-3xl font-bold text-yellow-600" x-text="stats.in_production"></p>
+                    </div>
+                </div>
+
+                <!-- Ana Distribution -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
+                    <div>
+                        <p class="text-gray-500 text-sm">Ana Martínez</p>
+                        <p class="text-3xl font-bold text-purple-600" x-text="presenterDist.ana_percentage"></p>
+                    </div>
+                </div>
+
+                <!-- Carlos Distribution -->
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-cyan-500">
+                    <div>
+                        <p class="text-gray-500 text-sm">Carlos González</p>
+                        <p class="text-3xl font-bold text-cyan-600" x-text="presenterDist.carlos_percentage"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4 mb-8">
+                <button
+                    @click="showNewContentModal = true"
+                    class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Contenido
+                </button>
+
+                <button
+                    @click="loadPlanning()"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2">
+                    <i class="fas fa-sync"></i>
+                    Refrescar
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl shadow-md mb-6">
+                <div class="flex border-b">
+                    <button
+                        @click="activeTab = 'scheduled'"
+                        :class="activeTab === 'scheduled' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-50'"
+                        class="px-6 py-4 font-semibold transition">
+                        <i class="fas fa-calendar-check mr-2"></i>Planificados
+                        <span class="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs" x-text="stats.scheduled"></span>
+                    </button>
+
+                    <button
+                        @click="activeTab = 'triggers'"
+                        :class="activeTab === 'triggers' ? 'bg-red-50 text-red-600 border-b-2 border-red-600' : 'text-gray-600 hover:bg-gray-50'"
+                        class="px-6 py-4 font-semibold transition">
+                        <i class="fas fa-bolt mr-2"></i>Triggers
+                        <span class="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs animate-pulse" x-text="stats.triggers"></span>
+                    </button>
+
+                    <button
+                        @click="activeTab = 'production'"
+                        :class="activeTab === 'production' ? 'bg-yellow-50 text-yellow-600 border-b-2 border-yellow-600' : 'text-gray-600 hover:bg-gray-50'"
+                        class="px-6 py-4 font-semibold transition">
+                        <i class="fas fa-video mr-2"></i>En Producción
+                        <span class="ml-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs" x-text="stats.in_production"></span>
+                    </button>
+
+                    <button
+                        @click="activeTab = 'published'"
+                        :class="activeTab === 'published' ? 'bg-green-50 text-green-600 border-b-2 border-green-600' : 'text-gray-600 hover:bg-gray-50'"
+                        class="px-6 py-4 font-semibold transition">
+                        <i class="fas fa-check-circle mr-2"></i>Publicados
+                        <span class="ml-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs" x-text="stats.published"></span>
+                    </button>
+
+                    <button
+                        @click="activeTab = 'rules'"
+                        :class="activeTab === 'rules' ? 'bg-purple-50 text-purple-600 border-b-2 border-purple-600' : 'text-gray-600 hover:bg-gray-50'"
+                        class="px-6 py-4 font-semibold transition">
+                        <i class="fas fa-user-friends mr-2"></i>Reglas Presentadores
+                    </button>
+                </div>
+            </div>
+
+            <!-- Scheduled Content -->
+            <div x-show="activeTab === 'scheduled'" x-cloak>
+                <div class="grid grid-cols-1 gap-4">
+                    <template x-for="item in planning.scheduled" :key="item.id">
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
+                             :class="getPriorityClass(item.priority)">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="status-badge status-scheduled">Planificado</span>
+                                        <span :class="getPresenterBadgeClass(item.presenter)"
+                                              x-text="item.presenter === 'ana' ? 'Ana Martínez' : 'Carlos González'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.contentType"></span>
+                                    </div>
+
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2" x-text="item.topic"></h3>
+
+                                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                                        <div>
+                                            <i class="fas fa-calendar mr-1"></i>
+                                            <span x-text="formatDate(item.scheduledDate)"></span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-tag mr-1"></i>
+                                            <span x-text="item.platform"></span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-flag mr-1"></i>
+                                            <span x-text="item.priority"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button @click="moveToProduction(item.id)"
+                                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                                        <i class="fas fa-play mr-1"></i>Producir
+                                    </button>
+                                    <button @click="deleteItem(item.id)"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="planning.scheduled.length === 0" class="text-center py-12 text-gray-500">
+                        <i class="fas fa-inbox text-4xl mb-4"></i>
+                        <p>No hay contenidos planificados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Triggers -->
+            <div x-show="activeTab === 'triggers'" x-cloak>
+                <div class="grid grid-cols-1 gap-6">
+                    <template x-for="item in planning.triggers" :key="item.id">
+                        <div x-data="{
+                            briefExpanded: true,
+                            daysExpired: item.expired && item.deadline ? Math.floor((new Date() - new Date(item.deadline)) / (1000 * 60 * 60 * 24)) : 0
+                        }"
+                        :class="item.expired ? 'opacity-75 bg-gray-50' : 'bg-white'"
+                        class="rounded-lg shadow-md overflow-hidden border-l-4"
+                        :class="item.expired ? 'border-gray-400' : 'border-red-500'">
+
+                            <!-- DEMO CADUCADO Banner (solo para triggers expirados) -->
+                            <div x-show="item.expired || item.demo" class="bg-gradient-to-r from-gray-700 to-gray-600 text-white px-6 py-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas fa-lock text-2xl"></i>
+                                        <div>
+                                            <div class="font-bold text-lg">🔒 DEMO CADUCADO - SOLO EJEMPLO</div>
+                                            <div class="text-xs text-gray-200">Este trigger es un ejemplo con datos reales pero ya expiró. No entrará en producción.</div>
+                                        </div>
+                                    </div>
+                                    <div x-show="daysExpired > 0" class="bg-white/20 rounded-lg px-4 py-2 text-center">
+                                        <div class="text-xl font-bold" x-text="'Expiró hace ' + daysExpired + ' días'"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Header -->
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <span class="status-badge" :class="item.expired ? 'bg-gray-100 text-gray-600' : 'status-trigger'">
+                                                <i class="fas fa-bolt mr-1"></i>
+                                                <span x-text="item.expired ? 'Trigger Expirado' : 'Trigger Activo'"></span>
+                                            </span>
+                                            <span x-show="item.demo" class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-400">
+                                                <i class="fas fa-flask mr-1"></i>DEMO
+                                            </span>
+                                            <span :class="getPresenterBadgeClass(item.presenter)"
+                                                  x-text="item.presenter === 'ana' ? 'Ana Martínez' : 'Carlos González'"></span>
+                                            <span class="text-xs font-bold uppercase"
+                                                  :class="item.expired ? 'text-gray-500' : 'text-red-600'"
+                                                  x-text="item.trigger_type"></span>
+                                        </div>
+
+                                        <h3 class="text-xl font-bold mb-3"
+                                            :class="item.expired ? 'text-gray-600 line-through' : 'text-gray-800'"
+                                            x-text="item.topic"></h3>
+
+                                        <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                                            <div class="font-semibold" :class="item.expired ? 'text-gray-500' : 'text-red-600'">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                <span x-text="item.expired ? 'Expiró' : 'Deadline'"></span>: <span x-text="formatDate(item.deadline)"></span>
+                                            </div>
+                                            <div>
+                                                <i class="fas fa-chart-line mr-1"></i>
+                                                Viral Score: <span x-text="item.viralScore || 0"></span>
+                                            </div>
+                                            <div x-show="item.writer_brief?.why?.estimated_views" class="text-green-600 font-semibold">
+                                                <i class="fas fa-eye mr-1"></i>
+                                                <span x-text="(item.writer_brief?.why?.estimated_views || 0).toLocaleString() + ' views est.'"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="border rounded p-3 text-sm mb-4"
+                                             :class="item.expired ? 'bg-gray-50 border-gray-300 text-gray-600' : 'bg-red-50 border-red-200 text-red-800'">
+                                            <i class="fas mr-2" :class="item.expired ? 'fa-info-circle' : 'fa-exclamation-triangle'"></i>
+                                            <span x-text="item.writer_brief?.why?.urgency || 'Respuesta urgente a contenido viral'"></span>
+                                        </div>
+
+                                        <!-- Brief Preview -->
+                                        <div x-show="item.writer_brief" class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
+                                            <div class="font-semibold text-blue-800 mb-2">📋 Brief Disponible</div>
+                                            <div class="text-sm text-blue-700 space-y-1">
+                                                <div>✅ Qué hacer: <span x-text="item.writer_brief?.what_to_do?.video_type || 'N/A'"></span></div>
+                                                <div>✅ Por qué: <span x-text="item.writer_brief?.why?.rationale?.substring(0, 80) + '...' || 'N/A'"></span></div>
+                                                <div>✅ Datos: <span x-text="(item.writer_brief?.data_to_use?.data_points?.length || 0) + ' data points'"></span></div>
+                                                <div>✅ Ideas: <span x-text="(item.writer_brief?.content_ideas?.hooks?.length || 0) + ' hooks listos'"></span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <button @click="briefExpanded = !briefExpanded"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                                            <i :class="briefExpanded ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+                                            <span x-show="!briefExpanded">Expandir Brief</span>
+                                            <span x-show="briefExpanded">Colapsar Brief</span>
+                                        </button>
+
+                                        <!-- Botón Producir (deshabilitado para demos/expirados) -->
+                                        <template x-if="item.expired || item.demo">
+                                            <button disabled
+                                                    class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg text-sm cursor-not-allowed flex items-center gap-2"
+                                                    title="Este trigger ha expirado y no puede entrar en producción">
+                                                <i class="fas fa-lock"></i>
+                                                Solo Demo
+                                            </button>
+                                        </template>
+                                        <template x-if="!item.expired && !item.demo">
+                                            <button @click="moveToProduction(item.id)"
+                                                    class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                                                <i class="fas fa-play mr-1"></i>Producir
+                                            </button>
+                                        </template>
+
+                                        <button @click="deleteItem(item.id)"
+                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm transition">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- BRIEF COMPLETO EXPANDIBLE -->
+                                <div x-show="briefExpanded" x-collapse class="space-y-4 pt-6 border-t-2 border-gray-200">
+                                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-1 rounded-lg">
+                                        <div class="bg-white rounded-lg p-6">
+                                            <h4 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                                                <i class="fas fa-scroll text-blue-600"></i>
+                                                Brief Completo para Agente Redactor
+                                            </h4>
+
+                                            <!-- 1. QUÉ HACER -->
+                                            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-5">
+                                                <h5 class="font-bold text-green-800 text-lg mb-3 flex items-center gap-2">
+                                                    <i class="fas fa-tasks"></i>
+                                                    1. QUÉ HACER
+                                                </h5>
+                                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Tipo de Video:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.what_to_do?.video_type || 'N/A'"></div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Presentador:</span>
+                                                        <div class="mt-1">
+                                                            <span :class="getPresenterBadgeClass(item.writer_brief?.what_to_do?.presenter)" x-text="item.writer_brief?.what_to_do?.presenter === 'ana' ? 'Ana Martínez' : 'Carlos González'"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Segmentos:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.what_to_do?.segments || 3"></div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Duración:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.what_to_do?.duration || '24s'"></div>
+                                                    </div>
+                                                    <div class="col-span-2">
+                                                        <span class="text-gray-600 font-semibold">Descripción:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.what_to_do?.description || 'N/A'"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 2. POR QUÉ (Motivo) -->
+                                            <div class="mb-6 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-5">
+                                                <h5 class="font-bold text-yellow-800 text-lg mb-3 flex items-center gap-2">
+                                                    <i class="fas fa-lightbulb"></i>
+                                                    2. POR QUÉ (Motivo)
+                                                </h5>
+                                                <div class="space-y-3 text-sm">
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Rationale:</span>
+                                                        <div class="mt-1 text-gray-800 bg-white p-3 rounded" x-text="item.writer_brief?.why?.rationale || 'N/A'"></div>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.why?.competitor_claim">
+                                                        <span class="text-gray-600 font-semibold">Claim Competidor:</span>
+                                                        <div class="mt-1 text-red-700 bg-white p-3 rounded border-l-2 border-red-500" x-text="'\"' + (item.writer_brief?.why?.competitor_claim || '') + '\"'"></div>
+                                                    </div>
+                                                    <div class="grid grid-cols-3 gap-4">
+                                                        <div class="bg-white p-3 rounded text-center">
+                                                            <div class="text-2xl font-bold text-red-600" x-text="item.writer_brief?.why?.viral_potential_original || 0"></div>
+                                                            <div class="text-xs text-gray-500">Viral Original</div>
+                                                        </div>
+                                                        <div class="bg-white p-3 rounded text-center">
+                                                            <div class="text-2xl font-bold text-green-600" x-text="item.writer_brief?.why?.viral_potential_ours || 0"></div>
+                                                            <div class="text-xs text-gray-500">Nuestro Viral</div>
+                                                        </div>
+                                                        <div class="bg-white p-3 rounded text-center">
+                                                            <div class="text-2xl font-bold text-blue-600" x-text="(item.writer_brief?.why?.estimated_views || 0).toLocaleString()"></div>
+                                                            <div class="text-xs text-gray-500">Views Estimadas</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 3. DATOS A USAR -->
+                                            <div class="mb-6 bg-purple-50 border-l-4 border-purple-500 rounded-r-lg p-5">
+                                                <h5 class="font-bold text-purple-800 text-lg mb-3 flex items-center gap-2">
+                                                    <i class="fas fa-database"></i>
+                                                    3. DATOS A USAR (API-Sports)
+                                                </h5>
+                                                <div class="space-y-3 text-sm">
+                                                    <div x-show="item.writer_brief?.data_to_use?.players?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">Jugadores:</span>
+                                                        <div class="mt-2 flex flex-wrap gap-2">
+                                                            <template x-for="player in item.writer_brief?.data_to_use?.players || []" :key="player.name">
+                                                                <span class="bg-white px-3 py-2 rounded-lg border border-purple-200">
+                                                                    <span class="font-semibold" x-text="player.name"></span>
+                                                                    <span class="text-gray-500 text-xs ml-1" x-text="'(' + (player.position || 'N/A') + ')'"></span>
+                                                                </span>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.data_to_use?.api_endpoints?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">API Endpoints:</span>
+                                                        <ul class="mt-2 space-y-1 bg-white p-3 rounded">
+                                                            <template x-for="endpoint in item.writer_brief?.data_to_use?.api_endpoints || []" :key="endpoint">
+                                                                <li class="text-xs font-mono text-purple-700" x-text="endpoint"></li>
+                                                            </template>
+                                                        </ul>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.data_to_use?.data_points?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">Data Points a Incluir:</span>
+                                                        <ul class="mt-2 space-y-1 bg-white p-3 rounded list-disc list-inside">
+                                                            <template x-for="point in item.writer_brief?.data_to_use?.data_points || []" :key="point">
+                                                                <li class="text-gray-700" x-text="point"></li>
+                                                            </template>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 4. FRASES CLAVE E IDEAS -->
+                                            <div class="mb-6 bg-pink-50 border-l-4 border-pink-500 rounded-r-lg p-5">
+                                                <h5 class="font-bold text-pink-800 text-lg mb-3 flex items-center gap-2">
+                                                    <i class="fas fa-comment-dots"></i>
+                                                    4. FRASES CLAVE E IDEAS
+                                                </h5>
+                                                <div class="space-y-4 text-sm">
+                                                    <div x-show="item.writer_brief?.content_ideas?.hooks?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">🎯 Hooks (Enganches):</span>
+                                                        <div class="mt-2 space-y-2">
+                                                            <template x-for="(hook, index) in item.writer_brief?.content_ideas?.hooks || []" :key="index">
+                                                                <div class="bg-white p-3 rounded border-l-2 border-pink-400 text-gray-800" x-text="hook"></div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.content_ideas?.key_messages?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">💬 Mensajes Clave:</span>
+                                                        <ul class="mt-2 space-y-1 bg-white p-3 rounded list-disc list-inside">
+                                                            <template x-for="msg in item.writer_brief?.content_ideas?.key_messages || []" :key="msg">
+                                                                <li class="text-gray-700" x-text="msg"></li>
+                                                            </template>
+                                                        </ul>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.content_ideas?.cta_suggestions?.length > 0">
+                                                        <span class="text-gray-600 font-semibold">📢 CTAs Sugeridos:</span>
+                                                        <div class="mt-2 flex flex-wrap gap-2">
+                                                            <template x-for="(cta, index) in item.writer_brief?.content_ideas?.cta_suggestions || []" :key="index">
+                                                                <span class="bg-white px-3 py-1 rounded-full border border-pink-300 text-xs" x-text="cta"></span>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                    <div x-show="item.writer_brief?.content_ideas?.tone">
+                                                        <span class="text-gray-600 font-semibold">🎭 Tono:</span>
+                                                        <div class="mt-1 bg-white p-3 rounded italic text-gray-700" x-text="item.writer_brief?.content_ideas?.tone"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 5. CONTEXTO ORIGINAL -->
+                                            <div class="bg-gray-50 border-l-4 border-gray-500 rounded-r-lg p-5">
+                                                <h5 class="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
+                                                    <i class="fas fa-info-circle"></i>
+                                                    5. CONTEXTO ORIGINAL (Competidor)
+                                                </h5>
+                                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Canal:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.competitor_context?.channel || 'N/A'"></div>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-gray-600 font-semibold">Views:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="(item.writer_brief?.competitor_context?.views || 0).toLocaleString()"></div>
+                                                    </div>
+                                                    <div class="col-span-2">
+                                                        <span class="text-gray-600 font-semibold">Título Video:</span>
+                                                        <div class="mt-1 text-gray-800" x-text="item.writer_brief?.competitor_context?.video_title || 'N/A'"></div>
+                                                    </div>
+                                                    <div class="col-span-2" x-show="item.writer_brief?.competitor_context?.video_url">
+                                                        <a :href="item.writer_brief?.competitor_context?.video_url" target="_blank"
+                                                           class="text-blue-600 hover:text-blue-800 underline text-xs">
+                                                            <i class="fas fa-external-link-alt mr-1"></i>Ver video original
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="planning.triggers.length === 0" class="text-center py-12 text-gray-500">
+                        <i class="fas fa-bolt text-4xl mb-4"></i>
+                        <p>No hay triggers activos</p>
+                        <p class="text-sm mt-2">Los triggers se generan automáticamente desde el análisis competitivo</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In Production -->
+            <div x-show="activeTab === 'production'" x-cloak>
+                <div class="grid grid-cols-1 gap-4">
+                    <template x-for="item in planning.in_production" :key="item.id">
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition border-l-4 border-yellow-500">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="status-badge status-production">
+                                            <i class="fas fa-video mr-1"></i>En Producción
+                                        </span>
+                                        <span :class="getPresenterBadgeClass(item.presenter)"
+                                              x-text="item.presenter === 'ana' ? 'Ana Martínez' : 'Carlos González'"></span>
+                                    </div>
+
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2" x-text="item.topic"></h3>
+
+                                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                                        <div>
+                                            <i class="fas fa-tag mr-1"></i>
+                                            <span x-text="item.contentType"></span>
+                                        </div>
+                                        <div>
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Actualizado: <span x-text="formatDate(item.updatedAt)"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button @click="markAsPublished(item.id)"
+                                            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm transition">
+                                        <i class="fas fa-check mr-1"></i>Publicar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="planning.in_production.length === 0" class="text-center py-12 text-gray-500">
+                        <i class="fas fa-video text-4xl mb-4"></i>
+                        <p>No hay contenidos en producción</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Published -->
+            <div x-show="activeTab === 'published'" x-cloak>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <template x-for="item in planning.published.slice(0, 10)" :key="item.id">
+                        <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="status-badge status-published">
+                                            <i class="fas fa-check-circle mr-1"></i>Publicado
+                                        </span>
+                                        <span :class="getPresenterBadgeClass(item.presenter)"
+                                              x-text="item.presenter === 'ana' ? 'Ana' : 'Carlos'"></span>
+                                    </div>
+
+                                    <h3 class="font-bold text-gray-800 mb-2" x-text="item.topic"></h3>
+
+                                    <div class="text-xs text-gray-500">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        <span x-text="formatDate(item.publishedAt)"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="planning.published.length === 0" class="col-span-2 text-center py-12 text-gray-500">
+                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                        <p>No hay contenidos publicados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Presenter Rules -->
+            <div x-show="activeTab === 'rules'" x-cloak class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Ana's Content Types -->
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl shadow-md p-6">
+                    <h3 class="text-2xl font-bold text-purple-600 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-circle"></i>
+                        Ana Martínez
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Contenido de Engagement y Acción</p>
+
+                    <div class="space-y-2">
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Chollos</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Reel/Story</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Bargains</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Reel/Story</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Alineaciones</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Reel/Carousel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Tips</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Story/Reel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Match Preview</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Reel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Player Spotlight</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Reel/Story</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">News</span>
+                            <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Story</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Carlos's Content Types -->
+                <div class="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl shadow-md p-6">
+                    <h3 class="text-2xl font-bold text-cyan-600 mb-4 flex items-center gap-2">
+                        <i class="fas fa-user-tie"></i>
+                        Carlos González
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Contenido Analítico y Datos</p>
+
+                    <div class="space-y-2">
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Stats</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel/Reel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Analysis</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel/Reel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Team Analysis</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Data Insights</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Weekly Roundup</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel/Reel</span>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+                            <span class="text-sm font-semibold">Top Performers</span>
+                            <span class="text-xs bg-cyan-100 text-cyan-800 px-2 py-1 rounded">Carousel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Content Modal -->
+    <div x-show="showNewContentModal"
+         x-cloak
+         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+         @click.self="showNewContentModal = false">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4">
+            <h2 class="text-2xl font-bold mb-6">Nuevo Contenido</h2>
+
+            <form @submit.prevent="createNewContent()" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Contenido</label>
+                    <select x-model="newContent.contentType" required
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="">Seleccionar...</option>
+                        <option value="chollos">Chollos</option>
+                        <option value="stats">Estadísticas</option>
+                        <option value="analysis">Análisis</option>
+                        <option value="tips">Tips</option>
+                        <option value="match_preview">Preview de Partido</option>
+                        <option value="player_spotlight">Spotlight Jugador</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tema/Título</label>
+                    <input type="text" x-model="newContent.topic" required
+                           placeholder="Ej: Top Chollos Jornada 5"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Plataforma</label>
+                    <select x-model="newContent.platform"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="instagram">Instagram</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="tiktok">TikTok</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Fecha Programada</label>
+                    <input type="datetime-local" x-model="newContent.scheduledDate"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Prioridad</label>
+                    <select x-model="newContent.priority"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                        <option value="normal">Normal</option>
+                        <option value="high">Alta</option>
+                        <option value="low">Baja</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button type="submit"
+                            class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                        Crear Contenido
+                    </button>
+                    <button type="button" @click="showNewContentModal = false"
+                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold transition">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function editorialPlanning() {
+            return {
+                loading: true,
+                activeTab: 'scheduled',
+                showNewContentModal: false,
+
+                planning: {
+                    scheduled: [],
+                    triggers: [],
+                    in_production: [],
+                    published: []
+                },
+
+                stats: {
+                    scheduled: 0,
+                    triggers: 0,
+                    in_production: 0,
+                    published: 0
+                },
+
+                presenterDist: {
+                    ana: 0,
+                    carlos: 0,
+                    ana_percentage: '0%',
+                    carlos_percentage: '0%'
+                },
+
+                newContent: {
+                    contentType: '',
+                    topic: '',
+                    platform: 'instagram',
+                    scheduledDate: '',
+                    priority: 'normal'
+                },
+
+                async init() {
+                    await this.loadPlanning();
+                },
+
+                async loadPlanning() {
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/api/planning');
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.planning = data.data.planning;
+                            this.stats = data.data.stats;
+                            this.presenterDist = data.data.presenter_distribution;
+                        }
+                    } catch (error) {
+                        console.error('Error loading planning:', error);
+                        alert('Error cargando planning');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async createNewContent() {
+                    try {
+                        const response = await fetch('/api/planning/schedule', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.newContent)
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('Contenido creado correctamente');
+                            this.showNewContentModal = false;
+                            this.newContent = {
+                                contentType: '',
+                                topic: '',
+                                platform: 'instagram',
+                                scheduledDate: '',
+                                priority: 'normal'
+                            };
+                            await this.loadPlanning();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error creating content:', error);
+                        alert('Error creando contenido');
+                    }
+                },
+
+                async moveToProduction(itemId) {
+                    if (!confirm('¿Mover este contenido a producción?')) return;
+
+                    try {
+                        const response = await fetch(`/api/planning/production/${itemId}`, {
+                            method: 'PUT'
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('Movido a producción');
+                            await this.loadPlanning();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error moviendo a producción');
+                    }
+                },
+
+                async markAsPublished(itemId) {
+                    if (!confirm('¿Marcar como publicado?')) return;
+
+                    try {
+                        const response = await fetch(`/api/planning/publish/${itemId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                publishedAt: new Date().toISOString()
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('Marcado como publicado');
+                            await this.loadPlanning();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error marcando como publicado');
+                    }
+                },
+
+                async deleteItem(itemId) {
+                    if (!confirm('¿Eliminar este contenido?')) return;
+
+                    try {
+                        const response = await fetch(`/api/planning/${itemId}`, {
+                            method: 'DELETE'
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            alert('Contenido eliminado');
+                            await this.loadPlanning();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Error eliminando contenido');
+                    }
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'N/A';
+                    const date = new Date(dateString);
+                    return date.toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                getPriorityClass(priority) {
+                    if (priority === 'high') return 'priority-high';
+                    if (priority === 'low') return 'priority-low';
+                    return 'priority-normal';
+                },
+
+                getPresenterBadgeClass(presenter) {
+                    return presenter === 'ana' ? 'presenter-badge presenter-ana' : 'presenter-badge presenter-carlos';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

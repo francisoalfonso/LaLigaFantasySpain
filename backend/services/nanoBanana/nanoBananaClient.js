@@ -51,11 +51,12 @@ class NanoBananaClient {
         };
 
         // URLs de referencias para Nano Banana
-        // Orden: 4 Ana + 1 estudio (estudio al final)
+        // Orden: 4 Ana + 2 estudios (estudios al final)
         // El aspect ratio se fuerza con image_size: "9:16" (no depende del orden)
+        // ✅ ACTUALIZADO (12 Oct 2025): Ahora usa 2 imágenes de estudio (con/sin mesa)
         this.anaReferenceUrls = [
             ...FLP_CONFIG.ana_references.map(ref => ref.url),
-            FLP_CONFIG.estudio.url
+            ...FLP_CONFIG.estudio_references.map(ref => ref.url)
         ];
 
         // Información de kits disponibles (para cambio de camiseta)
@@ -533,6 +534,13 @@ class NanoBananaClient {
 
             const seed = options.seed || this.anaConfig.seed;
 
+            // ✅ FIX (12 Oct 2025): Usar imageUrls dinámicas (Carlos/Ana) o fallback a Ana
+            const referenceUrls = options.imageUrls || this.anaReferenceUrls;
+            logger.info(`[NanoBananaClient] Referencias: ${referenceUrls.length} imágenes`);
+            logger.info(
+                `[NanoBananaClient] URLs: ${referenceUrls.map(u => u.split('/').pop()).join(', ')}`
+            );
+
             // Negative prompt para evitar reflejos rojizos y aspecto 3D
             const negativePrompt = `no red tint on hair, no red highlights on hair, no strong color reflections, no magenta tone on face, no HDR, no 3D render, no composite lighting mismatch, no overexposed red areas, no fake reflections`;
 
@@ -541,7 +549,7 @@ class NanoBananaClient {
                 input: {
                     prompt: customPrompt,
                     negative_prompt: negativePrompt,
-                    image_urls: this.anaReferenceUrls,
+                    image_urls: referenceUrls,
                     output_format: this.anaConfig.outputFormat,
                     image_size: this.anaConfig.imageSize, // "9:16" vertical 576x1024
                     seed: seed,

@@ -1,0 +1,107 @@
+{
+  "version": "1.0",
+  "updated_at": "2025-10-12T17:24:28.975Z",
+  "distribution": {
+    "ana": 0.7,
+    "carlos": 0.3
+  },
+  "schedule": {
+    "lunes": [
+      {
+        "type": "reel",
+        "presenter": "ana",
+        "topic": "Chollos de la Jornada",
+        "time": "10:00"
+      }
+    ],
+    "martes": [
+      {
+        "type": "carousel",
+        "presenter": "carlos",
+        "topic": "Top 10 Stats Semana",
+        "time": "10:00"
+      },
+      {
+        "type": "story",
+        "presenter": "ana",
+        "topic": "Tips Rápidos",
+        "time": "18:00"
+      }
+    ],
+    "miercoles": [
+      {
+        "type": "reel",
+        "presenter": "carlos",
+        "topic": "Análisis Estadístico",
+        "time": "12:00"
+      },
+      {
+        "type": "story",
+        "presenter": "carlos",
+        "topic": "Stats del Día",
+        "time": "20:00"
+      }
+    ],
+    "jueves": [
+      {
+        "type": "reel",
+        "presenter": "ana",
+        "topic": "Preview Jornada",
+        "time": "11:00"
+      },
+      {
+        "type": "story",
+        "presenter": "ana",
+        "topic": "Últimas Noticias",
+        "time": "19:00"
+      }
+    ],
+    "viernes": [
+      {
+        "type": "reel",
+        "presenter": "ana",
+        "topic": "Alineaciones Recomendadas",
+        "time": "10:00"
+      },
+      {
+        "type": "story",
+        "presenter": "carlos",
+        "topic": "Datos Clave",
+        "time": "17:00"
+      }
+    ],
+    "sabado": [
+      {
+        "type": "reel",
+        "presenter": "ana",
+        "topic": "Análisis Pre-Partidos",
+        "time": "09:00"
+      },
+      {
+        "type": "story",
+        "presenter": "ana",
+        "topic": "Match Day Updates",
+        "time": "14:00"
+      }
+    ],
+    "domingo": [
+      {
+        "type": "carousel",
+        "presenter": "carlos",
+        "topic": "Resumen Jornada Stats",
+        "time": "21:00"
+      },
+      {
+        "type": "story",
+        "presenter": "carlos",
+        "topic": "Highlights",
+        "time": "22:00"
+      }
+    ]
+  },
+  "metadata": {
+    "total_days": 7,
+    "presenters": ["ana", "carlos"],
+    "content_types": ["reel", "carousel", "story"]
+  }
+}

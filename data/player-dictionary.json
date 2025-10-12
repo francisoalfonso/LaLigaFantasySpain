@@ -190,6 +190,23 @@
       "lastTested": null,
       "totalVideos": 0,
       "addedAt": "2025-10-11T15:36:58.556Z"
+    },
+    "Test Player": {
+      "surname": "Player",
+      "team": "Real Madrid",
+      "safeReferences": ["Player", "el jugador"],
+      "avoidCombinations": [
+        "Player del Real Madrid",
+        "Player Real Madrid",
+        "Test Player del Real Madrid",
+        "Test Player Real Madrid"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-12T15:25:59.170Z"
     }
   },
   "teams": {
@@ -240,6 +257,12 @@
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-11T15:41:05.641Z"
+    },
+    "FC Barcelona": {
+      "safeReferences": ["el equipo", "el club"],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-12T16:56:29.628Z"
     }
   }
 }

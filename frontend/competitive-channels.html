@@ -185,6 +185,10 @@
                                                 <i class="fas fa-link mr-1"></i>
                                                 <a :href="channel.channel_url" target="_blank" class="text-blue-600 hover:underline" x-text="channel.channel_url"></a>
                                             </p>
+                                            <p class="text-xs text-gray-400 mt-1 font-mono">
+                                                <i class="fas fa-id-card mr-1"></i>
+                                                ID: <span x-text="channel.channel_id"></span>
+                                            </p>
                                             <div class="flex items-center space-x-4 mt-3 text-sm text-gray-600">
                                                 <span>
                                                     <i class="fas fa-video mr-1"></i>
@@ -205,6 +209,13 @@
                                             </div>
                                         </div>
                                         <div class="flex space-x-2">
+                                            <button
+                                                @click="onboardChannel(channel)"
+                                                class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded transition shadow-sm"
+                                                title="Ejecutar onboarding (análisis de últimos 20 videos)"
+                                            >
+                                                <i class="fas fa-play-circle mr-1"></i>Onboard
+                                            </button>
                                             <button
                                                 @click="editChannel(channel)"
                                                 class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded hover:bg-blue-50 transition"
@@ -406,6 +417,28 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Channel ID <span class="text-red-500">*</span>
+                                <span class="text-xs text-gray-500 font-normal ml-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    Formato: UCxxxxxxxxxxx
+                                </span>
+                            </label>
+                            <input
+                                x-model="newChannel.channel_id"
+                                type="text"
+                                required
+                                pattern="UC[a-zA-Z0-9_-]{22}"
+                                placeholder="UCu7ZOzCUgWpvvJzYAdnw0_Q"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent font-mono text-sm"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-lightbulb text-yellow-500"></i>
+                                <strong>Cómo obtenerlo:</strong> Abre el canal en YouTube → Ver código fuente (Cmd+Option+U) → Buscar "channelId"
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Nombre del Canal
                             </label>
                             <input
@@ -511,6 +544,7 @@
                     // New channel form
                     newChannel: {
                         channel_url: '',
+                        channel_id: '',
                         channel_name: '',
                         priority: 3,
                         monitoring_frequency: '1h',
@@ -522,8 +556,8 @@
                         this.updateTimestamp();
                         setInterval(() => this.updateTimestamp(), 1000);
                         await this.loadData();
-                        // Auto-refresh every 30 seconds
-                        setInterval(() => this.loadData(), 30000);
+                        // Auto-refresh disabled to avoid rate limiting
+                        // setInterval(() => this.loadData(), 30000);
                     },
 
                     // Load all data
@@ -715,6 +749,40 @@
                         }
                     },
 
+                    // Onboard channel (analyze last videos)
+                    async onboardChannel(channel) {
+                        if (!confirm(`¿Ejecutar onboarding de "${channel.channel_name}"?\n\nEsto analizará los últimos 20 videos del canal (modo smart).\n\nTiempo estimado: 5-7 minutos\nCosto estimado: ~$0.08`)) return;
+
+                        this.loading = true;
+                        this.loadingMessage = `Ejecutando onboarding de ${channel.channel_name}... (puede tardar 5-7 min)`;
+
+                        try {
+                            const response = await fetch(`/api/competitive/channels/${channel.id}/onboard`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ mode: 'smart' })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                this.showNotification(`Onboarding completado: ${data.data.videos_found} videos analizados`, 'success');
+                                await this.loadChannels();
+
+                                // Mostrar resumen
+                                const result = data.data;
+                                alert(`✅ Onboarding completado!\n\n📊 Videos encontrados: ${result.videos_found}\n💰 Costo: $${result.cost_estimate.toFixed(2)}\n\n✨ Viral patterns extraídos y listos para VEO3`);
+                            } else {
+                                this.showNotification('Error: ' + data.error, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error onboarding channel:', error);
+                            this.showNotification('Error ejecutando onboarding', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
                     // Edit channel (placeholder)
                     editChannel(channel) {
                         alert('TODO: Implementar modal de edición para ' + channel.channel_name);
@@ -724,6 +792,7 @@
                     resetNewChannelForm() {
                         this.newChannel = {
                             channel_url: '',
+                            channel_id: '',
                             channel_name: '',
                             priority: 3,
                             monitoring_frequency: '1h',

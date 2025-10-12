@@ -1792,7 +1792,8 @@ router.post('/prepare-session', async (req, res) => {
             viralData = {},
             preset = 'chollo_viral',
             options = {},
-            customScript = null // ✨ NUEVO: Script personalizado opcional (ej: desde Content Analyzer)
+            customScript = null, // ✨ NUEVO: Script personalizado opcional (ej: desde Content Analyzer)
+            presenter = 'ana' // ✨ NUEVO: Selector de presentador ('ana' o 'carlos')
         } = req.body;
 
         // Validar datos requeridos
@@ -1806,6 +1807,38 @@ router.post('/prepare-session', async (req, res) => {
         logger.info(
             `[VEO3 Routes] 🎨 FASE 1: Preparando sesión para ${playerData.name} (${contentType})${customScript ? ' - Con custom script' : ''}`
         );
+
+        // ✅ PASO 0: Cargar configuración del presentador seleccionado
+        let presenterConfig;
+        if (presenter === 'carlos') {
+            const carlosChar = require('../config/veo3/carlosCharacter');
+            presenterConfig = {
+                name: 'Carlos González',
+                seed: carlosChar.CARLOS_DEFAULT_CONFIG.seed,
+                imageUrl: carlosChar.CARLOS_IMAGE_URL,
+                characterBible: carlosChar.CARLOS_CHARACTER_BIBLE,
+                model: carlosChar.CARLOS_DEFAULT_CONFIG.model,
+                aspectRatio: carlosChar.CARLOS_DEFAULT_CONFIG.aspectRatio,
+                waterMark: carlosChar.CARLOS_DEFAULT_CONFIG.waterMark
+            };
+            logger.info(
+                `[VEO3 Routes] 👨‍💼 Presentador: Carlos González (seed: ${presenterConfig.seed})`
+            );
+        } else {
+            const anaChar = require('../config/veo3/anaCharacter');
+            presenterConfig = {
+                name: 'Ana Martínez',
+                seed: anaChar.ANA_DEFAULT_CONFIG.seed,
+                imageUrl: anaChar.ANA_IMAGE_URL,
+                characterBible: anaChar.ANA_CHARACTER_BIBLE,
+                model: anaChar.ANA_DEFAULT_CONFIG.model,
+                aspectRatio: anaChar.ANA_DEFAULT_CONFIG.aspectRatio,
+                waterMark: anaChar.ANA_DEFAULT_CONFIG.waterMark
+            };
+            logger.info(
+                `[VEO3 Routes] 👩‍💼 Presentadora: Ana Martínez (seed: ${presenterConfig.seed})`
+            );
+        }
 
         const startTime = Date.now();
         const sessionId = `nanoBanana_${Date.now()}`;
@@ -1827,19 +1860,43 @@ router.post('/prepare-session', async (req, res) => {
 
         if (customScript) {
             // ✨ USAR SCRIPT PERSONALIZADO (ej: desde Content Analyzer)
+            // Normalizar formato: aceptar tanto array directo como objeto con .segments
+            const scriptSegments = Array.isArray(customScript)
+                ? customScript
+                : customScript.segments;
+
+            if (!scriptSegments || scriptSegments.length === 0) {
+                throw new Error(
+                    'customScript debe ser un array de segmentos o un objeto con propiedad segments'
+                );
+            }
+
             logger.info(
-                `[VEO3 Routes] 📝 Usando custom script proporcionado (${customScript.segments.length} segmentos)`
+                `[VEO3 Routes] 📝 Usando custom script proporcionado (${scriptSegments.length} segmentos)`
             );
+
+            // Normalizar propiedades: script → dialogue, añadir role si falta
+            const roles = ['intro', 'middle', 'outro'];
+            const normalizedSegments = scriptSegments.map((seg, idx) => ({
+                role: seg.role || roles[idx],
+                dialogue: seg.dialogue || seg.script,
+                // Mapear emotion, camera, studio desde customScript
+                emotion: seg.emotion || 'neutral',
+                duration: seg.duration || 8,
+                camera: seg.camera,
+                studio: seg.studio
+            }));
+
             structure = {
                 segments: {
-                    intro: customScript.segments[0],
-                    middle: customScript.segments[1],
-                    outro: customScript.segments[2]
+                    intro: normalizedSegments[0],
+                    middle: normalizedSegments[1],
+                    outro: normalizedSegments[2]
                 },
-                segmentCount: customScript.segments.length,
+                segmentCount: normalizedSegments.length,
                 totalDuration:
                     customScript.totalDuration ||
-                    customScript.segments.reduce((sum, s) => sum + s.duration, 0),
+                    normalizedSegments.reduce((sum, s) => sum + (s.duration || 0), 0),
                 contentType: customScript.contentType || contentType
             };
             logger.info(
@@ -1889,14 +1946,27 @@ router.post('/prepare-session', async (req, res) => {
 
         // ✅ PASO 3: Generar imágenes Nano Banana BASADAS EN el guión
         logger.info(
-            `[VEO3 Routes] 🖼️  Generando 3 imágenes Nano Banana contextualizadas del guión...`
+            `[VEO3 Routes] 🖼️  Generando 3 imágenes Nano Banana contextualizadas del guión con ${presenterConfig.name}...`
         );
 
         const nanoBananaVeo3Integrator = require('../services/veo3/nanoBananaVeo3Integrator');
 
+        // Combinar options con configuración del presentador seleccionado
+        const optionsWithPresenter = {
+            ...options,
+            seed: presenterConfig.seed,
+            // ✅ CRÍTICO (12 Oct): Solo pasar imageUrl para presentadores NO-Ana
+            // Ana usa sistema por defecto (4 Ana + múltiples estudios), Carlos usa (1 Carlos + múltiples estudios)
+            ...(presenter !== 'ana' && { imageUrl: presenterConfig.imageUrl }),
+            characterBible: presenterConfig.characterBible,
+            model: presenterConfig.model,
+            aspectRatio: presenterConfig.aspectRatio,
+            waterMark: presenterConfig.waterMark
+        };
+
         const imagesResult = await nanoBananaVeo3Integrator.generateImagesFromScript(
             scriptSegments,
-            options
+            optionsWithPresenter
         );
 
         logger.info(
@@ -1945,6 +2015,16 @@ router.post('/prepare-session', async (req, res) => {
             contentType,
             preset,
             workflow: 'nano-banana-contextual',
+            // Configuración del presentador seleccionado
+            presenter: {
+                name: presenterConfig.name,
+                seed: presenterConfig.seed,
+                imageUrl: presenterConfig.imageUrl,
+                characterBible: presenterConfig.characterBible,
+                model: presenterConfig.model,
+                aspectRatio: presenterConfig.aspectRatio,
+                waterMark: presenterConfig.waterMark
+            },
             // Guión completo
             script: {
                 segments: scriptSegments.map(seg => ({

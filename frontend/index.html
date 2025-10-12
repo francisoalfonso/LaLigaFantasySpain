@@ -44,6 +44,11 @@
                             class="px-6 py-4 font-semibold transition-colors">
                         <i class="fas fa-tasks mr-2"></i>Plan de Acción
                     </button>
+                    <button @click="activeTab = 'presenters'"
+                            :class="activeTab === 'presenters' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-50'"
+                            class="px-6 py-4 font-semibold transition-colors">
+                        <i class="fas fa-user-friends mr-2"></i>Presentadores
+                    </button>
                     <button @click="activeTab = 'funcionalidades'"
                             :class="activeTab === 'funcionalidades' ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-600' : 'text-gray-600 hover:bg-gray-50'"
                             class="px-6 py-4 font-semibold transition-colors">
@@ -440,6 +445,185 @@
 
             </div>
 
+            <!-- PRESENTADORES TAB -->
+            <div x-show="activeTab === 'presenters'" x-transition x-data="{
+                schedule: null,
+                stats: null,
+                loading: true,
+                async loadSchedule() {
+                    try {
+                        const response = await fetch('/api/presenters/schedule');
+                        const data = await response.json();
+                        this.schedule = data.data.schedule;
+                        this.stats = data.data.stats;
+                        this.loading = false;
+                    } catch (error) {
+                        console.error('Error loading schedule:', error);
+                        this.loading = false;
+                    }
+                }
+            }" x-init="loadSchedule()">
+
+                <!-- Header con estadísticas -->
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg p-8 mb-8 text-white">
+                    <h2 class="text-3xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-user-friends mr-3"></i>
+                        Planificación Semanal de Presentadores
+                    </h2>
+                    <p class="text-purple-100 mb-6">Distribución de contenido entre Ana Martínez y Carlos González</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4" x-show="!loading">
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                            <div class="text-sm text-purple-100">Total Contenidos</div>
+                            <div class="text-3xl font-bold" x-text="stats?.total_items || 0"></div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                            <div class="text-sm text-purple-100">Ana Martínez</div>
+                            <div class="text-3xl font-bold" x-text="stats?.presenter_percentages?.ana || '0%'"></div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                            <div class="text-sm text-purple-100">Carlos González</div>
+                            <div class="text-3xl font-bold" x-text="stats?.presenter_percentages?.carlos || '0%'"></div>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                            <div class="text-sm text-purple-100">Reels / Carruseles / Stories</div>
+                            <div class="text-xl font-bold"><span x-text="stats?.by_type?.reel || 0"></span> / <span x-text="stats?.by_type?.carousel || 0"></span> / <span x-text="stats?.by_type?.story || 0"></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendario Semanal -->
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">📅 Calendario Semanal</h3>
+
+                    <div x-show="loading" class="text-center py-12">
+                        <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-4"></i>
+                        <p class="text-gray-500">Cargando planificación...</p>
+                    </div>
+
+                    <div x-show="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Lunes -->
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4">
+                            <h4 class="font-bold text-blue-800 mb-3 text-lg">Lunes</h4>
+                            <template x-for="item in schedule?.lunes || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Martes -->
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4">
+                            <h4 class="font-bold text-purple-800 mb-3 text-lg">Martes</h4>
+                            <template x-for="item in schedule?.martes || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Miércoles -->
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4">
+                            <h4 class="font-bold text-green-800 mb-3 text-lg">Miércoles</h4>
+                            <template x-for="item in schedule?.miercoles || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Jueves -->
+                        <div class="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4">
+                            <h4 class="font-bold text-yellow-800 mb-3 text-lg">Jueves</h4>
+                            <template x-for="item in schedule?.jueves || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Viernes -->
+                        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4">
+                            <h4 class="font-bold text-red-800 mb-3 text-lg">Viernes</h4>
+                            <template x-for="item in schedule?.viernes || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Sábado -->
+                        <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4">
+                            <h4 class="font-bold text-indigo-800 mb-3 text-lg">Sábado</h4>
+                            <template x-for="item in schedule?.sabado || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Domingo -->
+                        <div class="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg p-4">
+                            <h4 class="font-bold text-pink-800 mb-3 text-lg">Domingo</h4>
+                            <template x-for="item in schedule?.domingo || []" :key="item.time">
+                                <div class="bg-white rounded-lg p-3 mb-2 shadow-sm">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-semibold" :class="item.presenter === 'ana' ? 'text-purple-600' : 'text-blue-600'" x-text="item.presenter === 'ana' ? '👩 Ana' : '👨 Carlos'"></span>
+                                        <span class="text-xs text-gray-500" x-text="item.time"></span>
+                                    </div>
+                                    <div class="text-xs font-medium text-gray-700" x-text="item.topic"></div>
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        <span x-text="item.type === 'reel' ? '🎬 Reel' : (item.type === 'carousel' ? '📊 Carrusel' : '📱 Story')"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- FUNCIONALIDADES TAB -->
             <div x-show="activeTab === 'funcionalidades'" x-transition>
 
@@ -622,6 +806,40 @@
                                         class="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition-colors">
                                     <i class="fas fa-rocket mr-2"></i>Ver Instrucciones Deploy
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Competitive Intelligence -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow border-2 border-red-400">
+                        <div class="bg-gradient-to-r from-red-500 to-orange-500 p-4">
+                            <h3 class="text-white font-bold text-lg flex items-center">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Inteligencia Competitiva
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <a href="/intel" class="block p-3 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-400 rounded-lg hover:border-red-600 transition-all">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-semibold text-red-800">🎯 Dashboard Competitivo</div>
+                                        <div class="text-sm text-red-600">Análisis canales YouTube competidores</div>
+                                    </div>
+                                    <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">NEW</span>
+                                </div>
+                            </a>
+                            <a href="/competitive-channels" class="block p-3 bg-gray-50 rounded-lg hover:bg-red-50 transition-colors">
+                                <div class="font-semibold">Gestión Canales</div>
+                                <div class="text-sm text-gray-500">Onboarding y monitoreo competidores</div>
+                            </a>
+                            <div class="bg-orange-50 border-l-4 border-orange-500 p-3 rounded">
+                                <p class="text-xs font-semibold text-orange-800 mb-1">🚀 Sistema Automático</p>
+                                <ul class="text-xs text-orange-700 space-y-1">
+                                    <li>• Transcripción con Whisper AI</li>
+                                    <li>• Análisis GPT-5 Mini</li>
+                                    <li>• Recomendaciones contenido</li>
+                                    <li>• Cola procesamiento automática</li>
+                                </ul>
                             </div>
                         </div>
                     </div>

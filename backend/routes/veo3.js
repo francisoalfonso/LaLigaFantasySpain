@@ -1791,7 +1791,8 @@ router.post('/prepare-session', async (req, res) => {
             playerData,
             viralData = {},
             preset = 'chollo_viral',
-            options = {}
+            options = {},
+            customScript = null // ✨ NUEVO: Script personalizado opcional (ej: desde Content Analyzer)
         } = req.body;
 
         // Validar datos requeridos
@@ -1803,7 +1804,7 @@ router.post('/prepare-session', async (req, res) => {
         }
 
         logger.info(
-            `[VEO3 Routes] 🎨 FASE 1: Preparando sesión para ${playerData.name} (${contentType})`
+            `[VEO3 Routes] 🎨 FASE 1: Preparando sesión para ${playerData.name} (${contentType})${customScript ? ' - Con custom script' : ''}`
         );
 
         const startTime = Date.now();
@@ -1821,22 +1822,47 @@ router.post('/prepare-session', async (req, res) => {
             );
         }
 
-        // ✅ PASO 2: Generar estructura de guión con UnifiedScriptGenerator
-        logger.info(`[VEO3 Routes] 📝 Generando guión profesional con UnifiedScriptGenerator...`);
+        // ✅ PASO 2: Generar estructura de guión (o usar customScript)
+        let structure;
 
-        const structure = multiSegmentGenerator.generateThreeSegments(
-            contentType,
-            playerData,
-            viralData,
-            {
-                preset,
-                ...options
-            }
-        );
-
-        logger.info(
-            `[VEO3 Routes] ✅ Guión generado: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`
-        );
+        if (customScript) {
+            // ✨ USAR SCRIPT PERSONALIZADO (ej: desde Content Analyzer)
+            logger.info(
+                `[VEO3 Routes] 📝 Usando custom script proporcionado (${customScript.segments.length} segmentos)`
+            );
+            structure = {
+                segments: {
+                    intro: customScript.segments[0],
+                    middle: customScript.segments[1],
+                    outro: customScript.segments[2]
+                },
+                segmentCount: customScript.segments.length,
+                totalDuration:
+                    customScript.totalDuration ||
+                    customScript.segments.reduce((sum, s) => sum + s.duration, 0),
+                contentType: customScript.contentType || contentType
+            };
+            logger.info(
+                `[VEO3 Routes] ✅ Custom script cargado: ${structure.totalDuration}s total, tipo: ${structure.contentType}`
+            );
+        } else {
+            // GENERAR GUIÓN AUTOMÁTICAMENTE con UnifiedScriptGenerator
+            logger.info(
+                `[VEO3 Routes] 📝 Generando guión profesional con UnifiedScriptGenerator...`
+            );
+            structure = multiSegmentGenerator.generateThreeSegments(
+                contentType,
+                playerData,
+                viralData,
+                {
+                    preset,
+                    ...options
+                }
+            );
+            logger.info(
+                `[VEO3 Routes] ✅ Guión generado: ${structure.segmentCount} segmentos, ${structure.totalDuration}s total`
+            );
+        }
 
         // Extraer array de 3 segmentos con cinematografía
         const CinematicProgressionSystem = require('../services/veo3/cinematicProgressionSystem');

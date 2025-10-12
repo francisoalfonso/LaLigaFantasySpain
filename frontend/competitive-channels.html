@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Competitive Channels - Fantasy La Liga</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        />
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+            .stat-card {
+                transition: all 0.3s ease;
+            }
+            .stat-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            }
+        </style>
+    </head>
+    <body class="bg-gray-50">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <a href="/" class="text-white hover:text-gray-200 transition">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 class="text-3xl font-bold">
+                                <i class="fas fa-eye mr-2"></i>Competitive Channels
+                            </h1>
+                            <p class="text-sm text-purple-100 mt-1">
+                                Monitorización de competidores YouTube
+                            </p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-purple-100">Sistema de Análisis Competitivo</div>
+                        <div class="text-xs text-purple-200" id="timestamp">
+                            <i class="far fa-clock mr-1"></i><span id="current-time"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main App -->
+        <div
+            x-data="competitiveApp()"
+            x-init="init()"
+            class="container mx-auto px-4 py-8"
+            x-cloak
+        >
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <!-- Active Channels -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Canales Activos</p>
+                            <p class="text-3xl font-bold text-purple-600 mt-2" x-text="stats.activeChannels"></p>
+                        </div>
+                        <div class="bg-purple-100 rounded-full p-3">
+                            <i class="fas fa-broadcast-tower text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Videos -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Videos Pendientes</p>
+                            <p class="text-3xl font-bold text-orange-600 mt-2" x-text="stats.pendingVideos"></p>
+                        </div>
+                        <div class="bg-orange-100 rounded-full p-3">
+                            <i class="fas fa-clock text-orange-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processed Today -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Procesados Hoy</p>
+                            <p class="text-3xl font-bold text-green-600 mt-2" x-text="stats.processedToday"></p>
+                        </div>
+                        <div class="bg-green-100 rounded-full p-3">
+                            <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avg Quality Score -->
+                <div class="stat-card bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Quality Score Avg</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2" x-text="stats.avgQuality.toFixed(1)"></p>
+                        </div>
+                        <div class="bg-blue-100 rounded-full p-3">
+                            <i class="fas fa-star text-blue-600 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="bg-white rounded-xl shadow-md mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="flex space-x-8 px-6" aria-label="Tabs">
+                        <button
+                            @click="currentTab = 'channels'"
+                            :class="currentTab === 'channels' ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition"
+                        >
+                            <i class="fas fa-broadcast-tower mr-2"></i>Canales Monitorizados
+                        </button>
+                        <button
+                            @click="currentTab = 'pending'"
+                            :class="currentTab === 'pending' ? 'border-orange-600 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition"
+                        >
+                            <i class="fas fa-clock mr-2"></i>Videos Pendientes
+                            <span x-show="stats.pendingVideos > 0" class="ml-2 bg-orange-100 text-orange-600 text-xs font-bold px-2 py-1 rounded-full" x-text="stats.pendingVideos"></span>
+                        </button>
+                        <button
+                            @click="currentTab = 'processed'"
+                            :class="currentTab === 'processed' ? 'border-green-600 text-green-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition"
+                        >
+                            <i class="fas fa-check-circle mr-2"></i>Historial Procesados
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="p-6">
+                    <!-- Channels Tab -->
+                    <div x-show="currentTab === 'channels'" class="space-y-6">
+                        <!-- Add Channel Button -->
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">
+                                Canales Monitorizados (<span x-text="channels.length"></span>)
+                            </h3>
+                            <button
+                                @click="showAddChannelModal = true"
+                                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-md hover:shadow-lg"
+                            >
+                                <i class="fas fa-plus mr-2"></i>Añadir Canal
+                            </button>
+                        </div>
+
+                        <!-- Channels List -->
+                        <div class="space-y-4">
+                            <template x-for="channel in channels" :key="channel.id">
+                                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center space-x-3">
+                                                <h4 class="text-lg font-semibold text-gray-900" x-text="channel.channel_name || 'Sin nombre'"></h4>
+                                                <span
+                                                    :class="channel.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                                    class="px-2 py-1 text-xs font-medium rounded-full"
+                                                    x-text="channel.is_active ? 'Activo' : 'Inactivo'"
+                                                ></span>
+                                                <!-- Priority Stars -->
+                                                <div class="flex">
+                                                    <template x-for="i in 5" :key="i">
+                                                        <i
+                                                            :class="i <= channel.priority ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300'"
+                                                        ></i>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                <i class="fas fa-link mr-1"></i>
+                                                <a :href="channel.channel_url" target="_blank" class="text-blue-600 hover:underline" x-text="channel.channel_url"></a>
+                                            </p>
+                                            <div class="flex items-center space-x-4 mt-3 text-sm text-gray-600">
+                                                <span>
+                                                    <i class="fas fa-video mr-1"></i>
+                                                    <span x-text="channel.videos_processed || 0"></span> procesados
+                                                </span>
+                                                <span>
+                                                    <i class="fas fa-clock mr-1"></i>
+                                                    <span x-text="channel.monitoring_frequency || '1h'"></span>
+                                                </span>
+                                                <span>
+                                                    <i class="fas fa-tag mr-1"></i>
+                                                    <span x-text="channel.content_type || 'general'"></span>
+                                                </span>
+                                                <span x-show="channel.avg_quality_score > 0">
+                                                    <i class="fas fa-star mr-1"></i>
+                                                    <span x-text="channel.avg_quality_score.toFixed(1)"></span>/10
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex space-x-2">
+                                            <button
+                                                @click="editChannel(channel)"
+                                                class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded hover:bg-blue-50 transition"
+                                                title="Editar canal"
+                                            >
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button
+                                                @click="toggleChannelStatus(channel)"
+                                                :class="channel.is_active ? 'text-orange-600 hover:text-orange-800 hover:bg-orange-50' : 'text-green-600 hover:text-green-800 hover:bg-green-50'"
+                                                class="px-3 py-1 rounded transition"
+                                                :title="channel.is_active ? 'Desactivar' : 'Activar'"
+                                            >
+                                                <i :class="channel.is_active ? 'fas fa-pause' : 'fas fa-play'"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Empty State -->
+                            <div x-show="channels.length === 0" class="text-center py-12">
+                                <i class="fas fa-broadcast-tower text-gray-300 text-6xl mb-4"></i>
+                                <p class="text-gray-500 text-lg">No hay canales monitorizados</p>
+                                <button
+                                    @click="showAddChannelModal = true"
+                                    class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition"
+                                >
+                                    <i class="fas fa-plus mr-2"></i>Añadir Primer Canal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Videos Tab -->
+                    <div x-show="currentTab === 'pending'" class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">
+                            Videos Pendientes de Procesar (<span x-text="pendingVideos.length"></span>)
+                        </h3>
+
+                        <template x-for="video in pendingVideos" :key="video.id">
+                            <div class="border border-orange-200 bg-orange-50 rounded-lg p-4 hover:shadow-md transition">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-semibold text-gray-900" x-text="video.title || 'Sin título'"></h4>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            <i class="fas fa-user mr-1"></i>
+                                            <span x-text="video.channel_name || 'Canal desconocido'"></span>
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            <i class="far fa-clock mr-1"></i>
+                                            Detectado: <span x-text="formatDate(video.detected_at)"></span>
+                                        </p>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            <i class="fas fa-link mr-1"></i>
+                                            <a :href="video.video_url" target="_blank" class="text-blue-600 hover:underline" x-text="video.video_url"></a>
+                                        </p>
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button
+                                            @click="processVideo(video)"
+                                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-md"
+                                        >
+                                            <i class="fas fa-play mr-2"></i>Procesar
+                                        </button>
+                                        <button
+                                            @click="skipVideo(video)"
+                                            class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg font-medium transition"
+                                        >
+                                            <i class="fas fa-times mr-2"></i>Skip
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty State -->
+                        <div x-show="pendingVideos.length === 0" class="text-center py-12">
+                            <i class="fas fa-check-circle text-green-300 text-6xl mb-4"></i>
+                            <p class="text-gray-500 text-lg">No hay videos pendientes</p>
+                            <p class="text-gray-400 text-sm mt-2">
+                                Los videos detectados aparecerán aquí automáticamente
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Processed Videos Tab -->
+                    <div x-show="currentTab === 'processed'" class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">
+                            Historial de Videos Procesados (<span x-text="processedVideos.length"></span>)
+                        </h3>
+
+                        <template x-for="video in processedVideos" :key="video.id">
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2">
+                                            <h4 class="text-lg font-semibold text-gray-900" x-text="video.title || 'Sin título'"></h4>
+                                            <span
+                                                :class="{
+                                                    'bg-green-100 text-green-800': video.processing_status === 'completed',
+                                                    'bg-gray-100 text-gray-800': video.processing_status === 'skipped',
+                                                    'bg-yellow-100 text-yellow-800': video.processing_status === 'processing'
+                                                }"
+                                                class="px-2 py-1 text-xs font-medium rounded-full"
+                                                x-text="video.processing_status"
+                                            ></span>
+                                            <span
+                                                x-show="video.quality_score"
+                                                class="text-sm text-gray-600"
+                                            >
+                                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                                <span x-text="video.quality_score.toFixed(1)"></span>/10
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1">
+                                            <i class="fas fa-user mr-1"></i>
+                                            <span x-text="video.channel_name || 'Canal desconocido'"></span>
+                                        </p>
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            <i class="far fa-clock mr-1"></i>
+                                            Procesado: <span x-text="formatDate(video.detected_at)"></span>
+                                        </p>
+                                        <p
+                                            x-show="video.our_response_session_id"
+                                            class="text-sm text-green-600 mt-2"
+                                        >
+                                            <i class="fas fa-video mr-1"></i>
+                                            Respuesta generada: <code class="bg-green-50 px-2 py-1 rounded text-xs" x-text="video.our_response_session_id"></code>
+                                        </p>
+                                    </div>
+                                    <a
+                                        :href="video.video_url"
+                                        target="_blank"
+                                        class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded hover:bg-blue-50 transition"
+                                    >
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty State -->
+                        <div x-show="processedVideos.length === 0" class="text-center py-12">
+                            <i class="fas fa-history text-gray-300 text-6xl mb-4"></i>
+                            <p class="text-gray-500 text-lg">No hay videos procesados</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Overlay -->
+            <div
+                x-show="loading"
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                style="display: none"
+            >
+                <div class="bg-white rounded-lg p-8 shadow-2xl">
+                    <div class="flex items-center space-x-4">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                        <div>
+                            <p class="text-lg font-semibold text-gray-900" x-text="loadingMessage"></p>
+                            <p class="text-sm text-gray-500">Por favor espera...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Channel Modal -->
+            <div
+                x-show="showAddChannelModal"
+                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                style="display: none"
+                @click.self="showAddChannelModal = false"
+            >
+                <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="p-6 border-b border-gray-200">
+                        <h3 class="text-2xl font-bold text-gray-900">
+                            <i class="fas fa-plus-circle text-purple-600 mr-2"></i>
+                            Añadir Nuevo Canal
+                        </h3>
+                    </div>
+                    <form @submit.prevent="addChannel" class="p-6 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                URL del Canal <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                x-model="newChannel.channel_url"
+                                type="url"
+                                required
+                                placeholder="https://www.youtube.com/@canal/shorts"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Formatos soportados: /@usuario/shorts, /channel/CHANNEL_ID, /c/username
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Nombre del Canal
+                            </label>
+                            <input
+                                x-model="newChannel.channel_name"
+                                type="text"
+                                placeholder="José Carrasco"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Prioridad (1-5)
+                                </label>
+                                <select
+                                    x-model="newChannel.priority"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                >
+                                    <option value="5">5 - Muy Alta</option>
+                                    <option value="4">4 - Alta</option>
+                                    <option value="3" selected>3 - Media</option>
+                                    <option value="2">2 - Baja</option>
+                                    <option value="1">1 - Muy Baja</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Frecuencia Monitorización
+                                </label>
+                                <select
+                                    x-model="newChannel.monitoring_frequency"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                                >
+                                    <option value="30min">30 minutos</option>
+                                    <option value="1h" selected>1 hora</option>
+                                    <option value="4h">4 horas</option>
+                                    <option value="12h">12 horas</option>
+                                    <option value="24h">24 horas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Tipo de Contenido
+                            </label>
+                            <select
+                                x-model="newChannel.content_type"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
+                            >
+                                <option value="general" selected>General</option>
+                                <option value="chollos">Chollos</option>
+                                <option value="stats">Estadísticas</option>
+                                <option value="predicciones">Predicciones</option>
+                                <option value="breaking">Breaking News</option>
+                            </select>
+                        </div>
+
+                        <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                            <button
+                                type="button"
+                                @click="showAddChannelModal = false"
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                class="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition shadow-md"
+                            >
+                                <i class="fas fa-plus mr-2"></i>Añadir Canal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function competitiveApp() {
+                return {
+                    // State
+                    currentTab: 'channels',
+                    loading: false,
+                    loadingMessage: 'Cargando...',
+                    showAddChannelModal: false,
+
+                    // Data
+                    channels: [],
+                    pendingVideos: [],
+                    processedVideos: [],
+
+                    // Stats
+                    stats: {
+                        activeChannels: 0,
+                        pendingVideos: 0,
+                        processedToday: 0,
+                        avgQuality: 0
+                    },
+
+                    // New channel form
+                    newChannel: {
+                        channel_url: '',
+                        channel_name: '',
+                        priority: 3,
+                        monitoring_frequency: '1h',
+                        content_type: 'general'
+                    },
+
+                    // Initialize
+                    async init() {
+                        this.updateTimestamp();
+                        setInterval(() => this.updateTimestamp(), 1000);
+                        await this.loadData();
+                        // Auto-refresh every 30 seconds
+                        setInterval(() => this.loadData(), 30000);
+                    },
+
+                    // Load all data
+                    async loadData() {
+                        await Promise.all([
+                            this.loadChannels(),
+                            this.loadPendingVideos(),
+                            this.loadProcessedVideos()
+                        ]);
+                        this.calculateStats();
+                    },
+
+                    // Load channels
+                    async loadChannels() {
+                        try {
+                            const response = await fetch('/api/competitive/channels');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.channels = data.data;
+                            }
+                        } catch (error) {
+                            console.error('Error loading channels:', error);
+                            this.showNotification('Error cargando canales', 'error');
+                        }
+                    },
+
+                    // Load pending videos
+                    async loadPendingVideos() {
+                        try {
+                            const response = await fetch('/api/competitive/videos/pending');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.pendingVideos = data.data;
+                            }
+                        } catch (error) {
+                            console.error('Error loading pending videos:', error);
+                        }
+                    },
+
+                    // Load processed videos
+                    async loadProcessedVideos() {
+                        try {
+                            const response = await fetch('/api/competitive/videos/processed?limit=50');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.processedVideos = data.data;
+                            }
+                        } catch (error) {
+                            console.error('Error loading processed videos:', error);
+                        }
+                    },
+
+                    // Calculate stats
+                    calculateStats() {
+                        this.stats.activeChannels = this.channels.filter(c => c.is_active).length;
+                        this.stats.pendingVideos = this.pendingVideos.length;
+
+                        // Processed today
+                        const today = new Date().toISOString().split('T')[0];
+                        this.stats.processedToday = this.processedVideos.filter(
+                            v => v.detected_at && v.detected_at.startsWith(today)
+                        ).length;
+
+                        // Avg quality score
+                        const scoresWithQuality = this.channels.filter(c => c.avg_quality_score > 0);
+                        this.stats.avgQuality =
+                            scoresWithQuality.length > 0
+                                ? scoresWithQuality.reduce((sum, c) => sum + c.avg_quality_score, 0) /
+                                  scoresWithQuality.length
+                                : 0;
+                    },
+
+                    // Add new channel
+                    async addChannel() {
+                        this.loading = true;
+                        this.loadingMessage = 'Añadiendo canal...';
+
+                        try {
+                            const response = await fetch('/api/competitive/channels', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(this.newChannel)
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                this.showNotification('Canal añadido correctamente', 'success');
+                                this.showAddChannelModal = false;
+                                this.resetNewChannelForm();
+                                await this.loadChannels();
+                            } else {
+                                this.showNotification('Error: ' + data.error, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error adding channel:', error);
+                            this.showNotification('Error añadiendo canal', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    // Toggle channel active status
+                    async toggleChannelStatus(channel) {
+                        this.loading = true;
+                        this.loadingMessage = channel.is_active ? 'Desactivando canal...' : 'Activando canal...';
+
+                        try {
+                            const response = await fetch(`/api/competitive/channels/${channel.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ is_active: !channel.is_active })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                this.showNotification(
+                                    `Canal ${channel.is_active ? 'desactivado' : 'activado'} correctamente`,
+                                    'success'
+                                );
+                                await this.loadChannels();
+                            } else {
+                                this.showNotification('Error: ' + data.error, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error toggling channel status:', error);
+                            this.showNotification('Error actualizando canal', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    // Process video
+                    async processVideo(video) {
+                        if (!confirm('¿Procesar este video y generar respuesta automática?')) return;
+
+                        this.loading = true;
+                        this.loadingMessage = 'Procesando video (esto puede tardar varios minutos)...';
+
+                        try {
+                            const response = await fetch(`/api/competitive/videos/${video.id}/process`, {
+                                method: 'POST'
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                this.showNotification('Video en cola de procesamiento', 'success');
+                                await this.loadData();
+                            } else {
+                                this.showNotification('Error: ' + data.error, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error processing video:', error);
+                            this.showNotification('Error procesando video', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    // Skip video
+                    async skipVideo(video) {
+                        if (!confirm('¿Marcar este video como skip (no interesante)?')) return;
+
+                        this.loading = true;
+                        this.loadingMessage = 'Marcando como skip...';
+
+                        try {
+                            const response = await fetch(`/api/competitive/videos/${video.id}/skip`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason: 'Manual skip from UI' })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                this.showNotification('Video marcado como skip', 'success');
+                                await this.loadData();
+                            } else {
+                                this.showNotification('Error: ' + data.error, 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error skipping video:', error);
+                            this.showNotification('Error marcando skip', 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    },
+
+                    // Edit channel (placeholder)
+                    editChannel(channel) {
+                        alert('TODO: Implementar modal de edición para ' + channel.channel_name);
+                    },
+
+                    // Reset new channel form
+                    resetNewChannelForm() {
+                        this.newChannel = {
+                            channel_url: '',
+                            channel_name: '',
+                            priority: 3,
+                            monitoring_frequency: '1h',
+                            content_type: 'general'
+                        };
+                    },
+
+                    // Format date
+                    formatDate(dateString) {
+                        if (!dateString) return 'N/A';
+                        const date = new Date(dateString);
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / 60000);
+                        const diffHours = Math.floor(diffMs / 3600000);
+                        const diffDays = Math.floor(diffMs / 86400000);
+
+                        if (diffMins < 60) return `Hace ${diffMins} min`;
+                        if (diffHours < 24) return `Hace ${diffHours}h`;
+                        if (diffDays < 7) return `Hace ${diffDays}d`;
+                        return date.toLocaleDateString('es-ES');
+                    },
+
+                    // Update timestamp
+                    updateTimestamp() {
+                        const now = new Date();
+                        document.getElementById('current-time').textContent = now.toLocaleString('es-ES');
+                    },
+
+                    // Show notification
+                    showNotification(message, type = 'info') {
+                        // Simple console notification (could be replaced with toast library)
+                        console.log(`[${type.toUpperCase()}] ${message}`);
+                        if (type === 'error') {
+                            alert('❌ ' + message);
+                        } else if (type === 'success') {
+                            alert('✅ ' + message);
+                        }
+                    }
+                };
+            }
+        </script>
+    </body>
+</html>

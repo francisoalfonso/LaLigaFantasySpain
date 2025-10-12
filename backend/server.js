@@ -264,6 +264,16 @@ app.get('/viral-preview', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/instagram-viral-preview.html'));
 });
 
+// Ruta para gestión de canales competitivos (nuevo)
+app.get('/competitive-channels', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/competitive-channels.html'));
+});
+
+// Ruta alternativa más corta
+app.get('/competitive', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/competitive-channels.html'));
+});
+
 /**
  * @swagger
  * /health:

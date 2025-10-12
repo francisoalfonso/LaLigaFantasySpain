@@ -56,6 +56,10 @@ const carouselsRoutes = require('./routes/carousels');
 const testHistoryRoutes = require('./routes/testHistory');
 const nanoBananaRoutes = require('./routes/nanoBanana');
 
+// ✨ NEW: Competitive YouTube Analyzer Routes
+const contentAnalysisRoutes = require('./routes/contentAnalysis');
+const competitiveChannelsRoutes = require('./routes/competitiveChannels');
+
 // Configuración
 const { SERVER } = require('./config/constants');
 
@@ -168,6 +172,12 @@ app.use('/api/content-preview', contentPreviewRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/carousels', carouselsRoutes);
 app.use('/api/test-history', testHistoryRoutes);
+
+// ✨ NEW: Competitive YouTube Analyzer
+// Content Analysis - operaciones pesadas (transcripción + análisis AI)
+app.use('/api/content-analysis', heavyOperationsLimiter, contentAnalysisRoutes);
+// Channel Management - rate limiting general (CRUD ligero)
+app.use('/api/competitive', generalLimiter, competitiveChannelsRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {

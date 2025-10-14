@@ -221,17 +221,22 @@ class NanoBananaClient {
                 logger.info(`[NanoBananaClient] Task creada: ${taskId}, esperando generación...`);
 
                 // 2. Polling para esperar que la imagen se genere
+                console.log('\n=== INICIANDO POLLING (generateAnaProgression) ===');
+                console.log('Task ID:', taskId);
+                console.log('Max Attempts: 60');
+                console.log('Intervalo: 3s');
+                console.log('==========================\n');
+
                 let imageUrl = null;
                 let attempts = 0;
                 const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
+                let lastState = null;
+                let lastResponse = null;
 
                 while (!imageUrl && attempts < maxAttempts) {
+                    // SIEMPRE esperar 3s antes de cada intento (incluso el primero)
+                    await this.sleep(3000);
                     attempts++;
-
-                    // Esperar 3 segundos antes de cada intento (excepto el primero)
-                    if (attempts > 1) {
-                        await this.sleep(3000);
-                    }
 
                     const statusResponse = await axios.get(
                         `${this.baseUrl}${this.recordInfoEndpoint}`,
@@ -244,33 +249,130 @@ class NanoBananaClient {
                         }
                     );
 
+                    lastResponse = statusResponse.data;
                     const data = statusResponse.data?.data;
                     const state = data?.state;
                     const resultJson = data?.resultJson;
+                    lastState = state;
+
+                    // Logging exhaustivo
+                    console.log(
+                        `\n=== POLLING ATTEMPT ${attempts}/${maxAttempts} (Ana Progression ${index}) ===`
+                    );
+                    console.log('Status Response COMPLETO:');
+                    console.log(JSON.stringify(statusResponse.data, null, 2));
+                    console.log('Estructura detectada:');
+                    console.log('  - statusResponse.data:', typeof statusResponse.data);
+                    console.log('  - statusResponse.data.data:', typeof data);
+                    console.log('  - state:', state, `(type: ${typeof state})`);
+                    console.log(
+                        '  - resultJson:',
+                        typeof resultJson,
+                        resultJson ? `(${String(resultJson).substring(0, 50)}...)` : 'null'
+                    );
+                    console.log('=======================================\n');
 
                     logger.info(
                         `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
                     );
 
-                    if (state === 'success') {
-                        // Parsear resultJson para obtener URL
-                        const result = JSON.parse(resultJson);
-                        imageUrl = result?.resultUrls?.[0];
-                        if (!imageUrl) {
-                            throw new Error('No se encontró URL en resultJson');
+                    const stateNormalized = state?.toLowerCase();
+
+                    // ESTADOS DE ÉXITO
+                    if (
+                        stateNormalized === 'success' ||
+                        stateNormalized === 'completed' ||
+                        stateNormalized === 'done' ||
+                        stateNormalized === 'finished'
+                    ) {
+                        console.log('\n✅ ESTADO DE ÉXITO DETECTADO:', state);
+
+                        // Intentar parsear resultJson si es string
+                        let result;
+                        if (typeof resultJson === 'string') {
+                            try {
+                                result = JSON.parse(resultJson);
+                                console.log('✅ resultJson parseado exitosamente');
+                            } catch (e) {
+                                console.error('❌ Error parseando resultJson:', e.message);
+                                console.error('resultJson raw:', resultJson);
+                                throw new Error(`Failed to parse resultJson: ${e.message}`);
+                            }
+                        } else {
+                            result = resultJson;
+                            console.log('ℹ️  resultJson ya es objeto, no requiere parsing');
                         }
+
+                        // Intentar extraer URL de múltiples paths posibles
+                        const possiblePaths = [
+                            result?.resultUrls?.[0],
+                            result?.results?.[0]?.url,
+                            result?.output_url,
+                            result?.images?.[0],
+                            result?.data?.url,
+                            result?.url
+                        ];
+
+                        console.log('🔍 Buscando imageUrl en paths posibles:');
+                        possiblePaths.forEach((path, idx) => {
+                            console.log(
+                                `  Path ${idx + 1}:`,
+                                path
+                                    ? `✅ ${String(path).substring(0, 50)}...`
+                                    : '❌ null/undefined'
+                            );
+                        });
+
+                        imageUrl = possiblePaths.find(url => url && typeof url === 'string');
+
+                        if (!imageUrl) {
+                            console.error('❌ NO SE ENCONTRÓ URL EN NINGÚN PATH');
+                            console.error('result completo:', JSON.stringify(result, null, 2));
+                            throw new Error('No se encontró URL de imagen en respuesta de KIE.ai');
+                        }
+
+                        console.log('✅ imageUrl extraída:', imageUrl.substring(0, 80), '...');
                         break;
-                    } else if (state === 'failed' || state === 'fail') {
-                        // KIE.ai puede devolver 'fail' o 'failed'
-                        const errorMsg = data?.failMsg || 'Generación de imagen falló en servidor';
+                    } else if (
+                        stateNormalized === 'failed' ||
+                        stateNormalized === 'fail' ||
+                        stateNormalized === 'error'
+                    ) {
+                        console.error('\n❌ ESTADO DE FALLO DETECTADO:', state);
+                        const errorMsg =
+                            data?.failMsg ||
+                            data?.error ||
+                            data?.message ||
+                            'Generación de imagen falló en servidor';
+                        console.error('Error message:', errorMsg);
+                        console.error('data completo:', JSON.stringify(data, null, 2));
                         throw new Error(errorMsg);
+                    } else if (
+                        stateNormalized === 'queuing' ||
+                        stateNormalized === 'generating' ||
+                        stateNormalized === 'processing' ||
+                        stateNormalized === 'pending' ||
+                        stateNormalized === 'waiting'
+                    ) {
+                        console.log(`⏳ Estado en progreso (${state}), esperando 3s...`);
+                        // Continuar polling
+                    } else {
+                        console.warn(`⚠️  Estado desconocido: ${state}, continuando polling...`);
+                        // Continuar polling por si es un estado intermedio
                     }
-                    // Si state es 'queuing' o 'generating', continuar polling
                 }
 
                 if (!imageUrl) {
+                    console.error('\n=== TIMEOUT ALCANZADO ===');
+                    console.error(`Intentos: ${attempts}/${maxAttempts}`);
+                    console.error(`Tiempo total: ${attempts * 3}s`);
+                    console.error('Último estado conocido:', lastState);
+                    console.error('Última respuesta:', JSON.stringify(lastResponse, null, 2));
+                    console.error('==========================\n');
+
                     throw new Error(
-                        `Timeout esperando generación después de ${maxAttempts} intentos`
+                        `Timeout esperando generación después de ${maxAttempts} intentos (${attempts * 3}s). ` +
+                            `Último estado: ${lastState || 'desconocido'}`
                     );
                 }
 
@@ -406,15 +508,22 @@ class NanoBananaClient {
             }
 
             // Polling
+            console.log('\n=== INICIANDO POLLING (generateSingleImage) ===');
+            console.log('Task ID:', taskId);
+            console.log('Max Attempts: 60');
+            console.log('Intervalo: 3s');
+            console.log('==========================\n');
+
             let imageUrl = null;
             let attempts = 0;
             const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
+            let lastState = null;
+            let lastResponse = null;
 
             while (!imageUrl && attempts < maxAttempts) {
+                // SIEMPRE esperar 3s antes de cada intento (incluso el primero)
+                await this.sleep(3000);
                 attempts++;
-                if (attempts > 1) {
-                    await this.sleep(3000);
-                }
 
                 const statusResponse = await axios.get(
                     `${this.baseUrl}${this.recordInfoEndpoint}`,
@@ -425,20 +534,124 @@ class NanoBananaClient {
                     }
                 );
 
+                lastResponse = statusResponse.data;
                 const data = statusResponse.data?.data;
                 const state = data?.state;
+                const resultJson = data?.resultJson;
+                lastState = state;
 
-                if (state === 'success') {
-                    const result = JSON.parse(data.resultJson);
-                    imageUrl = result?.resultUrls?.[0];
+                // Logging exhaustivo
+                console.log(`\n=== POLLING ATTEMPT ${attempts}/${maxAttempts} (Single Image) ===`);
+                console.log('Status Response COMPLETO:');
+                console.log(JSON.stringify(statusResponse.data, null, 2));
+                console.log('Estructura detectada:');
+                console.log('  - statusResponse.data:', typeof statusResponse.data);
+                console.log('  - statusResponse.data.data:', typeof data);
+                console.log('  - state:', state, `(type: ${typeof state})`);
+                console.log(
+                    '  - resultJson:',
+                    typeof resultJson,
+                    resultJson ? `(${String(resultJson).substring(0, 50)}...)` : 'null'
+                );
+                console.log('=======================================\n');
+
+                logger.info(
+                    `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
+                );
+
+                const stateNormalized = state?.toLowerCase();
+
+                // ESTADOS DE ÉXITO
+                if (
+                    stateNormalized === 'success' ||
+                    stateNormalized === 'completed' ||
+                    stateNormalized === 'done' ||
+                    stateNormalized === 'finished'
+                ) {
+                    console.log('\n✅ ESTADO DE ÉXITO DETECTADO:', state);
+
+                    // Intentar parsear resultJson si es string
+                    let result;
+                    if (typeof resultJson === 'string') {
+                        try {
+                            result = JSON.parse(resultJson);
+                            console.log('✅ resultJson parseado exitosamente');
+                        } catch (e) {
+                            console.error('❌ Error parseando resultJson:', e.message);
+                            console.error('resultJson raw:', resultJson);
+                            throw new Error(`Failed to parse resultJson: ${e.message}`);
+                        }
+                    } else {
+                        result = resultJson;
+                        console.log('ℹ️  resultJson ya es objeto, no requiere parsing');
+                    }
+
+                    // Intentar extraer URL de múltiples paths posibles
+                    const possiblePaths = [
+                        result?.resultUrls?.[0],
+                        result?.results?.[0]?.url,
+                        result?.output_url,
+                        result?.images?.[0],
+                        result?.data?.url,
+                        result?.url
+                    ];
+
+                    console.log('🔍 Buscando imageUrl en paths posibles:');
+                    possiblePaths.forEach((path, idx) => {
+                        console.log(
+                            `  Path ${idx + 1}:`,
+                            path ? `✅ ${String(path).substring(0, 50)}...` : '❌ null/undefined'
+                        );
+                    });
+
+                    imageUrl = possiblePaths.find(url => url && typeof url === 'string');
+
+                    if (!imageUrl) {
+                        console.error('❌ NO SE ENCONTRÓ URL EN NINGÚN PATH');
+                        console.error('result completo:', JSON.stringify(result, null, 2));
+                        throw new Error('No se encontró URL de imagen en respuesta de KIE.ai');
+                    }
+
+                    console.log('✅ imageUrl extraída:', imageUrl.substring(0, 80), '...');
                     break;
-                } else if (state === 'failed') {
-                    throw new Error(data?.failMsg || 'Generación falló');
+                } else if (
+                    stateNormalized === 'failed' ||
+                    stateNormalized === 'fail' ||
+                    stateNormalized === 'error'
+                ) {
+                    console.error('\n❌ ESTADO DE FALLO DETECTADO:', state);
+                    const errorMsg =
+                        data?.failMsg || data?.error || data?.message || 'Generación falló';
+                    console.error('Error message:', errorMsg);
+                    console.error('data completo:', JSON.stringify(data, null, 2));
+                    throw new Error(errorMsg);
+                } else if (
+                    stateNormalized === 'queuing' ||
+                    stateNormalized === 'generating' ||
+                    stateNormalized === 'processing' ||
+                    stateNormalized === 'pending' ||
+                    stateNormalized === 'waiting'
+                ) {
+                    console.log(`⏳ Estado en progreso (${state}), esperando 3s...`);
+                    // Continuar polling
+                } else {
+                    console.warn(`⚠️  Estado desconocido: ${state}, continuando polling...`);
+                    // Continuar polling por si es un estado intermedio
                 }
             }
 
             if (!imageUrl) {
-                throw new Error('Timeout esperando generación');
+                console.error('\n=== TIMEOUT ALCANZADO ===');
+                console.error(`Intentos: ${attempts}/${maxAttempts}`);
+                console.error(`Tiempo total: ${attempts * 3}s`);
+                console.error('Último estado conocido:', lastState);
+                console.error('Última respuesta:', JSON.stringify(lastResponse, null, 2));
+                console.error('==========================\n');
+
+                throw new Error(
+                    `Timeout esperando generación después de ${maxAttempts} intentos (${attempts * 3}s). ` +
+                        `Último estado: ${lastState || 'desconocido'}`
+                );
             }
 
             logger.info(`[NanoBananaClient] ✅ Imagen generada: ${imageUrl}`);
@@ -586,16 +799,22 @@ class NanoBananaClient {
             logger.info(`[NanoBananaClient] Task creada: ${taskId}, esperando generación...`);
 
             // 2. Polling hasta que complete
+            console.log('\n=== INICIANDO POLLING ===');
+            console.log('Task ID:', taskId);
+            console.log('Max Attempts: 60');
+            console.log('Intervalo: 3s');
+            console.log('==========================\n');
+
             let imageUrl = null;
             let attempts = 0;
-            const maxAttempts = 60; // 60 intentos × 3s = 180s max (aumentado para Nano Banana API lenta)
+            const maxAttempts = 60; // 60 intentos × 3s = 180s max
+            let lastState = null;
+            let lastResponse = null;
 
             while (!imageUrl && attempts < maxAttempts) {
+                // SIEMPRE esperar 3s antes de cada intento (incluso el primero)
+                await this.sleep(3000);
                 attempts++;
-
-                if (attempts > 1) {
-                    await this.sleep(3000);
-                }
 
                 const statusResponse = await axios.get(
                     `${this.baseUrl}${this.recordInfoEndpoint}`,
@@ -608,29 +827,124 @@ class NanoBananaClient {
                     }
                 );
 
+                lastResponse = statusResponse.data;
                 const data = statusResponse.data?.data;
                 const state = data?.state;
+                const resultJson = data?.resultJson;
+                lastState = state;
+
+                // Logging exhaustivo
+                console.log(`\n=== POLLING ATTEMPT ${attempts}/${maxAttempts} ===`);
+                console.log('Status Response COMPLETO:');
+                console.log(JSON.stringify(statusResponse.data, null, 2));
+                console.log('Estructura detectada:');
+                console.log('  - statusResponse.data:', typeof statusResponse.data);
+                console.log('  - statusResponse.data.data:', typeof data);
+                console.log('  - state:', state, `(type: ${typeof state})`);
+                console.log(
+                    '  - resultJson:',
+                    typeof resultJson,
+                    resultJson ? `(${String(resultJson).substring(0, 50)}...)` : 'null'
+                );
+                console.log('=======================================\n');
 
                 logger.info(
                     `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
                 );
 
-                if (state === 'success') {
-                    const result = JSON.parse(data.resultJson);
-                    imageUrl = result?.resultUrls?.[0];
+                const stateNormalized = state?.toLowerCase();
+
+                // ESTADOS DE ÉXITO
+                if (
+                    stateNormalized === 'success' ||
+                    stateNormalized === 'completed' ||
+                    stateNormalized === 'done' ||
+                    stateNormalized === 'finished'
+                ) {
+                    console.log('\n✅ ESTADO DE ÉXITO DETECTADO:', state);
+
+                    // Intentar parsear resultJson si es string
+                    let result;
+                    if (typeof resultJson === 'string') {
+                        try {
+                            result = JSON.parse(resultJson);
+                            console.log('✅ resultJson parseado exitosamente');
+                        } catch (e) {
+                            console.error('❌ Error parseando resultJson:', e.message);
+                            console.error('resultJson raw:', resultJson);
+                            throw new Error(`Failed to parse resultJson: ${e.message}`);
+                        }
+                    } else {
+                        result = resultJson;
+                        console.log('ℹ️  resultJson ya es objeto, no requiere parsing');
+                    }
+
+                    // Intentar extraer URL de múltiples paths posibles
+                    const possiblePaths = [
+                        result?.resultUrls?.[0],
+                        result?.results?.[0]?.url,
+                        result?.output_url,
+                        result?.images?.[0],
+                        result?.data?.url,
+                        result?.url
+                    ];
+
+                    console.log('🔍 Buscando imageUrl en paths posibles:');
+                    possiblePaths.forEach((path, idx) => {
+                        console.log(
+                            `  Path ${idx + 1}:`,
+                            path ? `✅ ${String(path).substring(0, 50)}...` : '❌ null/undefined'
+                        );
+                    });
+
+                    imageUrl = possiblePaths.find(url => url && typeof url === 'string');
 
                     if (!imageUrl) {
-                        throw new Error('No se encontró URL en resultJson');
+                        console.error('❌ NO SE ENCONTRÓ URL EN NINGÚN PATH');
+                        console.error('result completo:', JSON.stringify(result, null, 2));
+                        throw new Error('No se encontró URL de imagen en respuesta de KIE.ai');
                     }
+
+                    console.log('✅ imageUrl extraída:', imageUrl.substring(0, 80), '...');
                     break;
-                } else if (state === 'failed' || state === 'fail') {
-                    const errorMsg = data?.failMsg || 'Generación de imagen falló en servidor';
+                } else if (
+                    stateNormalized === 'failed' ||
+                    stateNormalized === 'fail' ||
+                    stateNormalized === 'error'
+                ) {
+                    console.error('\n❌ ESTADO DE FALLO DETECTADO:', state);
+                    const errorMsg =
+                        data?.failMsg || data?.error || data?.message || 'Generación falló';
+                    console.error('Error message:', errorMsg);
+                    console.error('data completo:', JSON.stringify(data, null, 2));
                     throw new Error(errorMsg);
+                } else if (
+                    stateNormalized === 'queuing' ||
+                    stateNormalized === 'generating' ||
+                    stateNormalized === 'processing' ||
+                    stateNormalized === 'pending' ||
+                    stateNormalized === 'waiting'
+                ) {
+                    console.log(`⏳ Estado en progreso (${state}), esperando 3s...`);
+                    // Continuar polling
+                } else {
+                    console.warn(`⚠️  Estado desconocido: ${state}, continuando polling...`);
+                    // Continuar polling por si es un estado intermedio
                 }
             }
 
             if (!imageUrl) {
-                throw new Error(`Timeout esperando generación después de ${maxAttempts} intentos`);
+                console.error('\n=== TIMEOUT ALCANZADO ===');
+                console.error(`Intentos: ${attempts}/${maxAttempts}`);
+                console.error(`Tiempo total: ${attempts * 3}s`);
+                console.error('Último estado conocido:', lastState);
+                console.error('Última respuesta:', JSON.stringify(lastResponse, null, 2));
+                console.error('==========================\n');
+
+                throw new Error(
+                    `Timeout esperando generación después de ${maxAttempts} intentos (${attempts * 3}s). ` +
+                        `Último estado: ${lastState || 'desconocido'}`
+                );
             }
 
             logger.info(`[NanoBananaClient] ✅ Imagen generada: ${imageUrl.substring(0, 80)}...`);

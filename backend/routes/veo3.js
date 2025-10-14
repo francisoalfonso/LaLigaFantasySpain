@@ -12,6 +12,7 @@ const PlayerCardsOverlay = require('../services/veo3/playerCardsOverlay');
 const VideoConcatenator = require('../services/veo3/videoConcatenator');
 const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
 const ThreeSegmentGenerator = require('../services/veo3/threeSegmentGenerator'); // ✅ NUEVO
+const OutlierScriptGenerator = require('../services/contentAnalysis/outlierScriptGenerator'); // ✅ NUEVO
 const {
     validateAndPrepare,
     updatePlayerSuccessRate
@@ -24,6 +25,7 @@ const playerCards = new PlayerCardsOverlay();
 const concatenator = new VideoConcatenator();
 const viralBuilder = new ViralVideoBuilder();
 const multiSegmentGenerator = new ThreeSegmentGenerator(); // ✅ NUEVO
+const outlierScriptGen = new OutlierScriptGenerator(); // ✅ NUEVO
 
 /**
  * @route GET /api/veo3/test
@@ -1342,7 +1344,8 @@ router.post('/generate-with-nano-banana', async (req, res) => {
             playerData,
             viralData = {},
             preset = 'chollo_viral',
-            options = {}
+            options = {},
+            presenter = 'ana' // ✨ NUEVO (14 Oct 2025): Soporte multi-presentador
         } = req.body;
 
         // Validar datos requeridos
@@ -1359,6 +1362,38 @@ router.post('/generate-with-nano-banana', async (req, res) => {
 
         const startTime = Date.now();
         const sessionId = `nanoBanana_${Date.now()}`;
+
+        // ✅ NUEVO (14 Oct 2025): Cargar configuración del presentador seleccionado
+        let presenterConfig;
+        if (presenter === 'carlos') {
+            const carlosChar = require('../config/veo3/carlosCharacter');
+            presenterConfig = {
+                name: 'Carlos González',
+                seed: carlosChar.CARLOS_DEFAULT_CONFIG.seed,
+                imageUrl: carlosChar.CARLOS_IMAGE_URL,
+                characterBible: carlosChar.CARLOS_CHARACTER_BIBLE,
+                model: carlosChar.CARLOS_DEFAULT_CONFIG.model,
+                aspectRatio: carlosChar.CARLOS_DEFAULT_CONFIG.aspectRatio,
+                waterMark: carlosChar.CARLOS_DEFAULT_CONFIG.waterMark
+            };
+            logger.info(
+                `[VEO3 Routes] 👨‍💼 Presentador: Carlos González (seed: ${presenterConfig.seed})`
+            );
+        } else {
+            const anaChar = require('../config/veo3/anaCharacter');
+            presenterConfig = {
+                name: 'Ana Martínez',
+                seed: anaChar.ANA_DEFAULT_CONFIG.seed,
+                imageUrl: anaChar.ANA_IMAGE_URL,
+                characterBible: anaChar.ANA_CHARACTER_BIBLE,
+                model: anaChar.ANA_DEFAULT_CONFIG.model,
+                aspectRatio: anaChar.ANA_DEFAULT_CONFIG.aspectRatio,
+                waterMark: anaChar.ANA_DEFAULT_CONFIG.waterMark
+            };
+            logger.info(
+                `[VEO3 Routes] 👩‍💼 Presentador: Ana Martínez (seed: ${presenterConfig.seed})`
+            );
+        }
 
         // ✅ PASO 1: Validar diccionario
         let dictionaryData = null;
@@ -1421,14 +1456,27 @@ router.post('/generate-with-nano-banana', async (req, res) => {
 
         // ✅ PASO 3: Generar imágenes Nano Banana BASADAS EN el guión
         logger.info(
-            `[VEO3 Routes] 🖼️  Generando 3 imágenes Nano Banana contextualizadas del guión...`
+            `[VEO3 Routes] 🖼️  Generando 3 imágenes Nano Banana contextualizadas del guión con ${presenterConfig.name}...`
         );
 
         const nanoBananaVeo3Integrator = require('../services/veo3/nanoBananaVeo3Integrator');
 
+        // ✅ NUEVO (14 Oct 2025): Pasar configuración de presentador a Nano Banana
+        const optionsWithPresenter = {
+            ...options,
+            presenter: presenter,
+            seed: presenterConfig.seed,
+            // ✅ CRÍTICO (14 Oct): Solo pasar imageUrl para presentadores NO-Ana
+            ...(presenter !== 'ana' && { imageUrl: presenterConfig.imageUrl }),
+            characterBible: presenterConfig.characterBible, // ✅ FIX: Descripción del presentador
+            model: presenterConfig.model,
+            aspectRatio: presenterConfig.aspectRatio,
+            waterMark: presenterConfig.waterMark
+        };
+
         const imagesResult = await nanoBananaVeo3Integrator.generateImagesFromScript(
             scriptSegments,
-            options
+            optionsWithPresenter
         );
 
         logger.info(
@@ -1465,16 +1513,21 @@ router.post('/generate-with-nano-banana', async (req, res) => {
 
             try {
                 // ✅ ACTUALIZADO (11 Oct 2025): Usar prompt MEJORADO tipo Playground para Nano Banana → VEO3
+                // ✅ FIX (14 Oct 2025): Pasar characterBible para soporte multi-presentador
                 // Basado en prompts exitosos del playground que incluyen:
                 // - Duración explícita (8 seconds)
                 // - Acción física progresiva
                 // - Tono emocional específico
                 // - Dirección de actuación (like a TV commentator)
+                // - Character bible del presentador seleccionado
                 const nanoBananaPrompt = promptBuilder.buildEnhancedNanoBananaPrompt(
                     segment.dialogue,
                     segment.emotion,
                     image.shot,
-                    { duration: segment.duration || 8 }
+                    {
+                        duration: segment.duration || 8,
+                        characterBible: presenterConfig.characterBible // ✅ FIX: Descripción del presentador (Ana o Carlos)
+                    }
                 );
 
                 logger.info(
@@ -1797,15 +1850,19 @@ router.post('/prepare-session', async (req, res) => {
         } = req.body;
 
         // Validar datos requeridos
-        if (!playerData || !playerData.name) {
+        // Si no hay customScript, entonces playerData es obligatorio
+        if (!customScript && (!playerData || !playerData.name)) {
             return res.status(400).json({
                 success: false,
-                message: 'playerData con name requerido'
+                message: 'playerData con name requerido (o usa customScript)'
             });
         }
 
+        // Para outliers/customScript, usar nombre genérico en logs
+        const contentName = playerData?.name || 'content sin jugador (outlier)';
+
         logger.info(
-            `[VEO3 Routes] 🎨 FASE 1: Preparando sesión para ${playerData.name} (${contentType})${customScript ? ' - Con custom script' : ''}`
+            `[VEO3 Routes] 🎨 FASE 1: Preparando sesión para ${contentName} (${contentType})${customScript ? ' - Con custom script' : ''}`
         );
 
         // ✅ PASO 0: Cargar configuración del presentador seleccionado
@@ -1843,9 +1900,9 @@ router.post('/prepare-session', async (req, res) => {
         const startTime = Date.now();
         const sessionId = `nanoBanana_${Date.now()}`;
 
-        // ✅ PASO 1: Validar diccionario
+        // ✅ PASO 1: Validar diccionario (solo si hay playerData)
         let dictionaryData = null;
-        if (playerData.name && playerData.team) {
+        if (playerData && playerData.name && playerData.team) {
             logger.info(
                 `[VEO3 Routes] 📋 Validando diccionario para "${playerData.name}" del "${playerData.team}"...`
             );
@@ -1853,6 +1910,8 @@ router.post('/prepare-session', async (req, res) => {
             logger.info(
                 `[VEO3 Routes] ✅ Diccionario validado - Tasa éxito: ${(dictionaryData.player.testedSuccessRate * 100).toFixed(1)}%`
             );
+        } else if (!customScript) {
+            logger.warn('[VEO3 Routes] ⚠️ playerData incompleto, no se validará diccionario');
         }
 
         // ✅ PASO 2: Generar estructura de guión (o usar customScript)
@@ -1954,6 +2013,7 @@ router.post('/prepare-session', async (req, res) => {
         // Combinar options con configuración del presentador seleccionado
         const optionsWithPresenter = {
             ...options,
+            presenter: presenter, // ✅ Para Supabase bucket subdirectory (ana/carlos)
             seed: presenterConfig.seed,
             // ✅ CRÍTICO (12 Oct): Solo pasar imageUrl para presentadores NO-Ana
             // Ana usa sistema por defecto (4 Ana + múltiples estudios), Carlos usa (1 Carlos + múltiples estudios)
@@ -2011,7 +2071,7 @@ router.post('/prepare-session', async (req, res) => {
             status: 'prepared', // ✅ Estado: preparado, listo para generar videos
             segmentsCompleted: 0, // Ningún video generado aún
             segmentsTotal: 3,
-            playerName: playerData.name || 'unknown',
+            playerName: playerData?.name || contentName || 'outlier',
             contentType,
             preset,
             workflow: 'nano-banana-contextual',
@@ -2067,7 +2127,7 @@ router.post('/prepare-session', async (req, res) => {
 
         res.json({
             success: true,
-            message: `Sesión preparada exitosamente para ${playerData.name}`,
+            message: `Sesión preparada exitosamente para ${playerData?.name || contentName}`,
             data: {
                 sessionId,
                 sessionDir,
@@ -2095,11 +2155,13 @@ router.post('/prepare-session', async (req, res) => {
                     visualContext: img.visualContext
                 })),
                 // Metadata
-                playerData: {
-                    name: playerData.name,
-                    team: playerData.team,
-                    price: playerData.price
-                },
+                playerData: playerData
+                    ? {
+                          name: playerData.name,
+                          team: playerData.team,
+                          price: playerData.price
+                      }
+                    : null,
                 dictionary: dictionaryData
                     ? {
                           playerInDictionary: true,
@@ -2131,11 +2193,16 @@ router.post('/prepare-session', async (req, res) => {
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        logger.error('[VEO3 Routes] Error en FASE 1 (prepare-session):', error.message);
+        logger.error('[VEO3 Routes] Error en FASE 1 (prepare-session):', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
         res.status(500).json({
             success: false,
             message: 'Error preparando sesión',
             error: error.message,
+            stack: error.stack,
             timestamp: new Date().toISOString()
         });
     }
@@ -2251,7 +2318,10 @@ router.post('/generate-segment', async (req, res) => {
             segment.dialogue,
             segment.emotion,
             segment.shot,
-            { duration: segment.duration || 8 }
+            {
+                duration: segment.duration || 8,
+                characterBible: progressData.presenter?.characterBible // ✅ Descripción dinámica del presenter
+            }
         );
 
         logger.info(`[VEO3 Routes] 📝 Prompt (${segment.role}): ${nanoBananaPrompt.length} chars`);
@@ -2930,6 +3000,46 @@ router.post('/add-enhancements', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error añadiendo mejoras al video',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+/**
+ * @route POST /api/veo3/generate-script-from-outlier
+ * @desc Generar script VEO3 desde un outlier viral
+ */
+router.post('/generate-script-from-outlier', async (req, res) => {
+    try {
+        const { outlierData, options = {} } = req.body;
+
+        if (!outlierData) {
+            return res.status(400).json({
+                success: false,
+                message: 'outlierData es requerido'
+            });
+        }
+
+        logger.info('[VEO3 Routes] Generando script desde outlier:', {
+            videoId: outlierData.video_id,
+            platform: options.platform || 'youtube'
+        });
+
+        // Generar script optimizado
+        const script = outlierScriptGen.generateScriptFromOutlier(outlierData, options);
+
+        res.json({
+            success: true,
+            script,
+            message: 'Script generado exitosamente desde outlier',
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        logger.error('[VEO3 Routes] Error generando script desde outlier:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error generando script desde outlier',
             error: error.message,
             timestamp: new Date().toISOString()
         });

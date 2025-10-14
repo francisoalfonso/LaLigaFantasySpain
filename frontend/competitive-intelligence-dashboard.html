@@ -185,10 +185,11 @@
                             </button>
                             <button
                                 @click="refreshDashboard()"
-                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                                :disabled="refreshing"
+                                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
                             >
-                                <i class="fas fa-sync mr-1"></i>
-                                Actualizar
+                                <i class="fas fa-sync mr-1" :class="{'fa-spin': refreshing}"></i>
+                                <span x-text="refreshing ? 'Investigando...' : 'Actualizar'"></span>
                             </button>
                         </div>
                     </div>
@@ -240,6 +241,190 @@
                                     x-text="'$' + (processorStatus.stats?.totalCost || 0).toFixed(4)"
                                 ></span>
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Viral Outliers Section -->
+                <div class="bg-white rounded-lg shadow mb-8 overflow-hidden">
+                    <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold flex items-center gap-2">
+                                    <i class="fas fa-fire"></i>
+                                    Outliers Virales Detectados
+                                </h2>
+                                <p class="text-red-100 text-sm mt-1">
+                                    Videos con rendimiento anómalo de canales desconocidos (últimas 24h)
+                                </p>
+                            </div>
+                            <button
+                                @click="loadOutliers()"
+                                :disabled="outliersLoading"
+                                class="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <i class="fas fa-sync mr-1" :class="{'fa-spin': outliersLoading}"></i>
+                                <span x-text="outliersLoading ? 'Actualizando...' : 'Actualizar'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Outliers Stats -->
+                    <div class="p-6 border-b bg-gradient-to-r from-red-50 to-orange-50">
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <div class="text-center">
+                                <div
+                                    class="text-3xl font-bold text-red-600"
+                                    x-text="outliers.length"
+                                ></div>
+                                <div class="text-xs text-gray-600 uppercase">Total Outliers</div>
+                            </div>
+                            <div class="text-center">
+                                <div
+                                    class="text-3xl font-bold text-red-700"
+                                    x-text="outliers.filter(o => o.priority === 'P0').length"
+                                ></div>
+                                <div class="text-xs text-gray-600 uppercase">P0 (Críticos)</div>
+                            </div>
+                            <div class="text-center">
+                                <div
+                                    class="text-3xl font-bold text-orange-600"
+                                    x-text="outliers.filter(o => o.priority === 'P1').length"
+                                ></div>
+                                <div class="text-xs text-gray-600 uppercase">P1 (Altos)</div>
+                            </div>
+                            <div class="text-center">
+                                <div
+                                    class="text-3xl font-bold text-yellow-600"
+                                    x-text="outliers.filter(o => o.priority === 'P2').length"
+                                ></div>
+                                <div class="text-xs text-gray-600 uppercase">P2 (Medios)</div>
+                            </div>
+                            <div class="text-center">
+                                <div
+                                    class="text-2xl font-bold text-purple-600"
+                                    x-text="outliers.length > 0 ? (outliers.reduce((sum, o) => sum + o.outlier_score, 0) / outliers.length).toFixed(1) : '0'"
+                                ></div>
+                                <div class="text-xs text-gray-600 uppercase">Score Promedio</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outliers List -->
+                    <div class="p-6">
+                        <div x-show="outliers.length === 0" class="text-center py-12 text-gray-500">
+                            <i class="fas fa-search text-6xl mb-4 text-gray-300"></i>
+                            <p class="text-xl">No se han detectado outliers en las últimas 24h</p>
+                            <p class="text-sm mt-2">El sistema automático ejecuta búsquedas cada 6 horas</p>
+                        </div>
+
+                        <div x-show="outliers.length > 0" class="space-y-4">
+                            <template x-for="outlier in outliers" :key="outlier.video_id">
+                                <div class="border rounded-lg overflow-hidden hover:shadow-lg transition">
+                                    <!-- Outlier Header -->
+                                    <div
+                                        class="p-4"
+                                        :class="{
+                                            'bg-red-50 border-l-4 border-red-600': outlier.priority === 'P0',
+                                            'bg-orange-50 border-l-4 border-orange-500': outlier.priority === 'P1',
+                                            'bg-yellow-50 border-l-4 border-yellow-500': outlier.priority === 'P2'
+                                        }"
+                                    >
+                                        <div class="flex gap-4">
+                                            <!-- Priority Badge -->
+                                            <div class="flex-shrink-0">
+                                                <div
+                                                    class="w-16 h-16 rounded-full flex flex-col items-center justify-center font-bold text-white"
+                                                    :class="{
+                                                        'bg-red-600': outlier.priority === 'P0',
+                                                        'bg-orange-500': outlier.priority === 'P1',
+                                                        'bg-yellow-500': outlier.priority === 'P2'
+                                                    }"
+                                                >
+                                                    <div class="text-xl" x-text="outlier.priority"></div>
+                                                    <div class="text-xs" x-text="outlier.outlier_score"></div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Thumbnail -->
+                                            <div class="flex-shrink-0">
+                                                <img
+                                                    :src="outlier.thumbnail_url"
+                                                    :alt="outlier.title"
+                                                    class="w-40 h-24 object-cover rounded"
+                                                />
+                                            </div>
+
+                                            <!-- Video Info -->
+                                            <div class="flex-grow">
+                                                <a
+                                                    :href="outlier.video_url"
+                                                    target="_blank"
+                                                    class="font-semibold text-blue-600 hover:text-blue-800 line-clamp-2 block mb-2"
+                                                    x-text="outlier.title"
+                                                ></a>
+
+                                                <div class="text-sm text-gray-600 mb-2">
+                                                    <i class="fas fa-user-circle mr-1"></i>
+                                                    <span class="font-semibold" x-text="outlier.channel_name"></span>
+                                                    <span class="mx-2">•</span>
+                                                    <span x-text="formatNumber(outlier.channel_subscribers) + ' subs'"></span>
+                                                </div>
+
+                                                <div class="flex gap-4 text-sm">
+                                                    <span class="text-gray-700">
+                                                        <i class="fas fa-eye text-blue-500 mr-1"></i>
+                                                        <span class="font-semibold" x-text="formatNumber(outlier.views)"></span>
+                                                        views
+                                                    </span>
+                                                    <span class="text-gray-700">
+                                                        <i class="fas fa-chart-line text-green-500 mr-1"></i>
+                                                        <span class="font-semibold" x-text="outlier.engagement_rate + '%'"></span>
+                                                        engagement
+                                                    </span>
+                                                    <span class="text-gray-700">
+                                                        <i class="fas fa-fire text-red-500 mr-1"></i>
+                                                        <span class="font-semibold" x-text="outlier.viral_ratio?.toFixed(1) || 'N/A'"></span>
+                                                        viral ratio
+                                                    </span>
+                                                    <span class="text-gray-700">
+                                                        <i class="fas fa-bolt text-yellow-500 mr-1"></i>
+                                                        <span class="font-semibold" x-text="outlier.velocity?.toFixed(1) || 'N/A'"></span>
+                                                        views/h
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Actions -->
+                                            <div class="flex-shrink-0 flex flex-col gap-2">
+                                                <button
+                                                    @click="analyzeOutlier(outlier.video_id)"
+                                                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm"
+                                                >
+                                                    <i class="fas fa-brain mr-1"></i>
+                                                    Analizar
+                                                </button>
+                                                <button
+                                                    @click="updateOutlierStatus(outlier.video_id, 'responded')"
+                                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition text-sm"
+                                                    :disabled="outlier.processing_status === 'responded'"
+                                                >
+                                                    <i class="fas fa-check mr-1"></i>
+                                                    <span x-text="outlier.processing_status === 'responded' ? 'Respondido' : 'Marcar'"></span>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Published Date -->
+                                        <div class="mt-3 pt-3 border-t text-xs text-gray-500">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Publicado: <span x-text="new Date(outlier.published_at).toLocaleString('es-ES')"></span>
+                                            <span class="mx-2">•</span>
+                                            Detectado: <span x-text="new Date(outlier.detected_at).toLocaleString('es-ES')"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -837,7 +1022,10 @@
                 return {
                     loading: true,
                     error: null,
+                    refreshing: false,
                     channels: [],
+                    outliers: [],
+                    outliersLoading: false,
                     globalStats: {
                         total_channels: 0,
                         total_videos: 0,
@@ -859,11 +1047,13 @@
 
                     async init() {
                         await this.loadDashboard();
+                        await this.loadOutliers();
 
-                        // Auto-refresh cada 30 segundos
+                        // Auto-refresh cada 60 segundos (reducido para evitar rate limiting)
                         this.refreshInterval = setInterval(() => {
                             this.loadDashboard(true);
-                        }, 30000);
+                            this.loadOutliers(true);
+                        }, 60000);
                     },
 
                     async loadDashboard(silent = false) {
@@ -894,7 +1084,90 @@
                     },
 
                     async refreshDashboard() {
-                        await this.loadDashboard(false);
+                        if (this.refreshing) return; // Evitar dobles pulsaciones
+
+                        this.refreshing = true;
+                        try {
+                            await this.loadDashboard(false);
+                            await this.loadOutliers(false);
+                        } finally {
+                            this.refreshing = false;
+                        }
+                    },
+
+                    async loadOutliers(silent = false) {
+                        if (!silent) {
+                            this.outliersLoading = true;
+                        }
+
+                        try {
+                            const response = await fetch('/api/outliers/list?hoursBack=48');
+                            const result = await response.json();
+
+                            if (result.success) {
+                                // Sort by priority (P0 first) and outlier_score (desc)
+                                this.outliers = result.data.outliers.sort((a, b) => {
+                                    const priorityOrder = { P0: 0, P1: 1, P2: 2, P3: 3 };
+                                    if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+                                        return priorityOrder[a.priority] - priorityOrder[b.priority];
+                                    }
+                                    return b.outlier_score - a.outlier_score;
+                                });
+                            } else {
+                                // Mostrar error si falla (rate limit, etc.)
+                                if (!silent && result.error) {
+                                    alert('⚠️ ' + result.error);
+                                }
+                            }
+                        } catch (err) {
+                            if (!silent) {
+                                console.error('Error loading outliers:', err);
+                                alert('❌ Error cargando outliers: ' + err.message);
+                            }
+                        } finally {
+                            if (!silent) {
+                                this.outliersLoading = false;
+                            }
+                        }
+                    },
+
+                    async analyzeOutlier(videoId) {
+                        try {
+                            const response = await fetch(`/api/outliers/analyze/${videoId}`, {
+                                method: 'POST'
+                            });
+                            const result = await response.json();
+
+                            if (result.success) {
+                                alert('✅ Análisis iniciado (función pendiente de implementación completa)');
+                            } else {
+                                alert('❌ Error: ' + result.error);
+                            }
+                        } catch (err) {
+                            alert('❌ Error analizando outlier: ' + err.message);
+                        }
+                    },
+
+                    async updateOutlierStatus(videoId, status) {
+                        try {
+                            const response = await fetch(`/api/outliers/${videoId}/status`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ status })
+                            });
+                            const result = await response.json();
+
+                            if (result.success) {
+                                alert('✅ Estado actualizado correctamente');
+                                await this.loadOutliers(true);
+                            } else {
+                                alert('❌ Error: ' + result.error);
+                            }
+                        } catch (err) {
+                            alert('❌ Error actualizando estado: ' + err.message);
+                        }
                     },
 
                     async startProcessing() {

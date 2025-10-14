@@ -153,6 +153,160 @@ router.put('/:videoId/status', limiter, async (req, res) => {
 });
 
 /**
+ * POST /api/outliers/generate-script/:videoId
+ * Generar script VEO3 inteligente para responder a outlier
+ *
+ * FLUJO:
+ * 1. Obtener outlier de DB (debe estar 'analyzed')
+ * 2. Enriquecer con API-Sports si aún no está hecho
+ * 3. Generar script con GPT-4o via intelligentScriptGenerator
+ * 4. Guardar generated_script en DB
+ * 5. Update status: analyzed → scripted
+ *
+ * COST: ~$0.002 por script (GPT-4o-mini cached)
+ */
+router.post('/generate-script/:videoId', limiter, async (req, res) => {
+    const { videoId } = req.params;
+    const { responseAngle = 'rebatir', presenter = 'ana' } = req.body;
+
+    try {
+        logger.info('[Outliers API] Generando script para outlier', {
+            videoId,
+            responseAngle,
+            presenter
+        });
+
+        // 1. Obtener outlier de DB
+        const outliers = await youtubeOutlierDetector.getOutliers({
+            status: null
+        });
+
+        const outlier = outliers.find(o => o.video_id === videoId);
+
+        if (!outlier) {
+            return res.status(404).json({
+                success: false,
+                error: `Outlier not found: ${videoId}`
+            });
+        }
+
+        // Verificar que tiene análisis
+        if (!outlier.content_analysis || !outlier.transcription) {
+            return res.status(400).json({
+                success: false,
+                error: 'Outlier must be analyzed first. Call POST /api/outliers/analyze/:videoId'
+            });
+        }
+
+        // 2. Enriquecer con API-Sports si no está hecho
+        let enrichedData = outlier.enriched_data;
+
+        if (!enrichedData && outlier.mentioned_players?.length > 0) {
+            logger.info('[Outliers API] Enriqueciendo con API-Sports...', {
+                players: outlier.mentioned_players
+            });
+
+            const apiFootball = require('../services/apiFootball');
+            const enrichmentResult = await apiFootball.getPlayerStatsForOutlier(
+                outlier.mentioned_players
+            );
+
+            if (enrichmentResult.success) {
+                enrichedData = enrichmentResult;
+
+                // Guardar enriched data en DB
+                const { supabaseAdmin } = require('../config/supabase');
+                await supabaseAdmin
+                    .from('youtube_outliers')
+                    .update({
+                        enriched_data: enrichedData,
+                        processing_status: 'enriched'
+                    })
+                    .eq('video_id', videoId);
+
+                logger.info('[Outliers API] ✅ Datos enriquecidos guardados en DB');
+            } else {
+                logger.warn('[Outliers API] ⚠️ No se pudieron enriquecer datos de jugadores');
+                // Continue anyway, script generator can work without enriched data
+                enrichedData = { players: [], totalFound: 0 };
+            }
+        }
+
+        // 3. Generar script con intelligentScriptGenerator
+        logger.info('[Outliers API] Generando script inteligente con GPT-4o...');
+
+        const intelligentScriptGenerator = require('../services/contentAnalysis/intelligentScriptGenerator');
+
+        const scriptResult = await intelligentScriptGenerator.generateResponseScript(
+            {
+                video_id: outlier.video_id,
+                title: outlier.title,
+                channel_name: outlier.channel_name,
+                views: outlier.views,
+                transcription: outlier.transcription,
+                content_analysis: outlier.content_analysis,
+                enriched_data: enrichedData
+            },
+            {
+                responseAngle,
+                presenter
+            }
+        );
+
+        if (!scriptResult.success) {
+            throw new Error('Script generation failed');
+        }
+
+        // 4. Guardar generated_script en DB
+        logger.info('[Outliers API] Guardando script en DB...');
+
+        const { supabaseAdmin } = require('../config/supabase');
+        const { error: updateError } = await supabaseAdmin
+            .from('youtube_outliers')
+            .update({
+                generated_script: scriptResult,
+                processing_status: 'scripted'
+            })
+            .eq('video_id', videoId);
+
+        if (updateError) {
+            throw updateError;
+        }
+
+        logger.info('[Outliers API] ✅ Script guardado en DB');
+
+        // Format for VEO3
+        const veo3Script = intelligentScriptGenerator.formatForVEO3(scriptResult);
+
+        // Success response
+        res.json({
+            success: true,
+            message: 'Script generated successfully',
+            data: {
+                videoId,
+                script: scriptResult.script,
+                veo3Format: veo3Script,
+                metadata: scriptResult.metadata,
+                totalCost: scriptResult.metadata.cost_usd,
+                status: 'scripted',
+                nextStep: 'POST /api/veo3/prepare-session with veo3Format'
+            }
+        });
+    } catch (error) {
+        logger.error('[Outliers API] Error generando script', {
+            videoId,
+            error: error.message,
+            stack: error.stack
+        });
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+/**
  * POST /api/outliers/analyze/:videoId
  * Analizar un outlier específico (transcripción + AI analysis)
  *

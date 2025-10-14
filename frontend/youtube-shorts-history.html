@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📺 Historial YouTube Shorts - VEO3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* YouTube Shorts mockup styles */
+        .youtube-phone {
+            max-width: 375px;
+            background: #000;
+            border-radius: 30px;
+            padding: 20px 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .youtube-screen {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .youtube-header {
+            background: rgba(0,0,0,0.6);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+        }
+
+        .youtube-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .youtube-video-container {
+            position: relative;
+            aspect-ratio: 9/16;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .youtube-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .youtube-actions {
+            position: absolute;
+            right: 12px;
+            bottom: 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            z-index: 10;
+        }
+
+        .youtube-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .youtube-action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .youtube-action-icon {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .youtube-action-text {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .youtube-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+
+        .youtube-title {
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .youtube-channel-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .youtube-channel-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #FF0000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .youtube-channel-name {
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .youtube-subscribe-btn {
+            margin-left: auto;
+            background: #FF0000;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="youtubeHistory()">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-red-600 to-red-700 text-white py-6 px-4 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <h1 class="text-3xl font-bold">📺 Historial YouTube Shorts</h1>
+                <p class="text-red-100 mt-2">Videos generados con Carlos para YouTube</p>
+            </div>
+        </header>
+
+        <!-- Stats Banner -->
+        <div class="bg-white border-b border-gray-200 py-4 px-4">
+            <div class="max-w-7xl mx-auto grid grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900" x-text="videos.length"></div>
+                    <div class="text-sm text-gray-500">Shorts Totales</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" x-text="videosPublished"></div>
+                    <div class="text-sm text-gray-500">Publicados</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600" x-text="videosReview"></div>
+                    <div class="text-sm text-gray-500">En Revisión</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" x-text="avgScore.toFixed(1)"></div>
+                    <div class="text-sm text-gray-500">Score Promedio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Mobile Preview + Video List -->
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="grid grid-cols-12 gap-6">
+
+                <!-- Left: YouTube Shorts Preview (Sticky) -->
+                <div class="col-span-4">
+                    <div class="sticky top-6">
+                        <div class="youtube-phone mx-auto">
+                            <div class="youtube-screen relative">
+                                <!-- YouTube Header -->
+                                <div class="youtube-header">
+                                    <div class="youtube-logo">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                        </svg>
+                                        <span>Shorts</span>
+                                    </div>
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+
+                                <!-- Video Container -->
+                                <div class="youtube-video-container">
+                                    <template x-if="selectedVideo && selectedVideo.videoUrl">
+                                        <video
+                                            :src="selectedVideo.videoUrl"
+                                            class="youtube-video"
+                                            controls
+                                            loop
+                                            autoplay
+                                            muted>
+                                        </video>
+                                    </template>
+                                    <template x-if="!selectedVideo">
+                                        <div class="text-white text-center p-8">
+                                            <div class="text-4xl mb-4">📱</div>
+                                            <div class="text-sm">Selecciona un Short para ver preview</div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- YouTube Actions (lado derecho) -->
+                                <div class="youtube-actions">
+                                    <div class="youtube-action-btn">
+                                        <div class="youtube-action-icon">👍</div>
+                                        <div class="youtube-action-text">Like</div>
+                                    </div>
+                                    <div class="youtube-action-btn">
+                                        <div class="youtube-action-icon">👎</div>
+                                        <div class="youtube-action-text">Dislike</div>
+                                    </div>
+                                    <div class="youtube-action-btn">
+                                        <div class="youtube-action-icon">💬</div>
+                                        <div class="youtube-action-text">Comment</div>
+                                    </div>
+                                    <div class="youtube-action-btn">
+                                        <div class="youtube-action-icon">↗️</div>
+                                        <div class="youtube-action-text">Share</div>
+                                    </div>
+                                    <div class="youtube-action-btn">
+                                        <div class="youtube-action-icon">⋯</div>
+                                    </div>
+                                </div>
+
+                                <!-- YouTube Bottom Info -->
+                                <template x-if="selectedVideo">
+                                    <div class="youtube-bottom-bar">
+                                        <div class="youtube-title" x-text="selectedVideo.title || 'Sin título'"></div>
+                                        <div class="youtube-channel-info">
+                                            <div class="youtube-channel-avatar">FLP</div>
+                                            <div class="youtube-channel-name">Fantasy La Liga Pro</div>
+                                            <div class="youtube-subscribe-btn">Suscribirse</div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Selected Video Info -->
+                        <template x-if="selectedVideo">
+                            <div class="mt-4 bg-white rounded-lg shadow p-4">
+                                <div class="text-sm font-semibold text-gray-700 mb-2">Short Seleccionado</div>
+                                <div class="text-lg font-bold text-gray-900" x-text="selectedVideo.title || selectedVideo.playerName || 'Sin título'"></div>
+                                <div class="text-sm text-gray-600 mt-1" x-text="formatDate(selectedVideo.createdAt || selectedVideo.timestamp)"></div>
+                                <template x-if="selectedVideo.youtubeUrl">
+                                    <a :href="selectedVideo.youtubeUrl" target="_blank" class="text-sm text-red-600 hover:underline mt-2 block">
+                                        📺 Ver en YouTube
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Right: Video List -->
+                <div class="col-span-8">
+                    <!-- Filter & Search -->
+                    <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="grid grid-cols-3 gap-4">
+                            <input
+                                type="text"
+                                x-model="searchQuery"
+                                placeholder="Buscar por título..."
+                                class="px-4 py-2 border rounded-lg">
+                            <select x-model="filterStatus" class="px-4 py-2 border rounded-lg">
+                                <option value="all">Todos los estados</option>
+                                <option value="review">En revisión</option>
+                                <option value="published">Publicados</option>
+                                <option value="draft">Borrador</option>
+                            </select>
+                            <select x-model="filterType" class="px-4 py-2 border rounded-lg">
+                                <option value="all">Todos los tipos</option>
+                                <option value="chollo">Chollos</option>
+                                <option value="outlier">Outliers</option>
+                                <option value="analysis">Análisis</option>
+                            </select>
+                        </div>
+                    </div>
+
+            <!-- Video Timeline (Stack View) -->
+            <div class="space-y-4">
+                <template x-for="(video, index) in filteredVideos" :key="video.id">
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden border-l-4 cursor-pointer hover:shadow-xl transition-shadow"
+                         :class="{
+                             'border-green-500': video.status === 'published',
+                             'border-orange-500': video.status === 'review',
+                             'border-gray-300': video.status === 'draft',
+                             'ring-2 ring-red-500': selectedVideo?.id === video.id
+                         }"
+                         @click="selectVideo(video)">
+
+                        <!-- Video Header -->
+                        <div class="p-6" @click.stop="video.expanded = !video.expanded">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-2xl font-bold text-gray-900"
+                                              x-text="`#${video.shortNumber || index + 1}`"></span>
+                                        <span class="text-lg font-semibold text-gray-700"
+                                              x-text="video.title || video.playerName || 'Sin título'"></span>
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                                              :class="{
+                                                  'bg-green-100 text-green-800': video.status === 'published',
+                                                  'bg-orange-100 text-orange-800': video.status === 'review',
+                                                  'bg-gray-100 text-gray-800': video.status === 'draft'
+                                              }"
+                                              x-text="video.status || 'draft'"></span>
+                                    </div>
+                                    <div class="text-sm text-gray-500 mb-2">
+                                        📅 <span x-text="formatDate(video.createdAt || video.timestamp)"></span>
+                                        <template x-if="video.sessionId">
+                                            | 🆔 <span class="font-mono text-xs" x-text="video.sessionId"></span>
+                                        </template>
+                                    </div>
+                                    <div class="text-sm text-gray-700 mb-3" x-text="video.description || 'Sin descripción'"></div>
+
+                                    <!-- Type Tags -->
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-if="video.type">
+                                            <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium" x-text="video.type"></span>
+                                        </template>
+                                        <template x-if="video.presenter">
+                                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium" x-text="'👨‍💼 ' + video.presenter"></span>
+                                        </template>
+                                        <template x-if="video.platform">
+                                            <span class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs font-medium" x-text="video.platform.toUpperCase()"></span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold"
+                                         :class="{
+                                             'text-green-600': (video.qualityScore || 0) >= 8.5,
+                                             'text-orange-600': (video.qualityScore || 0) >= 7 && (video.qualityScore || 0) < 8.5,
+                                             'text-red-600': (video.qualityScore || 0) < 7
+                                         }"
+                                         x-text="(video.qualityScore || 0).toFixed(1) + '/10'"></div>
+                                    <div class="text-xs text-gray-500">Quality Score</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expanded Details -->
+                        <div x-show="video.expanded" x-collapse>
+                            <div class="border-t border-gray-200 p-6 bg-gray-50">
+
+                                <!-- YouTube Stats (if published) -->
+                                <template x-if="video.youtubeStats">
+                                    <div class="grid grid-cols-5 gap-4 mb-6 bg-red-50 p-4 rounded-lg">
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold text-gray-900" x-text="(video.youtubeStats.views || 0).toLocaleString()"></div>
+                                            <div class="text-xs text-gray-500">Views</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold text-green-600" x-text="(video.youtubeStats.likes || 0).toLocaleString()"></div>
+                                            <div class="text-xs text-gray-500">Likes</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold text-blue-600" x-text="(video.youtubeStats.comments || 0).toLocaleString()"></div>
+                                            <div class="text-xs text-gray-500">Comments</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold text-purple-600" x-text="(video.youtubeStats.shares || 0).toLocaleString()"></div>
+                                            <div class="text-xs text-gray-500">Shares</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-lg font-bold text-orange-600" x-text="((video.youtubeStats.engagement || 0) * 100).toFixed(1) + '%'"></div>
+                                            <div class="text-xs text-gray-500">Engagement</div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Feedback Section -->
+                                <template x-if="video.feedback">
+                                    <div class="grid grid-cols-2 gap-6 mb-6">
+                                        <!-- What Works -->
+                                        <div>
+                                            <h4 class="font-bold text-green-700 mb-3 flex items-center gap-2">
+                                                <span class="text-xl">✅</span>
+                                                Lo que funciona (<span x-text="(video.feedback.whatWorks || []).length"></span>)
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <template x-for="item in video.feedback.whatWorks || []" :key="item">
+                                                    <li class="text-sm text-gray-700 pl-4 border-l-2 border-green-300" x-text="item"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+
+                                        <!-- What Fails -->
+                                        <div>
+                                            <h4 class="font-bold text-red-700 mb-3 flex items-center gap-2">
+                                                <span class="text-xl">❌</span>
+                                                Lo que falla (<span x-text="(video.feedback.whatFails || []).length"></span>)
+                                            </h4>
+                                            <ul class="space-y-2">
+                                                <template x-for="item in video.feedback.whatFails || []" :key="item">
+                                                    <li class="text-sm pl-4 border-l-2 border-red-300 text-gray-700" x-text="item"></li>
+                                                </template>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Technical Details -->
+                                <div class="grid grid-cols-4 gap-4 mb-6 bg-gray-100 p-4 rounded-lg">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="video.duration || 'N/A'"></div>
+                                        <div class="text-xs text-gray-500">Duración</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="video.segments || 3"></div>
+                                        <div class="text-xs text-gray-500">Segmentos</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="video.resolution || '1080x1920'"></div>
+                                        <div class="text-xs text-gray-500">Resolución</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold" x-text="video.bitrate || '5 Mbps'"></div>
+                                        <div class="text-xs text-gray-500">Bitrate</div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="flex gap-4">
+                                    <template x-if="video.videoUrl">
+                                        <a :href="video.videoUrl" target="_blank" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                            ▶️ Ver Video
+                                        </a>
+                                    </template>
+                                    <template x-if="video.youtubeUrl">
+                                        <a :href="video.youtubeUrl" target="_blank" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                                            📺 Ver en YouTube
+                                        </a>
+                                    </template>
+                                    <button @click="addFeedback(video)" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        📝 Agregar Feedback
+                                    </button>
+                                    <template x-if="video.status === 'review'">
+                                        <button @click="markAsPublished(video)" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                            ✅ Marcar como Publicado
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        function youtubeHistory() {
+            return {
+                videos: [],
+                selectedVideo: null,
+                searchQuery: '',
+                filterStatus: 'all',
+                filterType: 'all',
+
+                init() {
+                    this.loadVideos();
+                },
+
+                async loadVideos() {
+                    try {
+                        // TODO: Implementar endpoint /api/youtube-shorts/list
+                        // Por ahora, datos de ejemplo
+                        this.videos = [
+                            {
+                                id: 'short-1',
+                                shortNumber: 1,
+                                title: '¡Este video está ROMPIENDO YouTube! 🔥',
+                                description: 'Análisis de outlier viral',
+                                playerName: 'Fantasy Football España',
+                                type: 'outlier',
+                                presenter: 'Carlos',
+                                platform: 'youtube',
+                                status: 'published',
+                                createdAt: new Date().toISOString(),
+                                sessionId: 'nanoBanana_1234567890',
+                                videoUrl: '/output/veo3/sessions/nanoBanana_1234567890/final-enhanced.mp4',
+                                youtubeUrl: 'https://youtube.com/shorts/ABC123',
+                                duration: '24s',
+                                segments: 3,
+                                resolution: '1080x1920',
+                                bitrate: '5 Mbps',
+                                qualityScore: 8.5,
+                                youtubeStats: {
+                                    views: 12500,
+                                    likes: 890,
+                                    comments: 45,
+                                    shares: 120,
+                                    engagement: 0.084
+                                },
+                                feedback: {
+                                    whatWorks: [
+                                        '✅ Carlos mantiene profesionalismo',
+                                        '✅ Hook viral efectivo',
+                                        '✅ Subtítulos virales funcionan'
+                                    ],
+                                    whatFails: [
+                                        '❌ Calidad SD en vez de HD',
+                                        '❌ Logo muy pequeño'
+                                    ]
+                                },
+                                expanded: false
+                            }
+                        ];
+
+                        // Seleccionar automáticamente el primer video
+                        if (this.videos.length > 0) {
+                            this.selectedVideo = this.videos[0];
+                        }
+                    } catch (error) {
+                        console.error('Error loading videos:', error);
+                    }
+                },
+
+                get filteredVideos() {
+                    return this.videos.filter(video => {
+                        const matchesSearch = !this.searchQuery ||
+                            (video.title || '').toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            (video.playerName || '').toLowerCase().includes(this.searchQuery.toLowerCase());
+                        const matchesStatus = this.filterStatus === 'all' || video.status === this.filterStatus;
+                        const matchesType = this.filterType === 'all' || video.type === this.filterType;
+                        return matchesSearch && matchesStatus && matchesType;
+                    });
+                },
+
+                get videosPublished() {
+                    return this.videos.filter(v => v.status === 'published').length;
+                },
+
+                get videosReview() {
+                    return this.videos.filter(v => v.status === 'review').length;
+                },
+
+                get avgScore() {
+                    const scores = this.videos.map(v => v.qualityScore || 0);
+                    return scores.length ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+                },
+
+                selectVideo(video) {
+                    this.selectedVideo = video;
+                },
+
+                formatDate(dateStr) {
+                    if (!dateStr) return 'N/A';
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                addFeedback(video) {
+                    // TODO: Implementar modal de feedback
+                    alert('Feedback modal - TODO');
+                },
+
+                async markAsPublished(video) {
+                    if (confirm('¿Marcar este Short como publicado?')) {
+                        // TODO: Implementar actualización de estado
+                        video.status = 'published';
+                        alert('✅ Short marcado como publicado');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

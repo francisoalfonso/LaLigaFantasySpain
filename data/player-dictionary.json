@@ -3,7 +3,10 @@
     "Iago Aspas": {
       "surname": "Aspas",
       "team": "Celta de Vigo",
-      "safeReferences": ["Aspas", "el jugador"],
+      "safeReferences": [
+        "Aspas",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Aspas del Celta de Vigo",
         "Aspas Celta de Vigo",
@@ -20,7 +23,10 @@
     "Pere Milla": {
       "surname": "Milla",
       "team": "Espanyol",
-      "safeReferences": ["Milla", "el jugador"],
+      "safeReferences": [
+        "Milla",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Milla del Espanyol",
         "Milla Espanyol",
@@ -37,7 +43,10 @@
     "Pepelu": {
       "surname": "Pepelu",
       "team": "Valencia",
-      "safeReferences": ["Pepelu", "el jugador"],
+      "safeReferences": [
+        "Pepelu",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Pepelu del Valencia",
         "Pepelu Valencia",
@@ -54,7 +63,10 @@
     "Dani Carvajal": {
       "surname": "Carvajal",
       "team": "Real Madrid",
-      "safeReferences": ["Carvajal", "el jugador"],
+      "safeReferences": [
+        "Carvajal",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Carvajal del Real Madrid",
         "Carvajal Real Madrid",
@@ -71,7 +83,10 @@
     "Nico Williams": {
       "surname": "Williams",
       "team": "Athletic Club",
-      "safeReferences": ["Williams", "el jugador"],
+      "safeReferences": [
+        "Williams",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Williams del Athletic Club",
         "Williams Athletic Club",
@@ -88,7 +103,10 @@
     "Lamine Yamal": {
       "surname": "Yamal",
       "team": "Barcelona",
-      "safeReferences": ["Yamal", "el jugador"],
+      "safeReferences": [
+        "Yamal",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Yamal del Barcelona",
         "Yamal Barcelona",
@@ -105,7 +123,11 @@
     "Pedri": {
       "surname": "el centrocampista",
       "team": "Barcelona",
-      "safeReferences": ["el centrocampista", "el jugador", "el volante"],
+      "safeReferences": [
+        "el centrocampista",
+        "el jugador",
+        "el volante"
+      ],
       "avoidCombinations": [
         "Pedri del Barcelona",
         "Pedri Barcelona",
@@ -122,7 +144,11 @@
     "Gavi": {
       "surname": "el centrocampista",
       "team": "Barcelona",
-      "safeReferences": ["el centrocampista", "el jugador", "el canterano"],
+      "safeReferences": [
+        "el centrocampista",
+        "el jugador",
+        "el canterano"
+      ],
       "avoidCombinations": [
         "Gavi del Barcelona",
         "Gavi Barcelona",
@@ -139,7 +165,10 @@
     "Robert Lewandowski": {
       "surname": "Lewandowski",
       "team": "Barcelona",
-      "safeReferences": ["Lewandowski", "el jugador"],
+      "safeReferences": [
+        "Lewandowski",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Lewandowski del Barcelona",
         "Lewandowski Barcelona",
@@ -158,7 +187,10 @@
       "team": "Mallorca",
       "position": null,
       "number": null,
-      "safeReferences": ["Jugador", "el jugador"],
+      "safeReferences": [
+        "Jugador",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Jugador del Mallorca",
         "Jugador Mallorca",
@@ -166,7 +198,9 @@
         "El Jugador Mallorca"
       ],
       "registeredNicknames": [],
-      "safeNicknames": ["Jugador"],
+      "safeNicknames": [
+        "Jugador"
+      ],
       "testedSuccessRate": 0,
       "lastTested": null,
       "totalVideos": 0,
@@ -177,7 +211,12 @@
       "team": "Girona",
       "position": "DEF",
       "number": null,
-      "safeReferences": ["Blind", "el jugador gironí", "el jugador", "jugador"],
+      "safeReferences": [
+        "Blind",
+        "el jugador gironí",
+        "el jugador",
+        "jugador"
+      ],
       "avoidCombinations": [
         "Blind del Girona",
         "Blind Girona",
@@ -185,7 +224,11 @@
         "D. Blind Girona"
       ],
       "registeredNicknames": [],
-      "safeNicknames": ["Blind", "el jugador gironí", "jugador"],
+      "safeNicknames": [
+        "Blind",
+        "el jugador gironí",
+        "jugador"
+      ],
       "testedSuccessRate": 0,
       "lastTested": null,
       "totalVideos": 0,
@@ -194,7 +237,10 @@
     "Test Player": {
       "surname": "Player",
       "team": "Real Madrid",
-      "safeReferences": ["Player", "el jugador"],
+      "safeReferences": [
+        "Player",
+        "el jugador"
+      ],
       "avoidCombinations": [
         "Player del Real Madrid",
         "Player Real Madrid",
@@ -207,62 +253,154 @@
       "lastTested": null,
       "totalVideos": 0,
       "addedAt": "2025-10-12T15:25:59.170Z"
+    },
+    "Lucas Ahijado": {
+      "surname": "el defensa",
+      "team": "Oviedo",
+      "position": "DEF",
+      "number": null,
+      "safeReferences": [
+        "el defensa",
+        "el lateral",
+        "el jugador",
+        "el defensor"
+      ],
+      "avoidCombinations": [
+        "Ahijado del Oviedo",
+        "Ahijado Oviedo",
+        "Lucas Ahijado del Oviedo",
+        "Lucas Ahijado Oviedo"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [
+        "el defensa",
+        "el lateral",
+        "el defensor"
+      ],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-13T06:06:00.000Z"
+    },
+    "Lewandowski": {
+      "surname": "Lewandowski",
+      "team": "Barcelona",
+      "position": "Delantero",
+      "number": null,
+      "safeReferences": [
+        "Lewandowski",
+        "el jugador azulgrana",
+        "el jugador",
+        "jugador"
+      ],
+      "avoidCombinations": [
+        "Lewandowski del Barcelona",
+        "Lewandowski Barcelona",
+        "Lewandowski del Barcelona",
+        "Lewandowski Barcelona"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [
+        "Lewandowski",
+        "el jugador azulgrana",
+        "jugador"
+      ],
+      "testedSuccessRate": 0,
+      "lastTested": null,
+      "totalVideos": 0,
+      "addedAt": "2025-10-14T05:11:59.625Z"
     }
   },
   "teams": {
     "Celta de Vigo": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-03T05:05:32.053Z"
     },
     "Espanyol": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-03T05:11:21.388Z"
     },
     "Valencia": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-03T13:34:09.585Z"
     },
     "Real Madrid": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-04T09:15:46.235Z"
     },
     "Athletic Club": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-04T16:10:30.019Z"
     },
     "Barcelona": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-04T16:15:24.309Z"
     },
     "Valencia CF": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-10T18:48:30.065Z"
     },
     "Girona": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-11T15:41:05.641Z"
     },
     "FC Barcelona": {
-      "safeReferences": ["el equipo", "el club"],
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
       "registeredNicknames": [],
       "safeNicknames": [],
       "addedAt": "2025-10-12T16:56:29.628Z"
+    },
+    "Oviedo": {
+      "safeReferences": [
+        "el equipo",
+        "el club"
+      ],
+      "registeredNicknames": [],
+      "safeNicknames": [],
+      "addedAt": "2025-10-13T06:06:00.000Z"
     }
   }
 }

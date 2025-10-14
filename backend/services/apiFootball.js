@@ -1342,6 +1342,72 @@ class ApiFootballClient {
         return aggregated;
     }
 
+    /**
+     * Obtener stats de jugadores para sistema de outliers
+     *
+     * @param {Array<string>} playerNames - Array de nombres de jugadores mencionados
+     * @returns {Object} Stats agregadas de los jugadores encontrados
+     */
+    async getPlayerStatsForOutlier(playerNames) {
+        try {
+            logger.info(`[Outliers] Enriqueciendo con API-Sports: ${playerNames.length} jugadores`);
+
+            const playersData = [];
+
+            // Buscar cada jugador por nombre
+            for (const playerName of playerNames) {
+                try {
+                    // Buscar jugador por nombre en La Liga actual
+                    const searchResult = await this.makeRequest('/players', {
+                        league: this.LEAGUES.LA_LIGA,
+                        season: this.LEAGUES.CURRENT_SEASON,
+                        search: playerName
+                    });
+
+                    if (searchResult.success && searchResult.data && searchResult.data.length > 0) {
+                        const playerInfo = searchResult.data[0];
+                        const stats = playerInfo.statistics?.[0];
+
+                        if (stats) {
+                            playersData.push({
+                                name: playerInfo.player.name,
+                                team: stats.team.name,
+                                position: stats.games.position,
+                                stats: {
+                                    appearances: stats.games.appearences,
+                                    minutes: stats.games.minutes,
+                                    goals: stats.goals.total || 0,
+                                    assists: stats.goals.assists || 0,
+                                    rating: stats.games.rating || 'N/A'
+                                }
+                            });
+
+                            logger.info(`[Outliers] ✅ ${playerName} encontrado en API-Sports`);
+                        }
+                    } else {
+                        logger.warn(`[Outliers] ⚠️ ${playerName} no encontrado en API-Sports`);
+                    }
+                } catch (error) {
+                    logger.error(`[Outliers] Error buscando ${playerName}:`, error.message);
+                }
+            }
+
+            return {
+                success: true,
+                players: playersData,
+                totalFound: playersData.length
+            };
+        } catch (error) {
+            logger.error('[Outliers] Error obteniendo stats para outliers:', error.message);
+            return {
+                success: false,
+                error: error.message,
+                players: [],
+                totalFound: 0
+            };
+        }
+    }
+
     // Utilidad para pausas
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));

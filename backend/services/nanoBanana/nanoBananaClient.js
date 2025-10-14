@@ -276,7 +276,7 @@ class NanoBananaClient {
                         `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
                     );
 
-                    const stateNormalized = state?.toLowerCase();
+                    const stateNormalized = state?.toString().trim().toLowerCase();
 
                     // ESTADOS DE ÉXITO
                     if (
@@ -559,7 +559,7 @@ class NanoBananaClient {
                     `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
                 );
 
-                const stateNormalized = state?.toLowerCase();
+                const stateNormalized = state?.toString().trim().toLowerCase();
 
                 // ESTADOS DE ÉXITO
                 if (
@@ -852,7 +852,7 @@ class NanoBananaClient {
                     `[NanoBananaClient] Intento ${attempts}/${maxAttempts}: State = ${state}`
                 );
 
-                const stateNormalized = state?.toLowerCase();
+                const stateNormalized = state?.toString().trim().toLowerCase();
 
                 // ESTADOS DE ÉXITO
                 if (

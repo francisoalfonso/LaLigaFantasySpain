@@ -1,0 +1,117 @@
+{
+  "id": "d.-blind-v1760335656146",
+  "version": 3,
+  "timestamp": "2025-10-13T06:07:36.146Z",
+  "playerData": {
+    "playerName": "D. Blind",
+    "team": "Girona",
+    "price": 4.54,
+    "stats": {
+      "goals": 0,
+      "assists": 0,
+      "rating": "6.48"
+    },
+    "ratio": 1.74,
+    "fantasyPoints": 7.91,
+    "position": "DEF"
+  },
+  "testMetadata": {
+    "testDate": "2025-10-13T06:07:36.146Z",
+    "testNumber": 52,
+    "fixesApplied": [
+      "nano-banana-contextual",
+      "supabase-frame-storage",
+      "frame-to-frame-continuity",
+      "player-card-overlay",
+      "viral-subtitles-karaoke"
+    ],
+    "testPurpose": "PRODUCCIÓN: Primera línea de contenido chollo completa desde identificación hasta assets listos para Instagram. Test del workflow completo E2E automatizado.",
+    "feedback": {
+      "whatWorks": [],
+      "whatFails": [
+        {
+          "description": "Faltan los datos reales de D. Blind en la card",
+          "severity": "critical"
+        },
+        {
+          "description": "Aparecen pelotas de rugbi en las pantallas. Tenemos que reforzar en VEO que estamos hablando de \"soccer\"",
+          "severity": "major"
+        }
+      ],
+      "severity": {
+        "critical": 1,
+        "major": 1,
+        "minor": 0
+      },
+      "reviewedBy": "Usuario",
+      "reviewDate": "2025-10-13T07:40:11.848Z",
+      "reviewNotes": ""
+    },
+    "checklist": {},
+    "qualityScore": {
+      "videoQuality": null,
+      "audioQuality": null,
+      "viralPotential": null,
+      "technicalScore": null,
+      "overallScore": 7.5,
+      "autoCalculated": true,
+      "calculationMethod": "Base 10.0 - (1 critical × 2.0) - (1 major × 0.5) - (0 minor × 0.2) + (0 works × 0.3)"
+    },
+    "comparisonWith": [
+      "d.-blind-v1760203806235",
+      "pere-milla-v1760210731693"
+    ],
+    "improvements": [
+      "Workflow 4 fases completamente automatizado",
+      "Captions virales generados automáticamente con HookCaptionOptimizer",
+      "VALUE RATIO strategy validada en BargainAnalyzer"
+    ],
+    "issues": []
+  },
+  "veo3Config": {
+    "anaImageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-03.png",
+    "seed": 30001,
+    "enhanced": true,
+    "modelVersion": "veo3_fast",
+    "segmentCount": 3,
+    "totalDuration": 24,
+    "workflow": "nano-banana-contextual",
+    "nanoBananaImages": 3,
+    "enhancements": {
+      "playerCard": true,
+      "viralSubtitles": true,
+      "blackFlashes": false
+    }
+  },
+  "sessionId": "nanoBanana_1760335656146",
+  "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760340544198-with-captions.mp4",
+  "previewData": {
+    "videoUrl": "http://localhost:3000/output/veo3/video-with-card-1760340544198-with-captions.mp4",
+    "sessionId": "nanoBanana_1760335656146",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146"
+  },
+  "caption": "🔥 CHOLLO: D. Blind (Girona) a solo €4.54M\n\n💰 Ratio 1.74x - 0 goles, 0 asists\n\n👇 Comenta",
+  "hook": "Nadie habla de D. Blind... €4.54M y es un CHOLLO brutal",
+  "hashtags": "#FantasyLaLiga #Chollo #DBlind #Girona #DefensaLaLiga #FantasyFootball #LaLiga #LaLiga2526",
+  "notes": "Test #52 - Primera línea de producción completa. D. Blind elegido por BargainAnalyzer con VALUE RATIO strategy (1.74x mejor que Lucas Ahijado 1.58x). Hook score 75/100, Caption score 82/100. Workflow E2E: 71 minutos totales.",
+  "viralScore": null,
+  "isRealVideo": true,
+  "metadata": {
+    "createdAt": "2025-10-13T06:07:36.146Z",
+    "updatedAt": "2025-10-13T07:40:11.848Z",
+    "userId": "claude-code",
+    "status": "approved",
+    "costs": {
+      "nanoBanana": 0.06,
+      "veo3": 0.9,
+      "total": 0.96
+    },
+    "performance": {
+      "prepareSession": "120s (Script + Nano Banana x3)",
+      "generateSegments": "4080s (segmento 1: 1403s, segmento 2: 1383s, segmento 3: 1294s)",
+      "finalizeSession": "21.8s (concatenación)",
+      "addEnhancements": "54.8s (player card + subtítulos)",
+      "totalWorkflow": "4276.6s (~71.3 min)"
+    }
+  }
+}

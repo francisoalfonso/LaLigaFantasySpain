@@ -1,0 +1,130 @@
+{
+  "sessionId": "nanoBanana_1760427897900",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760427897900",
+  "status": "prepared",
+  "segmentsCompleted": 0,
+  "segmentsTotal": 3,
+  "playerName": "delantero polaco",
+  "contentType": "outlier_response",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "presenter": {
+    "name": "Ana Martínez",
+    "seed": 30001,
+    "imageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-03.png",
+    "characterBible": "A 32-year-old Spanish sports analyst with long blonde wavy hair, green-hazel eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Natural smile, confident posture, warm and approachable professional broadcaster energy",
+    "model": "veo3_fast",
+    "aspectRatio": "9:16",
+    "waterMark": "Fantasy La Liga Pro"
+  },
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "emotion": "mysterious",
+        "dialogue": "Misters, acabo de ver el video de Fantasy Football Pro España sobre el delantero polaco... y hay datos cruciales que NO os están contando. ¡Escuchad esto!",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "emotion": "confident",
+        "dialogue": "Los números reales son: 5 goles en 5 jornadas, 1 asistencia, y un rating de 6.8... nada comparado con lo que están vendiendo por ahí. ¡Reflexionad!",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "emotion": "urgent",
+        "dialogue": "Ahora vosotros decidís: confiar en el hype de un 11M o en datos reales. Yo ya os lo he dicho. ¡No os quedéis atrás!",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "emotion": "mysterious",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg1-intro-1760427959850.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA0Mjc5NTk4NTAucG5nIiwiaWF0IjoxNzYwNDI3OTYzLCJleHAiOjE3NjA1MTQzNjN9._lAIIDP2X8at9UExWcV1WBUWAfcUvs5fU8yLemAOrlQ",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "emotion": "confident",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg2-middle-1760428002424.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNDI4MDAyNDI0LnBuZyIsImlhdCI6MTc2MDQyODAwMywiZXhwIjoxNzYwNTE0NDAzfQ.v9Yd73KxYV5tL9Py_r8fbqLKEqqU-u2aMESHTnRSOGw",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "emotion": "urgent",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg3-outro-1760428138708.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA0MjgxMzg3MDgucG5nIiwiaWF0IjoxNzYwNDI4MTQwLCJleHAiOjE3NjA1MTQ1NDB9.K06GVRlj_PRfP_8wqH5nAj0aQtip4uu_RHbCs_xwgUs",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "emotion": "mysterious",
+      "dialogue": "Misters, acabo de ver el video de Fantasy Football Pro España sobre el delantero polaco... y hay datos cruciales que NO os están contando. ¡Escuchad esto!",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg1-intro-1760427959850.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA0Mjc5NTk4NTAucG5nIiwiaWF0IjoxNzYwNDI3OTYzLCJleHAiOjE3NjA1MTQzNjN9._lAIIDP2X8at9UExWcV1WBUWAfcUvs5fU8yLemAOrlQ",
+        "visualContext": "framed from shoulders up, intimate perspective",
+        "emotion": "mysterious"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "emotion": "confident",
+      "dialogue": "Los números reales son: 5 goles en 5 jornadas, 1 asistencia, y un rating de 6.8... nada comparado con lo que están vendiendo por ahí. ¡Reflexionad!",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg2-middle-1760428002424.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNDI4MDAyNDI0LnBuZyIsImlhdCI6MTc2MDQyODAwMywiZXhwIjoxNzYwNTE0NDAzfQ.v9Yd73KxYV5tL9Py_r8fbqLKEqqU-u2aMESHTnRSOGw",
+        "visualContext": "framed from waist up, slightly closer perspective",
+        "emotion": "confident"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "emotion": "urgent",
+      "dialogue": "Ahora vosotros decidís: confiar en el hype de un 11M o en datos reales. Yo ya os lo he dicho. ¡No os quedéis atrás!",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg3-outro-1760428138708.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA0MjgxMzg3MDgucG5nIiwiaWF0IjoxNzYwNDI4MTQwLCJleHAiOjE3NjA1MTQ1NDB9.K06GVRlj_PRfP_8wqH5nAj0aQtip4uu_RHbCs_xwgUs",
+        "visualContext": "framed from chest up, balanced intimate shot",
+        "emotion": "urgent"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    }
+  ],
+  "preparedAt": "2025-10-14T07:49:00.528Z",
+  "lastUpdate": "2025-10-14T07:49:00.528Z"
+}

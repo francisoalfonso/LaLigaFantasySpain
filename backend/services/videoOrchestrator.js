@@ -319,14 +319,55 @@ class VideoOrchestrator {
     async _executeInstagramJob(job) {
         logger.info('[VideoOrchestrator] Ejecutando trabajo Instagram', { jobId: job.id });
 
-        // TODO: Integrar con Instagram Graph API
-        await this._sleep(2000);
+        try {
+            const instagramPublisher = require('./instagramPublisher');
 
-        return {
-            instagram_id: `post_${Date.now()}`,
-            url: `https://instagram.com/p/${Date.now()}`,
-            cost: 0
-        };
+            // Verificar que está configurado
+            if (!instagramPublisher.isConfigured()) {
+                throw new Error('InstagramPublisher no está configurado. Ver docs/INSTAGRAM_SETUP_CREDENTIALS.md');
+            }
+
+            // Obtener configuración del trabajo
+            const { videoUrl, caption, coverUrl, locationId, shareToFeed } = job.job_config;
+
+            if (!videoUrl) {
+                throw new Error('job_config debe incluir videoUrl');
+            }
+
+            if (!caption) {
+                throw new Error('job_config debe incluir caption');
+            }
+
+            // Publicar Reel
+            const result = await instagramPublisher.publishReel({
+                videoUrl,
+                caption,
+                coverUrl,
+                locationId,
+                shareToFeed: shareToFeed !== false // default true
+            });
+
+            if (!result.success) {
+                throw new Error(result.error || 'Error publicando en Instagram');
+            }
+
+            logger.info('✅ [VideoOrchestrator] Reel publicado en Instagram', {
+                postId: result.postId,
+                permalink: result.permalink
+            });
+
+            return {
+                instagram_id: result.postId,
+                url: result.permalink,
+                cost: 0, // Instagram API es gratis
+                publishedAt: result.publishedAt
+            };
+        } catch (error) {
+            logger.error('❌ [VideoOrchestrator] Error en _executeInstagramJob', {
+                error: error.message
+            });
+            throw error;
+        }
     }
 
     /**

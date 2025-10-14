@@ -206,7 +206,8 @@ router.post('/generate-script/:videoId', limiter, async (req, res) => {
                 players: outlier.mentioned_players
             });
 
-            const apiFootball = require('../services/apiFootball');
+            const ApiFootballClient = require('../services/apiFootball');
+            const apiFootball = new ApiFootballClient();
             const enrichmentResult = await apiFootball.getPlayerStatsForOutlier(
                 outlier.mentioned_players
             );

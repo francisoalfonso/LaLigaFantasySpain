@@ -279,10 +279,16 @@ async function main() {
             {
                 sessionId: sessionId,
                 playerData: {
+                    // ✅ Datos completos del jugador (incluye id, photo, team)
+                    id: topBargain.id,
                     name: topBargain.name,
+                    photo: topBargain.photo,
+                    team: topBargain.team.name,
+                    teamLogo: topBargain.team.logo,
+                    position: topBargain.position,
                     stats: {
+                        games: topBargain.stats.games || 0,
                         goals: topBargain.stats.goals || 0,
-                        assists: topBargain.stats.assists || 0,
                         rating: topBargain.stats.rating
                     }
                 },

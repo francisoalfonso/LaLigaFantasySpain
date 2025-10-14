@@ -3,6 +3,7 @@ const express = require('express');
 const logger = require('../utils/logger');
 const ViralVideoBuilder = require('../services/veo3/viralVideoBuilder');
 const versionManager = require('../services/instagramVersionManager');
+const instagramPublisher = require('../services/instagramPublisher');
 const axios = require('axios');
 const router = express.Router();
 
@@ -21,7 +22,25 @@ const INSTAGRAM_CONFIG = {
 const scheduledContent = [];
 const contentQueue = [];
 
-// GET /api/instagram/test - Test conexión Instagram Business API
+// GET /api/instagram/health - Health check de Instagram Graph API
+router.get('/health', async (req, res) => {
+    try {
+        logger.info('🔄 [Instagram] Health check...');
+
+        const healthResult = await instagramPublisher.healthCheck();
+
+        res.json(healthResult);
+    } catch (error) {
+        logger.error('❌ [Instagram] Health check error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Error ejecutando health check',
+            error: error.message
+        });
+    }
+});
+
+// GET /api/instagram/test - Test conexión Instagram Business API (legacy, usar /health)
 router.get('/test', async (req, res) => {
     try {
         logger.info('🔄 Testing Instagram Business API connection...');
@@ -329,7 +348,62 @@ router.post('/preview-viral', async (req, res) => {
     }
 });
 
-// POST /api/instagram/publish-viral - Publicar video viral a Instagram
+// POST /api/instagram/publish - Publicar Reel directamente a Instagram
+router.post('/publish', async (req, res) => {
+    try {
+        const { videoUrl, caption, coverUrl, locationId, shareToFeed } = req.body;
+
+        if (!videoUrl || !caption) {
+            return res.status(400).json({
+                success: false,
+                message: 'videoUrl y caption son requeridos'
+            });
+        }
+
+        logger.info('📤 [Instagram] Publicando Reel...', {
+            videoUrl,
+            captionLength: caption.length
+        });
+
+        // Publicar directamente con Instagram Graph API
+        const result = await instagramPublisher.publishReel({
+            videoUrl,
+            caption,
+            coverUrl,
+            locationId,
+            shareToFeed
+        });
+
+        if (!result.success) {
+            return res.status(500).json({
+                success: false,
+                message: 'Error publicando en Instagram',
+                error: result.error,
+                details: result.details
+            });
+        }
+
+        logger.info('🎉 [Instagram] ¡Reel publicado!', {
+            postId: result.postId,
+            permalink: result.permalink
+        });
+
+        res.json({
+            success: true,
+            message: 'Reel publicado exitosamente en Instagram',
+            data: result
+        });
+    } catch (error) {
+        logger.error('❌ [Instagram] Error en /publish:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error publicando Reel',
+            error: error.message
+        });
+    }
+});
+
+// POST /api/instagram/publish-viral - Publicar video viral a Instagram (staging)
 router.post('/publish-viral', async (req, res) => {
     try {
         const { previewData, scheduleFor } = req.body;

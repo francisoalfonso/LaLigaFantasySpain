@@ -95,17 +95,20 @@ class UnifiedScriptGenerator {
      * @param {string} contentType - Tipo de contenido (chollo, analisis, breaking)
      * @param {object} playerData - Datos del jugador
      * @param {object} options - Opciones adicionales
+     * @param {string} options.platform - Plataforma objetivo ('instagram' | 'youtube') - DEFAULT: 'instagram'
+     * @param {object} options.viralData - Datos virales adicionales
      * @returns {object} - Guión completo con 4 segmentos cohesivos
      */
     generateUnifiedScript(contentType, playerData, options = {}) {
-        const { viralData = {} } = options;
+        const { viralData = {}, platform = 'instagram' } = options;
 
         logger.info(`[UnifiedScriptGenerator] Generando guión unificado: ${contentType}`);
         logger.info(`[UnifiedScriptGenerator] Jugador: ${playerData.name}`);
+        logger.info(`[UnifiedScriptGenerator] 🎯 Plataforma: ${platform.toUpperCase()}`);
 
-        // Obtener arco narrativo y plantilla
+        // Obtener arco narrativo y plantilla optimizada por plataforma
         const arc = this.narrativeArcs[contentType] || this.narrativeArcs.chollo;
-        const template = this.scriptTemplates[contentType] || this.scriptTemplates.chollo;
+        const template = this._getTemplateForPlatform(contentType, platform);
 
         // Generar guión completo con datos reales
         const fullScript = this._buildFullScript(template, playerData, viralData);
@@ -129,12 +132,69 @@ class UnifiedScriptGenerator {
             metadata: {
                 contentType,
                 playerName: playerData.name,
+                platform: platform, // ✅ Incluir plataforma en metadata
                 totalDuration: arc.totalDuration,
                 emotionalJourney: arc.emotionalJourney,
                 cohesionScore: validation.score,
                 generatedAt: new Date().toISOString()
             }
         };
+    }
+
+    /**
+     * 🎯 Obtener template optimizado según plataforma
+     * @param {string} contentType - Tipo de contenido
+     * @param {string} platform - 'instagram' | 'youtube'
+     * @returns {object} Template de guión optimizado
+     * @private
+     */
+    _getTemplateForPlatform(contentType, platform) {
+        const baseTemplate = this.scriptTemplates[contentType] || this.scriptTemplates.chollo;
+
+        // Si es Instagram, usar template base (ya optimizado para 24s)
+        if (platform === 'instagram') {
+            return baseTemplate;
+        }
+
+        // Si es YouTube, adaptar template para 30-45s (más relajado, educativo)
+        if (platform === 'youtube') {
+            return this._adaptTemplateForYouTube(baseTemplate, contentType);
+        }
+
+        return baseTemplate;
+    }
+
+    /**
+     * 🎬 Adaptar template para YouTube (más largo, educativo, CTAs específicos)
+     * @private
+     */
+    _adaptTemplateForYouTube(instagramTemplate, contentType) {
+        if (contentType === 'chollo') {
+            return {
+                // SEGMENTO 1: Hook más relajado, contexto ampliado
+                segment1: {
+                    hook: 'Misters, he encontrado un chollo brutal en Fantasy...', // Menos urgente
+                    revelation: '{{player}} está infravalorado en el mercado.',
+                    context: 'Muy pocos managers lo tienen en su equipo.',
+                    promise: 'Os voy a explicar por qué es una ganga.' // YouTube permite más detalle
+                },
+                // SEGMENTO 2: Datos más detallados
+                segment2: {
+                    impact: 'Mirad los números, {{greetingMiddle}}.',
+                    proof: 'Tiene {{goals}}, {{assists}}, media de {{valueRatio}} puntos por partido.',
+                    evidence: 'Comparado con otros en su posición, está muy por debajo de precio.'
+                },
+                // SEGMENTO 3: CTA YouTube-específico
+                segment3: {
+                    urgency: 'Antes de que suba, es un momento perfecto.',
+                    scarcity: 'Titular del {{team}}, precio de suplente.',
+                    cta: 'Dale like si lo vas a fichar, y suscríbete para más chollos.' // CTA YouTube
+                }
+            };
+        }
+
+        // Si no es chollo, devolver template base
+        return instagramTemplate;
     }
 
     /**

@@ -6,13 +6,12 @@ const path = require('path');
 /**
  * Subir frames extraídos a Supabase Storage para usar como referencia en VEO3
  *
- * Usa el bucket 'ana-images' existente para almacenar frames temporales
- * que sirven como continuidad visual entre segmentos de video.
+ * Usa el bucket 'flp' con subdirectorios por presenter (ana/carlos)
+ * para almacenar frames temporales de continuidad visual entre segmentos.
  */
 class SupabaseFrameUploader {
     constructor() {
-        this.bucketName = 'ana-images'; // Bucket existente
-        this.framePrefix = 'video-frames/'; // Subdirectorio para frames
+        this.bucketName = 'flp'; // Bucket unificado para todos los presenters
     }
 
     /**
@@ -20,9 +19,14 @@ class SupabaseFrameUploader {
      * @param {string} localFramePath - Ruta local del frame extraído
      * @param {string} segmentName - Nombre descriptivo (ej: 'seg1-end', 'seg2-end')
      * @param {object} options - Opciones de upload
+     * @param {string} options.presenter - Presenter name ('ana' | 'carlos') para subdirectorio
+     * @param {boolean} options.useSignedUrl - Generar signed URL (default: true)
      * @returns {Promise<string>} - URL pública o signed URL del frame en Supabase
      */
     async uploadFrame(localFramePath, segmentName = 'frame', options = {}) {
+        // Determinar presenter y subdirectorio
+        const presenter = (options.presenter || 'ana').toLowerCase();
+        const framePrefix = `${presenter}/video-frames/`;
         try {
             logger.info(`[SupabaseFrameUploader] Subiendo frame: ${localFramePath}`);
 
@@ -31,7 +35,7 @@ class SupabaseFrameUploader {
             const fileExt = path.extname(localFramePath);
 
             // Nombre único con timestamp
-            const fileName = `${this.framePrefix}${segmentName}-${Date.now()}${fileExt}`;
+            const fileName = `${framePrefix}${segmentName}-${Date.now()}${fileExt}`;
 
             // Subir a Supabase Storage
             const { error } = await supabaseAdmin.storage
@@ -92,15 +96,17 @@ class SupabaseFrameUploader {
     /**
      * Limpiar frames antiguos (opcional, para mantenimiento)
      * Elimina frames con más de 24 horas
+     * @param {string} presenter - Presenter name ('ana' | 'carlos')
      */
-    async cleanupOldFrames() {
+    async cleanupOldFrames(presenter = 'ana') {
         try {
-            logger.info('[SupabaseFrameUploader] Limpiando frames antiguos...');
+            const framePrefix = `${presenter.toLowerCase()}/video-frames/`;
+            logger.info(`[SupabaseFrameUploader] Limpiando frames antiguos de ${presenter}...`);
 
             // Listar todos los frames
             const { data: files, error } = await supabaseAdmin.storage
                 .from(this.bucketName)
-                .list(this.framePrefix);
+                .list(framePrefix);
 
             if (error) {
                 throw new Error(`Error listando frames: ${error.message}`);
@@ -119,7 +125,7 @@ class SupabaseFrameUploader {
             }
 
             // Eliminar frames antiguos
-            const filePaths = oldFrames.map(file => `${this.framePrefix}${file.name}`);
+            const filePaths = oldFrames.map(file => `${framePrefix}${file.name}`);
             const { error: deleteError } = await supabaseAdmin.storage
                 .from(this.bucketName)
                 .remove(filePaths);

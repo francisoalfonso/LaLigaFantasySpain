@@ -11,17 +11,21 @@ code in this repository.
 Liga Fantasy Football using VEO3 video generation, API-Sports data, and n8n
 workflows.
 
-### Mandatory Session Start (3 minutes)
+### Mandatory Session Start (4 minutes)
 
 ```bash
 1. Read .claude/rules/01-CRITICAL-RULES.md          # Unbreakable rules (1 min)
 2. Read .claude/status/CURRENT-SPRINT.md            # Current state (1 min)
 3. Read .claude/status/PRIORITIES.md                # P0/P1/P2 tasks (1 min)
-4. Health check: npm run dev && curl http://localhost:3000/api/test/ping
+4. 🚨 Read PENDING_FIX_OUTLIERS_PRESENTERS.md       # CRITICAL P0 - Bug activo (1 min)
+5. Health check: npm run dev && curl http://localhost:3000/api/test/ping
 ```
 
 **Why**: Without this context, you'll duplicate work or violate critical system
 constraints.
+
+**⚠️ CRITICAL**: Step 4 contiene un P0 activo sobre selección de presentadores en flujo outliers.
+Debe revisarse ANTES de trabajar en cualquier tarea relacionada con VEO3/Nano Banana/presentadores.
 
 **Then**: Work on P0 tasks from PRIORITIES.md. Update CURRENT-SPRINT.md when
 done.
@@ -73,31 +77,43 @@ done.
 ## 📋 Essential Commands
 
 ```bash
-# Most Used (Daily)
-npm run dev                                    # Start server with auto-reload
+# Development
+npm run dev                                    # Start server with auto-reload (PORT 3000)
 curl http://localhost:3000/api/test/ping      # Server health check
-curl http://localhost:3000/api/veo3/health    # VEO3 system health
 
-# VEO3 Video Generation
-npm run veo3:generate-ana                      # Generate Ana video (interactive)
-npm run veo3:test-retry-v3                     # Test optimized system (recommended)
+# VEO3 Video Generation (3-Phase System) ⭐ RECOMMENDED
+npm run veo3:test-phased                       # E2E test of 3-phase workflow
+npm run veo3:e2e-chollo                        # Complete chollo video generation
+npm run veo3:test-nano-banana                  # Test Nano Banana integration
 npm run veo3:monitor                           # Monitor active generation
+
+# VEO3 Legacy (Single-Phase)
+npm run veo3:generate-ana                      # Generate Ana video (interactive)
+npm run veo3:test-retry-v3                     # Test with retry system
 
 # Database
 npm run db:init                                # Initialize/reset Supabase schema
 npm run db:test                                # Database connectivity test
+npm run db:verify-competitive                  # Verify competitive analysis schema
 
 # Quality & Testing
 npm run quality                                # Lint + format + test (all checks)
-npm test                                       # Jest tests
+npm test                                       # Jest tests only
 npm run lint:fix                               # Auto-fix ESLint issues
 
-# Instagram & Social Media
+# Content & Instagram
 npm run instagram:test-e2e                     # End-to-end Instagram workflow
-npm run sync:player-photos                     # Sync player photos from API
+npm run sync:player-photos                     # Sync player photos from API-Sports
+npm run veo3:test-carlos                       # Test player stats video
 
-# Less Frequent
-npm run veo3:test-google-vs-kie                # Compare VEO3 providers
+# Competitive YouTube Analyzer (NEW - Oct 2025)
+# (No dedicated npm scripts - use API endpoints via curl or frontend)
+
+# Session Management
+npm run session-close                          # Save session + commit changes
+npm run auto-save                              # Quick save without commit
+
+# Utilities
 npm run n8n:check-versions                     # Check n8n workflow versions
 npm run db:keep-alive                          # Keep Supabase connection alive
 ```
@@ -129,62 +145,64 @@ n8n Workflows (scheduled) → Instagram Graph API (publish)
 
 ### VEO3 3-Phase Architecture (NEW - Oct 2025) ⭐ **MOST IMPORTANT**
 
-**Problem Solved**: Server crashes eliminated by splitting video generation into
-separate short HTTP requests.
+**Problem Solved**: Server timeouts eliminated by splitting 10-15 minute monolithic operations into separate short HTTP requests (2-4 min each).
 
-**Location**: `backend/services/veo3/` (22 services) + `backend/routes/veo3.js`
-(3-phase endpoints)
+**Location**: `backend/services/veo3/` (22 services) + `backend/routes/veo3.js` (lines 1772-2493)
 
-**The 3 Phases**:
+**Architecture Overview**:
 
-#### Phase 1: Preparation (`/api/veo3/prepare-session`)
+```
+Phase 1: Preparation (2-3 min)
+   ├─ Generate 3-segment script (UnifiedScriptGenerator)
+   ├─ Generate 3 contextual images (Nano Banana)
+   └─ Save progress.json (status: "prepared")
 
-- **Duration**: ~2-3 minutes
-- **Process**:
-    1. Generate 3-segment script (UnifiedScriptGenerator)
-    2. Generate 3 contextual Nano Banana images
-    3. Save to `progress.json` with `status: "prepared"`
-- **Output**: `sessionId` + script metadata + image URLs
-- **Cost**: ~$0.06 (Nano Banana only)
+Phase 2: Individual Generation (3-4 min × 3)
+   ├─ Generate segment 0 (intro)
+   ├─ Generate segment 1 (middle)
+   └─ Generate segment 2 (outro)
 
-#### Phase 2: Individual Generation (`/api/veo3/generate-segment`)
+Phase 3: Finalization (1 min)
+   ├─ Concatenate 3 videos (FFmpeg)
+   └─ Add logo outro
+```
 
-- **Duration**: ~3-4 minutes per segment
-- **Process**: Generate ONE VEO3 video using contextual image
-- **Call 3 times**: Once per segment (0, 1, 2)
-- **Advantage**: Short sessions, no server timeouts, retriable
-- **Cost**: ~$0.30 per segment
+**Key Endpoints**:
 
-#### Phase 3: Finalization (`/api/veo3/finalize-session`)
+- `POST /api/veo3/prepare-session` - Phase 1: Script + images
+- `POST /api/veo3/generate-segment` - Phase 2: Generate 1 segment (call 3x)
+- `POST /api/veo3/finalize-session` - Phase 3: Concatenate + logo
 
-- **Duration**: ~1 minute
-- **Process**: Concatenate 3 videos + add logo outro
-- **Output**: Final video + complete metadata
-- **Cost**: $0 (local FFmpeg)
+**Advantages**:
 
-**Why 3 Phases**:
+1. ✅ **No timeouts** - Each request <5 min (vs 15 min monolithic)
+2. ✅ **Retry individual segments** - Don't regenerate entire video on failure
+3. ✅ **Visible progress** - `progress.json` updates incrementally
+4. ✅ **Persistent state** - Survives server restarts
+5. ✅ **Parallelizable** - Future: generate 3 segments concurrently
 
-- ✅ No server timeouts (each phase <5 min)
-- ✅ Visible progress (`progress.json` updates)
-- ✅ Retry individual segments without regenerating all
-- ✅ Persistent state survives server restarts
+**Cost per video**: ~$0.96 ($0.06 Nano Banana + $0.90 VEO3 for 3 segments)
 
-**Test Command**: `npm run veo3:test-phased`
+**Test Commands**:
+```bash
+npm run veo3:test-phased        # E2E test of 3-phase workflow
+npm run veo3:e2e-chollo         # Complete chollo video generation
+```
 
 ### VEO3 Core Services
 
+**Location**: `backend/services/veo3/` (22 services total)
+
 **Core Services**:
 
-- `veo3Client.js` - KIE.ai API client with Ana character consistency (120s
-  timeout)
-- `promptBuilder.js` - Viral framework + **automatic player name removal**
-  (bypasses Error 422)
+- `veo3Client.js` - KIE.ai API client with Ana character consistency (120s timeout)
+- `promptBuilder.js` - Viral framework + **automatic player name removal** (bypasses Error 422)
 - `unifiedScriptGenerator.js` - Cohesive narrative arcs across segments
-- `viralVideoBuilder.js` - Multi-segment generation with frame-to-frame
-  transitions
+- `viralVideoBuilder.js` - Multi-segment generation with frame-to-frame transitions
 - `videoConcatenator.js` - FFmpeg concatenation + logo outro
 - `viralCaptionsGenerator.js` - Automatic viral Instagram/TikTok captions
 - `playerCardOverlay.js` - Player stats overlay (seconds 3-6)
+- `nanoBananaVeo3Integrator.js` - Nano Banana integration coordinator
 
 **Intelligent Systems**:
 
@@ -253,34 +271,67 @@ appearance would be inconsistent across segments.
 
 ### Competitive YouTube Analyzer (NEW - Oct 2025)
 
-**Location**: `backend/services/contentAnalysis/` (11 services)
+**Location**: `backend/services/contentAnalysis/` (14 services)
 
-**Purpose**: Automated system to analyze competitor YouTube channels for content
-ideas and viral patterns.
+**Purpose**: Automated intelligence system that monitors competitor YouTube channels to identify trending players, topics, and viral content patterns for Fantasy La Liga.
+
+**Architecture**:
+
+```
+Onboarding → Monitor → Download → Transcribe → Analyze → Recommend
+    ↓           ↓          ↓          ↓           ↓          ↓
+ Channels   New Videos   Audio    Whisper AI   GPT-5 Mini  Editorial
+ Database   Detection    Extract               Content     Planning
+                                               Insights
+
+Outlier Detection (Parallel System)
+    ↓
+ YouTube Search → Filter → Analyze → Generate Scripts
+    ↓                ↓          ↓            ↓
+ Keywords     Performance   AI Analysis   VEO3 Ready
+```
 
 **Key Services**:
 
-- `youtubeMonitor.js` - Tracks competitor channels
-- `transcriptionService.js` - Whisper API transcription
-- `contentAnalyzer.js` - AI-powered content analysis
-- `recommendationEngine.js` - Generates content recommendations
-- `automaticVideoProcessor.js` - Auto-process queue
-- `viralInsightsIntegration.js` - Extract viral patterns
+- `competitiveOnboardingService.js` - Automated channel onboarding with first video analysis
+- `youtubeMonitor.js` - Tracks competitor channels for new uploads
+- `transcriptionService.js` - Whisper API transcription (~$0.01/video)
+- `contentAnalyzer.js` - OpenAI GPT-5 Mini content analysis
+- `recommendationEngine.js` - Generates actionable content recommendations
+- `viralInsightsIntegration.js` - Extracts viral patterns and hooks
+- `automaticVideoProcessor.js` - Background queue processing
+- `youtubeOutlierDetector.js` - Detects viral videos by keyword search
+- `outlierScriptGenerator.js` - Generates VEO3 scripts from outliers
+- `outlierDetectorScheduler.js` - Automated hourly outlier detection
+- `playerNameNormalizer.js` - Normalizes player names across sources
+- `dataCatalog.js` - Centralized data catalog management
+- `contentEnrichmentEngine.js` - Enriches content with additional metadata
+- `tempCleaner.js` - Cleans temporary files (videos, audio)
 
 **How it works**:
 
-1. Monitor competitor channels (onboarding system)
-2. Download and transcribe new videos
-3. Analyze content with OpenAI GPT-5 Mini
-4. Extract players, topics, and viral hooks
-5. Generate recommendations for FLP content
+1. **Onboarding**: Add competitor channel → auto-analyze first video
+2. **Monitoring**: Poll YouTube RSS feeds for new videos (cron: every hour)
+3. **Processing**: Download audio → transcribe with Whisper → analyze with GPT-5
+4. **Intelligence**: Extract players mentioned, topics, viral hooks, engagement patterns
+5. **Recommendations**: Generate content ideas for Editorial Planning
+6. **Outlier Detection**: Hourly search for trending keywords → identify viral videos → generate scripts
 
-**Cost**: ~$0.01 per video (Whisper transcription)
+**Cost per video**: ~$0.01 (Whisper transcription only, GPT-5 Mini cached)
 
-**Endpoints**:
+**Key Endpoints**:
 
-- `/api/competitive/*` - Channel management
-- `/api/content-analysis/*` - Video processing
+- `POST /api/competitive/onboard` - Onboard new competitor channel
+- `GET /api/competitive/channels` - List all tracked channels
+- `POST /api/content-analysis/analyze` - Analyze specific video
+- `GET /api/content-analysis/recommendations` - Get content recommendations
+- `POST /api/outliers/detect` - Manually trigger outlier detection
+- `GET /api/outliers/recent` - Get recent outliers
+- `POST /api/outliers/generate-script` - Generate VEO3 script from outlier
+
+**Dashboards**:
+- http://localhost:3000/intel - Competitive Intelligence Dashboard
+- http://localhost:3000/planning - Editorial Planning (integrates recommendations)
 
 ### Instagram Automation Strategy
 
@@ -581,84 +632,97 @@ AEMET_API_KEY=your_key         # Weather integration
 
 ## 💰 Cost Tracking
 
-**Monthly Costs**:
-
+**Monthly Costs (Active)**:
 - API-Sports Ultra: $29/mo (75k req/day)
-- VEO3 (KIE.ai): ~$6/mo (20 videos × $0.30)
+- VEO3 (KIE.ai): ~$19/mo (20 videos × $0.96 with Nano Banana)
+  - Per video: $0.90 VEO3 (3 segments × $0.30) + $0.06 Nano Banana (3 images)
 - Supabase: $0 (free tier)
 - n8n: $0 (self-hosted)
-- ContentDrips: $39/mo (pending activation)
 
-**Total Active**: $35/mo | **Projected**: $74/mo
+**Pending**:
+- ContentDrips: $39/mo (carousel automation, pending activation)
 
----
+**Total Active**: $48/mo | **Projected with ContentDrips**: $87/mo
 
-## 🎯 TL;DR - Critical Knowledge
-
-**VEO3 Video Generation**:
-
-- Ana seed 30001 + fixed image URL (NEVER change)
-- Prompts: 30-50 words, "speaks in Spanish from Spain" (lowercase)
-- Player names: Auto-replaced with generic references ("el jugador")
-- Timeouts: ≥120s (initial), ≥45s (status)
-
-**La Liga Data**:
-
-- Season 2025-26 = ID 2025 (not 2024)
-- 20 teams (includes Levante, Elche, Oviedo)
-
-**File Creation**:
-
-- Check `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md` FIRST
-- Search existing files before creating new ones
-
-**Database**:
-
-- Update BOTH `supabase-schema.sql` AND `init-database.js`
-- Run `npm run db:init` after schema changes
-
-**Session Workflow**:
-
-1. Read `.claude/rules/01-CRITICAL-RULES.md` +
-   `.claude/status/CURRENT-SPRINT.md`
-2. Work on P0 tasks from `.claude/status/PRIORITIES.md`
-3. Update `CURRENT-SPRINT.md` when done
+**Cost Breakdown per Video**:
+- Phase 1: $0.06 (Nano Banana images only)
+- Phase 2: $0.90 (VEO3 3 segments × $0.30)
+- Phase 3: $0 (local FFmpeg concatenation)
+- **Total**: $0.96/video
 
 ---
 
-**Last Updated**: 2025-10-12 **Version**: 2.3.0 **Maintained by**: Claude Code
+## 🎯 Quick Reference - Start Here
+
+**Every Session Start (3 min)**:
+1. Read `.claude/rules/01-CRITICAL-RULES.md` (unbreakable rules)
+2. Read `.claude/status/CURRENT-SPRINT.md` (current state)
+3. Check `.claude/status/PRIORITIES.md` (P0/P1/P2 tasks)
+4. Run: `npm run dev && curl http://localhost:3000/api/test/ping`
+
+**VEO3 Critical Rules**:
+- ❌ NEVER change `ANA_CHARACTER_SEED=30001` or `ANA_IMAGE_URL`
+- ❌ NEVER use player names in prompts (auto-replaced with "el jugador", "el centrocampista")
+- ✅ ALWAYS use "speaks in Spanish from Spain" (lowercase)
+- ✅ ALWAYS use 3-phase workflow: `npm run veo3:test-phased`
+- Timeouts: ≥120s (initial), ≥45s (status polling)
+
+**La Liga Season 2025-26**:
+- API-Sports season ID: **2025** (not 2024)
+- 20 teams (new: Levante, Elche, Real Oviedo)
+- Config: `backend/config/constants.js`
+
+**Before Creating Files**:
+1. Search: `ls backend/services/ | grep -i [keyword]`
+2. Check: `docs/NORMAS_DESARROLLO_IMPRESCINDIBLES.md`
+3. MODIFY > CREATE (always prefer editing existing)
+
+**Database Changes**:
+1. Update `database/supabase-schema.sql`
+2. Update `database/init-database.js`
+3. Run: `npm run db:init`
+
+---
+
+**Last Updated**: 2025-10-14 **Version**: 2.5.0 **Maintained by**: Claude Code
 
 ## 🆕 Recent Critical Updates
 
-### Oct 12, 2025 - Architecture Documentation Updated
+### Oct 14, 2025 - CLAUDE.md Improvements
 
-- Documented 3-Phase VEO3 Architecture (critical Oct 11 update)
-- Added Nano Banana Integration explanation
-- Added Competitive YouTube Analyzer system
-- Clarified relationship between systems
+- Added Competitive YouTube Analyzer service details (14 services)
+- Updated service counts: VEO3 (22 services), contentAnalysis (14 services)
+- Added missing `nanoBananaVeo3Integrator.js` to VEO3 core services
+- Clarified outlier detection system architecture
+- Added dashboards section for competitive intelligence
 
-### Oct 10, 2025 - CLAUDE.md Streamlined
+### Oct 13, 2025 - CLAUDE.md Refinements
 
-- Reduced redundancy with `.claude/` documentation
-- Emphasized VEO3 Error 422 solution (most common issue)
-- Focused on high-level architecture vs implementation details
-- Removed generic development advice per `/init` guidelines
+- Enhanced 3-Phase VEO3 Architecture documentation with visual diagram
+- Reorganized Essential Commands with 3-phase system as primary
+- Updated cost tracking with accurate Nano Banana costs ($0.96/video)
+- Simplified TL;DR → Quick Reference with actionable steps
+- Added session management commands (session-close, auto-save)
 
-### Oct 9, 2025 - Modular .claude/ Structure
+### Oct 11, 2025 - 3-Phase VEO3 Architecture ⭐ MAJOR
 
-- Split documentation into `.claude/rules/`, `.claude/workflows/`,
-  `.claude/reference/`
-- Created `START_HERE.md` master index
-- Better separation of concerns
+- **Problem solved**: Server timeouts eliminated (15 min → 3×4 min requests)
+- Implemented Phase 1 (prepare-session), Phase 2 (generate-segment), Phase 3 (finalize-session)
+- Endpoints: `veo3.js:1772-2493` (3 new endpoints)
+- Test script: `npm run veo3:test-phased`
+- Benefits: Retriable segments, visible progress, persistent state
 
-### Oct 8, 2025 - Intelligent VEO3 Systems
+### Oct 11, 2025 - VEO3 Prompt Optimization
 
-- EmotionAnalyzer: 18 emotions, content-based detection
-- CinematicProgressionSystem: 5 progression patterns, prevents "reset" look
-- AudioAnalyzer: FFmpeg silence detection, auto-trimming
+- Dialogue length: 10 words → 40-45 words (prevents VEO3 inventing content)
+- Duration: 7s → 8s (matches playground standard)
+- Speech rate: 2.5 → 5 words/sec (natural speaking)
+- New method: `buildEnhancedNanoBananaPrompt()` in `promptBuilder.js`
 
-### Oct 6, 2025 - VEO3 Critical Fix
+### Oct 6, 2025 - VEO3 Critical Fix (100% Success Rate)
 
 - Fixed 100% failure → 100% success rate
+- Root cause: Player names blocked by KIE.ai (image rights)
+- Solution: Dictionary-based generic references ("el jugador", "el centrocampista")
 - Timeout increase: 60s → 120s (initial), 15s → 45s (status)
-- Automatic generic player references (bypasses Error 422)
+- See: `docs/VEO3_FIX_REGRESION_OCTUBRE_2025.md`

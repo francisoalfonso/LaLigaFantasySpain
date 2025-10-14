@@ -50,7 +50,7 @@ class VideoConcatenator {
             video: {
                 resolution: '1080x1920', // Resolución final (9:16)
                 framerate: 30, // FPS
-                bitrate: '2M' // Bitrate del video
+                bitrate: '5M' // Bitrate del video (5 Mbps recomendado por YouTube para 720p+)
             },
             // 🔧 FIX: Logo outro automático
             outro: {

@@ -27,7 +27,8 @@ const {
     heavyOperationsLimiter,
     apiSportsLimiter,
     imageGenerationLimiter,
-    veo3Limiter
+    veo3Limiter,
+    adaptiveRateLimiter
 } = require('./middleware/rateLimiter');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
@@ -52,6 +53,7 @@ const veo3Routes = require('./routes/veo3');
 const videosRoutes = require('./routes/videos');
 const contentPreviewRoutes = require('./routes/contentPreview');
 const youtubeShortsRoutes = require('./routes/youtubeShorts');
+const youtubeRoutes = require('./routes/youtube');
 const carouselsRoutes = require('./routes/carousels');
 const testHistoryRoutes = require('./routes/testHistory');
 const nanoBananaRoutes = require('./routes/nanoBanana');
@@ -61,11 +63,14 @@ const editorialPlanningRoutes = require('./routes/editorialPlanning');
 // ✨ NEW: Competitive YouTube Analyzer Routes
 const contentAnalysisRoutes = require('./routes/contentAnalysis');
 const competitiveChannelsRoutes = require('./routes/competitiveChannels');
+const outlierRoutes = require('./routes/outliers');
+const outlierTestRoutes = require('./routes/outliers-test');
 
 // ✨ NEW: Automation System
 const videoOrchestrator = require('./services/videoOrchestrator');
 const recommendationEngine = require('./services/contentAnalysis/recommendationEngine');
 const tempCleaner = require('./services/contentAnalysis/tempCleaner');
+const outlierScheduler = require('./services/contentAnalysis/outlierDetectorScheduler');
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -98,7 +103,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting general para toda la API
 // Aplica a todos los endpoints excepto /health y /api/info
-app.use('/api/', generalLimiter);
+// adaptiveRateLimiter desactiva rate limiting si DISABLE_RATE_LIMIT=true en desarrollo
+app.use('/api/', adaptiveRateLimiter(generalLimiter));
 
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
@@ -169,6 +175,9 @@ app.use('/api/veo3', veo3Limiter, veo3Routes);
 // YouTube Shorts - restrictivo similar a VEO3 (genera videos)
 app.use('/api/youtube-shorts', veo3Limiter, youtubeShortsRoutes);
 
+// YouTube API - para publicar videos (rate limiting general, no genera)
+app.use('/api/youtube', generalLimiter, youtubeRoutes);
+
 // Otros endpoints con rate limiting general
 app.use('/api/n8n-mcp', n8nMcpRoutes);
 app.use('/api/n8n-versions', n8nVersionsRoutes);
@@ -187,6 +196,10 @@ app.use('/api/planning', generalLimiter, editorialPlanningRoutes);
 app.use('/api/content-analysis', heavyOperationsLimiter, contentAnalysisRoutes);
 // Channel Management - rate limiting general (CRUD ligero)
 app.use('/api/competitive', generalLimiter, competitiveChannelsRoutes);
+// Outlier Detection - operaciones pesadas (búsqueda en YouTube)
+app.use('/api/outliers', heavyOperationsLimiter, outlierRoutes);
+// Outlier Testing - sin rate limiting (solo para desarrollo)
+app.use('/api/outliers', outlierTestRoutes);
 
 // Ruta principal - dashboard
 app.get('/', (req, res) => {
@@ -420,6 +433,24 @@ logger.info('⏱️  Timeouts del servidor configurados para VEO3', {
     }
 })();
 
+// Iniciar OutlierScheduler para detectar videos virales automáticamente
+(async () => {
+    try {
+        await outlierScheduler.start();
+        const stats = outlierScheduler.getStats();
+        logger.info('🔍 OutlierScheduler iniciado - Detección automática de outliers virales', {
+            interval: `${stats.config.intervalHours}h`,
+            searchHoursBack: stats.config.searchHoursBack,
+            maxResultsPerKeyword: stats.config.maxResultsPerKeyword,
+            nextRun: stats.nextRunAt
+        });
+    } catch (error) {
+        logger.error('❌ Error iniciando OutlierScheduler', {
+            error: error.message
+        });
+    }
+})();
+
 // Iniciar VideoOrchestrator para procesar cola automáticamente
 (async () => {
     try {
@@ -471,6 +502,7 @@ process.on('SIGTERM', () => {
     logger.info('🛑 Señal SIGTERM recibida - Cerrando servidor gracefully...');
     videoOrchestrator.stop();
     tempCleaner.stop();
+    outlierScheduler.stop();
     server.close(() => {
         logger.info('✅ Servidor cerrado correctamente');
         process.exit(0);
@@ -481,6 +513,7 @@ process.on('SIGINT', () => {
     logger.info('🛑 Señal SIGINT recibida - Cerrando servidor gracefully...');
     videoOrchestrator.stop();
     tempCleaner.stop();
+    outlierScheduler.stop();
     server.close(() => {
         logger.info('✅ Servidor cerrado correctamente');
         process.exit(0);

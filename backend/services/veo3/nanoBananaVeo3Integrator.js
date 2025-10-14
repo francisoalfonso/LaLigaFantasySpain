@@ -103,11 +103,13 @@ class NanoBananaVeo3Integrator {
 
                     // Subir a Supabase Storage con signed URL para VEO3
                     const segmentName = `seg${i + 1}-${nanoImage.shot}`;
+                    const presenter = options.presenter || 'ana';
                     const supabaseUrl = await supabaseFrameUploader.uploadFrame(
                         localPath,
                         segmentName,
                         {
-                            useSignedUrl: true // ✅ Usar signed URL para VEO3
+                            useSignedUrl: true, // ✅ Usar signed URL para VEO3
+                            presenter: presenter // ✅ Para subdirectorio correcto (ana/carlos)
                         }
                     );
 
@@ -222,7 +224,8 @@ class NanoBananaVeo3Integrator {
                 );
 
                 // Descargar y subir a Supabase
-                const fileName = `ana-${segment.role}-${Date.now()}.png`;
+                const presenter = options.presenter || 'ana';
+                const fileName = `${presenter}-${segment.role}-${Date.now()}.png`;
                 const localPath = await this.downloadImage(nanoImage.url, fileName);
 
                 const segmentName = `seg${i + 1}-${segment.role}`;
@@ -230,7 +233,8 @@ class NanoBananaVeo3Integrator {
                     localPath,
                     segmentName,
                     {
-                        useSignedUrl: true // ✅ Signed URL para VEO3
+                        useSignedUrl: true, // ✅ Signed URL para VEO3
+                        presenter: presenter // ✅ Para subdirectorio correcto (ana/carlos)
                     }
                 );
 

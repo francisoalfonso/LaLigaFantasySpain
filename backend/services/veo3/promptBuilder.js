@@ -653,6 +653,31 @@ class PromptBuilder {
      */
     buildEnhancedNanoBananaPrompt(dialogue, emotion, shot, options = {}) {
         const duration = options.duration || 8;
+        const characterBible = options.characterBible;
+
+        // ✅ FIX (13 Oct 2025 20:45): Detectar género dinámicamente del characterBible
+        // Detectar género buscando palabras clave en characterBible
+        let gender = 'female'; // Default: Ana (backward compatibility)
+        let pronoun = 'She';
+        let presenterType = 'sports presenter';
+
+        if (characterBible) {
+            // Detectar género usando palabras clave MÁS ESPECÍFICAS
+            const lowerBible = characterBible.toLowerCase();
+
+            // Buscar indicadores de género masculino
+            const maleIndicators = ['38-year-old', 'analyst', 'he ', 'his ', 'him ', 'man', 'guy', 'male sports', 'male analyst'];
+            const isMale = maleIndicators.some(indicator => lowerBible.includes(indicator));
+
+            if (isMale) {
+                gender = 'male';
+                pronoun = 'He';
+                presenterType = 'sports data analyst';
+            }
+
+            logger.info(`[PromptBuilder] 🎭 Presenter detectado: ${gender} (${presenterType})`);
+            logger.info(`[PromptBuilder] 📋 CharacterBible: "${characterBible.substring(0, 80)}..."`);
+        }
 
         // Mapeo de emociones a tonos actorales específicos (tipo playground)
         const emotionToTone = {
@@ -667,16 +692,28 @@ class PromptBuilder {
             entusiasmo: 'with enthusiastic, animated energy',
             complicidad: 'with knowing, complicit energy',
             sorpresa: 'with surprised, amazed expression',
-            sarcastico: 'with sarcastic, frustrated energy'
+            sarcastico: 'with sarcastic, frustrated energy',
+            evidencia: 'presenting evidence confidently, pointing to key facts'
         };
 
-        // Mapeo de shots a acciones físicas progresivas (tipo playground)
+        // Mapeo de shots a acciones físicas progresivas (tipo playground) - DINÁMICO por género
         const shotToAction = {
             'close-up':
-                'places one hand on her chest and leans slightly forward with an intriguing expression',
-            medium: 'gestures with her hands and steps forward confidently, making strong eye contact',
-            'medium close-up': 'points directly to the camera and raises her finger urgently',
-            wide: 'moves expressively across the studio space with animated gestures'
+                gender === 'male'
+                    ? 'places one hand on his chest and leans slightly forward with an intriguing expression'
+                    : 'places one hand on her chest and leans slightly forward with an intriguing expression',
+            medium:
+                gender === 'male'
+                    ? 'gestures with his hands and steps forward confidently, making strong eye contact'
+                    : 'gestures with her hands and steps forward confidently, making strong eye contact',
+            'medium close-up':
+                gender === 'male'
+                    ? 'points directly to the camera and raises his finger urgently'
+                    : 'points directly to the camera and raises her finger urgently',
+            wide:
+                gender === 'male'
+                    ? 'moves expressively across the studio space with animated gestures'
+                    : 'moves expressively across the studio space with animated gestures'
         };
 
         // Obtener tone y action
@@ -692,12 +729,15 @@ class PromptBuilder {
                   : 'A cinematic';
 
         // ✅ FIX #4 (11 Oct 2025): Cambiar "7-second" → "8-second" y "fantasy football" → "La Liga Fantasy"
-        // Construcción del prompt (estructura ganadora del playground)
-        const prompt = `${videoType} ${duration}-second video. A young female sports presenter is standing in a modern La Liga Fantasy studio. She ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" She moves like a TV football commentator, making strong eye contact with the camera. Use the uploaded image of the presenter as the main reference. Do not redesign her.`;
+        // ✅ FIX #5 (13 Oct 2025): Añadir "European soccer" explícitamente para evitar balones de fútbol americano
+        // ✅ FIX #6 (13 Oct 2025 20:45): Género dinámico basado en characterBible
+        // Construcción del prompt (estructura ganadora del playground) - DINÁMICO
+        const prompt = `${videoType} ${duration}-second video. A ${gender} ${presenterType} is standing in a modern European soccer (La Liga) fantasy studio. ${pronoun} ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" ${pronoun} moves like a TV soccer commentator (European football, not American football), making strong eye contact with the camera. CRITICAL: This is about soccer/football (round ball sport), NOT American football. Use the uploaded image of the presenter as the main reference. Do not redesign ${gender === 'male' ? 'him' : 'her'}.`;
 
         logger.info(
             `[PromptBuilder] 🎬 Enhanced Nano Banana prompt (playground-style): ${prompt.length} chars`
         );
+        logger.info(`[PromptBuilder]    Gender: ${gender}, Presenter: ${presenterType}`);
         logger.info(`[PromptBuilder]    Emotion: ${emotion} → Tone: ${tone}`);
         logger.info(`[PromptBuilder]    Shot: ${shot} → Action: ${action}`);
         logger.info(`[PromptBuilder]    Dialogue length: ${dialogue.split(' ').length} words`);

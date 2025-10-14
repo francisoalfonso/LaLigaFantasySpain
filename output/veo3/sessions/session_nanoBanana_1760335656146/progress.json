@@ -1,0 +1,153 @@
+{
+  "sessionId": "nanoBanana_1760335656146",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146",
+  "status": "finalized",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "D. Blind",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "presenter": {
+    "name": "Ana Martínez",
+    "seed": 30001,
+    "imageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-03.png",
+    "characterBible": "A 32-year-old Spanish sports analyst with long blonde wavy hair, green-hazel eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Natural smile, confident posture, warm and approachable professional broadcaster energy",
+    "model": "veo3_fast",
+    "aspectRatio": "9:16",
+    "waterMark": "Fantasy La Liga Pro"
+  },
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "dialogue": "Misters, tengo un chollazo que no os vais a creer... el jugador gironí está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "dialogue": "Los números son brutales, Jefes. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "dialogue": "¿Qué más queréis, Gente? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760335686158.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAzMzU2ODYxNTgucG5nIiwiaWF0IjoxNzYwMzM1Njg3LCJleHAiOjE3NjA0MjIwODd9.LYXxH3hifO3yvwSmR89HxoAMkES9w0bBK-cYfpzrsEw",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760335716773.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMzM1NzE2NzczLnBuZyIsImlhdCI6MTc2MDMzNTcxNywiZXhwIjoxNzYwNDIyMTE3fQ.-M8VMvtnea8Ka0Upishou2Jaa14D940Q3FDQlsO7hYs",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760335746971.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAzMzU3NDY5NzEucG5nIiwiaWF0IjoxNzYwMzM1NzQ4LCJleHAiOjE3NjA0MjIxNDh9.YyNOh9f061cayqCCShZqJVZyDGT6vy4kTS56ppXZCr4",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... el jugador gironí está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg1-intro-1760335686158.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjAzMzU2ODYxNTgucG5nIiwiaWF0IjoxNzYwMzM1Njg3LCJleHAiOjE3NjA0MjIwODd9.LYXxH3hifO3yvwSmR89HxoAMkES9w0bBK-cYfpzrsEw",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "taskId": "484c31da49b339a82a652d98b40a00c3",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/7f980ef5-6a9d-4886-97da-dd2e3a273631_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146/segment_1_484c31da49b339a82a652d98b40a00c3.mp4",
+      "filename": "segment_1_484c31da49b339a82a652d98b40a00c3.mp4",
+      "generatedAt": "2025-10-13T06:52:25.037Z",
+      "size": 1759044
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "dialogue": "Los números son brutales, Jefes. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg2-middle-1760335716773.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwMzM1NzE2NzczLnBuZyIsImlhdCI6MTc2MDMzNTcxNywiZXhwIjoxNzYwNDIyMTE3fQ.-M8VMvtnea8Ka0Upishou2Jaa14D940Q3FDQlsO7hYs",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "taskId": "8eeee4b63fdfd76d1d1f1fe41dc9e53c",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/46b42bee-e6f1-4195-b928-d04cf55e1bd7_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146/segment_2_8eeee4b63fdfd76d1d1f1fe41dc9e53c.mp4",
+      "filename": "segment_2_8eeee4b63fdfd76d1d1f1fe41dc9e53c.mp4",
+      "generatedAt": "2025-10-13T06:58:48.760Z",
+      "size": 1732451
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "dialogue": "¿Qué más queréis, Gente? Titular del Girona al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/ana-images/video-frames/seg3-outro-1760335746971.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJhbmEtaW1hZ2VzL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjAzMzU3NDY5NzEucG5nIiwiaWF0IjoxNzYwMzM1NzQ4LCJleHAiOjE3NjA0MjIxNDh9.YyNOh9f061cayqCCShZqJVZyDGT6vy4kTS56ppXZCr4",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "taskId": "36b724ec091ae240e946de2031e3c9c1",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/4f289b8d-e194-4a99-84f3-2d824807e753_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146/segment_3_36b724ec091ae240e946de2031e3c9c1.mp4",
+      "filename": "segment_3_36b724ec091ae240e946de2031e3c9c1.mp4",
+      "generatedAt": "2025-10-13T07:22:09.304Z",
+      "size": 1713676
+    }
+  ],
+  "preparedAt": "2025-10-13T06:09:08.059Z",
+  "lastUpdate": "2025-10-13T15:35:28.546Z",
+  "concatenatedVideo": {
+    "videoId": "concat_nanoBanana_1760335656146",
+    "title": "D. Blind_chollo_nano_banana",
+    "duration": 24,
+    "sessionId": "nanoBanana_1760335656146",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760335656146",
+    "outputPath": "output/veo3/ana-concatenated-1760369719759.mp4",
+    "workflow": "nano-banana-contextual"
+  },
+  "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1760369719759.mp4",
+  "finalizedAt": "2025-10-13T15:35:28.546Z",
+  "enhancedVideo": {
+    "path": "output/veo3/video-with-card-1760340544198-with-captions.mp4",
+    "url": "http://localhost:3000/output/veo3/video-with-card-1760340544198-with-captions.mp4",
+    "appliedEnhancements": [
+      {
+        "type": "playerCard",
+        "details": {
+          "player": "D. Blind",
+          "timing": "3-6s",
+          "position": "top-right"
+        }
+      },
+      {
+        "type": "viralSubtitles",
+        "details": {
+          "captionsCount": 76,
+          "style": "karaoke",
+          "format": "ass",
+          "totalDuration": 24.000000000000007
+        }
+      }
+    ],
+    "enhancedAt": "2025-10-13T07:29:22.324Z"
+  }
+}

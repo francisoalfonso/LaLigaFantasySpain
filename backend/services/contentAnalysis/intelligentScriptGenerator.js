@@ -59,6 +59,7 @@ class IntelligentScriptGenerator {
     async generateResponseScript(outlierData, options = {}) {
         const startTime = Date.now();
         const { responseAngle = 'rebatir', presenter = 'ana' } = options;
+        const maxRetries = 1; // Máximo 1 retry para evitar gastar quota
 
         try {
             logger.info('[IntelligentScriptGenerator] Generando script inteligente de respuesta', {
@@ -73,68 +74,109 @@ class IntelligentScriptGenerator {
                 throw new Error('OPENAI_API_KEY no configurada en .env');
             }
 
-            // Build prompt para GPT-4o
-            const prompt = this._buildPrompt(outlierData, responseAngle, presenter);
+            let attempt = 0;
+            let lastError = null;
 
-            // Call GPT-4o
-            const response = await axios.post(
-                this.baseUrl,
-                {
-                    model: this.model,
-                    messages: [
+            // Retry loop
+            while (attempt <= maxRetries) {
+                try {
+                    // Build prompt para GPT-4o (con feedback si es retry)
+                    const prompt = this._buildPrompt(
+                        outlierData,
+                        responseAngle,
+                        presenter,
+                        lastError
+                    );
+
+                    logger.info('[IntelligentScriptGenerator] Llamando a GPT-4o...', {
+                        attempt: attempt + 1,
+                        maxRetries: maxRetries + 1,
+                        isRetry: attempt > 0
+                    });
+
+                    // Call GPT-4o
+                    const response = await axios.post(
+                        this.baseUrl,
                         {
-                            role: 'system',
-                            content: this._getSystemPrompt(presenter)
+                            model: this.model,
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: this._getSystemPrompt(presenter)
+                                },
+                                {
+                                    role: 'user',
+                                    content: prompt
+                                }
+                            ],
+                            temperature: 0.7, // Balance creatividad + consistencia
+                            max_tokens: 800,
+                            response_format: { type: 'json_object' } // Force JSON output
                         },
                         {
-                            role: 'user',
-                            content: prompt
+                            headers: {
+                                Authorization: `Bearer ${this.apiKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            timeout: 45000
                         }
-                    ],
-                    temperature: 0.7, // Balance creatividad + consistencia
-                    max_tokens: 800,
-                    response_format: { type: 'json_object' } // Force JSON output
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${this.apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 45000
+                    );
+
+                    const scriptData = JSON.parse(response.data.choices[0].message.content);
+
+                    // Validate script
+                    const validation = this._validateScript(scriptData);
+                    if (!validation.valid) {
+                        lastError = validation.errors.join(', ');
+                        throw new Error(`Script validation failed: ${lastError}`);
+                    }
+
+                    // ✅ Validación exitosa
+                    const duration = Date.now() - startTime;
+                    const cost = (attempt + 1) * 0.002; // $0.002 por intento
+
+                    logger.info('[IntelligentScriptGenerator] ✅ Script generado exitosamente', {
+                        segments: scriptData.segments.length,
+                        targetPlayer: scriptData.targetPlayer,
+                        responseAngle: scriptData.responseAngle,
+                        duration: `${duration}ms`,
+                        attempts: attempt + 1,
+                        cost: `$${cost.toFixed(3)}`
+                    });
+
+                    return {
+                        success: true,
+                        script: scriptData,
+                        metadata: {
+                            outlier_video_id: outlierData.video_id,
+                            competitor_channel: outlierData.channel_name,
+                            response_angle: responseAngle,
+                            presenter: presenter,
+                            generated_at: new Date().toISOString(),
+                            processing_time_ms: duration,
+                            attempts: attempt + 1,
+                            cost_usd: cost
+                        }
+                    };
+                } catch (error) {
+                    attempt++;
+
+                    if (attempt > maxRetries) {
+                        // Sin más retries, lanzar error
+                        throw error;
+                    }
+
+                    logger.warn(
+                        `[IntelligentScriptGenerator] ⚠️ Intento ${attempt} falló, reintentando...`,
+                        {
+                            error: error.message,
+                            nextAttempt: attempt + 1
+                        }
+                    );
+
+                    // Continuar al siguiente intento del loop
                 }
-            );
-
-            const scriptData = JSON.parse(response.data.choices[0].message.content);
-
-            // Validate script
-            const validation = this._validateScript(scriptData);
-            if (!validation.valid) {
-                throw new Error(`Script validation failed: ${validation.errors.join(', ')}`);
             }
-
-            const duration = Date.now() - startTime;
-
-            logger.info('[IntelligentScriptGenerator] ✅ Script generado exitosamente', {
-                segments: scriptData.segments.length,
-                targetPlayer: scriptData.targetPlayer,
-                responseAngle: scriptData.responseAngle,
-                duration: `${duration}ms`,
-                cost: '$0.002'
-            });
-
-            return {
-                success: true,
-                script: scriptData,
-                metadata: {
-                    outlier_video_id: outlierData.video_id,
-                    competitor_channel: outlierData.channel_name,
-                    response_angle: responseAngle,
-                    presenter: presenter,
-                    generated_at: new Date().toISOString(),
-                    processing_time_ms: duration,
-                    cost_usd: 0.002
-                }
-            };
         } catch (error) {
             logger.error('[IntelligentScriptGenerator] Error generando script', {
                 error: error.message,
@@ -184,7 +226,7 @@ REGLAS CRÍTICAS:
      * Build user prompt con todos los datos del outlier
      * @private
      */
-    _buildPrompt(outlierData, responseAngle, presenter) {
+    _buildPrompt(outlierData, responseAngle, presenter, lastError = null) {
         const { title, channel_name, views, transcription, content_analysis, enriched_data } =
             outlierData;
 
@@ -282,12 +324,17 @@ ${responseAngles[responseAngle]}
 
 **REGLAS CRÍTICAS:**
 1. ❌ NO uses nombres de jugadores en dialogues (usar "el delantero", "el 10 del Barça", etc.)
-2. ✅ Exactamente 24-25 palabras por diálogo (cuenta bien)
+2. ✅ Exactamente 24-25 palabras por diálogo (cuenta palabras ANTES de generar)
 3. ✅ Incluir números concretos de los datos reales
 4. ✅ Contrastar con lo que dijo el competidor
 5. ✅ Generar urgencia y FOMO en el outro
 6. ✅ Usar solo emociones válidas: mysterious, curious, confident, authoritative, urgent, exciting
 
+${
+            lastError
+                ? `\n⚠️ **RETRY FEEDBACK**: El intento anterior falló con estos errores:\n${lastError}\n\nPor favor, corrígelos en este nuevo intento. ESPECIALMENTE presta atención al word count de cada segmento.\n`
+                : ''
+        }
 Genera el JSON ahora:`;
     }
 

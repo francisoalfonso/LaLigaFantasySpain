@@ -666,7 +666,17 @@ class PromptBuilder {
             const lowerBible = characterBible.toLowerCase();
 
             // Buscar indicadores de género masculino
-            const maleIndicators = ['38-year-old', 'analyst', 'he ', 'his ', 'him ', 'man', 'guy', 'male sports', 'male analyst'];
+            const maleIndicators = [
+                '38-year-old',
+                'analyst',
+                'he ',
+                'his ',
+                'him ',
+                'man',
+                'guy',
+                'male sports',
+                'male analyst'
+            ];
             const isMale = maleIndicators.some(indicator => lowerBible.includes(indicator));
 
             if (isMale) {
@@ -676,7 +686,9 @@ class PromptBuilder {
             }
 
             logger.info(`[PromptBuilder] 🎭 Presenter detectado: ${gender} (${presenterType})`);
-            logger.info(`[PromptBuilder] 📋 CharacterBible: "${characterBible.substring(0, 80)}..."`);
+            logger.info(
+                `[PromptBuilder] 📋 CharacterBible: "${characterBible.substring(0, 80)}..."`
+            );
         }
 
         // Mapeo de emociones a tonos actorales específicos (tipo playground)
@@ -731,8 +743,13 @@ class PromptBuilder {
         // ✅ FIX #4 (11 Oct 2025): Cambiar "7-second" → "8-second" y "fantasy football" → "La Liga Fantasy"
         // ✅ FIX #5 (13 Oct 2025): Añadir "European soccer" explícitamente para evitar balones de fútbol americano
         // ✅ FIX #6 (13 Oct 2025 20:45): Género dinámico basado en characterBible
+        // ✅ FIX #7 (15 Oct 2025): CASTILIAN SPANISH enforcement (CRITICAL para evitar acento mexicano)
+        // ✅ FIX #8 (15 Oct 2025 - User Recommendation): Simplificar acento español + enforcar es_ES voice model
+        // ✅ FIX #9 (15 Oct 2025 23:50 - CRÍTICO): Aplicar MISMO enforcement de Ana que FUNCIONA 100%
+        //    Cambio: "Spanish from Spain" → "CASTILIAN SPANISH FROM SPAIN with EUROPEAN SPANISH accent"
+        //    Añadir: "(CRITICAL: not Mexican, not Latin American, ONLY Castilian Spanish from Spain)"
         // Construcción del prompt (estructura ganadora del playground) - DINÁMICO
-        const prompt = `${videoType} ${duration}-second video. A ${gender} ${presenterType} is standing in a modern European soccer (La Liga) fantasy studio. ${pronoun} ${action} and speaks in Spanish from Spain ${tone}: "${dialogue}" ${pronoun} moves like a TV soccer commentator (European football, not American football), making strong eye contact with the camera. CRITICAL: This is about soccer/football (round ball sport), NOT American football. Use the uploaded image of the presenter as the main reference. Do not redesign ${gender === 'male' ? 'him' : 'her'}.`;
+        const prompt = `${videoType} ${duration}-second video. A ${gender} ${presenterType} is standing in a modern European soccer (La Liga) fantasy studio. ${pronoun} ${action} and speaks in CASTILIAN SPANISH FROM SPAIN with EUROPEAN SPANISH accent (CRITICAL: not Mexican, not Latin American, ONLY Castilian Spanish from Spain) ${tone}: "${dialogue}" ${pronoun} moves like a TV soccer commentator (European football, not American football), making strong eye contact with the camera. CRITICAL: This is about soccer/football (round ball sport), NOT American football. Use the uploaded image of the presenter as the main reference. Do not redesign ${gender === 'male' ? 'him' : 'her'}.`;
 
         logger.info(
             `[PromptBuilder] 🎬 Enhanced Nano Banana prompt (playground-style): ${prompt.length} chars`

@@ -198,42 +198,116 @@ router.post('/generate-script/:videoId', limiter, async (req, res) => {
             });
         }
 
-        // 2. Enriquecer con API-Sports si no está hecho
-        let enrichedData = outlier.enriched_data;
+        // 2. Detectar tipo de video (player_spotlight vs generic_analysis)
+        const videoType = outlier.content_analysis?.video_type || 'player_spotlight';
+        const targetPlayer = outlier.content_analysis?.target_player;
+        const isGenericVideo = videoType === 'generic_analysis';
 
-        if (!enrichedData && outlier.mentioned_players?.length > 0) {
-            logger.info('[Outliers API] Enriqueciendo con API-Sports...', {
-                players: outlier.mentioned_players
-            });
+        logger.info('[Outliers API] Tipo de video detectado:', {
+            videoType,
+            targetPlayer: targetPlayer || 'N/A',
+            skipEnrichment: isGenericVideo
+        });
 
-            const ApiFootballClient = require('../services/apiFootball');
-            const apiFootball = new ApiFootballClient();
-            const enrichmentResult = await apiFootball.getPlayerStatsForOutlier(
-                outlier.mentioned_players
-            );
+        // 3. Enriquecer con API-Sports SOLO si es video de jugador específico
+        let enrichedData = null;
 
-            if (enrichmentResult.success) {
-                enrichedData = enrichmentResult;
+        if (!isGenericVideo) {
+            enrichedData = outlier.enriched_data;
 
-                // Guardar enriched data en DB
-                const { supabaseAdmin } = require('../config/supabase');
-                await supabaseAdmin
-                    .from('youtube_outliers')
-                    .update({
-                        enriched_data: enrichedData,
-                        processing_status: 'enriched'
-                    })
-                    .eq('video_id', videoId);
+            // ✅ NUEVO (15 Oct): Si ya tiene enriched_data pero target_player no es el primero, reordenar
+            if (enrichedData && targetPlayer && enrichedData.players?.length > 0) {
+                const firstPlayerName = enrichedData.players[0]?.name?.toLowerCase();
+                const targetPlayerLower = targetPlayer.toLowerCase();
 
-                logger.info('[Outliers API] ✅ Datos enriquecidos guardados en DB');
-            } else {
-                logger.warn('[Outliers API] ⚠️ No se pudieron enriquecer datos de jugadores');
-                // Continue anyway, script generator can work without enriched data
-                enrichedData = { players: [], totalFound: 0 };
+                if (firstPlayerName !== targetPlayerLower) {
+                    logger.info(
+                        '[Outliers API] 🔄 Reordenando enriched_data existente: target_player no es primero',
+                        {
+                            currentFirst: enrichedData.players[0]?.name,
+                            targetPlayer: targetPlayer
+                        }
+                    );
+
+                    // Buscar el target_player en el array
+                    const targetIndex = enrichedData.players.findIndex(
+                        p => p.name?.toLowerCase() === targetPlayerLower
+                    );
+
+                    if (targetIndex > 0) {
+                        // Mover target_player al inicio
+                        const [targetPlayerData] = enrichedData.players.splice(targetIndex, 1);
+                        enrichedData.players.unshift(targetPlayerData);
+
+                        // Guardar orden actualizado en DB
+                        const { supabaseAdmin } = require('../config/supabase');
+                        await supabaseAdmin
+                            .from('youtube_outliers')
+                            .update({ enriched_data: enrichedData })
+                            .eq('video_id', videoId);
+
+                        logger.info('[Outliers API] ✅ enriched_data reordenado y guardado');
+                    } else if (targetIndex === -1) {
+                        logger.warn(
+                            '[Outliers API] ⚠️ Target player no encontrado en enriched_data, regenerando...'
+                        );
+                        enrichedData = null; // Forzar regeneración
+                    }
+                }
             }
+
+            if (!enrichedData && outlier.mentioned_players?.length > 0) {
+                // ✅ NUEVO (15 Oct): Reordenar jugadores para poner target_player primero
+                let playersToEnrich = [...outlier.mentioned_players]; // Copia para no mutar original
+
+                if (targetPlayer) {
+                    // Filtrar target_player del array
+                    playersToEnrich = playersToEnrich.filter(
+                        p => p.toLowerCase() !== targetPlayer.toLowerCase()
+                    );
+                    // Poner target_player al inicio
+                    playersToEnrich.unshift(targetPlayer);
+
+                    logger.info('[Outliers API] 🎯 Reordenando jugadores: target_player primero', {
+                        targetPlayer: targetPlayer,
+                        totalPlayers: playersToEnrich.length
+                    });
+                }
+
+                logger.info('[Outliers API] Enriqueciendo con API-Sports...', {
+                    players: playersToEnrich
+                });
+
+                const ApiFootballClient = require('../services/apiFootball');
+                const apiFootball = new ApiFootballClient();
+                const enrichmentResult =
+                    await apiFootball.getPlayerStatsForOutlier(playersToEnrich);
+
+                if (enrichmentResult.success) {
+                    enrichedData = enrichmentResult;
+
+                    // Guardar enriched data en DB
+                    const { supabaseAdmin } = require('../config/supabase');
+                    await supabaseAdmin
+                        .from('youtube_outliers')
+                        .update({
+                            enriched_data: enrichedData,
+                            processing_status: 'enriched'
+                        })
+                        .eq('video_id', videoId);
+
+                    logger.info('[Outliers API] ✅ Datos enriquecidos guardados en DB');
+                } else {
+                    logger.warn('[Outliers API] ⚠️ No se pudieron enriquecer datos de jugadores');
+                    // Continue anyway, script generator can work without enriched data
+                    enrichedData = { players: [], totalFound: 0 };
+                }
+            }
+        } else {
+            logger.info('[Outliers API] ⏭️  Saltando enriquecimiento (video genérico)');
         }
 
-        // 3. Generar script con intelligentScriptGenerator
+        // 4. Generar script con intelligentScriptGenerator
         logger.info('[Outliers API] Generando script inteligente con GPT-4o...');
 
         const intelligentScriptGenerator = require('../services/contentAnalysis/intelligentScriptGenerator');
@@ -309,29 +383,32 @@ router.post('/generate-script/:videoId', limiter, async (req, res) => {
 
 /**
  * POST /api/outliers/analyze/:videoId
- * Analizar un outlier específico (transcripción + AI analysis)
+ * Analizar un outlier específico usando Gemini 2.0 Flash
  *
- * FLUJO:
+ * FLUJO NUEVO (con Gemini):
  * 1. Obtener outlier de DB
- * 2. Descargar audio con yt-dlp
- * 3. Transcribir con Whisper API
- * 4. Analizar contenido con GPT-4o Mini
- * 5. Guardar transcripción + análisis en DB
- * 6. Limpiar archivos temporales
- * 7. Update status: analyzing → analyzed
+ * 2. Analizar video directamente con Gemini (transcripción + análisis en 1 call)
+ * 3. Guardar resultados en DB
+ * 4. Update status: analyzing → analyzed
+ *
+ * VENTAJAS vs yt-dlp + Whisper:
+ * - ✅ No descarga videos (evita SABR protection)
+ * - ✅ 1 API call en lugar de 2
+ * - ✅ Más rápido (~30-60s vs 1-2 min)
+ * - ✅ Más barato (~$0.004 vs $0.007)
  */
 router.post('/analyze/:videoId', limiter, async (req, res) => {
     const { videoId } = req.params;
 
     try {
-        logger.info('[Outliers API] Iniciando análisis de outlier', { videoId });
+        logger.info('[Outliers API] Iniciando análisis con Gemini', { videoId });
 
         // 1. Obtener outlier de DB
-        const outlier = await youtubeOutlierDetector.getOutliers({
+        const outliers = await youtubeOutlierDetector.getOutliers({
             status: null // Get any status
         });
 
-        const outlierData = outlier.find(o => o.video_id === videoId);
+        const outlierData = outliers.find(o => o.video_id === videoId);
 
         if (!outlierData) {
             return res.status(404).json({
@@ -343,106 +420,34 @@ router.post('/analyze/:videoId', limiter, async (req, res) => {
         // Update status to 'analyzing'
         await youtubeOutlierDetector.updateOutlierStatus(videoId, 'analyzing');
 
-        // 2. Descargar audio (solo audio, más rápido y ligero)
-        logger.info('[Outliers API] Descargando audio del video...', { videoId });
+        // 2. Analizar video con Gemini (transcripción + análisis en 1 call)
+        logger.info('[Outliers API] Analizando video con Gemini 2.0 Flash...', { videoId });
 
-        const { exec } = require('child_process');
-        const fs = require('fs');
-        const path = require('path');
-        const { promisify } = require('util');
-        const execAsync = promisify(exec);
+        const geminiVideoAnalyzer = require('../services/contentAnalysis/geminiVideoAnalyzer');
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-        const tempDir = path.join(__dirname, '../../output/temp-outliers');
-        if (!fs.existsSync(tempDir)) {
-            fs.mkdirSync(tempDir, { recursive: true });
-        }
-
-        const audioPath = path.join(tempDir, `${videoId}.m4a`);
-
-        // Download only audio (10x faster, 10x smaller)
-        const ytdlpCmd = `yt-dlp -f bestaudio -o "${audioPath}" "https://www.youtube.com/watch?v=${videoId}"`;
-
+        let analysisResult;
         try {
-            await execAsync(ytdlpCmd, { timeout: 120000 }); // 2 min timeout
-            logger.info('[Outliers API] ✅ Audio descargado', { audioPath });
+            analysisResult = await geminiVideoAnalyzer.analyzeYouTubeVideo(youtubeUrl, outlierData);
+
+            logger.info('[Outliers API] ✅ Análisis con Gemini completado', {
+                duration: `${analysisResult.duration_seconds}s`,
+                cost: `$${analysisResult.cost_usd.toFixed(4)}`,
+                transcriptionLength: analysisResult.transcription.length
+            });
         } catch (error) {
-            logger.error('[Outliers API] Error descargando audio', { error: error.message });
+            logger.error('[Outliers API] Error en análisis con Gemini', {
+                error: error.message
+            });
             await youtubeOutlierDetector.updateOutlierStatus(videoId, 'failed');
             return res.status(500).json({
                 success: false,
-                error: 'Failed to download video audio',
+                error: 'Gemini analysis failed',
                 details: error.message
             });
         }
 
-        // 3. Transcribir con Whisper API
-        logger.info('[Outliers API] Transcribiendo audio con Whisper...', { videoId });
-
-        const transcriptionService = require('../services/contentAnalysis/transcriptionService');
-        let transcription;
-
-        try {
-            transcription = await transcriptionService.transcribeAudio(audioPath);
-            logger.info('[Outliers API] ✅ Transcripción completada', {
-                length: transcription.length,
-                cost: '$0.006'
-            });
-        } catch (error) {
-            logger.error('[Outliers API] Error transcribiendo', { error: error.message });
-            // Clean up
-            fs.unlinkSync(audioPath);
-            await youtubeOutlierDetector.updateOutlierStatus(videoId, 'failed');
-            return res.status(500).json({
-                success: false,
-                error: 'Transcription failed',
-                details: error.message
-            });
-        }
-
-        // 4. Analizar contenido con GPT-4o Mini
-        logger.info('[Outliers API] Analizando contenido con GPT...', { videoId });
-
-        const contentAnalyzer = require('../services/contentAnalysis/contentAnalyzer');
-        let contentAnalysis;
-
-        try {
-            const analysisPrompt = `Analiza este video viral de Fantasy La Liga:
-
-TÍTULO: ${outlierData.title}
-CANAL: ${outlierData.channel_name}
-VIEWS: ${outlierData.views}
-TRANSCRIPCIÓN:
-${transcription}
-
-Identifica y devuelve en formato JSON:
-{
-  "thesis": "Tesis principal del video en 1 frase",
-  "key_arguments": ["Argumento 1", "Argumento 2", "Argumento 3"],
-  "players_mentioned": ["Pedri", "Lewandowski"],
-  "viral_hooks": ["Hook 1", "Hook 2"],
-  "response_angle": "rebatir | complementar | ampliar",
-  "suggested_data_points": ["Dato que buscar en API-Sports", "Otro dato"],
-  "emotional_tone": "neutral | entusiasta | crítico | alarmista",
-  "target_audience": "descripción de la audiencia"
-}`;
-
-            contentAnalysis = await contentAnalyzer.analyzeContent(analysisPrompt);
-            logger.info('[Outliers API] ✅ Análisis completado', {
-                cost: '$0.001'
-            });
-        } catch (error) {
-            logger.error('[Outliers API] Error analizando contenido', { error: error.message });
-            // Clean up
-            fs.unlinkSync(audioPath);
-            await youtubeOutlierDetector.updateOutlierStatus(videoId, 'failed');
-            return res.status(500).json({
-                success: false,
-                error: 'Content analysis failed',
-                details: error.message
-            });
-        }
-
-        // 5. Guardar en DB
+        // 3. Guardar en DB
         logger.info('[Outliers API] Guardando resultados en DB...', { videoId });
 
         const { supabaseAdmin } = require('../config/supabase');
@@ -451,9 +456,10 @@ Identifica y devuelve en formato JSON:
             const { error: updateError } = await supabaseAdmin
                 .from('youtube_outliers')
                 .update({
-                    transcription: transcription,
-                    content_analysis: contentAnalysis,
-                    mentioned_players: contentAnalysis.players_mentioned || [],
+                    transcription: analysisResult.transcription,
+                    content_analysis: analysisResult.contentAnalysis,
+                    mentioned_players: analysisResult.contentAnalysis.players_mentioned || [],
+                    video_type: analysisResult.contentAnalysis.video_type, // ✅ NUEVO (15 Oct): Guardar tipo de video
                     processing_status: 'analyzed',
                     analyzed_at: new Date().toISOString()
                 })
@@ -463,11 +469,11 @@ Identifica y devuelve en formato JSON:
                 throw updateError;
             }
 
-            logger.info('[Outliers API] ✅ Resultados guardados en DB');
+            logger.info('[Outliers API] ✅ Resultados guardados en DB', {
+                videoType: analysisResult.contentAnalysis.video_type
+            });
         } catch (error) {
             logger.error('[Outliers API] Error guardando en DB', { error: error.message });
-            // Clean up
-            fs.unlinkSync(audioPath);
             return res.status(500).json({
                 success: false,
                 error: 'Failed to save analysis to database',
@@ -475,27 +481,17 @@ Identifica y devuelve en formato JSON:
             });
         }
 
-        // 6. Limpiar archivos temporales
-        try {
-            fs.unlinkSync(audioPath);
-            logger.info('[Outliers API] 🗑️  Archivo temporal eliminado');
-        } catch (cleanupError) {
-            logger.warn('[Outliers API] No se pudo eliminar archivo temporal', {
-                audioPath,
-                error: cleanupError.message
-            });
-        }
-
         // Success response
         res.json({
             success: true,
-            message: 'Outlier analyzed successfully',
+            message: 'Outlier analyzed successfully with Gemini',
             data: {
                 videoId,
-                transcriptionLength: transcription.length,
-                contentAnalysis,
-                processingTime: 'N/A',
-                totalCost: 0.007, // $0.006 Whisper + $0.001 GPT
+                transcriptionLength: analysisResult.transcription.length,
+                contentAnalysis: analysisResult.contentAnalysis,
+                processingTime: `${analysisResult.duration_seconds}s`,
+                totalCost: analysisResult.cost_usd,
+                model: analysisResult.model,
                 status: 'analyzed'
             }
         });

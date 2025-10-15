@@ -20,6 +20,13 @@
  * - CONSTRAINT: 24-25 palabras por segmento (evita cortes de audio)
  * - NO usar nombres de jugadores (auto-reemplazados por referencias genéricas)
  *
+ * 🚨 VEO3 PRONUNCIATION LIMITATIONS (15 Oct 2025):
+ * - VEO3 NO pronuncia bien datos estadísticos complejos
+ * - Evita listas de números: "3 goles, 2 asistencias, rating 7.8"
+ * - Convierte datos a lenguaje natural: "está ARRASANDO" en vez de "3 goals + 2 assists"
+ * - Usa números SOLO si son redondos y simples: "3 goles", "CERO derrotas"
+ * - Prioriza insights narrativos sobre estadísticas secas
+ *
  * COST: ~$0.002 por script (GPT-4o-mini cached)
  */
 
@@ -61,13 +68,17 @@ class IntelligentScriptGenerator {
         const { responseAngle = 'rebatir', presenter = 'ana' } = options;
         const maxRetries = 1; // Máximo 1 retry para evitar gastar quota
 
+        // ✅ NUEVO: Extraer target_player del análisis de contenido
+        const targetPlayer = outlierData.content_analysis?.target_player || null;
+
         try {
             logger.info('[IntelligentScriptGenerator] Generando script inteligente de respuesta', {
                 videoId: outlierData.video_id,
                 channel: outlierData.channel_name,
                 views: outlierData.views,
                 responseAngle,
-                presenter
+                presenter,
+                targetPlayer: targetPlayer // ✅ Log jugador objetivo identificado
             });
 
             if (!this.apiKey) {
@@ -85,6 +96,7 @@ class IntelligentScriptGenerator {
                         outlierData,
                         responseAngle,
                         presenter,
+                        targetPlayer, // ✅ NUEVO: Pasar target player identificado
                         lastError
                     );
 
@@ -152,6 +164,7 @@ class IntelligentScriptGenerator {
                             competitor_channel: outlierData.channel_name,
                             response_angle: responseAngle,
                             presenter: presenter,
+                            targetPlayer: targetPlayer || scriptData.targetPlayer, // ✅ NUEVO: Target player identificado
                             generated_at: new Date().toISOString(),
                             processing_time_ms: duration,
                             attempts: attempt + 1,
@@ -215,18 +228,34 @@ REGLAS CRÍTICAS:
 
 3. ✅ Responder en formato JSON válido con esta estructura EXACTA
 
-4. ✅ Incluir números concretos de los datos reales (goals, assists, rating, precio)
+4. 🚨 LIMITACIONES VEO3 CON NÚMEROS (CRÍTICO):
+   ❌ VEO3 NO pronuncia bien datos estadísticos complejos
+   ❌ Evitar cifras exactas múltiples ("3 goles, 2 asistencias, rating 7.8")
+   ❌ Evitar números decimales ("7.23", "€6.5M")
+   ❌ Evitar porcentajes precisos ("87.3%", "2.1 expected goals")
 
-5. ✅ Tono viral: urgencia, datos concretos, CTA claro, generar FOMO
+   ✅ CONVERTIR DATOS A LENGUAJE NATURAL VIRAL:
+   • "3 goles, 2 asistencias" → "está ARRASANDO en ataque"
+   • "rating 7.8" → "rendimiento BRUTAL"
+   • "€4.5M" → "baratísimo", "un regalo"
+   • "87% pass accuracy" → "controla el medio como NADIE"
+   • "xG 0.8 por partido" → "genera peligro CONSTANTE"
 
-6. ✅ Contrastar lo que dijo el competidor con nuestros datos reales`;
+   ✅ Usar números SOLO cuando son:
+   • Redondos y simples: "3 goles", "5 partidos", "€4M"
+   • Emotivos: "CERO derrotas en casa"
+   • Comparativos virales: "el DOBLE que su competencia"
+
+5. ✅ Tono viral: urgencia, datos narrativos (no estadísticos), CTA claro, generar FOMO
+
+6. ✅ Contrastar lo que dijo el competidor con insights narrativos basados en datos reales`;
     }
 
     /**
      * Build user prompt con todos los datos del outlier
      * @private
      */
-    _buildPrompt(outlierData, responseAngle, presenter, lastError = null) {
+    _buildPrompt(outlierData, responseAngle, presenter, targetPlayer = null, lastError = null) {
         const { title, channel_name, views, transcription, content_analysis, enriched_data } =
             outlierData;
 
@@ -267,6 +296,9 @@ ${viralHooks.map((hook, i) => `${i + 1}. "${hook}"`).join('\n')}
 **Jugadores mencionados:**
 ${players.map(p => `- ${p}`).join('\n')}
 
+**🎯 JUGADOR OBJETIVO IDENTIFICADO:**
+${targetPlayer ? `${targetPlayer} (este es el jugador principal del video, enfócate en él)` : 'No identificado (usa el más mencionado)'}
+
 **Transcripción relevante (primeras 500 chars):**
 "${transcription.substring(0, 500)}..."
 
@@ -288,7 +320,7 @@ ${responseAngles[responseAngle]}
 
 \`\`\`json
 {
-  "targetPlayer": "Nombre del jugador principal (para interno, NO se usa en diálogos)",
+  "targetPlayer": "${targetPlayer || 'Nombre del jugador principal (para interno, NO se usa en diálogos)'}",
   "responseAngle": "${responseAngle}",
   "segments": [
     {
@@ -301,9 +333,9 @@ ${responseAngles[responseAngle]}
     {
       "role": "middle",
       "duration": 8,
-      "dialogue": "Datos explosivos de 24-25 palabras. Ejemplo: Los números reales son: [stat], [stat], [stat]... muy diferente a lo que están vendiendo por ahí.",
+      "dialogue": "Insights narrativos de 24-25 palabras. Ejemplo: Mientras hablan de suerte, los datos cuentan otra historia... el delantero está ARRASANDO y nadie lo está viendo.",
       "emotion": "confident",
-      "narrativeFunction": "Prueba con datos"
+      "narrativeFunction": "Prueba con insights narrativos (NO listas de números)"
     },
     {
       "role": "outro",
@@ -314,9 +346,9 @@ ${responseAngles[responseAngle]}
     }
   ],
   "dataUsed": [
-    "goals: X",
-    "assists: Y",
-    "rating: Z"
+    "rendimiento ofensivo excepcional",
+    "forma ascendente últimas jornadas",
+    "valor Fantasy subestimado"
   ],
   "competitorClaimChallenged": "Descripción breve del claim que estás rebatiendo/complementando/ampliando"
 }
@@ -325,16 +357,19 @@ ${responseAngles[responseAngle]}
 **REGLAS CRÍTICAS:**
 1. ❌ NO uses nombres de jugadores en dialogues (usar "el delantero", "el 10 del Barça", etc.)
 2. ✅ Exactamente 24-25 palabras por diálogo (cuenta palabras ANTES de generar)
-3. ✅ Incluir números concretos de los datos reales
-4. ✅ Contrastar con lo que dijo el competidor
+3. 🚨 CONVERTIR DATOS A LENGUAJE NATURAL (VEO3 limitation):
+   • ❌ NO listas de números: "3 goles, 2 asistencias, rating 7.8"
+   • ✅ Insights narrativos: "está ARRASANDO en ataque", "rendimiento BRUTAL"
+   • ✅ Usar números SOLO si son redondos y simples: "3 goles", "CERO derrotas"
+4. ✅ Contrastar con lo que dijo el competidor usando insights (no estadísticas secas)
 5. ✅ Generar urgencia y FOMO en el outro
 6. ✅ Usar solo emociones válidas: mysterious, curious, confident, authoritative, urgent, exciting
 
 ${
-            lastError
-                ? `\n⚠️ **RETRY FEEDBACK**: El intento anterior falló con estos errores:\n${lastError}\n\nPor favor, corrígelos en este nuevo intento. ESPECIALMENTE presta atención al word count de cada segmento.\n`
-                : ''
-        }
+    lastError
+        ? `\n⚠️ **RETRY FEEDBACK**: El intento anterior falló con estos errores:\n${lastError}\n\nPor favor, corrígelos en este nuevo intento. ESPECIALMENTE presta atención al word count de cada segmento.\n`
+        : ''
+}
 Genera el JSON ahora:`;
     }
 
@@ -467,6 +502,7 @@ Genera el JSON ahora:`;
             })),
             metadata: {
                 source: 'intelligent_script_generator',
+                targetPlayer: script.metadata.targetPlayer || script.script.targetPlayer, // ✅ NUEVO: Target player en metadata
                 outlier_video_id: script.metadata.outlier_video_id,
                 response_angle: script.metadata.response_angle,
                 generated_at: script.metadata.generated_at

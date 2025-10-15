@@ -12,16 +12,16 @@ const fs = require('fs');
 class ViralCaptionsGenerator {
     constructor() {
         this.config = {
-            // Estilo viral TikTok/Instagram
-            fontSize: 48,
-            fontFamily: 'Arial-Bold',
+            // ✅ ESTILO APROBADO - Consistente con captionsService.js (Oct 11 16:15)
+            fontSize: 80, // Tamaño equilibrado - legible sin tapar presentador
+            fontFamily: 'Arial Black', // Arial Black para mejor legibilidad
             primaryColor: 'white',
-            highlightColor: 'yellow',
+            highlightColor: '#FFD700', // Dorado (más profesional que amarillo puro)
             outlineColor: 'black',
-            outlineWidth: 3,
+            outlineWidth: 6, // Borde más grueso para mejor contraste
 
-            // Posicionamiento (evita UI de redes sociales)
-            yPosition: '(h*0.75)', // 75% desde arriba
+            // Posicionamiento (410px desde borde inferior en 1280px = más arriba que antes)
+            yPosition: '(h-410)', // 410px desde borde inferior (zona segura de apps)
             xPosition: '(w-text_w)/2', // Centrado horizontal
 
             // Timing
@@ -30,7 +30,11 @@ class ViralCaptionsGenerator {
             // Box background (opcional)
             enableBox: true,
             boxColor: 'black@0.7', // Negro semi-transparente
-            boxPadding: 20
+            boxPadding: 20,
+
+            // Shadow para profundidad
+            shadowX: 2,
+            shadowY: 2
         };
     }
 
@@ -42,8 +46,7 @@ class ViralCaptionsGenerator {
      * @returns {Promise<string>} - Ruta del video con subtítulos
      */
     async generateViralCaptions(videoPath, dialogue, options = {}) {
-        const outputPath = options.outputPath ||
-            videoPath.replace('.mp4', '-with-captions.mp4');
+        const outputPath = options.outputPath || videoPath.replace('.mp4', '-with-captions.mp4');
 
         console.log(`🎬 Generando subtítulos virales para: ${path.basename(videoPath)}`);
         console.log(`💬 Diálogo: "${dialogue}"`);
@@ -53,7 +56,7 @@ class ViralCaptionsGenerator {
         console.log(`📝 ${words.length} palabras detectadas`);
 
         // Calcular timing para cada palabra
-        const wordTimings = this.calculateWordTimings(words, options.videoDuration || 7);  // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
+        const wordTimings = this.calculateWordTimings(words, options.videoDuration || 7); // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
 
         // Generar filtro FFmpeg para subtítulos
         const subtitleFilter = this.buildSubtitleFilter(wordTimings);
@@ -126,17 +129,19 @@ class ViralCaptionsGenerator {
                 boxParams = `:box=1:boxcolor=${this.config.boxColor}:boxborderw=${this.config.boxPadding}`;
             }
 
-            // Construir filtro drawtext
-            const filter = `drawtext=text='${escapedWord}'` +
+            // Construir filtro drawtext con estilo aprobado
+            const filter =
+                `drawtext=text='${escapedWord}'` +
                 `:fontfile=/System/Library/Fonts/Supplemental/Arial Bold.ttf` +
                 `:fontsize=${fontSize}` +
                 `:fontcolor=${color}` +
                 `:borderw=${this.config.outlineWidth}` +
                 `:bordercolor=${this.config.outlineColor}` +
+                `:shadowx=${this.config.shadowX}` +
+                `:shadowy=${this.config.shadowY}` +
                 `:x=${this.config.xPosition}` +
                 `:y=${this.config.yPosition}` +
-                `:enable='between(t,${startTime},${endTime})'` +
-                boxParams;
+                `:enable='between(t,${startTime},${endTime})'${boxParams}`;
 
             filters.push(filter);
         });
@@ -153,16 +158,11 @@ class ViralCaptionsGenerator {
 
             ffmpeg(inputPath)
                 .videoFilters(subtitleFilter)
-                .outputOptions([
-                    '-c:v libx264',
-                    '-preset fast',
-                    '-crf 23',
-                    '-c:a copy'
-                ])
-                .on('start', (cmd) => {
+                .outputOptions(['-c:v libx264', '-preset fast', '-crf 23', '-c:a copy'])
+                .on('start', cmd => {
                     console.log(`▶️  FFmpeg ejecutando: ${cmd.substring(0, 100)}...`);
                 })
-                .on('progress', (progress) => {
+                .on('progress', progress => {
                     if (progress.percent) {
                         console.log(`⏳ Progreso: ${progress.percent.toFixed(1)}%`);
                     }
@@ -179,7 +179,7 @@ class ViralCaptionsGenerator {
                         reject(new Error('Video con subtítulos no se generó correctamente'));
                     }
                 })
-                .on('error', (err) => {
+                .on('error', err => {
                     console.error(`❌ Error aplicando subtítulos: ${err.message}`);
                     reject(err);
                 })
@@ -203,7 +203,7 @@ class ViralCaptionsGenerator {
                 const outputPath = await this.generateViralCaptions(
                     segment.videoPath,
                     segment.dialogue,
-                    { videoDuration: segment.duration || 7 }  // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
+                    { videoDuration: segment.duration || 7 } // ⚠️ 7 segundos máximo para evitar caras raras en transiciones
                 );
 
                 results.push({

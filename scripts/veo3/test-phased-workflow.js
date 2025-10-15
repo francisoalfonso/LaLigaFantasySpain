@@ -67,6 +67,7 @@ async function main() {
             {
                 contentType: 'chollo',
                 playerData: TEST_PLAYER_DATA,
+                presenter: 'carlos', // ✅ Test con Carlos González
                 preset: 'chollo_viral',
                 viralData: {
                     gameweek: 'jornada 5',

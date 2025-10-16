@@ -1,0 +1,78 @@
+name: Deploy to OVH Production
+
+on:
+  push:
+    branches:
+      - main
+      - feature/competitive-youtube-analyzer  # También desde esta rama para testing
+
+jobs:
+  deploy:
+    name: Deploy to OVH Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🚀 Deploy to OVH via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.OVH_HOST }}
+          username: ${{ secrets.OVH_USERNAME }}
+          key: ${{ secrets.OVH_SSH_KEY }}
+          script: |
+            echo "🔄 Starting deployment to OVH..."
+
+            cd ~/Fantasy\ la\ liga
+
+            echo "📦 Pulling latest code from GitHub..."
+            git fetch origin
+            git pull origin ${{ github.ref_name }}
+
+            echo "📦 Installing dependencies..."
+            npm install --production
+
+            echo "🔄 Restarting application with PM2..."
+            pm2 restart all
+
+            echo "⏳ Waiting for server to start..."
+            sleep 5
+
+            echo "✅ Deployment completed!"
+            pm2 list
+
+      - name: 🧪 Health Check
+        run: |
+          echo "🔍 Checking server health..."
+          sleep 10
+
+          # Health endpoint check
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" https://laligafantasyspain.com/health)
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "✅ Server is healthy (HTTP 200)"
+          else
+            echo "❌ Server health check failed (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+      - name: 📊 Verify Automated Systems
+        run: |
+          echo "🔍 Checking ChollosScheduler..."
+          curl -s https://laligafantasyspain.com/api/chollos/status | jq '.'
+
+          echo ""
+          echo "🔍 Checking Outliers Detector..."
+          curl -s https://laligafantasyspain.com/api/outliers/stats | jq '.' || echo "Outliers endpoint not available yet"
+
+      - name: 📢 Deployment Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Deploy to OVH SUCCESSFUL"
+            echo "🌐 https://laligafantasyspain.com"
+            echo "📊 Chollos: https://laligafantasyspain.com/api/chollos/status"
+          else
+            echo "❌ Deploy to OVH FAILED"
+          fi

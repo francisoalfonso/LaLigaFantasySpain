@@ -59,6 +59,7 @@ const testHistoryRoutes = require('./routes/testHistory');
 const nanoBananaRoutes = require('./routes/nanoBanana');
 const presentersRoutes = require('./routes/presenters');
 const editorialPlanningRoutes = require('./routes/editorialPlanning');
+const { router: chollosRoutes, setChollosScheduler } = require('./routes/chollos');
 
 // ✨ NEW: Competitive YouTube Analyzer Routes
 const contentAnalysisRoutes = require('./routes/contentAnalysis');
@@ -71,6 +72,8 @@ const videoOrchestrator = require('./services/videoOrchestrator');
 const recommendationEngine = require('./services/contentAnalysis/recommendationEngine');
 const tempCleaner = require('./services/contentAnalysis/tempCleaner');
 const outlierScheduler = require('./services/contentAnalysis/outlierDetectorScheduler');
+const ChollosScheduler = require('./services/cron/chollosScheduler');
+const chollosScheduler = new ChollosScheduler();
 
 // Configuración
 const { SERVER } = require('./config/constants');
@@ -190,6 +193,7 @@ app.use('/api/carousels', carouselsRoutes);
 app.use('/api/test-history', testHistoryRoutes);
 app.use('/api/presenters', presentersRoutes);
 app.use('/api/planning', generalLimiter, editorialPlanningRoutes);
+app.use('/api/chollos', generalLimiter, chollosRoutes);
 
 // ✨ NEW: Competitive YouTube Analyzer
 // Content Analysis - operaciones pesadas (transcripción + análisis AI)
@@ -451,6 +455,26 @@ logger.info('⏱️  Timeouts del servidor configurados para VEO3', {
     }
 })();
 
+// Iniciar ChollosScheduler para generar videos de chollos automáticamente
+(() => {
+    try {
+        // Inyectar scheduler en routes/chollos.js para monitoreo y ejecución manual
+        setChollosScheduler(chollosScheduler);
+
+        chollosScheduler.start();
+        const stats = chollosScheduler.getStats();
+        logger.info('💰 ChollosScheduler iniciado - Generación automática de chollos', {
+            enabled: stats.enabled,
+            schedule: stats.schedule,
+            nextRun: stats.nextRun
+        });
+    } catch (error) {
+        logger.error('❌ Error iniciando ChollosScheduler', {
+            error: error.message
+        });
+    }
+})();
+
 // Iniciar VideoOrchestrator para procesar cola automáticamente
 (async () => {
     try {
@@ -503,6 +527,7 @@ process.on('SIGTERM', () => {
     videoOrchestrator.stop();
     tempCleaner.stop();
     outlierScheduler.stop();
+    chollosScheduler.stop();
     server.close(() => {
         logger.info('✅ Servidor cerrado correctamente');
         process.exit(0);
@@ -514,6 +539,7 @@ process.on('SIGINT', () => {
     videoOrchestrator.stop();
     tempCleaner.stop();
     outlierScheduler.stop();
+    chollosScheduler.stop();
     server.close(() => {
         logger.info('✅ Servidor cerrado correctamente');
         process.exit(0);

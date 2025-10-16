@@ -185,6 +185,33 @@ class NanoBananaVeo3Integrator {
             const startTime = Date.now();
             const processedImages = [];
 
+            // ✅ CRÍTICO (16 Oct 2025): Selección aleatoria de 1 estudio FUERA del loop
+            // IMPORTANTE: El MISMO estudio se usa para los 3 segmentos (continuidad visual)
+            // Solo cambian los ángulos de cámara (wide → medium → close-up), NO el escenario
+            // Esto evita "saltos" del presentador entre diferentes fondos
+            const randomEstudio =
+                FLP_CONFIG.estudio_references[
+                    Math.floor(Math.random() * FLP_CONFIG.estudio_references.length)
+                ];
+            logger.info(
+                `[NanoBananaVeo3Integrator] 🎲 Estudio seleccionado para todo el video: ${randomEstudio.description}`
+            );
+
+            // Preparar imageUrls ANTES del loop (mismo estudio para todos los segmentos)
+            const baseImageUrls = options.imageUrl
+                ? [
+                      ...FLP_CONFIG.carlos_references.map(ref => ref.url), // 5 imágenes Carlos
+                      randomEstudio.url // 1 estudio aleatorio (FIJO para 3 segmentos)
+                  ]
+                : [
+                      ...FLP_CONFIG.ana_references.map(ref => ref.url), // 3 imágenes Ana
+                      randomEstudio.url // 1 estudio aleatorio (FIJO para 3 segmentos)
+                  ];
+
+            logger.info(
+                `[NanoBananaVeo3Integrator] 📦 Referencias: ${baseImageUrls.length} imágenes (${options.imageUrl ? '5 Carlos' : '3 Ana'} + 1 estudio)`
+            );
+
             for (let i = 0; i < scriptSegments.length; i++) {
                 // scriptSegments es un array de 3 segmentos [hook, development, cta]
                 const segment = scriptSegments[i];
@@ -206,21 +233,11 @@ class NanoBananaVeo3Integrator {
                 // ✅ FIX (10 Oct 2025 21:05): cinematography.name (no cinematography.shot)
                 const shotType = segment.cinematography?.name || 'medium';
 
-                // ✅ FIX (12 Oct 2025): Pasar image URLs dinámicas según presentador
-                // Carlos: 3 imágenes Carlos + 2 estudios = 5 referencias (carga desde carlos_references config)
-                // Ana: undefined → usa 4 Ana + 2 estudios = 6 referencias (default en nanoBananaClient)
-                const imageUrls = options.imageUrl
-                    ? [
-                          ...FLP_CONFIG.carlos_references.map(ref => ref.url), // 3 imágenes Carlos desde config
-                          ...FLP_CONFIG.estudio_references.map(ref => ref.url) // 2 estudios dinámicos
-                      ]
-                    : undefined;
-
                 // Generar imagen con Nano Banana usando el contexto del segmento
                 const nanoImage = await this.nanoBananaClient.generateContextualImage(
                     imagePrompt,
                     shotType, // wide, medium, close-up
-                    { ...options, imageUrls }
+                    { ...options, imageUrls: baseImageUrls }
                 );
 
                 // Descargar y subir a Supabase

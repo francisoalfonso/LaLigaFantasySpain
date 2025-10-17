@@ -1,0 +1,118 @@
+{
+  "sessionId": "nanoBanana_1760630992456",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760630992456",
+  "status": "generating",
+  "segmentsCompleted": 1,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "presenter": {
+    "name": "Ana Martínez",
+    "seed": 30001,
+    "imageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-03.png",
+    "characterBible": "A 32-year-old Spanish sports analyst with long blonde wavy hair, green-hazel eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Natural smile, confident posture, warm and approachable professional broadcaster energy",
+    "model": "veo3_fast",
+    "aspectRatio": "9:16",
+    "waterMark": "Fantasy La Liga Pro"
+  },
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "dialogue": "Misters, tengo un chollazo que no os vais a creer... Milla está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "dialogue": "Los números son brutales, Managers. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "dialogue": "¿Qué más queréis, Tíos? Titular del Valencia CF al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg1-intro-1760631041199.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA2MzEwNDExOTkucG5nIiwiaWF0IjoxNzYwNjMxMDQyLCJleHAiOjE3NjA3MTc0NDJ9.NMXrE3ozULrag10SHV1b6ArwRxHu7EKUXKhcrzAMSaI",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg2-middle-1760631103893.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNjMxMTAzODkzLnBuZyIsImlhdCI6MTc2MDYzMTEwNCwiZXhwIjoxNzYwNzE3NTA0fQ.eqfie8elRrCYEp1klV_826KzbEnjuM_eSDVRauTmny4",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg3-outro-1760631169325.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA2MzExNjkzMjUucG5nIiwiaWF0IjoxNzYwNjMxMTcwLCJleHAiOjE3NjA3MTc1NzB9.CacnFYSTesSE2zOYnqsmaK9m4CJE4H7E44byhJToH6U",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... Milla está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg1-intro-1760631041199.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA2MzEwNDExOTkucG5nIiwiaWF0IjoxNzYwNjMxMDQyLCJleHAiOjE3NjA3MTc0NDJ9.NMXrE3ozULrag10SHV1b6ArwRxHu7EKUXKhcrzAMSaI",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "taskId": "a7b2a3312efdce1aa46087b5eff38a9f",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/fde51469-7ab9-48ff-9d7c-eecfe6c38a0e_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760630992456/segment_1_a7b2a3312efdce1aa46087b5eff38a9f.mp4",
+      "filename": "segment_1_a7b2a3312efdce1aa46087b5eff38a9f.mp4",
+      "generatedAt": "2025-10-16T16:14:43.500Z",
+      "size": 1862461
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "dialogue": "Los números son brutales, Managers. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg2-middle-1760631103893.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNjMxMTAzODkzLnBuZyIsImlhdCI6MTc2MDYzMTEwNCwiZXhwIjoxNzYwNzE3NTA0fQ.eqfie8elRrCYEp1klV_826KzbEnjuM_eSDVRauTmny4",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "dialogue": "¿Qué más queréis, Tíos? Titular del Valencia CF al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/ana/video-frames/seg3-outro-1760631169325.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvYW5hL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA2MzExNjkzMjUucG5nIiwiaWF0IjoxNzYwNjMxMTcwLCJleHAiOjE3NjA3MTc1NzB9.CacnFYSTesSE2zOYnqsmaK9m4CJE4H7E44byhJToH6U",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    }
+  ],
+  "preparedAt": "2025-10-16T16:12:50.275Z",
+  "lastUpdate": "2025-10-16T16:14:43.500Z"
+}

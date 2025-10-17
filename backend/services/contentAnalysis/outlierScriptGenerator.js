@@ -1,7 +1,22 @@
 /**
  * Outlier Script Generator
  *
- * PROPÓSITO:
+ * ⚠️ DEPRECATED - 15 Oct 2025
+ * Este generador basado en templates NO se usa en producción.
+ * Usar intelligentScriptGenerator.js (GPT-driven) para el flujo E2E de outliers.
+ *
+ * MOTIVO DEPRECACIÓN:
+ * - intelligentScriptGenerator.js es más completo: usa GPT-4o + datos reales API-Sports
+ * - Este es template-based y menos flexible
+ * - Sistema de producción usa intelligentScriptGenerator.js
+ *
+ * MANTENER SEPARADO DE:
+ * - unifiedScriptGenerator.js (chollos - contenido proactivo)
+ * - intelligentScriptGenerator.js (outliers - contenido reactivo GPT)
+ *
+ * ────────────────────────────────────────────────────────────────────────
+ *
+ * PROPÓSITO ORIGINAL:
  * Convertir outliers virales detectados en guiones VEO3 de 3 segmentos
  * para que Carlos/Ana creen videos de respuesta automáticamente.
  *
@@ -50,26 +65,37 @@ class OutlierScriptGenerator {
     generateScriptFromOutlier(outlierData, options = {}) {
         const { presenter = 'Carlos', customHook = null, platform = 'youtube' } = options;
 
+        // ✅ NUEVO: Extraer target_player del análisis de contenido
+        const targetPlayer = outlierData.content_analysis?.target_player || null;
+
         logger.info('[OutlierScriptGenerator] Generando script desde outlier:', {
             videoId: outlierData.video_id,
             title: outlierData.title?.substring(0, 50),
             priority: outlierData.priority,
-            platform: platform.toUpperCase()
+            platform: platform.toUpperCase(),
+            targetPlayer: targetPlayer // ✅ Log jugador objetivo
         });
 
         // Validar datos mínimos
         this._validateOutlierData(outlierData);
 
         // Construir script de 3 segmentos optimizado por plataforma
-        const script = this._buildOutlierScript(outlierData, presenter, customHook, platform);
+        const script = this._buildOutlierScript(
+            outlierData,
+            presenter,
+            customHook,
+            platform,
+            targetPlayer
+        ); // ✅ Pasar targetPlayer
 
         // Convertir a formato VEO3 (3 segmentos con dialogue, emotion, etc.)
-        const veo3Script = this._convertToVEO3Format(script, outlierData, platform);
+        const veo3Script = this._convertToVEO3Format(script, outlierData, platform, targetPlayer); // ✅ Pasar targetPlayer
 
         logger.info('[OutlierScriptGenerator] ✅ Script generado exitosamente:', {
             segments: veo3Script.segments.length,
             totalWords: veo3Script.metadata.totalWords,
-            cohesionScore: veo3Script.validation.score
+            cohesionScore: veo3Script.validation.score,
+            targetPlayer: targetPlayer // ✅ Confirmar jugador en metadata
         });
 
         return veo3Script;
@@ -79,7 +105,7 @@ class OutlierScriptGenerator {
      * Construir script personalizado para el outlier optimizado por plataforma
      * @private
      */
-    _buildOutlierScript(outlier, presenter, customHook, platform) {
+    _buildOutlierScript(outlier, presenter, customHook, platform, targetPlayer = null) {
         // Extraer datos clave del outlier
         const channelName = outlier.channel_name || 'un canal competidor';
         const views = this._formatNumber(outlier.views);
@@ -90,10 +116,17 @@ class OutlierScriptGenerator {
         // Simplificar título del video para mencionar (primeras 5-6 palabras)
         const shortTitle = this._simplifyTitle(outlier.title);
 
-        // Hook personalizado o generado automáticamente
-        const hook =
-            customHook ||
-            `Misters, acabo de descubrir un video que está rompiendo YouTube...`;
+        // ✅ NUEVO: Hook personalizado basado en target_player
+        let hook;
+        if (customHook) {
+            hook = customHook;
+        } else if (targetPlayer) {
+            // Hook específico con nombre del jugador
+            hook = `Misters, acabo de ver el video de Carrasco sobre ${targetPlayer}...`;
+        } else {
+            // Hook genérico si no hay jugador identificado
+            hook = `Misters, acabo de descubrir un video que está rompiendo YouTube...`;
+        }
 
         // SEGMENTO 1 (0-8s): Hook + Descubrimiento
         // 24-25 palabras (~7-8s de audio)
@@ -145,7 +178,7 @@ class OutlierScriptGenerator {
      * Convertir script a formato VEO3 compatible
      * @private
      */
-    _convertToVEO3Format(script, outlierData, platform) {
+    _convertToVEO3Format(script, outlierData, platform, targetPlayer = null) {
         const segments = [];
 
         // Segmento 1: Hook + Descubrimiento
@@ -225,6 +258,7 @@ class OutlierScriptGenerator {
             metadata: {
                 contentType: 'outlier_response',
                 platform: platform || 'youtube', // ✅ Incluir plataforma
+                targetPlayer: targetPlayer, // ✅ NUEVO: Jugador objetivo identificado
                 outlierVideoId: outlierData.video_id,
                 outlierTitle: outlierData.title,
                 outlierChannel: outlierData.channel_name,

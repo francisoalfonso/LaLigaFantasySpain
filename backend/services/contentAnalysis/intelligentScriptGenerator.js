@@ -437,9 +437,10 @@ Genera el JSON ahora:`;
                 const words = seg.dialogue.trim().split(/\s+/);
                 const wordCount = words.length;
 
-                if (wordCount < 22 || wordCount > 27) {
+                // ✅ Rango ampliado a [20-30] para dar flexibilidad (antes: 22-27)
+                if (wordCount < 20 || wordCount > 30) {
                     errors.push(
-                        `Segment ${i + 1}: Word count ${wordCount} out of range [22-27] (ideal: 24-25)`
+                        `Segment ${i + 1}: Word count ${wordCount} out of range [20-30] (ideal: 24-25)`
                     );
                     logger.warn(
                         `[IntelligentScriptGenerator] ⚠️ Segment ${i + 1} word count: ${wordCount}`

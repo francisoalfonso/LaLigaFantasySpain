@@ -1,0 +1,129 @@
+{
+  "sessionId": "nanoBanana_1760519873793",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760519873793",
+  "status": "finalized",
+  "segmentsCompleted": 3,
+  "segmentsTotal": 3,
+  "playerName": "Pere Milla",
+  "contentType": "chollo",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "presenter": {
+    "name": "Carlos González",
+    "seed": 30002,
+    "imageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-gonzalez-01.jpg",
+    "characterBible": "A 38-year-old Spanish sports data analyst with short dark hair with gray streaks, brown eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Confident analytical expression, professional posture, data-driven broadcaster energy",
+    "model": "veo3_fast",
+    "aspectRatio": "9:16",
+    "waterMark": "Fantasy La Liga Pro"
+  },
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "dialogue": "Misters, tengo un chollazo que no os vais a creer... Milla está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "dialogue": "Los números son brutales, Cracks. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "dialogue": "¿Qué más queréis, Gente? Titular del Valencia CF al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg1-intro-1760519938655.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA1MTk5Mzg2NTUucG5nIiwiaWF0IjoxNzYwNTE5OTM5LCJleHAiOjE3NjA2MDYzMzl9.Far-d7_iLTOzWD4TTFpkyJBmWuFBw-S8iyPRHI9Ycro",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg2-middle-1760520004129.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNTIwMDA0MTI5LnBuZyIsImlhdCI6MTc2MDUyMDAwNSwiZXhwIjoxNzYwNjA2NDA1fQ.moVE2ynmM-NYNp9OUK7XR4j2_BAgZOSWeP_ENSF9cSA",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg3-outro-1760520073505.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA1MjAwNzM1MDUucG5nIiwiaWF0IjoxNzYwNTIwMDc0LCJleHAiOjE3NjA2MDY0NzR9.9WwQqQp7n6yPVCFIkgmlZFf2GdxprE-BVRxSeq26J94",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "dialogue": "Misters, tengo un chollazo que no os vais a creer... Milla está a precio de risa en Fantasy. Y casi nadie lo está fichando todavía. ",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg1-intro-1760519938655.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA1MTk5Mzg2NTUucG5nIiwiaWF0IjoxNzYwNTE5OTM5LCJleHAiOjE3NjA2MDYzMzl9.Far-d7_iLTOzWD4TTFpkyJBmWuFBw-S8iyPRHI9Ycro",
+        "visualContext": "framed from shoulders up, intimate perspective"
+      },
+      "taskId": "19fe216c654e6de39278584ddfe7da2c",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/76bd1998-e90e-4d47-b5b5-19c98450ca95_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760519873793/segment_1_19fe216c654e6de39278584ddfe7da2c.mp4",
+      "filename": "segment_1_19fe216c654e6de39278584ddfe7da2c.mp4",
+      "generatedAt": "2025-10-15T09:22:46.960Z",
+      "size": 1758167
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "dialogue": "Los números son brutales, Cracks. Rinde como los mejores de La Liga... ¡dobla su valor en puntos! Y está más barato que un suplente del Cádiz.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg2-middle-1760520004129.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNTIwMDA0MTI5LnBuZyIsImlhdCI6MTc2MDUyMDAwNSwiZXhwIjoxNzYwNjA2NDA1fQ.moVE2ynmM-NYNp9OUK7XR4j2_BAgZOSWeP_ENSF9cSA",
+        "visualContext": "framed from waist up, slightly closer perspective"
+      },
+      "taskId": "af0dc50ad5e5b2b95986d57c8f56ad44",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/e93cf366-bd83-4649-ac62-e73d1bd9182a_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760519873793/segment_2_af0dc50ad5e5b2b95986d57c8f56ad44.mp4",
+      "filename": "segment_2_af0dc50ad5e5b2b95986d57c8f56ad44.mp4",
+      "generatedAt": "2025-10-15T09:24:35.617Z",
+      "size": 1654490
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "dialogue": "¿Qué más queréis, Gente? Titular del Valencia CF al precio de un suplente random. Si no lo ficháis ahora, mañana vale el doble.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg3-outro-1760520073505.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA1MjAwNzM1MDUucG5nIiwiaWF0IjoxNzYwNTIwMDc0LCJleHAiOjE3NjA2MDY0NzR9.9WwQqQp7n6yPVCFIkgmlZFf2GdxprE-BVRxSeq26J94",
+        "visualContext": "framed from chest up, balanced intimate shot"
+      },
+      "taskId": "cddf5263a9ba258507c5f42a06248625",
+      "veo3Url": "https://tempfile.aiquickdraw.com/s/ea0c84a5-d828-49f4-a88d-6c441d73b8c4_watermarked.mp4",
+      "localPath": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760519873793/segment_3_cddf5263a9ba258507c5f42a06248625.mp4",
+      "filename": "segment_3_cddf5263a9ba258507c5f42a06248625.mp4",
+      "generatedAt": "2025-10-15T09:26:23.568Z",
+      "size": 1354473
+    }
+  ],
+  "preparedAt": "2025-10-15T09:21:14.271Z",
+  "lastUpdate": "2025-10-15T09:26:51.354Z",
+  "concatenatedVideo": {
+    "videoId": "concat_nanoBanana_1760519873793",
+    "title": "Pere Milla_chollo_nano_banana",
+    "duration": 24,
+    "sessionId": "nanoBanana_1760519873793",
+    "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760519873793",
+    "outputPath": "output/veo3/ana-concatenated-1760520402672.mp4",
+    "workflow": "nano-banana-contextual"
+  },
+  "finalVideoUrl": "http://localhost:3000/output/veo3/ana-concatenated-1760520402672.mp4",
+  "finalizedAt": "2025-10-15T09:26:51.354Z"
+}

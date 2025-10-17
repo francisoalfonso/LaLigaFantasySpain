@@ -1846,7 +1846,8 @@ router.post('/prepare-session', async (req, res) => {
             preset = 'chollo_viral',
             options = {},
             customScript = null, // ✨ NUEVO: Script personalizado opcional (ej: desde Content Analyzer)
-            presenter = 'ana' // ✨ NUEVO: Selector de presentador ('ana' o 'carlos')
+            presenter = 'ana', // ✨ NUEVO: Selector de presentador ('ana' o 'carlos')
+            enrichedData = null // ✨ NUEVO (15 Oct 2025): Datos enriquecidos de API-Sports para player card
         } = req.body;
 
         // Validar datos requeridos
@@ -2106,6 +2107,8 @@ router.post('/prepare-session', async (req, res) => {
             })),
             // Segmentos preparados (sin videos)
             segments: segmentsPrepared,
+            // ✨ NUEVO (15 Oct 2025): Datos enriquecidos de API-Sports (para player card)
+            ...(enrichedData && { enriched_data: enrichedData }),
             // Metadata
             preparedAt: new Date().toISOString(),
             lastUpdate: new Date().toISOString()

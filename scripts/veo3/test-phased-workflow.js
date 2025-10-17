@@ -67,7 +67,7 @@ async function main() {
             {
                 contentType: 'chollo',
                 playerData: TEST_PLAYER_DATA,
-                presenter: 'carlos', // ✅ Test con Carlos González
+                presenter: 'ana', // ✅ Test con Ana (más estable con Nano Banana)
                 preset: 'chollo_viral',
                 viralData: {
                     gameweek: 'jornada 5',

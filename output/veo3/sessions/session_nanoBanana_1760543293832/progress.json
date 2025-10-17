@@ -1,0 +1,472 @@
+{
+  "sessionId": "nanoBanana_1760543293832",
+  "sessionDir": "/Users/fran/Desktop/CURSOR/Fantasy la liga/output/veo3/sessions/session_nanoBanana_1760543293832",
+  "status": "prepared",
+  "segmentsCompleted": 0,
+  "segmentsTotal": 3,
+  "playerName": "Toni Martínez",
+  "contentType": "outlier_response",
+  "preset": "chollo_viral",
+  "workflow": "nano-banana-contextual",
+  "presenter": {
+    "name": "Carlos González",
+    "seed": 30002,
+    "imageUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-gonzalez-01.jpg",
+    "characterBible": "A 38-year-old Spanish sports data analyst with short dark hair with gray streaks, brown eyes, athletic build, wearing a red Fantasy La Liga polo shirt. Confident analytical expression, professional posture, data-driven broadcaster energy",
+    "model": "veo3_fast",
+    "aspectRatio": "9:16",
+    "waterMark": "Fantasy La Liga Pro"
+  },
+  "script": {
+    "segments": [
+      {
+        "role": "intro",
+        "emotion": "mysterious",
+        "dialogue": "Misters, acabo de ver el video de Carrasco sobre el delantero que promete... y hay datos que NO os están contando sobre su rendimiento reciente.",
+        "duration": 8,
+        "shot": "Close-Up"
+      },
+      {
+        "role": "middle",
+        "emotion": "confident",
+        "dialogue": "Los números reales son: 0 goles, 0 asistencias y una calificación que no resalta. Muy diferente a lo que están vendiendo por ahí, amigos.",
+        "duration": 8,
+        "shot": "Medium Shot"
+      },
+      {
+        "role": "outro",
+        "emotion": "urgent",
+        "dialogue": "Ahora vosotros decidís: confiar en hype... o en datos reales. Yo ya os lo he dicho, ¡no dejéis pasar la oportunidad de mejorar!",
+        "duration": 8,
+        "shot": "Medium Close-Up"
+      }
+    ],
+    "totalDuration": 24
+  },
+  "nanoBananaImages": [
+    {
+      "role": "intro",
+      "shot": "Close-Up",
+      "emotion": "mysterious",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg1-intro-1760543311187.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA1NDMzMTExODcucG5nIiwiaWF0IjoxNzYwNTQzMzEyLCJleHAiOjE3NjA2Mjk3MTJ9.ToJdIycWYB8iBzc_VWq1bzgrGQ-yx4Y78iPOEcbugHw",
+      "visualContext": "framed from shoulders up, intimate perspective"
+    },
+    {
+      "role": "middle",
+      "shot": "Medium Shot",
+      "emotion": "confident",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg2-middle-1760543332033.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNTQzMzMyMDMzLnBuZyIsImlhdCI6MTc2MDU0MzMzMywiZXhwIjoxNzYwNjI5NzMzfQ.9XTlWWMvGPVlzXqbeKUguprud97Esu6I77pVWD0FhBU",
+      "visualContext": "framed from waist up, slightly closer perspective"
+    },
+    {
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "emotion": "urgent",
+      "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg3-outro-1760543356036.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA1NDMzNTYwMzYucG5nIiwiaWF0IjoxNzYwNTQzMzU3LCJleHAiOjE3NjA2Mjk3NTd9.TGcdHu4Twfzb3sYKvKpJ8sVhnYWTwDTOMEi9ID7zKAY",
+      "visualContext": "framed from chest up, balanced intimate shot"
+    }
+  ],
+  "segments": [
+    {
+      "index": 0,
+      "role": "intro",
+      "shot": "Close-Up",
+      "emotion": "mysterious",
+      "dialogue": "Misters, acabo de ver el video de Carrasco sobre el delantero que promete... y hay datos que NO os están contando sobre su rendimiento reciente.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg1-intro-1760543311187.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcxLWludHJvLTE3NjA1NDMzMTExODcucG5nIiwiaWF0IjoxNzYwNTQzMzEyLCJleHAiOjE3NjA2Mjk3MTJ9.ToJdIycWYB8iBzc_VWq1bzgrGQ-yx4Y78iPOEcbugHw",
+        "visualContext": "framed from shoulders up, intimate perspective",
+        "emotion": "mysterious"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 1,
+      "role": "middle",
+      "shot": "Medium Shot",
+      "emotion": "confident",
+      "dialogue": "Los números reales son: 0 goles, 0 asistencias y una calificación que no resalta. Muy diferente a lo que están vendiendo por ahí, amigos.",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg2-middle-1760543332033.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWcyLW1pZGRsZS0xNzYwNTQzMzMyMDMzLnBuZyIsImlhdCI6MTc2MDU0MzMzMywiZXhwIjoxNzYwNjI5NzMzfQ.9XTlWWMvGPVlzXqbeKUguprud97Esu6I77pVWD0FhBU",
+        "visualContext": "framed from waist up, slightly closer perspective",
+        "emotion": "confident"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    },
+    {
+      "index": 2,
+      "role": "outro",
+      "shot": "Medium Close-Up",
+      "emotion": "urgent",
+      "dialogue": "Ahora vosotros decidís: confiar en hype... o en datos reales. Yo ya os lo he dicho, ¡no dejéis pasar la oportunidad de mejorar!",
+      "duration": 8,
+      "imageContext": {
+        "supabaseUrl": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/sign/flp/carlos/video-frames/seg3-outro-1760543356036.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9kY2MxYTMxNy0yZWVhLTRhYzQtOWY5MC0zNzkwMDE2Nzg3ODYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJmbHAvY2FybG9zL3ZpZGVvLWZyYW1lcy9zZWczLW91dHJvLTE3NjA1NDMzNTYwMzYucG5nIiwiaWF0IjoxNzYwNTQzMzU3LCJleHAiOjE3NjA2Mjk3NTd9.TGcdHu4Twfzb3sYKvKpJ8sVhnYWTwDTOMEi9ID7zKAY",
+        "visualContext": "framed from chest up, balanced intimate shot",
+        "emotion": "urgent"
+      },
+      "taskId": null,
+      "veo3Url": null,
+      "localPath": null,
+      "filename": null,
+      "generatedAt": null,
+      "size": null
+    }
+  ],
+  "enriched_data": {
+    "players": [
+      {
+        "name": "Toni Martínez",
+        "team": "Alaves",
+        "stats": {
+          "goals": 1,
+          "rating": "6.900000",
+          "assists": 0,
+          "minutes": 305,
+          "appearances": 5
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "Mikel Vesga",
+        "team": "Athletic Club",
+        "stats": {
+          "goals": 0,
+          "rating": "6.55",
+          "assists": 0,
+          "minutes": 155,
+          "appearances": 7
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Oihan Sancet",
+        "team": "Athletic Club",
+        "stats": {
+          "goals": 1,
+          "rating": "6.42",
+          "assists": 0,
+          "minutes": 437,
+          "appearances": 6
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Joan García",
+        "team": "Barcelona",
+        "stats": {
+          "goals": 0,
+          "rating": "7.45",
+          "assists": 0,
+          "minutes": 540,
+          "appearances": 6
+        },
+        "position": "Goalkeeper"
+      },
+      {
+        "name": "Dani Olmo",
+        "team": "Barcelona",
+        "stats": {
+          "goals": 1,
+          "rating": "6.920000",
+          "assists": 2,
+          "minutes": 264,
+          "appearances": 5
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Ferran Torres",
+        "team": "Barcelona",
+        "stats": {
+          "goals": 4,
+          "rating": "7.060000",
+          "assists": 1,
+          "minutes": 365,
+          "appearances": 5
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "N. Pépé",
+        "team": "Villarreal",
+        "stats": {
+          "goals": 2,
+          "rating": "7.760000",
+          "assists": 1,
+          "minutes": 384,
+          "appearances": 5
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "Santi Comesaña",
+        "team": "Villarreal",
+        "stats": {
+          "goals": 0,
+          "rating": "6.71",
+          "assists": 0,
+          "minutes": 389,
+          "appearances": 7
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "José Gayà",
+        "team": "Valencia",
+        "stats": {
+          "goals": 0,
+          "rating": "6",
+          "assists": 0,
+          "minutes": 429,
+          "appearances": 6
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Nico Williams",
+        "team": "Athletic Club",
+        "stats": {
+          "goals": 1,
+          "rating": "7.58",
+          "assists": 1,
+          "minutes": 293,
+          "appearances": 4
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Copete",
+        "team": "Valencia",
+        "stats": {
+          "goals": 0,
+          "rating": "6.28",
+          "assists": 0,
+          "minutes": 357,
+          "appearances": 5
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "A. Rebbach",
+        "team": "Alaves",
+        "stats": {
+          "goals": 0,
+          "rating": "6.52",
+          "assists": 0,
+          "minutes": 317,
+          "appearances": 6
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "Aitor Ruibal",
+        "team": "Real Betis",
+        "stats": {
+          "goals": 1,
+          "rating": "6.94",
+          "assists": 0,
+          "minutes": 274,
+          "appearances": 5
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Sergi Cardona",
+        "team": "Villarreal",
+        "stats": {
+          "goals": 0,
+          "rating": "6.87",
+          "assists": 2,
+          "minutes": 613,
+          "appearances": 7
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Omar Mascarell",
+        "team": "Mallorca",
+        "stats": {
+          "goals": 0,
+          "rating": "6.800000",
+          "assists": 0,
+          "minutes": 113,
+          "appearances": 5
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Bryan Gil",
+        "team": "Girona",
+        "stats": {
+          "goals": 0,
+          "rating": "6.4",
+          "assists": 1,
+          "minutes": 153,
+          "appearances": 5
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "Óscar Valentín",
+        "team": "Rayo Vallecano",
+        "stats": {
+          "goals": 0,
+          "rating": "6.85",
+          "assists": 0,
+          "minutes": 359,
+          "appearances": 6
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Brugui",
+        "team": "Levante",
+        "stats": {
+          "goals": 0,
+          "rating": "6.15",
+          "assists": 1,
+          "minutes": 535,
+          "appearances": 8
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Diego Rico",
+        "team": "Getafe",
+        "stats": {
+          "goals": 0,
+          "rating": "6.54",
+          "assists": 0,
+          "minutes": 619,
+          "appearances": 7
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "T. Dolan",
+        "team": "Espanyol",
+        "stats": {
+          "goals": 0,
+          "rating": "6.800000",
+          "assists": 1,
+          "minutes": 358,
+          "appearances": 5
+        },
+        "position": "Attacker"
+      },
+      {
+        "name": "L. Cabrera",
+        "team": "Espanyol",
+        "stats": {
+          "goals": 1,
+          "rating": "7.03",
+          "assists": 0,
+          "minutes": 643,
+          "appearances": 7
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Urko González",
+        "team": "Real Sociedad",
+        "stats": {
+          "goals": 0,
+          "rating": "6.6",
+          "assists": 0,
+          "minutes": 11,
+          "appearances": 1
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "M. Dmitrović",
+        "team": "Espanyol",
+        "stats": {
+          "goals": 0,
+          "rating": "7.360000",
+          "assists": 0,
+          "minutes": 450,
+          "appearances": 5
+        },
+        "position": "Goalkeeper"
+      },
+      {
+        "name": "Thierry Correia",
+        "team": "Valencia",
+        "stats": {
+          "goals": 0,
+          "rating": "6.13",
+          "assists": 0,
+          "minutes": 116,
+          "appearances": 3
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Jon Pacheco",
+        "team": "Real Sociedad",
+        "stats": {
+          "goals": 0,
+          "rating": "N/A",
+          "assists": 0,
+          "minutes": null,
+          "appearances": 0
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Gibert Jordana",
+        "team": "Girona",
+        "stats": {
+          "goals": 0,
+          "rating": "N/A",
+          "assists": 0,
+          "minutes": null,
+          "appearances": 0
+        },
+        "position": "Defender"
+      },
+      {
+        "name": "Robert Navarro",
+        "team": "Athletic Club",
+        "stats": {
+          "goals": 1,
+          "rating": "6.6",
+          "assists": 0,
+          "minutes": 255,
+          "appearances": 7
+        },
+        "position": "Midfielder"
+      },
+      {
+        "name": "Carlos Vicente",
+        "team": "Alaves",
+        "stats": {
+          "goals": 3,
+          "rating": "7.01",
+          "assists": 0,
+          "minutes": 597,
+          "appearances": 8
+        },
+        "position": "Midfielder"
+      }
+    ],
+    "success": true,
+    "totalFound": 28
+  },
+  "preparedAt": "2025-10-15T15:49:17.082Z",
+  "lastUpdate": "2025-10-15T15:49:17.082Z"
+}

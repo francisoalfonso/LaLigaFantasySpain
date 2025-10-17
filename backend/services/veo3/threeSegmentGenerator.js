@@ -63,6 +63,14 @@ class ThreeSegmentGenerator {
                 stats: 8,
                 outro: 8,
                 total: 32
+            },
+            // Stats semanal (3 segmentos = 24s) - Carlos González
+            stats_semanal: {
+                segments: 3,
+                intro: 8,
+                stats: 8,
+                outro: 8,
+                total: 24
             }
         };
     }

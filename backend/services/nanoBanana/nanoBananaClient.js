@@ -51,19 +51,25 @@ class NanoBananaClient {
         };
 
         // URLs de referencias para Nano Banana
-        // Orden: 4 Ana + 2 estudios (estudios al final)
-        // El aspect ratio se fuerza con image_size: "9:16" (no depende del orden)
-        // ✅ ACTUALIZADO (12 Oct 2025): Ahora usa 2 imágenes de estudio (con/sin mesa)
+        // ✅ ACTUALIZADO (16 Oct 2025): Selección aleatoria de 1 estudio
+        // Ana: 3 Ana + 1 estudio random = 4 referencias (evita límite 10 imgs Nano Banana API)
+        // Variedad: 7 estudios disponibles, rotación aleatoria por video
+        const randomEstudio =
+            FLP_CONFIG.estudio_references[
+                Math.floor(Math.random() * FLP_CONFIG.estudio_references.length)
+            ];
         this.anaReferenceUrls = [
             ...FLP_CONFIG.ana_references.map(ref => ref.url),
-            ...FLP_CONFIG.estudio_references.map(ref => ref.url)
+            randomEstudio.url
         ];
+        this.selectedEstudio = randomEstudio.description; // Para logging
 
         // Información de kits disponibles (para cambio de camiseta)
         this.availableKits = FLP_CONFIG.kits || [];
 
         logger.info('[NanoBananaClient] ✅ Cliente inicializado (Ana Martínez System)');
         logger.info(`[NanoBananaClient] Referencias: ${this.anaReferenceUrls.length} imágenes`);
+        logger.info(`[NanoBananaClient] 🎲 Estudio aleatorio: ${this.selectedEstudio}`);
         logger.info(`[NanoBananaClient] Seed: ${this.anaConfig.seed}`);
         logger.info(`[NanoBananaClient] Prompt strength: ${this.anaConfig.promptStrength}`);
         logger.info('[NanoBananaClient] Pricing: $0.02/imagen');
@@ -771,6 +777,11 @@ class NanoBananaClient {
                     n: 1
                 }
             };
+
+            // DEBUG: Mostrar payload COMPLETO antes de enviar
+            console.log('\n=== PAYLOAD generateContextualImage ===');
+            console.log(JSON.stringify(payload, null, 2));
+            console.log('======================================\n');
 
             // 1. Crear tarea
             const createResponse = await axios.post(

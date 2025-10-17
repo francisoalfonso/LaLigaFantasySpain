@@ -1,12 +1,13 @@
 {
-  "updated_at": "2025-10-10T09:56:25.255Z",
+  "updated_at": "2025-10-16T16:10:00.000Z",
   "bucket": "flp",
   "structure": {
-    "ana": 4,
-    "estudio": 2,
+    "ana": 3,
+    "carlos": 5,
+    "estudio": 7,
     "kits": 13
   },
-  "total_images": 19,
+  "total_images": 28,
   "ana_references": [
     {
       "role": "body-outfit",
@@ -21,14 +22,8 @@
       "path": "ana/ana-peinido2-04.png"
     },
     {
-      "role": "face-right-profile",
-      "description": "Perfil derecho (volumen lateral)",
-      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-06.png",
-      "path": "ana/ana-peinido2-06.png"
-    },
-    {
-      "role": "face-left-profile",
-      "description": "Perfil izquierdo (equilibrio facial)",
+      "role": "face-profile",
+      "description": "Perfil lateral (equilibrio facial)",
       "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/ana/ana-peinido2-07.png",
       "path": "ana/ana-peinido2-07.png"
     }
@@ -47,13 +42,55 @@
       "path": "carlos/carlos-gonzalez-01.jpg"
     },
     {
-      "role": "plano-general",
-      "description": "Carlos plano general (cuerpo completo, visión amplia)",
-      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-plano-general.jpg",
-      "path": "carlos/carlos-plano-general.jpg"
+      "role": "pose-manos-atras",
+      "description": "Carlos con manos atrás (postura profesional)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-manos-atras.jpg",
+      "path": "carlos/carlos-manos-atras.jpg"
+    },
+    {
+      "role": "gesture-ok",
+      "description": "Carlos con gesto OK (expresión positiva)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-ok.jpg",
+      "path": "carlos/carlos-ok.jpg"
+    },
+    {
+      "role": "primer-plano",
+      "description": "Carlos primer plano (close-up facial)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/carlos/carlos-primer-plano.jpg",
+      "path": "carlos/carlos-primer-plano.jpg"
     }
   ],
   "estudio_references": [
+    {
+      "role": "estudio-variant-1",
+      "description": "Estudio variante 1",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-2-01.jpg",
+      "path": "estudio/estudio-2-01.jpg"
+    },
+    {
+      "role": "estudio-variant-2",
+      "description": "Estudio variante 2",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-2-02.jpg",
+      "path": "estudio/estudio-2-02.jpg"
+    },
+    {
+      "role": "estudio-variant-3",
+      "description": "Estudio variante 3",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-2-03.jpg",
+      "path": "estudio/estudio-2-03.jpg"
+    },
+    {
+      "role": "estudio-variant-4",
+      "description": "Estudio variante 4",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-2-04.jpg",
+      "path": "estudio/estudio-2-04.jpg"
+    },
+    {
+      "role": "estudio-con-mesa",
+      "description": "Estudio FLP con mesa (setup completo)",
+      "url": "https://ixfowlkuypnfbrwawxlx.supabase.co/storage/v1/object/public/flp/estudio/estudio-FLP-con-mesa.jpg",
+      "path": "estudio/estudio-FLP-con-mesa.jpg"
+    },
     {
       "role": "estudio-base",
       "description": "Estudio FLP sin mesa (visión amplia)",

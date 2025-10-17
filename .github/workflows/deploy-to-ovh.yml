@@ -15,6 +15,17 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v3
 
+      - name: 🔍 Debug Secrets
+        run: |
+          echo "Checking if secrets are available..."
+          echo "OVH_HOST length: ${#OVH_HOST}"
+          echo "OVH_USERNAME length: ${#OVH_USERNAME}"
+          echo "OVH_SSH_KEY length: ${#OVH_SSH_KEY}"
+        env:
+          OVH_HOST: ${{ secrets.OVH_HOST }}
+          OVH_USERNAME: ${{ secrets.OVH_USERNAME }}
+          OVH_SSH_KEY: ${{ secrets.OVH_SSH_KEY }}
+
       - name: 🚀 Deploy to OVH via SSH
         uses: appleboy/ssh-action@master
         with:

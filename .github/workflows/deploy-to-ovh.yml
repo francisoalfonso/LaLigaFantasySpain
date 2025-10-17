@@ -29,7 +29,7 @@ jobs:
       - name: 🚀 Deploy to OVH via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.OVH_HOST }}
+          host: "151.80.119.163"
           username: ${{ secrets.OVH_USERNAME }}
           key: ${{ secrets.OVH_SSH_KEY }}
           script: |
